@@ -1,9 +1,10 @@
-import { Text, View } from "react-native";
+import { useRootNavigationState, Redirect } from 'expo-router';
+
 
 export default function Index() {
-  return (
-    <View className="flex-1 justify-center items-center">
-      <Text className="text-blue-500 text-2xl font-bold">Starter Kit</Text>
-    </View>
-  );
+  const rootNavigationState = useRootNavigationState();
+
+  if (!rootNavigationState?.key) return null;
+
+  return <Redirect href={"/(main)" as any} />;
 }
