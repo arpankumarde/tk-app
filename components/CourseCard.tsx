@@ -1,8 +1,7 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useColorScheme } from 'nativewind';
+import { View, Text, Image, TouchableOpacity } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useColorScheme } from "nativewind";
 
 interface CourseCardProps {
   course: {
@@ -22,27 +21,30 @@ interface CourseCardProps {
   };
 }
 
-const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
+const CourseCard = ({ course }: CourseCardProps) => {
   const { colorScheme } = useColorScheme();
   const isFree = course.price === 0;
 
   // Exhaustive image field checking based on potential API variations
-  const displayImage = course.thumbnailImageUrl ||
+  const displayImage =
+    course.thumbnailImageUrl ||
     course.thumbnailUrl ||
     (course as any).image ||
     (course as any).thumbnail ||
-    'https://placehold.co/600x400/001f3f/white?text=No+Image';
+    "https://placehold.co/600x400/001f3f/white?text=No+Image";
 
   const handlePress = () => {
-    console.log('Navigating to course details for slug:', course.slug);
+    console.log("Navigating to course details for slug:", course.slug);
     router.push(`/(main)/course/${course.slug}` as any);
   };
 
-  const displayAvatar = (course as any).teacherAvatar ||
+  const displayAvatar =
+    (course as any).teacherAvatar ||
     (course as any).instructorAvatar ||
     `https://ui-avatars.com/api/?name=${course.teacherName}&background=random`;
 
-  const displayLevel = course.level || (course as any).difficulty || 'All Levels';
+  const displayLevel =
+    course.level || (course as any).difficulty || "All Levels";
   const displayStudents = course.enrollmentCount ?? course.totalEnrolled ?? 0;
 
   return (
@@ -53,7 +55,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
       {/* Category Badge */}
       <View className="absolute top-4 left-4 z-10 px-4 py-1.5 bg-white/90 dark:bg-slate-900/90 rounded-full border border-gray-100 dark:border-slate-700/50 shadow-sm">
         <Text className="text-primary text-[10px] font-black uppercase tracking-widest">
-          {course.category || 'General'}
+          {course.category || "General"}
         </Text>
       </View>
 
@@ -81,43 +83,61 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
 
       {/* Content */}
       <View className="p-6">
-        <Text className="text-xl font-black text-slate-800 dark:text-white mb-2 leading-7" numberOfLines={2}>
+        <Text
+          className="text-xl font-black text-slate-800 dark:text-white mb-2 leading-7"
+          numberOfLines={2}
+        >
           {course.title}
         </Text>
 
         <Text className="text-slate-500 dark:text-slate-400 text-sm mb-4 font-medium">
-          By: <Text className="text-slate-600 dark:text-slate-300 font-bold">{course.teacherName}</Text>
+          By:{" "}
+          <Text className="text-slate-600 dark:text-slate-300 font-bold">
+            {course.teacherName}
+          </Text>
         </Text>
 
         {/* Stats */}
         <View className="flex-row items-center justify-between mb-6 pb-4 border-b border-gray-50 dark:border-slate-700/50">
           <View className="flex-row items-center">
             <Feather name="bar-chart" size={14} color="#FF8A50" />
-            <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300 capitalize">{displayLevel}</Text>
+            <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300 capitalize">
+              {displayLevel}
+            </Text>
           </View>
           <View className="flex-row items-center">
             <Feather name="users" size={14} color="#FF8A50" />
-            <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">{displayStudents} Students</Text>
+            <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+              {displayStudents} Students
+            </Text>
           </View>
           <View className="flex-row items-center">
             <Feather name="globe" size={14} color="#FF8A50" />
-            <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">{course.language || 'English'}</Text>
+            <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+              {course.language || "English"}
+            </Text>
           </View>
         </View>
 
         {/* Footer */}
         <View className="flex-row items-center justify-between">
           <TouchableOpacity
-            className={`${isFree ? 'bg-emerald-500 shadow-emerald-500/30' : 'bg-primary shadow-orange-500/30'} flex-row items-center px-6 py-3.5 rounded-2xl shadow-lg flex-1 mr-4`}
+            className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} flex-row items-center px-6 py-3.5 rounded-2xl shadow-lg flex-1 mr-4`}
           >
-            <Feather name={isFree ? "book" : "shopping-cart"} size={18} color="white" />
+            <Feather
+              name={isFree ? "book" : "shopping-cart"}
+              size={18}
+              color="white"
+            />
             <Text className="text-white font-black ml-3 text-sm">
-              {isFree ? 'Enroll Free' : 'Buy Now'}
+              {isFree ? "Enroll Free" : "Buy Now"}
             </Text>
           </TouchableOpacity>
 
-          <Text className={`${isFree ? 'text-emerald-500' : 'text-slate-800 dark:text-white'} text-xl font-black`}>
-            {isFree ? 'Free' : `₹${course.price}`}
+          <Text
+            className={`${isFree ? "text-emerald-500" : "text-slate-800 dark:text-white"} text-xl font-black`}
+          >
+            {isFree ? "Free" : `₹${course.price}`}
           </Text>
         </View>
       </View>

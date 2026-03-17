@@ -1,17 +1,52 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { AntDesign } from '@expo/vector-icons';
-import Header from '../../components/Header';
-import BottomTabs from '../../components/BottomTabs';
-import { useColorScheme } from 'nativewind';
-import { Link } from 'expo-router';
+import { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { AntDesign } from "@expo/vector-icons";
+import Header from "@/components/Header";
+import BottomTabs from "@/components/BottomTabs";
+import { useColorScheme } from "nativewind";
+import { Link, router } from "expo-router";
+import { useGoogleAuth } from "@/hooks/useGoogleAuth";
+import { useAuth } from "@/context/AuthContext";
 
 const Signup = () => {
   const { colorScheme } = useColorScheme();
+  const { signInWithGoogle } = useGoogleAuth();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      router.push("/(user)" as any);
+    }
+  }, [user]);
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      await signInWithGoogle();
+      router.push("/(user)" as any);
+    } catch (err) {
+      console.error("[LoginScreen] signInWithGoogle threw:", err);
+      Alert.alert("Sign-in failed", "Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <SafeAreaView edges={['top', 'left', 'right']} className="flex-1 bg-white dark:bg-slate-900">
+    <SafeAreaView
+      edges={["top", "left", "right"]}
+      className="flex-1 bg-white dark:bg-slate-900"
+    >
       <Header />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="px-5 py-8">
         <View className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-slate-700">
@@ -23,9 +58,25 @@ const Signup = () => {
           </Text>
 
           {/* Google Login */}
-          <TouchableOpacity className="flex-row items-center justify-center border border-gray-200 dark:border-slate-600 rounded-xl h-14 mb-8">
-            <AntDesign name="google" size={24} color={colorScheme === 'dark' ? '#fff' : '#4285F4'} />
-            <Text className="text-primary font-bold ml-3 text-lg">Continue with Google</Text>
+          <TouchableOpacity
+            className="flex-row items-center justify-center border border-gray-200 dark:border-slate-600 rounded-xl h-14 mb-8"
+            onPress={handleGoogleSignIn}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <>
+                <AntDesign
+                  name="google"
+                  size={24}
+                  color={colorScheme === "dark" ? "#fff" : "#4285F4"}
+                />
+                <Text className="text-primary font-bold ml-3 text-lg">
+                  Continue with Google
+                </Text>
+              </>
+            )}
           </TouchableOpacity>
 
           {/* Divider */}
@@ -37,7 +88,9 @@ const Signup = () => {
 
           {/* Form */}
           <View className="mb-6">
-            <Text className="text-slate-900 dark:text-white font-bold mb-2 text-lg">Full Name</Text>
+            <Text className="text-slate-900 dark:text-white font-bold mb-2 text-lg">
+              Full Name
+            </Text>
             <TextInput
               placeholder="Enter your full name"
               placeholderTextColor="#999"
@@ -46,7 +99,9 @@ const Signup = () => {
           </View>
 
           <View className="mb-8">
-            <Text className="text-slate-900 dark:text-white font-bold mb-2 text-lg">Mobile Number</Text>
+            <Text className="text-slate-900 dark:text-white font-bold mb-2 text-lg">
+              Mobile Number
+            </Text>
             <TextInput
               placeholder="Enter your 10-digit mobile number"
               placeholderTextColor="#999"
@@ -61,7 +116,9 @@ const Signup = () => {
           </TouchableOpacity>
 
           <View className="flex-row justify-center items-center">
-            <Text className="text-slate-500 dark:text-slate-400 text-base">Already have an account? </Text>
+            <Text className="text-slate-500 dark:text-slate-400 text-base">
+              Already have an account?{" "}
+            </Text>
             <Link href="/login" asChild>
               <TouchableOpacity>
                 <Text className="text-primary font-bold text-base">Login</Text>

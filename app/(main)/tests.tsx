@@ -137,11 +137,11 @@ const ShopScreen = () => {
         {/* Hero Section */}
         <View className="px-6 py-8 items-center">
           <Text className="text-4xl font-extrabold text-slate-800 dark:text-white text-center leading-tight">
-            Buy Study Notes{"\n"}Online
+            Online Mock Tests
           </Text>
           <Text className="text-slate-500 dark:text-slate-400 text-center mt-3 text-base leading-6 px-4">
-            Premium study resources, notes, and eBooks for your exam
-            preparation.
+            Find the perfect mock test to sharpen your skills and boost your
+            confidence.
           </Text>
         </View>
 
@@ -220,7 +220,7 @@ const ShopScreen = () => {
                   No products found
                 </Text>
                 <Text className="text-slate-500 dark:text-slate-400 text-center">
-                  Try adjusting your filters or sorting to find what you&apos;re
+                  Try adjusting your filters or sorting to find what you&aops;re
                   looking for.
                 </Text>
                 <TouchableOpacity

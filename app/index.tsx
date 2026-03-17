@@ -1,5 +1,4 @@
-import { useRootNavigationState, Redirect } from 'expo-router';
-
+import { useRootNavigationState, Redirect } from "expo-router";
 
 export default function Index() {
   const rootNavigationState = useRootNavigationState();
