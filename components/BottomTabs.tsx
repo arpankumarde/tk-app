@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
-import { Link, usePathname } from "expo-router";
+import { Link, usePathname, useSegments } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
 
@@ -11,24 +11,28 @@ const BottomTabs = () => {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const pathname = usePathname();
+  const segments = useSegments();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     if (user) {
       setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
     }
   }, [user]);
 
   const tabs = [
-    { name: "Courses", icon: "book" },
-    { name: "Tests", icon: "file-text" },
-    { name: "Live", icon: "radio", badge: true },
-    { name: "Shop", icon: "shopping-bag" },
+    { name: "Courses", icon: "book", href: "/courses" },
+    { name: "Tests", icon: "file-text", href: "/tests" },
+    { name: "Live", icon: "radio", badge: true, href: "/live" },
+    { name: "Shop", icon: "shopping-bag", href: "/shop" },
     {
       name: isLoggedIn ? "Profile" : "Login",
       icon: isLoggedIn ? "user" : "user-plus",
       isProfile: isLoggedIn,
+      href: isLoggedIn ? "/(user)" : "/login",
     },
   ];
 
@@ -38,32 +42,24 @@ const BottomTabs = () => {
       className="flex-row bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 pb-2 pt-3 justify-around items-center"
     >
       {tabs.map((tab, index) => {
-        let href = "/";
-        if (tab.name === "Login") href = "/login";
-        if (tab.name === "Profile") href = "/(user)";
-        if (tab.name === "Live") href = "/live";
-        if (tab.name === "Courses") href = "/courses";
-        if (tab.name === "Tests") href = "/tests";
-        if (tab.name === "Shop") href = "/shop";
-
+        const href = tab.href;
         let isActive = false;
 
-        if (pathname === href) {
-          isActive = true;
-        }
-
-        if (pathname === "/" && href === "/" && index !== 0) {
-          isActive = false;
+        // More robust active state detection
+        if (tab.isProfile) {
+          isActive = (segments as string[]).includes("(user)");
+        } else {
+          isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
         }
 
         return (
           <Link href={href as any} key={index} asChild>
-            <TouchableOpacity className="items-center justify-center flex-1">
+            <TouchableOpacity className="items-center justify-center flex-1 active:opacity-70">
               <View className="items-center justify-center">
                 {tab.isProfile && isLoggedIn ? (
                   user?.avatarUrl ? (
                     <View
-                      className={`w-6 h-6 rounded-full overflow-hidden border ${isActive ? "border-primary" : "border-gray-300"}`}
+                      className={`w-7 h-7 rounded-full overflow-hidden border-2 ${isActive ? "border-primary" : "border-gray-200 dark:border-slate-700"}`}
                     >
                       <Image
                         source={{ uri: user.avatarUrl }}
@@ -74,7 +70,7 @@ const BottomTabs = () => {
                   ) : (
                     <Feather
                       name="user"
-                      size={22}
+                      size={24}
                       color={
                         isActive
                           ? "#FF8A50"
@@ -87,7 +83,7 @@ const BottomTabs = () => {
                 ) : (
                   <Feather
                     name={tab.icon as any}
-                    size={22}
+                    size={24}
                     color={
                       isActive
                         ? "#FF8A50"
@@ -98,11 +94,11 @@ const BottomTabs = () => {
                   />
                 )}
                 {tab.badge && (
-                  <View className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-white dark:border-slate-900" />
+                  <View className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-white dark:border-slate-900" />
                 )}
               </View>
               <Text
-                className={`text-[12px] mt-1 font-medium ${isActive ? "text-primary" : colorScheme === "dark" ? "text-gray-400" : "text-gray-500"}`}
+                className={`text-[11px] mt-1 font-bold ${isActive ? "text-primary" : colorScheme === "dark" ? "text-slate-500" : "text-slate-400"}`}
               >
                 {tab.name}
               </Text>

@@ -302,7 +302,7 @@ const ProductDetails = () => {
               <View className="flex-row items-center justify-between mb-6 px-1">
                 {product?.pdfUrl && product?.previewPages > 0 && (
                   <TouchableOpacity
-                    className="flex-1 h-12 rounded-2xl bg-orange-50/60 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/40 items-center justify-center mr-2 shadow-sm shadow-orange-100/20"
+                    className="flex-1 h-12 rounded-2xl bg-orange-50/60 dark:bg-orange-400/10 border border-orange-100 dark:border-orange-400/20 items-center justify-center mr-2"
                     onPress={() => setPreviewVisible(true)}
                   >
                     <View className="flex-row items-center">
@@ -315,7 +315,7 @@ const ProductDetails = () => {
                 )}
                 <TouchableOpacity
                   onPress={handleShare}
-                  className="flex-1 h-12 rounded-2xl bg-orange-50/60 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/40 items-center justify-center ml-2 shadow-sm shadow-orange-100/20"
+                  className="flex-1 h-12 rounded-2xl bg-orange-50/60 dark:bg-orange-400/10 border border-orange-100 dark:border-orange-400/20 items-center justify-center ml-2"
                 >
                   <View className="flex-row items-center">
                     <Feather name="share-2" size={16} color="#FF8A50" />
@@ -326,37 +326,40 @@ const ProductDetails = () => {
                 </TouchableOpacity>
               </View>
 
-              {/* Additional Product Stats (Dynamic) */}
-              <View className="px-1 space-y-3.5">
-                <View className="flex-row items-center">
+              {/* Additional Product Stats (Dynamic) - 2 Column Grid */}
+              <View className="px-1 flex-row flex-wrap">
+                <View className="w-1/2 flex-row items-center mb-4">
                   <View className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800/80 items-center justify-center mr-3">
                     <Feather name="file-text" size={16} color="#64748b" />
                   </View>
-                  <Text className="text-slate-700 dark:text-slate-300 font-bold text-base">
+                  <Text className="text-slate-700 dark:text-slate-300 font-bold text-sm">
                     {product.pageCount || 0} Pages
                   </Text>
                 </View>
-                <View className="flex-row items-center">
+
+                <View className="w-1/2 flex-row items-center mb-4">
                   <View className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800/80 items-center justify-center mr-3">
-                    <Feather name="download" size={16} color="#64748b" />
+                    <Feather name="file" size={16} color="#64748b" />
                   </View>
-                  <Text className="text-slate-700 dark:text-slate-300 font-bold text-base">
+                  <Text className="text-slate-700 dark:text-slate-300 font-bold text-sm">
                     {formatFileSize(product.fileSizeBytes)} PDF
                   </Text>
                 </View>
-                <View className="flex-row items-center">
+
+                <View className="w-1/2 flex-row items-center">
                   <View className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800/80 items-center justify-center mr-3">
                     <Feather name="globe" size={16} color="#64748b" />
                   </View>
-                  <Text className="text-slate-700 dark:text-slate-300 font-bold text-base">
-                    {product.language || "English Language"}
+                  <Text className="text-slate-700 dark:text-slate-300 font-bold text-sm">
+                    {product.language || "English"}
                   </Text>
                 </View>
-                <View className="flex-row items-center">
+
+                <View className="w-1/2 flex-row items-center">
                   <View className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800/80 items-center justify-center mr-3">
-                    <Feather name="users" size={16} color="#64748b" />
+                    <Feather name="download" size={16} color="#64748b" />
                   </View>
-                  <Text className="text-slate-700 dark:text-slate-300 font-bold text-base">
+                  <Text className="text-slate-700 dark:text-slate-300 font-bold text-sm">
                     {product.totalPurchases || 0} Downloads
                   </Text>
                 </View>
