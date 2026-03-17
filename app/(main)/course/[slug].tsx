@@ -7,12 +7,16 @@ import {
   Image,
   ActivityIndicator,
   StatusBar,
+  Modal,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router, Link } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import BottomTabs from "@/components/BottomTabs";
+import { WebView } from "react-native-webview";
+import PDFPreview from "@/components/PDFPreview";
 
 export type CourseStatus = "published" | "draft" | "archived";
 export type CourseLevel = "beginner" | "intermediate" | "advanced";
@@ -85,6 +89,7 @@ const CourseDetails = () => {
   const [course, setCourse] = useState<Course | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expandedModules, setExpandedModules] = useState<number[]>([0]);
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -138,6 +143,21 @@ const CourseDetails = () => {
 
     if (slug) fetchCourseDetails();
   }, [slug]);
+
+  const isYouTubeUrl = (url: string) =>
+    url.includes("youtube.com/") || url.includes("youtu.be/");
+
+  const getVideoPlayerHTML = (url: string) => `<!DOCTYPE html>
+<html><head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; background: #000; }
+    body { display: flex; align-items: center; justify-content: center; height: 100vh; }
+    video { width: 100%; max-height: 100vh; outline: none; }
+  </style>
+</head><body>
+  <video autoplay playsinline src="${url}"></video>
+</body></html>`;
 
   const toggleModule = (index: number) => {
     if (expandedModules.includes(index)) {
@@ -217,7 +237,7 @@ const CourseDetails = () => {
           <View className="flex-row items-center mb-6">
             <View className="px-4 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 rounded-full border border-emerald-100 dark:border-emerald-800/30 flex-row items-center">
               <Feather name="award" size={14} color="#10b981" />
-              <Text className="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest ml-2 capitalize">
+              <Text className="text-emerald-600 dark:text-emerald-400 text-[10px] font-black tracking-widest ml-2 capitalize">
                 {course.level}
               </Text>
             </View>
@@ -234,14 +254,6 @@ const CourseDetails = () => {
           </View>
 
           <View className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 rounded-[24px] p-5 border border-gray-100 dark:border-slate-700">
-            <Image
-              source={{
-                uri:
-                  course.teacherProfilePicture ||
-                  `https://ui-avatars.com/api/?name=${course.teacherDisplayName}&background=random`,
-              }}
-              className="w-12 h-12 rounded-xl"
-            />
             <View className="ml-4 flex-1">
               <Text className="text-slate-800 dark:text-white font-black text-lg">
                 Course Package
@@ -348,8 +360,21 @@ const CourseDetails = () => {
               {expandedModules.includes(sectionIdx) && (
                 <View className="px-6 pb-6 pt-2">
                   {section.lessons?.map((lesson, lessonIdx: number) => (
-                    <View
+                    <TouchableOpacity
                       key={lessonIdx}
+                      disabled={!lesson.isPreview}
+                      onPress={() => {
+                        if (!lesson.isPreview) return;
+                        if (
+                          lesson.contentType === "video" &&
+                          lesson.contentUrl &&
+                          isYouTubeUrl(lesson.contentUrl)
+                        ) {
+                          Linking.openURL(lesson.contentUrl);
+                        } else {
+                          setSelectedLesson(lesson);
+                        }
+                      }}
                       className="flex-row items-center py-4 border-t border-gray-100 dark:border-slate-700/30"
                     >
                       <View className="w-8 h-8 rounded-full bg-orange-50 dark:bg-orange-900/10 items-center justify-center mr-4">
@@ -375,8 +400,12 @@ const CourseDetails = () => {
                           </Text>
                         ) : null}
                       </View>
-                      <Feather name="lock" size={14} color="#cbd5e1" />
-                    </View>
+                      {lesson.isPreview ? (
+                        <Feather name="eye" size={14} color="#cbd5e1" />
+                      ) : (
+                        <Feather name="lock" size={14} color="#cbd5e1" />
+                      )}
+                    </TouchableOpacity>
                   ))}
                 </View>
               )}
@@ -412,6 +441,40 @@ const CourseDetails = () => {
           </Text>
         </View>
 
+        {/* Meet your instructor */}
+        <View className="px-6 mb-10">
+          <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+            Meet your instructor
+          </Text>
+          <TouchableOpacity
+            onPress={() => router.push(`/expert/${course.teacher.slug}`)}
+            className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-[24px] p-5"
+          >
+            <Image
+              source={{
+                uri:
+                  course.teacher.profilePicture ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(course.teacher.displayName)}&background=FF8A50&color=fff`,
+              }}
+              className="w-14 h-14 rounded-2xl"
+            />
+            <View className="ml-4 flex-1">
+              <Text className="text-slate-800 dark:text-white font-black text-base">
+                {course.teacher.displayName}
+              </Text>
+              {course.teacher.isVerified && (
+                <View className="flex-row items-center mt-1">
+                  <Feather name="check-circle" size={12} color="#10b981" />
+                  <Text className="text-emerald-500 text-xs font-bold ml-1">
+                    Verified Instructor
+                  </Text>
+                </View>
+              )}
+            </View>
+            <Feather name="chevron-right" size={20} color="#FF8A50" />
+          </TouchableOpacity>
+        </View>
+
         <View className="h-20" />
       </ScrollView>
 
@@ -434,6 +497,58 @@ const CourseDetails = () => {
         </TouchableOpacity>
       </View>
       <BottomTabs />
+
+      <Modal
+        visible={!!selectedLesson}
+        animationType="slide"
+        onRequestClose={() => setSelectedLesson(null)}
+      >
+        <SafeAreaView className="flex-1 bg-black">
+          <View className="flex-row items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-700">
+            <Text
+              className="text-white font-bold text-base flex-1 mr-3"
+              numberOfLines={1}
+            >
+              {selectedLesson?.title}
+            </Text>
+            <TouchableOpacity onPress={() => setSelectedLesson(null)}>
+              <Feather name="x" size={22} color="#94a3b8" />
+            </TouchableOpacity>
+          </View>
+
+          {selectedLesson?.contentType === "pdf" &&
+          selectedLesson.contentUrl ? (
+            <PDFPreview
+              pdfUrl={selectedLesson.contentUrl}
+              maxPages={99}
+              style={{ flex: 1 }}
+            />
+          ) : selectedLesson?.contentType === "video" &&
+            selectedLesson.contentUrl ? (
+            <WebView
+              source={{ html: getVideoPlayerHTML(selectedLesson.contentUrl) }}
+              style={{ flex: 1, backgroundColor: "#000" }}
+              allowsInlineMediaPlayback
+              mediaPlaybackRequiresUserAction={false}
+              originWhitelist={["*"]}
+            />
+          ) : selectedLesson?.contentType === "text" &&
+            selectedLesson.textContent ? (
+            <ScrollView className="flex-1 bg-white dark:bg-slate-900 px-6 py-5">
+              <Text className="text-slate-700 dark:text-slate-300 text-base leading-7">
+                {selectedLesson.textContent}
+              </Text>
+            </ScrollView>
+          ) : (
+            <View className="flex-1 items-center justify-center">
+              <Feather name="alert-circle" size={32} color="#64748b" />
+              <Text className="text-slate-400 mt-3 text-sm">
+                No preview available
+              </Text>
+            </View>
+          )}
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 };

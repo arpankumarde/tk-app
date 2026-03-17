@@ -1,8 +1,7 @@
-import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
-import DigitalDownloadCard from "./DigitalDownloadCard";
+import ProductCard from "./ProductCard";
 
 interface DigitalDownloadsSectionProps {
   products: any[];
@@ -32,11 +31,13 @@ const DigitalDownloadsSection = ({
 
       <View className="pb-8">
         {products.map((product, index) => (
-          <DigitalDownloadCard key={product.id || index} product={product} />
+          <ProductCard key={product.slug || index} product={product} />
         ))}
       </View>
     </View>
   );
 };
+
+// <DigitalDownloadCard key={product.id || index} product={product} />;
 
 export default DigitalDownloadsSection;

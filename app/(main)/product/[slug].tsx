@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   StatusBar,
   Share,
+  Modal,
 } from "react-native";
 import {
   SafeAreaView,
@@ -18,6 +19,7 @@ import { useColorScheme } from "nativewind";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
+import PDFPreview from "@/components/PDFPreview";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -55,33 +57,34 @@ const ProductDetails = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
-
-  const fetchProductDetails = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(
-        `${BASE_URL}/_api/shop/details?slug=${slug}`,
-      );
-      const data = await response.json();
-      const payload = data.json || data;
-      console.log("Fetched product details:", payload.product);
-      setProduct(payload.product);
-
-      // Fetch related products (simulated here with newest list)
-      const listResponse = await fetch(`${BASE_URL}/_api/shop/list?limit=4`);
-      const listData = await listResponse.json();
-      const listPayload = listData.json || listData;
-      setRelatedProducts(
-        listPayload.products?.filter((p: any) => p.slug !== slug) || [],
-      );
-    } catch (error: any) {
-      console.error("Error fetching product details:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [previewVisible, setPreviewVisible] = useState(false);
 
   useEffect(() => {
+    const fetchProductDetails = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `${BASE_URL}/_api/shop/details?slug=${slug}`,
+        );
+        const data = await response.json();
+        const payload = data.json || data;
+        console.log("Fetched product details:", payload.product);
+        setProduct(payload.product);
+
+        // Fetch related products (simulated here with newest list)
+        const listResponse = await fetch(`${BASE_URL}/_api/shop/list?limit=4`);
+        const listData = await listResponse.json();
+        const listPayload = listData.json || listData;
+        setRelatedProducts(
+          listPayload.products?.filter((p: any) => p.slug !== slug) || [],
+        );
+      } catch (error: any) {
+        console.error("Error fetching product details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (slug) fetchProductDetails();
   }, [slug]);
 
@@ -297,14 +300,19 @@ const ProductDetails = () => {
               </TouchableOpacity>
 
               <View className="flex-row items-center justify-between mb-6 px-1">
-                <TouchableOpacity className="flex-1 h-12 rounded-2xl bg-orange-50/60 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/40 items-center justify-center mr-2 shadow-sm shadow-orange-100/20">
-                  <View className="flex-row items-center">
-                    <Feather name="external-link" size={16} color="#FF8A50" />
-                    <Text className="text-primary font-black text-sm ml-2">
-                      Preview
-                    </Text>
-                  </View>
-                </TouchableOpacity>
+                {product?.pdfUrl && product?.previewPages > 0 && (
+                  <TouchableOpacity
+                    className="flex-1 h-12 rounded-2xl bg-orange-50/60 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/40 items-center justify-center mr-2 shadow-sm shadow-orange-100/20"
+                    onPress={() => setPreviewVisible(true)}
+                  >
+                    <View className="flex-row items-center">
+                      <Feather name="external-link" size={16} color="#FF8A50" />
+                      <Text className="text-primary font-black text-sm ml-2">
+                        Preview
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
                 <TouchableOpacity
                   onPress={handleShare}
                   className="flex-1 h-12 rounded-2xl bg-orange-50/60 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/40 items-center justify-center ml-2 shadow-sm shadow-orange-100/20"
@@ -354,13 +362,37 @@ const ProductDetails = () => {
                 </View>
               </View>
 
-              <View className="mt-6 bg-green-50/80 dark:bg-green-900/10 p-3.5 rounded-2xl border border-green-100 dark:border-green-800/30 flex-row items-center">
-                <Feather name="check-circle" size={16} color="#10B981" />
-                <Text className="ml-2.5 text-green-700 dark:text-green-400 font-bold text-[13px]">
-                  Includes {product.previewPages || 0} preview pages
-                </Text>
-              </View>
+              {product?.pdfUrl && product?.previewPages > 0 && (
+                <View className="mt-6 bg-green-50/80 dark:bg-green-900/10 p-3.5 rounded-2xl border border-green-100 dark:border-green-800/30 flex-row items-center">
+                  <Feather name="check-circle" size={16} color="#10B981" />
+                  <Text className="ml-2.5 text-green-700 dark:text-green-400 font-bold text-[13px]">
+                    Includes {product.previewPages || 0} preview pages
+                  </Text>
+                </View>
+              )}
             </View>
+
+            <Modal
+              visible={previewVisible}
+              animationType="slide"
+              onRequestClose={() => setPreviewVisible(false)}
+            >
+              <SafeAreaView className="flex-1 bg-white dark:bg-slate-900">
+                <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700">
+                  <Text className="text-base font-bold text-slate-800 dark:text-white">
+                    Preview
+                  </Text>
+                  <TouchableOpacity onPress={() => setPreviewVisible(false)}>
+                    <Feather name="x" size={22} color="#64748b" />
+                  </TouchableOpacity>
+                </View>
+                <PDFPreview
+                  pdfUrl={product.pdfUrl}
+                  maxPages={product.previewPages || 3}
+                  style={{ flex: 1 }}
+                />
+              </SafeAreaView>
+            </Modal>
 
             {/* Related Products Section */}
             {relatedProducts.length > 0 && (

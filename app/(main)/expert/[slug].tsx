@@ -286,7 +286,7 @@ const ExpertDetails = () => {
                   {teacher.displayName}
                 </Text>
                 {teacher.isVerified && (
-                  <View className="w-5 h-5 rounded-full bg-orange-500 items-center justify-center">
+                  <View className="w-5 h-5 rounded-full bg-green-500 items-center justify-center">
                     <Feather name="check" size={11} color="white" />
                   </View>
                 )}

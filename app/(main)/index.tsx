@@ -8,22 +8,39 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Header from "../../components/Header";
-import HeroSection from "../../components/HeroSection";
-import PopularMockTests from "../../components/PopularMockTests";
-import MockTestCard from "../../components/MockTestCard";
-import DigitalDownloadsSection from "../../components/DigitalDownloadsSection";
-import BottomTabs from "../../components/BottomTabs";
+import Header from "@/components/Header";
+import HeroSection from "@/components/HeroSection";
+import PopularMockTests from "@/components/PopularMockTests";
+import MockTestCard from "@/components/MockTestCard";
+import DigitalDownloadsSection from "@/components/DigitalDownloadsSection";
+import BottomTabs from "@/components/BottomTabs";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
+interface Product {
+  category: string;
+  id: number;
+  pdfUrl: string;
+  price: number;
+  publishedAt: string;
+  rating: number | null;
+  slug: string;
+  teacherAvatar: string;
+  teacherIsVerified: boolean;
+  teacherName: string;
+  teacherSlug: string;
+  thumbnailUrl: string | null;
+  title: string;
+  totalPurchases: number;
+}
+
 const App = () => {
   const { colorScheme } = useColorScheme();
   const [tests, setTests] = useState<any[]>([]);
-  const [shopProducts, setShopProducts] = useState<any[]>([]);
+  const [shopProducts, setShopProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,6 +53,7 @@ const App = () => {
       const data = await response.json();
 
       const payload = data.json || data;
+      console.log(payload.shopProducts);
       setTests(payload.tests || []);
       setShopProducts(payload.shopProducts || []);
     } catch (err: any) {
@@ -102,7 +120,7 @@ const App = () => {
 
               <TouchableOpacity
                 className="mx-5 mb-5 bg-orange-100/50 dark:bg-orange-900/20 py-5 rounded-3xl items-center border border-orange-200 dark:border-orange-800/30"
-                onPress={() => router.push("/courses")}
+                onPress={() => router.push("/tests")}
               >
                 <View className="flex-row items-center">
                   <Text className="text-primary font-black text-xl mr-2">
