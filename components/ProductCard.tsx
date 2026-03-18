@@ -89,9 +89,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
               {displaySales} sold
             </Text>
           </View>
-          <Text className="text-2xl font-black text-orange-500">
-            ₹ {displayPrice}
-          </Text>
+          {displayPrice === 0 ? (
+            <Text className="text-3xl font-black text-green-500">FREE</Text>
+          ) : (
+            <Text className="text-3xl font-black text-primary">
+              ₹ {displayPrice}
+            </Text>
+          )}
         </View>
       </View>
     </TouchableOpacity>

@@ -13,11 +13,14 @@ export const useEnrolledTests = (token: string | null) => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${BASE_URL}/_api/student/enrolled-tests?limit=10`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const response = await fetch(
+        `${BASE_URL}/_api/student/enrolled-tests?limit=10`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch tests");
@@ -27,7 +30,10 @@ export const useEnrolledTests = (token: string | null) => {
       const payload = data.json || data;
 
       // The API returns 'enrolledTests' based on the logs
-      const baseTests = payload.enrolledTests || payload.tests || (Array.isArray(payload) ? payload : []);
+      const baseTests =
+        payload.enrolledTests ||
+        payload.tests ||
+        (Array.isArray(payload) ? payload : []);
 
       setTests(baseTests);
       setTotal(payload.total || baseTests.length);
@@ -44,3 +50,5 @@ export const useEnrolledTests = (token: string | null) => {
 
   return { tests, loading, total, refetch: fetchTests };
 };
+
+export default useEnrolledTests;

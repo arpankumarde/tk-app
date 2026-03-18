@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   StatusBar,
   Share,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather, Ionicons } from "@expo/vector-icons";
@@ -86,6 +87,14 @@ interface PackageResponse {
   items: TestItem[];
 }
 
+interface FreeEnrollResponse {
+  json: {
+    error?: string;
+    message?: string;
+    orderId?: number;
+  };
+}
+
 const TestDetails = () => {
   const { slug } = useLocalSearchParams();
   const router = useRouter();
@@ -97,6 +106,12 @@ const TestDetails = () => {
   const [loading, setLoading] = useState(true);
   const [expandedItems, setExpandedItems] = useState<number[]>([]);
   const [enrolling, setEnrolling] = useState(false);
+  const [enrollResult, setEnrollResult] = useState<{
+    visible: boolean;
+    success: boolean;
+    orderId?: number;
+    message?: string;
+  }>({ visible: false, success: false });
 
   useEffect(() => {
     const fetchTestDetails = async () => {
@@ -144,16 +159,34 @@ const TestDetails = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ packageId: test?.id }),
+        body: JSON.stringify({ json: { mockTestId: test?.id } }),
       });
-      const data = await res.json();
-      if (data.success) {
+      const data: FreeEnrollResponse = await res.json();
+      console.log("Enroll response:", data);
+      if (data.json?.orderId) {
         setTest((prev) => (prev ? { ...prev, isEnrolled: true } : prev));
+        setEnrollResult({
+          visible: true,
+          success: true,
+          orderId: data.json.orderId,
+        });
       } else {
-        console.error("Enrollment failed:", data.error);
+        setEnrollResult({
+          visible: true,
+          success: false,
+          message:
+            data.json?.message ||
+            data.json?.error ||
+            "Failed to enroll. Please try again.",
+        });
       }
     } catch (err) {
       console.error("Enroll error:", err);
+      setEnrollResult({
+        visible: true,
+        success: false,
+        message: "Something went wrong. Please try again.",
+      });
     } finally {
       setEnrolling(false);
     }
@@ -637,6 +670,97 @@ const TestDetails = () => {
           )}
         </TouchableOpacity>
       </View>
+      {/* Enrollment Result Modal */}
+      <Modal
+        visible={enrollResult.visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() =>
+          setEnrollResult((prev) => ({ ...prev, visible: false }))
+        }
+      >
+        <View className="flex-1 bg-black/50 items-center justify-center px-6">
+          <View className="bg-white dark:bg-slate-800 rounded-[28px] p-8 w-full max-w-sm items-center shadow-2xl">
+            {enrollResult.success ? (
+              <>
+                <View className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 items-center justify-center mb-5">
+                  <Feather
+                    name="check-circle"
+                    size={32}
+                    color="#10B981"
+                  />
+                </View>
+                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                  Enrolled Successfully!
+                </Text>
+                <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm mb-1">
+                  Order ID #{enrollResult.orderId}
+                </Text>
+                <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                  Your test series is now available in your dashboard.
+                </Text>
+                <TouchableOpacity
+                  className="bg-green-500 w-full h-14 rounded-2xl items-center justify-center mb-3"
+                  onPress={() => {
+                    setEnrollResult((prev) => ({
+                      ...prev,
+                      visible: false,
+                    }));
+                    router.push("/(user)" as any);
+                  }}
+                >
+                  <Text className="text-white font-black text-base">
+                    Go to Dashboard
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="w-full h-12 rounded-2xl items-center justify-center"
+                  onPress={() =>
+                    setEnrollResult((prev) => ({
+                      ...prev,
+                      visible: false,
+                    }))
+                  }
+                >
+                  <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+                    Continue Browsing
+                  </Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <View className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 items-center justify-center mb-5">
+                  <Feather
+                    name="alert-circle"
+                    size={32}
+                    color="#EF4444"
+                  />
+                </View>
+                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                  Enrollment Failed
+                </Text>
+                <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                  {enrollResult.message}
+                </Text>
+                <TouchableOpacity
+                  className="bg-primary w-full h-14 rounded-2xl items-center justify-center"
+                  onPress={() =>
+                    setEnrollResult((prev) => ({
+                      ...prev,
+                      visible: false,
+                    }))
+                  }
+                >
+                  <Text className="text-white font-black text-base">
+                    Try Again
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
+
       <BottomTabs />
     </SafeAreaView>
   );

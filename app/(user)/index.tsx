@@ -21,6 +21,9 @@ import { useEnrolledCourses } from "./hooks/useEnrolledCourses";
 import { useEnrolledTests } from "./hooks/useEnrolledTests";
 import EnrolledCourseCard from "./_components/EnrolledCourseCard";
 import EnrolledTestCard from "./_components/EnrolledTestCard";
+import PurchasedProductCard from "./_components/PurchasedProductCard";
+
+import { usePurchasedProducts } from "./hooks/usePurchasedProducts";
 
 export default function ProfileScreen() {
   const { user, token, logout } = useAuth();
@@ -29,14 +32,17 @@ export default function ProfileScreen() {
   const {
     courses: enrolledCourses,
     loading: loadingCourses,
-    total: totalCourses
+    total: totalCourses,
   } = useEnrolledCourses(token);
 
   const {
     tests: enrolledTests,
     loading: loadingTests,
-    total: totalTests
+    total: totalTests,
   } = useEnrolledTests(token);
+
+  const { products: purchasedProducts, loading: loadingProducts } =
+    usePurchasedProducts(token, { limit: 1 });
 
   useEffect(() => {
     if (!user) {
@@ -56,17 +62,27 @@ export default function ProfileScreen() {
   };
 
   const menuItems = [
-    { title: "My Courses", icon: "book-open", route: "/courses", color: "text-blue-500", bgColor: "bg-blue-50 dark:bg-blue-900/20" },
-    { title: "My Mock Tests", icon: "layers", route: "/tests", color: "text-orange-500", bgColor: "bg-orange-50 dark:bg-orange-900/20" },
-    { title: "Live Sessions", icon: "radio", route: "/live", color: "text-red-500", bgColor: "bg-red-50 dark:bg-red-900/20" },
-    { title: "Downloads & Shop", icon: "shopping-bag", route: "/shop", color: "text-purple-500", bgColor: "bg-purple-50 dark:bg-purple-900/20" },
-    { title: "Account Settings", icon: "settings", route: "/", color: "text-gray-500", bgColor: "bg-gray-50 dark:bg-gray-700/20" },
-    { title: "Help & Support", icon: "headphones", route: "/", color: "text-green-500", bgColor: "bg-green-50 dark:bg-green-900/20" },
+    {
+      title: "Account Settings",
+      icon: "settings",
+      route: "/",
+      color: "text-gray-500",
+      bgColor: "bg-gray-50 dark:bg-gray-700/20",
+    },
+    {
+      title: "Help & Support",
+      icon: "headphones",
+      route: "/",
+      color: "text-green-500",
+      bgColor: "bg-green-50 dark:bg-green-900/20",
+    },
   ];
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-slate-950">
-      <StatusBar barStyle={colorScheme === "dark" ? "light-content" : "dark-content"} />
+      <StatusBar
+        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+      />
       <Header />
 
       <ScrollView
@@ -79,7 +95,10 @@ export default function ProfileScreen() {
           <View className="flex-row items-center mb-10">
             <View className="w-24 h-24 rounded-full bg-primary/10 border-4 border-white dark:border-slate-800 shadow-xl items-center justify-center overflow-hidden">
               {user?.avatarUrl ? (
-                <Image source={{ uri: user.avatarUrl }} className="w-full h-full" />
+                <Image
+                  source={{ uri: user.avatarUrl }}
+                  className="w-full h-full"
+                />
               ) : (
                 <Text className="text-4xl font-black text-primary">
                   {user?.displayName?.charAt(0).toUpperCase() || "P"}
@@ -87,14 +106,22 @@ export default function ProfileScreen() {
               )}
             </View>
             <View className="ml-5 flex-1">
-              <Text className="text-2xl font-black text-slate-800 dark:text-white mb-1.5" numberOfLines={1}>
+              <Text
+                className="text-2xl font-black text-slate-800 dark:text-white mb-1.5"
+                numberOfLines={1}
+              >
                 {user?.displayName || "User Name"}
               </Text>
-              <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm mb-4" numberOfLines={1}>
+              <Text
+                className="text-slate-500 dark:text-slate-400 font-bold text-sm mb-4"
+                numberOfLines={1}
+              >
                 {user?.email || "user@example.com"}
               </Text>
               <TouchableOpacity className="bg-orange-50 dark:bg-orange-950/30 px-6 py-2.5 rounded-full self-start border border-orange-100 dark:border-orange-800/30">
-                <Text className="text-primary font-black text-sm">Edit Profile</Text>
+                <Text className="text-primary font-black text-sm">
+                  Edit Profile
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -102,18 +129,30 @@ export default function ProfileScreen() {
           {/* Stats Bar */}
           <View className="bg-white dark:bg-slate-900 rounded-[32px] p-6 flex-row items-center shadow-2xl shadow-slate-200 dark:shadow-none border border-gray-50 dark:border-slate-800">
             <View className="items-center flex-1">
-              <Text className="text-2xl font-black text-slate-800 dark:text-white">{totalTests}</Text>
-              <Text className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">Tests</Text>
+              <Text className="text-2xl font-black text-slate-800 dark:text-white">
+                {totalTests}
+              </Text>
+              <Text className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">
+                Tests
+              </Text>
             </View>
             <View className="w-[1px] h-10 bg-gray-200 dark:bg-slate-700" />
             <View className="items-center flex-1">
-              <Text className="text-2xl font-black text-slate-800 dark:text-white">{totalCourses}</Text>
-              <Text className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">Courses</Text>
+              <Text className="text-2xl font-black text-slate-800 dark:text-white">
+                {totalCourses}
+              </Text>
+              <Text className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">
+                Courses
+              </Text>
             </View>
             <View className="w-[1px] h-10 bg-gray-200 dark:bg-slate-700" />
             <View className="items-center flex-1">
-              <Text className="text-2xl font-black text-slate-800 dark:text-white">85%</Text>
-              <Text className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">Score</Text>
+              <Text className="text-2xl font-black text-slate-800 dark:text-white">
+                85%
+              </Text>
+              <Text className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">
+                Score
+              </Text>
             </View>
           </View>
         </View>
@@ -124,10 +163,19 @@ export default function ProfileScreen() {
             <Text className="text-xl font-black text-slate-800 dark:text-white">
               Ongoing Courses ({totalCourses})
             </Text>
-            <TouchableOpacity onPress={() => router.push("/(main)/courses" as any)}>
+            <TouchableOpacity
+              onPress={() => router.push("/(main)/courses" as any)}
+            >
               <View className="flex-row items-center">
-                <Text className="text-primary font-black text-sm">View All</Text>
-                <Feather name="chevron-right" size={16} color="#FF8A50" className="ml-1" />
+                <Text className="text-primary font-black text-sm">
+                  View All
+                </Text>
+                <Feather
+                  name="chevron-right"
+                  size={16}
+                  color="#FF8A50"
+                  className="ml-1"
+                />
               </View>
             </TouchableOpacity>
           </View>
@@ -143,7 +191,9 @@ export default function ProfileScreen() {
           ) : (
             <View className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-gray-100 dark:border-slate-800 border-dashed items-center mb-8">
               <Feather name="book" size={32} color="#CBD5E1" />
-              <Text className="text-slate-400 font-bold mt-2">No ongoing courses yet</Text>
+              <Text className="text-slate-400 font-bold mt-2">
+                No ongoing courses yet
+              </Text>
             </View>
           )}
 
@@ -152,10 +202,19 @@ export default function ProfileScreen() {
             <Text className="text-xl font-black text-slate-800 dark:text-white">
               Ongoing Tests ({totalTests})
             </Text>
-            <TouchableOpacity onPress={() => router.push("/(main)/live" as any)}>
+            <TouchableOpacity
+              onPress={() => router.push("/(main)/live" as any)}
+            >
               <View className="flex-row items-center">
-                <Text className="text-primary font-black text-sm">View All</Text>
-                <Feather name="chevron-right" size={16} color="#FF8A50" className="ml-1" />
+                <Text className="text-primary font-black text-sm">
+                  View All
+                </Text>
+                <Feather
+                  name="chevron-right"
+                  size={16}
+                  color="#FF8A50"
+                  className="ml-1"
+                />
               </View>
             </TouchableOpacity>
           </View>
@@ -171,23 +230,74 @@ export default function ProfileScreen() {
           ) : (
             <View className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-gray-100 dark:border-slate-800 border-dashed items-center mb-8">
               <Feather name="file-text" size={32} color="#CBD5E1" />
-              <Text className="text-slate-400 font-bold mt-2">No enrolled tests yet</Text>
+              <Text className="text-slate-400 font-bold mt-2">
+                No enrolled tests yet
+              </Text>
+            </View>
+          )}
+
+          {/* My Notes Header */}
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className="text-xl font-black text-slate-800 dark:text-white">
+              My Notes
+            </Text>
+            <TouchableOpacity
+              onPress={() => router.push("/(user)/products" as any)}
+            >
+              <View className="flex-row items-center">
+                <Text className="text-primary font-black text-sm">
+                  View All
+                </Text>
+                <Feather
+                  name="chevron-right"
+                  size={16}
+                  color="#FF8A50"
+                  className="ml-1"
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          {loadingProducts ? (
+            <View className="py-10 items-center justify-center">
+              <ActivityIndicator color="#FF8A50" />
+            </View>
+          ) : purchasedProducts.length > 0 ? (
+            <PurchasedProductCard product={purchasedProducts[0]} />
+          ) : (
+            <View className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-gray-100 dark:border-slate-800 border-dashed items-center mb-8">
+              <Feather name="shopping-bag" size={32} color="#CBD5E1" />
+              <Text className="text-slate-400 font-bold mt-2">
+                No purchased notes yet
+              </Text>
             </View>
           )}
 
           {/* Account Menu List */}
-          <Text className="text-xl font-black text-slate-800 dark:text-white mb-4">My Account</Text>
+          <Text className="text-xl font-black text-slate-800 dark:text-white mb-4">
+            My Account
+          </Text>
           <View className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 overflow-hidden shadow-sm mb-8">
             {menuItems.map((item, index) => (
               <TouchableOpacity
                 key={index}
-                onPress={() => item.route !== "/" && router.push(item.route as any)}
-                className={`flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 ${index !== menuItems.length - 1 ? 'border-b border-gray-50 dark:border-slate-800' : ''}`}
+                onPress={() =>
+                  item.route !== "/" && router.push(item.route as any)
+                }
+                className={`flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 ${index !== menuItems.length - 1 ? "border-b border-gray-50 dark:border-slate-800" : ""}`}
               >
-                <View className={`w-12 h-12 rounded-2xl ${item.bgColor} items-center justify-center mr-4`}>
-                  <Feather name={item.icon as any} size={22} className={item.color} />
+                <View
+                  className={`w-12 h-12 rounded-2xl ${item.bgColor} items-center justify-center mr-4`}
+                >
+                  <Feather
+                    name={item.icon as any}
+                    size={22}
+                    className={item.color}
+                  />
                 </View>
-                <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">{item.title}</Text>
+                <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
+                  {item.title}
+                </Text>
                 <Feather name="chevron-right" size={20} color="#CBD5E1" />
               </TouchableOpacity>
             ))}
@@ -196,10 +306,12 @@ export default function ProfileScreen() {
           {/* Logout Section */}
           <TouchableOpacity
             onPress={handleLogout}
-            className="mb-12 p-6 bg-red-50 dark:bg-red-950/10 rounded-3xl border border-red-100 dark:border-red-900/20 flex-row items-center justify-center space-x-3"
+            className="p-6 bg-red-50 dark:bg-red-950/10 rounded-3xl border border-red-100 dark:border-red-900/20 flex-row items-center justify-center space-x-3"
           >
             <Feather name="log-out" size={22} color="#EF4444" />
-            <Text className="text-red-500 font-black text-lg ml-2">Sign Out</Text>
+            <Text className="text-red-500 font-black text-lg ml-2">
+              Sign Out
+            </Text>
           </TouchableOpacity>
         </View>
 

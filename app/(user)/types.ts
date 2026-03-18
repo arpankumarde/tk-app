@@ -61,3 +61,17 @@ export interface EnrolledCoursesResponse {
   enrolledCourses: EnrolledCourse[];
   total: number;
 }
+
+export interface PurchasedProduct {
+  purchaseId: number;
+  purchasedAt: string;
+  downloadCount: number;
+  lastDownloadedAt: string | null;
+  productId: number;
+  title: string;
+  slug: string;
+  thumbnailUrl: string | null;
+  category: string;
+  teacherName: string;
+  pdfUrl?: string;
+}

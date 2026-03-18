@@ -17,6 +17,7 @@ import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
 import PDFPreview from "@/components/PDFPreview";
+import { useAuth } from "@/context/AuthContext";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -45,6 +46,14 @@ interface Product {
   totalPurchases: number;
 }
 
+interface FreeEnrollResponse {
+  json: {
+    error?: string;
+    message?: string;
+    orderId?: number;
+  };
+}
+
 const ProductDetails = () => {
   const { slug } = useLocalSearchParams();
   const router = useRouter();
@@ -54,6 +63,14 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [previewVisible, setPreviewVisible] = useState(false);
+  const [enrolling, setEnrolling] = useState(false);
+  const [enrollResult, setEnrollResult] = useState<{
+    visible: boolean;
+    success: boolean;
+    orderId?: number;
+    message?: string;
+  }>({ visible: false, success: false });
+  const { token } = useAuth();
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -83,6 +100,49 @@ const ProductDetails = () => {
 
     if (slug) fetchProductDetails();
   }, [slug]);
+
+  const handleEnrollFree = async () => {
+    if (!product || !token) return;
+    try {
+      setEnrolling(true);
+      const response = await fetch(`${BASE_URL}/_api/shop/enroll-free`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ json: { digitalProductId: product.id } }),
+      });
+      console.log({ json: { digitalProductId: product.id } });
+      const data: FreeEnrollResponse = await response.json();
+      console.log(data);
+      if (data.json.orderId) {
+        setEnrollResult({
+          visible: true,
+          success: true,
+          orderId: data.json.orderId,
+        });
+      } else {
+        setEnrollResult({
+          visible: true,
+          success: false,
+          message:
+            data.json.message ||
+            data.json.error ||
+            "Failed to enroll. Please try again.",
+        });
+      }
+    } catch (error: any) {
+      console.error("Enrollment error:", error);
+      setEnrollResult({
+        visible: true,
+        success: false,
+        message: "Something went wrong. Please try again.",
+      });
+    } finally {
+      setEnrolling(false);
+    }
+  };
 
   const handleShare = async () => {
     try {
@@ -280,12 +340,31 @@ const ProductDetails = () => {
 
               <View className="h-[1px] bg-gray-50 dark:bg-slate-700/50 mb-5" />
 
-              <TouchableOpacity className="bg-primary h-14 rounded-2xl flex-row items-center justify-center shadow-md shadow-orange-500/20 mb-3">
-                <Feather name="shopping-cart" size={18} color="white" />
-                <Text className="text-white text-lg font-black ml-2.5">
-                  Add to Cart
-                </Text>
-              </TouchableOpacity>
+              {product.price === 0 ? (
+                <TouchableOpacity
+                  className="bg-green-500 h-14 rounded-2xl flex-row items-center justify-center shadow-md shadow-green-500/20 mb-3"
+                  onPress={handleEnrollFree}
+                  disabled={enrolling}
+                >
+                  {enrolling ? (
+                    <ActivityIndicator size="small" color="white" />
+                  ) : (
+                    <>
+                      <Feather name="download" size={18} color="white" />
+                      <Text className="text-white text-lg font-black ml-2.5">
+                        Get Free
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity className="bg-primary h-14 rounded-2xl flex-row items-center justify-center shadow-md shadow-orange-500/20 mb-3">
+                  <Feather name="shopping-cart" size={18} color="white" />
+                  <Text className="text-white text-lg font-black ml-2.5">
+                    Add to Cart
+                  </Text>
+                </TouchableOpacity>
+              )}
 
               <View className="flex-row items-center justify-between mb-6 px-1">
                 {product?.pdfUrl && product?.previewPages > 0 && (
@@ -383,6 +462,98 @@ const ProductDetails = () => {
                   style={{ flex: 1 }}
                 />
               </SafeAreaView>
+            </Modal>
+
+            {/* Enrollment Result Modal */}
+            <Modal
+              visible={enrollResult.visible}
+              transparent
+              animationType="fade"
+              onRequestClose={() =>
+                setEnrollResult((prev) => ({ ...prev, visible: false }))
+              }
+            >
+              <View className="flex-1 bg-black/50 items-center justify-center px-6">
+                <View className="bg-white dark:bg-slate-800 rounded-[28px] p-8 w-full max-w-sm items-center shadow-2xl">
+                  {enrollResult.success ? (
+                    <>
+                      <View className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 items-center justify-center mb-5">
+                        <Feather
+                          name="check-circle"
+                          size={32}
+                          color="#10B981"
+                        />
+                      </View>
+                      <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                        Purchase Successful!
+                      </Text>
+                      <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm mb-1">
+                        Order ID #{enrollResult.orderId}
+                      </Text>
+                      <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                        Your note is now available for download from the
+                        dashboard.
+                      </Text>
+                      <TouchableOpacity
+                        className="bg-green-500 w-full h-14 rounded-2xl items-center justify-center mb-3"
+                        onPress={() => {
+                          setEnrollResult((prev) => ({
+                            ...prev,
+                            visible: false,
+                          }));
+                          router.push("/(user)" as any);
+                        }}
+                      >
+                        <Text className="text-white font-black text-base">
+                          Go to Dashboard
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        className="w-full h-12 rounded-2xl items-center justify-center"
+                        onPress={() =>
+                          setEnrollResult((prev) => ({
+                            ...prev,
+                            visible: false,
+                          }))
+                        }
+                      >
+                        <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+                          Continue Browsing
+                        </Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <>
+                      <View className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 items-center justify-center mb-5">
+                        <Feather
+                          name="alert-circle"
+                          size={32}
+                          color="#EF4444"
+                        />
+                      </View>
+                      <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                        Enrollment Failed
+                      </Text>
+                      <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                        {enrollResult.message}
+                      </Text>
+                      <TouchableOpacity
+                        className="bg-primary w-full h-14 rounded-2xl items-center justify-center"
+                        onPress={() =>
+                          setEnrollResult((prev) => ({
+                            ...prev,
+                            visible: false,
+                          }))
+                        }
+                      >
+                        <Text className="text-white font-black text-base">
+                          Try Again
+                        </Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
+                </View>
+              </View>
             </Modal>
 
             {/* Related Products Section */}

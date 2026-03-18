@@ -13,9 +13,12 @@ export const useEnrolledCourses = (token: string | null) => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${BASE_URL}/_api/student/enrolled-courses?limit=5`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${BASE_URL}/_api/student/enrolled-courses?limit=5`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
       if (!response.ok) throw new Error("Failed to fetch courses");
 
@@ -26,28 +29,38 @@ export const useEnrolledCourses = (token: string | null) => {
       const detailedCourses = await Promise.all(
         baseCourses.map(async (c: any) => {
           try {
-            const progressRes = await fetch(`${BASE_URL}/_api/student/course/progress?courseId=${c.id}`, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
+            const progressRes = await fetch(
+              `${BASE_URL}/_api/student/course/progress?courseId=${c.id}`,
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              },
+            );
             const progressData = await progressRes.json();
-            const progressPayload: CourseProgressResponse = progressData.json || progressData;
+            const progressPayload: CourseProgressResponse =
+              progressData.json || progressData;
 
             const thumbUrl = c.thumbnailUrl || c.thumbnailImageUrl;
-            const isVideo = thumbUrl?.toLowerCase().endsWith('.mp4') || thumbUrl?.includes('/course_videos/');
+            const isVideo =
+              thumbUrl?.toLowerCase().endsWith(".mp4") ||
+              thumbUrl?.includes("/course_videos/");
 
             return {
               ...c,
-              thumbnailUrl: (!isVideo && thumbUrl)
-                ? thumbUrl
-                : "https://ik.imagekit.io/testkart/placeholders/mock-test-placeholder__FmYrad7s.png",
-              completionPercentage: progressPayload.completionPercentage ?? c.completionPercentage ?? 0,
+              thumbnailUrl:
+                !isVideo && thumbUrl
+                  ? thumbUrl
+                  : "https://ik.imagekit.io/testkart/placeholders/mock-test-placeholder__FmYrad7s.png",
+              completionPercentage:
+                progressPayload.completionPercentage ??
+                c.completionPercentage ??
+                0,
               completedLessons: progressPayload.completedLessonIds?.length ?? 0,
-              totalLessons: c.totalLessons || 0
+              totalLessons: c.totalLessons || 0,
             };
           } catch (e) {
             return c;
           }
-        })
+        }),
       );
 
       setCourses(detailedCourses);
@@ -65,3 +78,5 @@ export const useEnrolledCourses = (token: string | null) => {
 
   return { courses, loading, total, refetch: fetchCourses };
 };
+
+export default useEnrolledCourses;

@@ -93,6 +93,12 @@ const CourseDetails = () => {
   const [expandedModules, setExpandedModules] = useState<number[]>([0]);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [enrolling, setEnrolling] = useState(false);
+  const [enrollResult, setEnrollResult] = useState<{
+    visible: boolean;
+    success: boolean;
+    enrollmentId?: number;
+    message?: string;
+  }>({ visible: false, success: false });
 
   const handleFreeEnroll = async () => {
     if (!user || !token) {
@@ -109,19 +115,33 @@ const CourseDetails = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ courseId: course?.id }),
+          body: JSON.stringify({ json: { courseId: course?.id } }),
         },
       );
       const data = await res.json();
       console.log(data, course?.id);
-      if (data.success) {
+      if (data.json?.success) {
         setCourse((prev) => (prev ? { ...prev, isEnrolled: true } : prev));
+        setEnrollResult({
+          visible: true,
+          success: true,
+          enrollmentId: data.json.enrollmentId,
+        });
       } else {
-        console.log(data);
-        console.error("Enrollment failed:", data.error);
+        console.error("Enrollment failed:", data.json?.error);
+        setEnrollResult({
+          visible: true,
+          success: false,
+          message: data.json?.error || "Failed to enroll. Please try again.",
+        });
       }
     } catch (err) {
       console.error("Enroll error:", err);
+      setEnrollResult({
+        visible: true,
+        success: false,
+        message: "Something went wrong. Please try again.",
+      });
     } finally {
       setEnrolling(false);
     }
@@ -544,6 +564,81 @@ const CourseDetails = () => {
         </TouchableOpacity>
       </View>
       <BottomTabs />
+
+      {/* Enrollment Result Modal */}
+      <Modal
+        visible={enrollResult.visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() =>
+          setEnrollResult((prev) => ({ ...prev, visible: false }))
+        }
+      >
+        <View className="flex-1 bg-black/50 items-center justify-center px-6">
+          <View className="bg-white dark:bg-slate-800 rounded-[28px] p-8 w-full max-w-sm items-center shadow-2xl">
+            {enrollResult.success ? (
+              <>
+                <View className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 items-center justify-center mb-5">
+                  <Feather name="check-circle" size={32} color="#10B981" />
+                </View>
+                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                  Enrollment Successful!
+                </Text>
+                <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm mb-1">
+                  Enrollment ID #{enrollResult.enrollmentId}
+                </Text>
+                <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                  You now have full access to this course. Head to your
+                  dashboard to start learning.
+                </Text>
+                <TouchableOpacity
+                  className="bg-green-500 w-full h-14 rounded-2xl items-center justify-center mb-3"
+                  onPress={() => {
+                    setEnrollResult((prev) => ({ ...prev, visible: false }));
+                    router.push("/(user)" as any);
+                  }}
+                >
+                  <Text className="text-white font-black text-base">
+                    Go to Dashboard
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="w-full h-12 rounded-2xl items-center justify-center"
+                  onPress={() =>
+                    setEnrollResult((prev) => ({ ...prev, visible: false }))
+                  }
+                >
+                  <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+                    Continue Browsing
+                  </Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <View className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 items-center justify-center mb-5">
+                  <Feather name="alert-circle" size={32} color="#EF4444" />
+                </View>
+                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                  Enrollment Failed
+                </Text>
+                <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                  {enrollResult.message}
+                </Text>
+                <TouchableOpacity
+                  className="bg-primary w-full h-14 rounded-2xl items-center justify-center"
+                  onPress={() =>
+                    setEnrollResult((prev) => ({ ...prev, visible: false }))
+                  }
+                >
+                  <Text className="text-white font-black text-base">
+                    Try Again
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
 
       <Modal
         visible={!!selectedLesson}
