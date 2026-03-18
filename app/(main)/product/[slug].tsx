@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,10 +10,7 @@ import {
   Share,
   Modal,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
@@ -52,7 +49,6 @@ const ProductDetails = () => {
   const { slug } = useLocalSearchParams();
   const router = useRouter();
   const { colorScheme } = useColorScheme();
-  const insets = useSafeAreaInsets();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -241,38 +237,30 @@ const ProductDetails = () => {
 
             {/* About the Author Card */}
             <View className="mb-10">
-              <Text className="text-2xl font-black text-slate-800 dark:text-white mb-6">
+              <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
                 About the Author
               </Text>
-              <View className="bg-white dark:bg-slate-800/80 p-6 rounded-[32px] border border-gray-100 dark:border-slate-700 shadow-sm">
-                <View className="flex-row items-center">
-                  <View className="w-20 h-20 rounded-3xl bg-slate-100 dark:bg-slate-700 overflow-hidden shadow-sm">
-                    <Image
-                      source={{
-                        uri:
-                          product.teacherAvatar ||
-                          `https://ui-avatars.com/api/?name=${product.teacherName}&size=200&background=FF8A50&color=fff`,
-                      }}
-                      className="w-full h-full"
-                    />
-                  </View>
-                  <View className="ml-5 flex-1">
-                    <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
-                      {product.teacherName || "Author"}
-                    </Text>
-                    <TouchableOpacity
-                      className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/50 px-5 py-2 rounded-xl self-start"
-                      onPress={() =>
-                        router.push(`/(main)/expert/${product.teacherSlug}`)
-                      }
-                    >
-                      <Text className="text-primary font-black text-sm">
-                        View Profile
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+              <TouchableOpacity
+                onPress={() =>
+                  router.push(`/(main)/expert/${product.teacherSlug}`)
+                }
+                className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-[24px] p-5"
+              >
+                <Image
+                  source={{
+                    uri:
+                      product.teacherAvatar ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(product.teacherName)}&background=FF8A50&color=fff`,
+                  }}
+                  className="w-14 h-14 rounded-2xl"
+                />
+                <View className="ml-4 flex-1">
+                  <Text className="text-slate-800 dark:text-white font-black text-base">
+                    {product.teacherName || "Author"}
+                  </Text>
                 </View>
-              </View>
+                <Feather name="chevron-right" size={20} color="#FF8A50" />
+              </TouchableOpacity>
             </View>
 
             {/* Detailed Bottom Section (Dynamic Data) */}
@@ -404,11 +392,17 @@ const ProductDetails = () => {
                 <Text className="text-3xl font-black text-slate-800 dark:text-white mb-8">
                   Related Products
                 </Text>
-                <View className="space-y-6">
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingRight: 24 }}
+                >
                   {relatedProducts.map((p, i) => (
-                    <ProductCard key={p.id || i} product={p} />
+                    <View key={p.id || i} style={{ width: 320 }}>
+                      <ProductCard product={p} />
+                    </View>
                   ))}
-                </View>
+                </ScrollView>
               </View>
             )}
           </View>

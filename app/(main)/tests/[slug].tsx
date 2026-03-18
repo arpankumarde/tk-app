@@ -1,0 +1,645 @@
+import { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+  StatusBar,
+  Share,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Feather, Ionicons } from "@expo/vector-icons";
+import { useColorScheme } from "nativewind";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import BottomTabs from "@/components/BottomTabs";
+import { useAuth } from "@/context/AuthContext";
+
+const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+
+interface TeacherSocialLinks {
+  twitter: string;
+  youtube: string;
+  facebook: string;
+  linkedin: string;
+  instagram: string;
+}
+
+interface Subject {
+  id: number;
+  subjectName: string;
+  actualQuestionCount: number;
+}
+
+interface TestItem {
+  id: number;
+  title: string;
+  description: string | null;
+  durationMinutes: number;
+  totalQuestions: number;
+  isFree: boolean;
+  orderIndex: number;
+  createdAt: string;
+  subjects: Subject[];
+}
+
+interface Package {
+  id: number;
+  title: string;
+  description: string;
+  subject: string;
+  price: number;
+  discountPrice: number;
+  examName: string;
+  examSlug: string;
+  slug: string;
+  teacherName: string;
+  teacherAvatarUrl: string;
+  teacherId: number;
+  teacherBio: string;
+  teacherWebsiteUrl: string;
+  teacherPublicPhone: string;
+  teacherPublicEmail: string;
+  teacherAcademyName: string | null;
+  teacherSocialLinks: TeacherSocialLinks;
+  teacherAwardsCertificates: string[];
+  rating: number;
+  studentsEnrolled: number;
+  reviewsCount: number;
+  totalTests: number;
+  freeTestsCount: number;
+  thumbnailUrl: string;
+  creatorName: string;
+  createdAt: string;
+  updatedAt: string;
+  isEnrolled: boolean;
+  language: string;
+  teacherIsVerified: boolean;
+  whatYouLearn: string[];
+  requirements: string[];
+  longDescription: string;
+}
+
+interface PackageResponse {
+  package: Package;
+  items: TestItem[];
+}
+
+const TestDetails = () => {
+  const { slug } = useLocalSearchParams();
+  const router = useRouter();
+  const { colorScheme } = useColorScheme();
+  const { user, token } = useAuth();
+
+  const [test, setTest] = useState<Package | null>(null);
+  const [items, setItems] = useState<TestItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedItems, setExpandedItems] = useState<number[]>([]);
+  const [enrolling, setEnrolling] = useState(false);
+
+  useEffect(() => {
+    const fetchTestDetails = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `${BASE_URL}/_api/tests/details?slug=${slug}`,
+        );
+        const data = await response.json();
+        const payload: PackageResponse = data.json || data;
+        setTest(payload.package);
+        setItems(
+          payload.items && payload.items.length > 0 ? payload.items : [],
+        );
+      } catch (error: any) {
+        console.error("Error fetching test details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (slug) fetchTestDetails();
+  }, [slug]);
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Check out this test series: ${test?.title}\n${BASE_URL}/tests/${test?.slug}`,
+      });
+    } catch (error: any) {
+      console.error(error.message);
+    }
+  };
+
+  const handleFreeEnroll = async () => {
+    if (!user || !token) {
+      router.push("/login");
+      return;
+    }
+    try {
+      setEnrolling(true);
+      const res = await fetch(`${BASE_URL}/_api/tests/enroll-free`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ packageId: test?.id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTest((prev) => (prev ? { ...prev, isEnrolled: true } : prev));
+      } else {
+        console.error("Enrollment failed:", data.error);
+      }
+    } catch (err) {
+      console.error("Enroll error:", err);
+    } finally {
+      setEnrolling(false);
+    }
+  };
+
+  const toggleItem = (index: number) => {
+    if (expandedItems.includes(index)) {
+      setExpandedItems(expandedItems.filter((i) => i !== index));
+    } else {
+      setExpandedItems([...expandedItems, index]);
+    }
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-white dark:bg-slate-900 items-center justify-center">
+        <ActivityIndicator size="large" color="#FF8A50" />
+      </SafeAreaView>
+    );
+  }
+
+  if (!test) {
+    return (
+      <SafeAreaView className="flex-1 bg-white dark:bg-slate-900 items-center justify-center p-6">
+        <Text className="text-xl font-bold text-slate-800 dark:text-white mb-4 text-center">
+          Test not found
+        </Text>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="px-6 py-3 bg-primary rounded-full"
+        >
+          <Text className="text-white font-bold">Go Back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
+  const isFree = test.price === 0;
+  const actualPrice = test.discountPrice ?? test.price;
+  const originalPrice = test.discountPrice ? test.price : null;
+  const discountPercent = originalPrice
+    ? Math.round(((originalPrice - actualPrice) / originalPrice) * 100)
+    : null;
+
+  const totalQuestions = items.reduce((sum, t) => sum + t.totalQuestions, 0);
+  const totalDuration = items.reduce((sum, t) => sum + t.durationMinutes, 0);
+
+  return (
+    <SafeAreaView className="flex-1 bg-white dark:bg-slate-900" edges={["top"]}>
+      <StatusBar
+        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+      />
+
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        {/* Navigation Header */}
+        <View className="px-6 py-4 flex-row items-center">
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mr-4"
+          >
+            <Feather name="chevron-left" size={24} color="#FF8A50" />
+          </TouchableOpacity>
+          <View className="flex-row items-center">
+            <Text className="text-slate-400 dark:text-slate-500 text-xs">
+              Tests
+            </Text>
+            <Feather
+              name="chevron-right"
+              size={12}
+              color="#94a3b8"
+              className="mx-2"
+            />
+            <Text className="text-primary text-xs font-bold" numberOfLines={1}>
+              {test.examName || "Details"}
+            </Text>
+          </View>
+        </View>
+
+        {/* Title & Description */}
+        <View className="px-6 pt-2 pb-6">
+          <Text className="text-3xl font-black text-slate-800 dark:text-white leading-[42px] mb-4">
+            {test.title}
+          </Text>
+          <Text className="text-slate-500 dark:text-slate-400 text-base font-medium leading-6 mb-6">
+            {test.description ||
+              "Prepare with this comprehensive test series covering all key topics and exam patterns."}
+          </Text>
+
+          {/* Badges */}
+          <View className="flex-row items-center mb-6 flex-wrap">
+            {test.examName && (
+              <View className="px-4 py-1.5 bg-orange-50 dark:bg-orange-900/30 rounded-full border border-orange-100 dark:border-orange-800/30 flex-row items-center mr-3 mb-2">
+                <Feather name="target" size={14} color="#FF8A50" />
+                <Text className="text-primary text-[10px] font-black tracking-widest ml-2 uppercase">
+                  {test.examName}
+                </Text>
+              </View>
+            )}
+            <View className="px-4 py-1.5 bg-cyan-50 dark:bg-cyan-900/30 rounded-full border border-cyan-100 dark:border-cyan-800/30 flex-row items-center mb-2">
+              <Feather name="globe" size={14} color="#06b6d4" />
+              <Text className="text-cyan-600 dark:text-cyan-400 text-[10px] font-black tracking-widest ml-2 uppercase">
+                {test.language?.trim() || "English"}
+              </Text>
+            </View>
+          </View>
+
+          {/* Author & Rating */}
+          <View className="flex-row items-center mb-6">
+            <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
+              Created by{" "}
+              <Link
+                href={`/expert/${test.teacherId}` as any}
+                className="text-primary"
+              >
+                {test.teacherName || "TestKart Expert"}
+              </Link>
+            </Text>
+            <Text className="mx-3 text-slate-300">|</Text>
+            <View className="flex-row items-center">
+              <Ionicons name="star" size={16} color="#FF8A50" />
+              <Text className="ml-1 text-slate-800 dark:text-white font-black text-sm">
+                {test.rating ? test.rating.toFixed(1) : "New"}
+              </Text>
+              <Text className="ml-1 text-slate-400 text-xs">
+                ({test.reviewsCount || 0})
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Thumbnail */}
+        <View className="px-6 mb-8">
+          <View className="h-56 w-full rounded-[40px] overflow-hidden bg-slate-100 dark:bg-slate-800 relative shadow-2xl">
+            {test.thumbnailUrl ? (
+              <Image
+                source={{ uri: test.thumbnailUrl }}
+                className="w-full h-full"
+                resizeMode="cover"
+              />
+            ) : (
+              <View className="w-full h-full items-center justify-center">
+                <Feather name="edit-3" size={64} color="#e2e8f0" />
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* Package Stats Card */}
+        <View className="px-6 mb-8">
+          <View className="bg-gray-50 dark:bg-slate-800/50 rounded-[24px] p-5 border border-gray-100 dark:border-slate-700">
+            <Text className="text-slate-800 dark:text-white font-black text-lg mb-1">
+              This package includes
+            </Text>
+            <Text className="text-slate-500 dark:text-slate-400 text-xs font-medium mb-5">
+              {test.totalTests || items.length} tests
+              {test.freeTestsCount > 0 &&
+                ` • ${test.freeTestsCount} free`} • {totalQuestions} questions •{" "}
+              {totalDuration} min total
+            </Text>
+
+            <View className="flex-row flex-wrap">
+              <View className="w-1/2 flex-row items-center mb-4">
+                <View className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900/50 items-center justify-center mr-3">
+                  <Feather name="layers" size={16} color="#FF8A50" />
+                </View>
+                <View>
+                  <Text className="text-slate-800 dark:text-white font-black text-sm">
+                    {test.totalTests || items.length}
+                  </Text>
+                  <Text className="text-slate-400 text-[10px] font-bold">
+                    Total Tests
+                  </Text>
+                </View>
+              </View>
+
+              {test.freeTestsCount > 0 && (
+                <View className="w-1/2 flex-row items-center mb-4">
+                  <View className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900/50 items-center justify-center mr-3">
+                    <Feather name="gift" size={16} color="#10b981" />
+                  </View>
+                  <View>
+                    <Text className="text-slate-800 dark:text-white font-black text-sm">
+                      {test.freeTestsCount}
+                    </Text>
+                    <Text className="text-slate-400 text-[10px] font-bold">
+                      Free Tests
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              <View className="w-1/2 flex-row items-center mb-4">
+                <View className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900/50 items-center justify-center mr-3">
+                  <Feather name="file-text" size={16} color="#FF8A50" />
+                </View>
+                <View>
+                  <Text className="text-slate-800 dark:text-white font-black text-sm">
+                    {totalQuestions}
+                  </Text>
+                  <Text className="text-slate-400 text-[10px] font-bold">
+                    Questions
+                  </Text>
+                </View>
+              </View>
+
+              <View className="w-1/2 flex-row items-center mb-4">
+                <View className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900/50 items-center justify-center mr-3">
+                  <Feather name="clock" size={16} color="#FF8A50" />
+                </View>
+                <View>
+                  <Text className="text-slate-800 dark:text-white font-black text-sm">
+                    {totalDuration} min
+                  </Text>
+                  <Text className="text-slate-400 text-[10px] font-bold">
+                    Total Duration
+                  </Text>
+                </View>
+              </View>
+
+              <View className="w-1/2 flex-row items-center">
+                <View className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900/50 items-center justify-center mr-3">
+                  <Feather name="users" size={16} color="#FF8A50" />
+                </View>
+                <View>
+                  <Text className="text-slate-800 dark:text-white font-black text-sm">
+                    {test.studentsEnrolled || 0}
+                  </Text>
+                  <Text className="text-slate-400 text-[10px] font-bold">
+                    Students
+                  </Text>
+                </View>
+              </View>
+
+              <View className="w-1/2 flex-row items-center">
+                <View className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900/50 items-center justify-center mr-3">
+                  <Feather name="globe" size={16} color="#FF8A50" />
+                </View>
+                <View>
+                  <Text className="text-slate-800 dark:text-white font-black text-sm">
+                    {test.language || "English"}
+                  </Text>
+                  <Text className="text-slate-400 text-[10px] font-bold">
+                    Language
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Test Series Content (Expandable Items) */}
+        {items.length > 0 && (
+          <View className="px-6 mb-10">
+            <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+              Test series content
+            </Text>
+            <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-6">
+              {items.length} tests • {totalQuestions} questions
+            </Text>
+
+            {items.map((item, idx) => (
+              <View
+                key={item.id}
+                className="mb-4 bg-gray-50 dark:bg-slate-800/30 border border-gray-100 dark:border-slate-700/50 rounded-[32px] overflow-hidden"
+              >
+                <TouchableOpacity
+                  onPress={() => toggleItem(idx)}
+                  className="p-6 flex-row items-center justify-between"
+                >
+                  <View className="flex-1 mr-3">
+                    <View className="flex-row items-center mb-1">
+                      {item.isFree && (
+                        <View className="bg-green-50 dark:bg-green-900/20 px-2.5 py-0.5 rounded-full mr-2">
+                          <Text className="text-green-600 dark:text-green-400 text-[10px] font-black uppercase">
+                            Free
+                          </Text>
+                        </View>
+                      )}
+                      <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+                        Test {idx + 1}
+                      </Text>
+                    </View>
+                    <Text className="text-slate-800 dark:text-white font-black text-base">
+                      {item.title}
+                    </Text>
+                    <View className="flex-row items-center mt-2">
+                      <Feather name="file-text" size={12} color="#94a3b8" />
+                      <Text className="text-slate-400 text-xs font-bold ml-1.5 mr-4">
+                        {item.totalQuestions} Qs
+                      </Text>
+                      <Feather name="clock" size={12} color="#94a3b8" />
+                      <Text className="text-slate-400 text-xs font-bold ml-1.5">
+                        {item.durationMinutes} min
+                      </Text>
+                    </View>
+                  </View>
+                  <Feather
+                    name={
+                      expandedItems.includes(idx)
+                        ? "chevron-up"
+                        : "chevron-down"
+                    }
+                    size={20}
+                    color="#FF8A50"
+                  />
+                </TouchableOpacity>
+
+                {expandedItems.includes(idx) && item.subjects.length > 0 && (
+                  <View className="px-6 pb-6 pt-2">
+                    <Text className="text-slate-500 dark:text-slate-400 text-xs font-black uppercase tracking-wider mb-3">
+                      Subjects covered
+                    </Text>
+                    {item.subjects.map((subject) => (
+                      <View
+                        key={subject.id}
+                        className="flex-row items-center py-3 border-t border-gray-100 dark:border-slate-700/30"
+                      >
+                        <View className="w-8 h-8 rounded-full bg-orange-50 dark:bg-orange-900/10 items-center justify-center mr-4">
+                          <Feather name="book-open" size={14} color="#FF8A50" />
+                        </View>
+                        <Text className="text-slate-700 dark:text-slate-300 text-sm font-bold flex-1">
+                          {subject.subjectName}
+                        </Text>
+                        <Text className="text-slate-400 text-xs font-bold">
+                          {subject.actualQuestionCount} Qs
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* What You'll Learn */}
+        {test.whatYouLearn && test.whatYouLearn.length > 0 && (
+          <View className="px-6 mb-10">
+            <Text className="text-2xl font-black text-slate-800 dark:text-white mb-6">
+              What you&apos;ll learn
+            </Text>
+            {test.whatYouLearn.map((point, id) => (
+              <View key={id} className="flex-row items-start mb-4">
+                <View className="w-6 h-6 bg-emerald-100 dark:bg-emerald-900/30 rounded-full items-center justify-center mr-4 mt-0.5">
+                  <Feather name="check" size={14} color="#10b981" />
+                </View>
+                <Text className="text-slate-600 dark:text-slate-300 text-sm font-medium flex-1">
+                  {point}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Requirements */}
+        {test.requirements && test.requirements.length > 0 && (
+          <View className="px-6 mb-10">
+            <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+              Requirements
+            </Text>
+            {test.requirements.map((req, rid) => (
+              <View key={rid} className="flex-row items-start mb-3">
+                <View className="w-1.5 h-1.5 bg-primary rounded-full mr-3 mt-2" />
+                <Text className="text-slate-600 dark:text-slate-300 text-sm font-medium flex-1">
+                  {req}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Long Description */}
+        {test.longDescription && (
+          <View className="px-6 mb-10">
+            <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+              Description
+            </Text>
+            <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-6">
+              {test.longDescription.replace(/<[^>]*>?/gm, "")}
+            </Text>
+          </View>
+        )}
+
+        {/* About the Author */}
+        <View className="px-6 mb-10">
+          <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+            About the Author
+          </Text>
+          <TouchableOpacity
+            onPress={() => router.push(`/expert/${test.teacherId}` as any)}
+            className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-[24px] p-5"
+          >
+            <Image
+              source={{
+                uri:
+                  test.teacherAvatarUrl ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(test.teacherName)}&background=FF8A50&color=fff`,
+              }}
+              className="w-14 h-14 rounded-2xl"
+            />
+            <View className="ml-4 flex-1">
+              <Text className="text-slate-800 dark:text-white font-black text-base">
+                {test.teacherName || "Author"}
+              </Text>
+              {test.teacherIsVerified && (
+                <View className="flex-row items-center mt-1">
+                  <Feather name="check-circle" size={12} color="#10b981" />
+                  <Text className="text-emerald-500 text-xs font-bold ml-1">
+                    Verified Instructor
+                  </Text>
+                </View>
+              )}
+              {test.teacherAcademyName && (
+                <Text className="text-slate-400 text-xs font-medium mt-0.5">
+                  {test.teacherAcademyName}
+                </Text>
+              )}
+            </View>
+            <Feather name="chevron-right" size={20} color="#FF8A50" />
+          </TouchableOpacity>
+
+          {test.teacherBio && (
+            <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-6 mt-4 px-1">
+              {test.teacherBio}
+            </Text>
+          )}
+        </View>
+
+        <View className="h-20" />
+      </ScrollView>
+
+      {/* Sticky Bottom Bar */}
+      <View className="bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 p-6 flex-row items-center">
+        <View className="flex-1">
+          <Text className="text-slate-400 dark:text-slate-500 text-xs font-black uppercase tracking-tighter">
+            Price
+          </Text>
+          <View className="flex-row items-center mt-1">
+            {actualPrice === 0 ? (
+              <Text className="text-2xl font-black text-green-500">Free</Text>
+            ) : (
+              <Text className="text-2xl font-black text-slate-800 dark:text-white">
+                ₹{actualPrice}
+              </Text>
+            )}
+            {originalPrice && (
+              <>
+                <Text className="ml-2 text-slate-400 line-through text-sm">
+                  ₹{originalPrice}
+                </Text>
+                <View className="ml-2 bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-md">
+                  <Text className="text-green-600 dark:text-green-400 font-black text-[10px]">
+                    {discountPercent}% OFF
+                  </Text>
+                </View>
+              </>
+            )}
+          </View>
+        </View>
+        <TouchableOpacity
+          onPress={handleShare}
+          className="w-12 h-12 bg-gray-50 dark:bg-slate-800 rounded-2xl items-center justify-center mr-3"
+        >
+          <Feather name="share-2" size={18} color="#FF8A50" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={isFree ? handleFreeEnroll : undefined}
+          disabled={enrolling || (isFree && test.isEnrolled)}
+          className={`${isFree ? "bg-orange-500" : "bg-primary"} h-14 px-8 rounded-2xl items-center justify-center shadow-lg shadow-orange-500/30 disabled:opacity-60`}
+        >
+          {enrolling ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text className="text-white text-lg font-black">
+              {isFree
+                ? test.isEnrolled
+                  ? "Enrolled"
+                  : "Enroll Free"
+                : "Buy Now"}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
+      <BottomTabs />
+    </SafeAreaView>
+  );
+};
+
+export default TestDetails;

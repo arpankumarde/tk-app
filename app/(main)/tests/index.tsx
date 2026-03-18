@@ -14,20 +14,61 @@ import { Feather } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import Header from "@/components/Header";
 import BottomTabs from "@/components/BottomTabs";
-import ProductCard from "@/components/ProductCard";
+import MockTestCard from "@/components/MockTestCard";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
 const SORT_OPTIONS = [
   { label: "New Arrival", value: "newest" },
   { label: "Most Popular", value: "popular" },
+  { label: "Rating", value: "rating" },
   { label: "Price High to Low", value: "price_desc" },
   { label: "Price Low to High", value: "price_asc" },
 ];
 
+type ExamTest = {
+  id: number;
+  slug: string;
+  title: string;
+  description: string;
+  subject: string; // This could be an array of strings if subjects are well defined
+  price: number;
+  discountPrice: number | null;
+  totalQuestions: number;
+  thumbnailUrl: string | null;
+  totalTests: number;
+  freeTestsCount: number;
+  creatorName: string;
+  studentsEnrolled: number;
+  rating: number | null;
+  reviewsCount: number;
+  examName: string;
+  language: string;
+  teacherName: string;
+  teacherIsVerified: boolean;
+  examSlug: string;
+  durationMinutes: string; // Duration can be a string representing minutes
+  actualQuestionCount: string; // Consider if this should be a number
+  isEnrolled: boolean;
+};
+
+type Pagination = {
+  page: number;
+  limit: number;
+  totalCount: number;
+  totalPages: number;
+};
+
+type JsonResponse = {
+  json: {
+    tests: ExamTest[];
+    pagination: Pagination;
+  };
+};
+
 const ShopScreen = () => {
   const { colorScheme } = useColorScheme();
-  const [products, setProducts] = useState<any[]>([]);
+  const [tests, setTests] = useState<ExamTest[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [sort, setSort] = useState("newest");
@@ -37,22 +78,15 @@ const ShopScreen = () => {
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([
-    "All Categories",
-  ]);
+  const [priceType, setPriceType] = useState<"all" | "free" | "paid">("all");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("All Languages");
 
-  const categories = [
-    "All Categories",
-    "Study Material",
-    "Question Bank",
-    "Notes",
-    "eBooks",
-    "Practice Papers",
-    "Reference Material",
-    "Other",
+  const priceTypes = [
+    { label: "All", value: "all" as const },
+    { label: "Free", value: "free" as const },
+    { label: "Paid", value: "paid" as const },
   ];
 
   const languages = [
@@ -71,19 +105,19 @@ const ShopScreen = () => {
 
   const clearFilters = () => {
     setSearchQuery("");
-    setSelectedCategories(["All Categories"]);
+    setPriceType("all");
     setMinPrice("");
     setMaxPrice("");
     setSelectedLanguage("All Languages");
   };
 
-  const fetchProducts = useCallback(async () => {
+  const fetchTests = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const url = `${BASE_URL}/_api/shop/list?sort=${sort}`;
-      console.log("Fetching products from:", url);
+      const url = `${BASE_URL}/_api/tests/list?sort=${sort}`;
+      console.log("Fetching tests from:", url);
 
       const response = await fetch(url);
 
@@ -96,18 +130,18 @@ const ShopScreen = () => {
 
       // Fix: The log shows the data is inside a "json" field
       const payload = data.json || data;
-      const productList = payload.products || payload.data?.products || [];
+      const testsList = payload.tests || payload.data?.tests || [];
       const count =
-        payload.totalCount || payload.data?.totalCount || productList.length;
+        payload.totalCount || payload.data?.totalCount || testsList.length;
 
-      setProducts(productList);
+      setTests(testsList);
       setTotalCount(count);
 
-      if (productList.length === 0) {
-        console.warn("No products returned from API");
+      if (testsList.length === 0) {
+        console.warn("No tests returned from API");
       }
     } catch (error: any) {
-      console.error("Error fetching products:", error);
+      console.error("Error fetching tests:", error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -115,8 +149,8 @@ const ShopScreen = () => {
   }, [sort]);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    fetchTests();
+  }, [fetchTests]);
 
   const activeSortLabel = SORT_OPTIONS.find((opt) => opt.value === sort)?.label;
 
@@ -178,7 +212,7 @@ const ShopScreen = () => {
             <Text className="text-red-600 dark:text-red-400 text-center font-medium">
               Error: {error}
             </Text>
-            <TouchableOpacity onPress={fetchProducts} className="mt-2">
+            <TouchableOpacity onPress={fetchTests} className="mt-2">
               <Text className="text-primary text-center font-bold underline">
                 Retry
               </Text>
@@ -203,9 +237,9 @@ const ShopScreen = () => {
           </View>
         ) : (
           <View className="pb-10">
-            {products.length > 0 ? (
-              products.map((product, index) => (
-                <ProductCard key={product.slug || index} product={product} />
+            {tests.length > 0 ? (
+              tests.map((test, index) => (
+                <MockTestCard key={test.slug || index} test={test} />
               ))
             ) : (
               <View className="items-center justify-center py-20 px-8">
@@ -217,14 +251,14 @@ const ShopScreen = () => {
                   />
                 </View>
                 <Text className="text-xl font-bold text-slate-800 dark:text-white mb-2 text-center">
-                  No products found
+                  No tests found
                 </Text>
                 <Text className="text-slate-500 dark:text-slate-400 text-center">
-                  Try adjusting your filters or sorting to find what you&aops;re
+                  Try adjusting your filters or sorting to find what you&apos;re
                   looking for.
                 </Text>
                 <TouchableOpacity
-                  onPress={fetchProducts}
+                  onPress={fetchTests}
                   className="mt-6 px-6 py-2 bg-orange-50 dark:bg-orange-900/20 rounded-full"
                 >
                   <Text className="text-primary font-bold">Refresh</Text>
@@ -326,7 +360,7 @@ const ShopScreen = () => {
                     <TextInput
                       value={searchQuery}
                       onChangeText={setSearchQuery}
-                      placeholder="Search products..."
+                      placeholder="Search tests..."
                       placeholderTextColor={
                         colorScheme === "dark" ? "#64748b" : "#94a3b8"
                       }
@@ -335,52 +369,36 @@ const ShopScreen = () => {
                   </View>
                 </View>
 
-                {/* Category */}
+                {/* Price Type */}
                 <View className="mb-8">
                   <Text className="text-base font-bold text-slate-800 dark:text-white mb-4">
-                    Category
+                    Price Type
                   </Text>
-                  {categories.map((cat) => (
+                  {priceTypes.map((option) => (
                     <TouchableOpacity
-                      key={cat}
-                      onPress={() => {
-                        if (cat === "All Categories") {
-                          setSelectedCategories(["All Categories"]);
-                        } else {
-                          let newCats = selectedCategories.filter(
-                            (c) => c !== "All Categories",
-                          );
-                          if (newCats.includes(cat)) {
-                            newCats = newCats.filter((c) => c !== cat);
-                            if (newCats.length === 0)
-                              newCats = ["All Categories"];
-                          } else {
-                            newCats.push(cat);
-                          }
-                          setSelectedCategories(newCats);
-                        }
-                      }}
+                      key={option.value}
+                      onPress={() => setPriceType(option.value)}
                       className="flex-row items-center mb-4"
                     >
                       <View
-                        className={`w-6 h-6 rounded-md border items-center justify-center ${
-                          selectedCategories.includes(cat)
+                        className={`w-6 h-6 rounded-full border items-center justify-center ${
+                          priceType === option.value
                             ? "bg-orange-500 border-orange-500"
                             : "border-gray-200 dark:border-slate-700"
                         }`}
                       >
-                        {selectedCategories.includes(cat) && (
-                          <Feather name="check" size={14} color="white" />
+                        {priceType === option.value && (
+                          <View className="w-2.5 h-2.5 rounded-full bg-white" />
                         )}
                       </View>
                       <Text
                         className={`ml-4 text-base ${
-                          selectedCategories.includes(cat)
+                          priceType === option.value
                             ? "text-slate-900 dark:text-white font-bold"
                             : "text-slate-500 dark:text-slate-400"
                         }`}
                       >
-                        {cat}
+                        {option.label}
                       </Text>
                     </TouchableOpacity>
                   ))}

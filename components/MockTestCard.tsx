@@ -30,6 +30,10 @@ interface MockTestCardProps {
 const MockTestCard = ({ test }: MockTestCardProps) => {
   const { colorScheme } = useColorScheme();
 
+  const handlePress = () => {
+    router.push(`/(main)/tests/${test.slug}` as any);
+  };
+
   const displayImage =
     test.thumbnailUrl ||
     "https://ik.imagekit.io/testkart/placeholders/mock-test-placeholder__FmYrad7s.png";
@@ -49,7 +53,11 @@ const MockTestCard = ({ test }: MockTestCardProps) => {
   }
 
   return (
-    <View className="bg-white dark:bg-slate-800 rounded-[32px] mx-5 mb-6 overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none border border-gray-100 dark:border-slate-700/50">
+    <TouchableOpacity
+      onPress={handlePress}
+      activeOpacity={0.85}
+      className="bg-white dark:bg-slate-800 rounded-[32px] mx-5 mb-6 overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none border border-gray-100 dark:border-slate-700/50"
+    >
       <View className="p-4">
         {/* Badges */}
         <View className="flex-row justify-between mb-3">
@@ -74,9 +82,7 @@ const MockTestCard = ({ test }: MockTestCardProps) => {
           />
           <TouchableOpacity
             className="absolute bottom-4 right-4 w-12 h-12 bg-primary rounded-2xl items-center justify-center shadow-lg shadow-orange-500/40"
-            onPress={() =>
-              router.push(`/tests/details?slug=${test.slug}` as any)
-            }
+            onPress={() => router.push(`/(main)/tests/${test.slug}` as any)}
           >
             <Feather name="plus" size={24} color="white" />
           </TouchableOpacity>
@@ -167,9 +173,7 @@ const MockTestCard = ({ test }: MockTestCardProps) => {
           <View className="flex-row items-center justify-between pt-5 border-t border-slate-50 dark:border-slate-700/50">
             <TouchableOpacity
               className="bg-primary flex-row items-center px-8 py-4 rounded-2xl shadow-lg shadow-orange-500/30 grow mr-4"
-              onPress={() =>
-                router.push(`/tests/details?slug=${test.slug}` as any)
-              }
+              onPress={() => router.push(`/tests/${test.slug}` as any)}
             >
               <Feather name="shopping-cart" size={20} color="white" />
               <Text className="ml-2 text-white font-black text-lg">
@@ -203,7 +207,7 @@ const MockTestCard = ({ test }: MockTestCardProps) => {
           </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

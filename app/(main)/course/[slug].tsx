@@ -17,6 +17,7 @@ import { useColorScheme } from "nativewind";
 import BottomTabs from "@/components/BottomTabs";
 import { WebView } from "react-native-webview";
 import PDFPreview from "@/components/PDFPreview";
+import { useAuth } from "@/context/AuthContext";
 
 export type CourseStatus = "published" | "draft" | "archived";
 export type CourseLevel = "beginner" | "intermediate" | "advanced";
@@ -85,11 +86,46 @@ export interface Course {
 const CourseDetails = () => {
   const { slug } = useLocalSearchParams();
   const { colorScheme } = useColorScheme();
+  const { user, token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [course, setCourse] = useState<Course | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expandedModules, setExpandedModules] = useState<number[]>([0]);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [enrolling, setEnrolling] = useState(false);
+
+  const handleFreeEnroll = async () => {
+    if (!user || !token) {
+      router.push("/login");
+      return;
+    }
+    try {
+      setEnrolling(true);
+      const res = await fetch(
+        `${process.env.EXPO_PUBLIC_BASE_URL}/_api/courses/enroll-free`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ courseId: course?.id }),
+        },
+      );
+      const data = await res.json();
+      console.log(data, course?.id);
+      if (data.success) {
+        setCourse((prev) => (prev ? { ...prev, isEnrolled: true } : prev));
+      } else {
+        console.log(data);
+        console.error("Enrollment failed:", data.error);
+      }
+    } catch (err) {
+      console.error("Enroll error:", err);
+    } finally {
+      setEnrolling(false);
+    }
+  };
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -133,6 +169,7 @@ const CourseDetails = () => {
         }
 
         setCourse(details);
+        console.log(details);
       } catch (err: any) {
         console.error("Fetch Course Error:", err);
         setError(err.message || "Failed to load course details.");
@@ -489,11 +526,21 @@ const CourseDetails = () => {
           </Text>
         </View>
         <TouchableOpacity
-          className={`${isFree ? "bg-orange-500" : "bg-primary"} h-14 px-8 rounded-2xl items-center justify-center shadow-lg shadow-orange-500/30`}
+          onPress={isFree ? handleFreeEnroll : undefined}
+          disabled={enrolling || (isFree && course.isEnrolled)}
+          className={`${isFree ? "bg-orange-500" : "bg-primary"} h-14 px-8 rounded-2xl items-center justify-center shadow-lg shadow-orange-500/30 disabled:opacity-60`}
         >
-          <Text className="text-white text-lg font-black">
-            {isFree ? "Enroll Free" : "Buy Now"}
-          </Text>
+          {enrolling ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text className="text-white text-lg font-black">
+              {isFree
+                ? course.isEnrolled
+                  ? "Enrolled"
+                  : "Enroll Free"
+                : "Buy Now"}
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
       <BottomTabs />

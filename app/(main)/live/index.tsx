@@ -15,23 +15,21 @@ import { Feather } from "@expo/vector-icons";
 import Header from "@/components/Header";
 import BottomTabs from "@/components/BottomTabs";
 import { useColorScheme } from "nativewind";
+import { router } from "expo-router";
 
-// Root Interface
 export interface ExamData {
   categories: Category[];
 }
 
-// Category Interface
 export interface Category {
   id: number;
   categoryName: string;
   categorySlug: string;
   orderIndex: number;
-  createdAt: string; // ISO date string
+  createdAt: string;
   exams: Exam[];
 }
 
-// Exam Interface
 export interface Exam {
   id: number;
   categoryId: number;
@@ -40,12 +38,11 @@ export interface Exam {
   examSlug: string;
   description: string;
   orderIndex: number;
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
+  createdAt: string;
+  updatedAt: string;
   aiGenerationPrompt?: string | null;
 }
 
-// Live Test Interface
 export interface LiveTest {
   id: number;
   title: string;
@@ -84,29 +81,23 @@ export interface LiveTestResponse {
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
-const LiveTestCard = ({ test, colorScheme }: { test: LiveTest, colorScheme: "light" | "dark" | undefined }) => {
-  const isPaid = test.price > 0;
-  const startDate = new Date(test.startTime);
-  const formattedDate = startDate.toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    weekday: 'long'
-  });
-  const formattedTime = startDate.toLocaleTimeString('en-IN', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-
+const LiveTestCard = ({
+  test,
+  colorScheme,
+}: {
+  test: LiveTest;
+  colorScheme: "light" | "dark" | undefined;
+}) => {
   const enrollmentProgress = (test.enrolledCount / test.maxSeats) * 100;
 
   return (
     <View className="bg-white dark:bg-slate-800 rounded-[32px] mb-6 shadow-md border border-gray-100 dark:border-slate-800 overflow-hidden">
-      {/* Thumbnail / Banner area */}
       <View className="h-48 w-full bg-slate-100 dark:bg-slate-900">
         <Image
-          source={{ 
-            uri: test.thumbnailUrl || "https://ik.imagekit.io/testkart/placeholders/mock-test-placeholder__FmYrad7s.png" 
+          source={{
+            uri:
+              test.thumbnailUrl ||
+              "https://ik.imagekit.io/testkart/placeholders/mock-test-placeholder__FmYrad7s.png",
           }}
           className="w-full h-full"
           resizeMode="cover"
@@ -128,11 +119,13 @@ const LiveTestCard = ({ test, colorScheme }: { test: LiveTest, colorScheme: "lig
           {test.title}
         </Text>
         <View className="flex-row items-center mb-6">
-          <Text className="text-slate-500 dark:text-slate-400 text-base">By: {test.teacherName}</Text>
+          <Text className="text-slate-500 dark:text-slate-400 text-base">
+            By: {test.teacherName}
+          </Text>
           {test.teacherIsVerified && (
-             <View className="ml-1.5 bg-orange-500 rounded-full p-0.5">
-               <Feather name="check" size={10} color="white" />
-             </View>
+            <View className="ml-1.5 bg-orange-500 rounded-full p-0.5">
+              <Feather name="check" size={10} color="white" />
+            </View>
           )}
         </View>
 
@@ -143,8 +136,12 @@ const LiveTestCard = ({ test, colorScheme }: { test: LiveTest, colorScheme: "lig
               <Feather name="clock" size={20} color="#FF8A50" />
             </View>
             <View className="flex-row items-baseline">
-              <Text className="text-slate-500 dark:text-slate-400 text-base">Duration: </Text>
-              <Text className="text-slate-800 dark:text-white text-base font-black">{test.durationMinutes} Minutes</Text>
+              <Text className="text-slate-500 dark:text-slate-400 text-base">
+                Duration:{" "}
+              </Text>
+              <Text className="text-slate-800 dark:text-white text-base font-black">
+                {test.durationMinutes} Minutes
+              </Text>
             </View>
           </View>
 
@@ -153,8 +150,12 @@ const LiveTestCard = ({ test, colorScheme }: { test: LiveTest, colorScheme: "lig
               <Feather name="file-text" size={20} color="#FF8A50" />
             </View>
             <View className="flex-row items-baseline">
-              <Text className="text-slate-500 dark:text-slate-400 text-base">Questions: </Text>
-              <Text className="text-slate-800 dark:text-white text-base font-black">{test.actualQuestionCount}</Text>
+              <Text className="text-slate-500 dark:text-slate-400 text-base">
+                Questions:{" "}
+              </Text>
+              <Text className="text-slate-800 dark:text-white text-base font-black">
+                {test.actualQuestionCount}
+              </Text>
             </View>
           </View>
 
@@ -163,8 +164,13 @@ const LiveTestCard = ({ test, colorScheme }: { test: LiveTest, colorScheme: "lig
               <Feather name="book-open" size={20} color="#FF8A50" />
             </View>
             <View className="flex-row items-baseline flex-1">
-              <Text className="text-slate-500 dark:text-slate-400 text-base">Subjects: </Text>
-              <Text className="text-slate-800 dark:text-white text-base font-black flex-1" numberOfLines={1}>
+              <Text className="text-slate-500 dark:text-slate-400 text-base">
+                Subjects:{" "}
+              </Text>
+              <Text
+                className="text-slate-800 dark:text-white text-base font-black flex-1"
+                numberOfLines={1}
+              >
                 {test.subjects}
               </Text>
             </View>
@@ -180,17 +186,30 @@ const LiveTestCard = ({ test, colorScheme }: { test: LiveTest, colorScheme: "lig
                 Prize Pool: ₹{test.totalPrizePool}
               </Text>
             </View>
-            
+
             <View className="flex-row space-x-3">
               {[
                 { rank: "1ST", prize: test.firstPrize, icon: "award" },
                 { rank: "2ND", prize: test.secondPrize, icon: "award" },
-                { rank: "3RD", prize: test.thirdPrize, icon: "award" }
+                { rank: "3RD", prize: test.thirdPrize, icon: "award" },
               ].map((p, i) => (
-                <View key={i} className="flex-1 bg-white dark:bg-slate-800 border border-orange-50 dark:border-slate-700 rounded-2xl p-3 items-center">
-                  <Feather name="award" size={16} color={i === 0 ? "#FFC107" : i === 1 ? "#9E9E9E" : "#CD7F32"} />
-                  <Text className="text-[10px] font-black text-slate-400 uppercase mt-1">{p.rank}:</Text>
-                  <Text className="text-sm font-black text-slate-800 dark:text-white">₹{p.prize}</Text>
+                <View
+                  key={i}
+                  className="flex-1 bg-white dark:bg-slate-800 border border-orange-50 dark:border-slate-700 rounded-2xl p-3 items-center"
+                >
+                  <Feather
+                    name="award"
+                    size={16}
+                    color={
+                      i === 0 ? "#FFC107" : i === 1 ? "#9E9E9E" : "#CD7F32"
+                    }
+                  />
+                  <Text className="text-[10px] font-black text-slate-400 uppercase mt-1">
+                    {p.rank}:
+                  </Text>
+                  <Text className="text-sm font-black text-slate-800 dark:text-white">
+                    ₹{p.prize}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -208,7 +227,7 @@ const LiveTestCard = ({ test, colorScheme }: { test: LiveTest, colorScheme: "lig
             </View>
           </View>
           <View className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-            <View 
+            <View
               style={{ width: `${Math.min(enrollmentProgress, 100)}%` }}
               className="h-full bg-orange-500 rounded-full"
             />
@@ -216,8 +235,9 @@ const LiveTestCard = ({ test, colorScheme }: { test: LiveTest, colorScheme: "lig
         </View>
 
         {/* View Details Button */}
-        <TouchableOpacity 
+        <TouchableOpacity
           className="border border-primary rounded-2xl py-4 items-center"
+          onPress={() => router.push(`/live/${test.id}` as any)}
         >
           <Text className="text-primary text-lg font-black">View Details</Text>
         </TouchableOpacity>
@@ -231,14 +251,14 @@ const LiveTests = () => {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [showExamModal, setShowExamModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState("All");
   const [showStatusModal, setShowStatusModal] = useState(false);
-  
+
   // Live Tests states
   const [tests, setTests] = useState<LiveTest[]>([]);
   const [loadingTests, setLoadingTests] = useState(false);
@@ -250,7 +270,7 @@ const LiveTests = () => {
       setLoading(true);
       setError(null);
       const apiUrl = `${BASE_URL}/_api/exams/list`;
-      
+
       console.log("Fetching exams from:", apiUrl);
       const response = await fetch(apiUrl);
 
@@ -259,7 +279,7 @@ const LiveTests = () => {
       }
 
       const data = await response.json();
-      
+
       const payload = data.json || data;
       const categoriesData = payload.categories || data.categories;
 
@@ -279,9 +299,12 @@ const LiveTests = () => {
   const fetchTests = useCallback(async () => {
     try {
       setLoadingTests(true);
-      const statusParam = statusFilter === "All" ? "" : statusFilter.toLowerCase().replace(/ /g, "-");
+      const statusParam =
+        statusFilter === "All"
+          ? ""
+          : statusFilter.toLowerCase().replace(/ /g, "-");
       let apiUrl = `${BASE_URL}/_api/live-tests/list?status=${statusParam}`;
-      
+
       if (selectedExam) {
         apiUrl += `&exam=${selectedExam.examSlug}`;
       }
@@ -300,7 +323,7 @@ const LiveTests = () => {
       const data = await response.json();
       const payload = data.json || data;
       const testsData = payload.tests || [];
-      
+
       setTests(testsData);
     } catch (err) {
       console.log("Fetch Tests Error:", err);
@@ -339,7 +362,8 @@ const LiveTests = () => {
             Live Competitive Tests
           </Text>
           <Text className="text-slate-500 dark:text-slate-400 text-center mt-4 text-lg font-medium leading-7 max-w-[300px]">
-            Experience the thrill of real exams. Compete with thousands of students.
+            Experience the thrill of real exams. Compete with thousands of
+            students.
           </Text>
         </View>
 
@@ -365,38 +389,32 @@ const LiveTests = () => {
             </View>
 
             {/* Exam Selector */}
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setShowExamModal(true)}
               className="flex-row items-center justify-between bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-700 rounded-2xl px-5 h-14 mb-4"
             >
               <View className="flex-1 mr-4">
-                <Text 
+                <Text
                   numberOfLines={1}
                   className={`text-base font-bold ${selectedExam ? "text-slate-800 dark:text-white" : "text-slate-400 dark:text-slate-500"}`}
                 >
-                  {selectedExam ? (selectedExam.fullName || selectedExam.examName) : "Select Exam Category"}
+                  {selectedExam
+                    ? selectedExam.fullName || selectedExam.examName
+                    : "Select Exam Category"}
                 </Text>
               </View>
-              <Feather
-                name="chevron-down"
-                size={18}
-                color="#FF8A50"
-              />
+              <Feather name="chevron-down" size={18} color="#FF8A50" />
             </TouchableOpacity>
 
             {/* Status Filter */}
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setShowStatusModal(true)}
               className="flex-row items-center justify-between bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-700 rounded-2xl px-5 h-14"
             >
               <Text className="text-base font-bold text-slate-800 dark:text-white">
                 {statusFilter}
               </Text>
-              <Feather
-                name="chevron-down"
-                size={18}
-                color="#FF8A50"
-              />
+              <Feather name="chevron-down" size={18} color="#FF8A50" />
             </TouchableOpacity>
           </View>
         </View>
@@ -406,13 +424,20 @@ const LiveTests = () => {
           {loading || loadingTests ? (
             <View className="items-center justify-center py-20">
               <ActivityIndicator size="large" color="#FF8A50" />
-              <Text className="mt-4 text-slate-500 dark:text-slate-400 font-bold">Finding best tests for you...</Text>
+              <Text className="mt-4 text-slate-500 dark:text-slate-400 font-bold">
+                Finding best tests for you...
+              </Text>
             </View>
           ) : error ? (
             <View className="items-center justify-center px-4 py-20">
-              <Text className="text-red-500 text-center font-bold text-lg mb-4">{error}</Text>
-              <TouchableOpacity 
-                onPress={() => { fetchExams(); fetchTests(); }}
+              <Text className="text-red-500 text-center font-bold text-lg mb-4">
+                {error}
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  fetchExams();
+                  fetchTests();
+                }}
                 className="bg-primary px-8 py-3 rounded-2xl"
               >
                 <Text className="text-white font-bold">Retry</Text>
@@ -421,7 +446,11 @@ const LiveTests = () => {
           ) : tests.length > 0 ? (
             <View>
               {tests.map((test) => (
-                <LiveTestCard key={test.id} test={test} colorScheme={colorScheme} />
+                <LiveTestCard
+                  key={test.id}
+                  test={test}
+                  colorScheme={colorScheme}
+                />
               ))}
             </View>
           ) : (
@@ -437,7 +466,7 @@ const LiveTests = () => {
                 No Live Tests Found
               </Text>
               <Text className="text-slate-500 dark:text-slate-400 text-center text-lg font-medium leading-7">
-                {selectedExam 
+                {selectedExam
                   ? `We couldn't find any live tests for ${selectedExam.fullName || selectedExam.examName}.`
                   : "There are no live tests matching your criteria at the moment."}
               </Text>
@@ -456,46 +485,112 @@ const LiveTests = () => {
         animationType="fade"
         onRequestClose={() => setShowExamModal(false)}
       >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <Pressable 
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <Pressable
             onPress={() => setShowExamModal(false)}
-            style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}
+            style={{
+              position: "absolute",
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+            }}
           />
-          
-          <View style={{ backgroundColor: colorScheme === 'dark' ? '#1e293b' : 'white', borderRadius: 24, width: '100%', maxHeight: '80%', overflow: 'hidden' }}>
+
+          <View
+            style={{
+              backgroundColor: colorScheme === "dark" ? "#1e293b" : "white",
+              borderRadius: 24,
+              width: "100%",
+              maxHeight: "80%",
+              overflow: "hidden",
+            }}
+          >
             {/* List */}
-            <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 30 }}>
-              <TouchableOpacity 
+            <ScrollView
+              style={{ width: "100%" }}
+              contentContainerStyle={{ paddingBottom: 30 }}
+            >
+              <TouchableOpacity
                 onPress={() => {
                   setSelectedExam(null);
                   setShowExamModal(false);
                 }}
-                style={{ padding: 20, borderBottomWidth: 1, borderBottomColor: colorScheme === 'dark' ? '#334155' : '#f1f5f9', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+                style={{
+                  padding: 20,
+                  borderBottomWidth: 1,
+                  borderBottomColor:
+                    colorScheme === "dark" ? "#334155" : "#f1f5f9",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
               >
-                <Text style={{ fontSize: 16, fontWeight: 'bold', color: !selectedExam ? '#FF8A50' : (colorScheme === 'dark' ? '#cbd5e1' : '#334155') }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "bold",
+                    color: !selectedExam
+                      ? "#FF8A50"
+                      : colorScheme === "dark"
+                        ? "#cbd5e1"
+                        : "#334155",
+                  }}
+                >
                   All Exams
                 </Text>
-                {!selectedExam && <Feather name="check" size={20} color="#FF8A50" />}
+                {!selectedExam && (
+                  <Feather name="check" size={20} color="#FF8A50" />
+                )}
               </TouchableOpacity>
 
               {categories.map((category) => (
                 <View key={`cat-${category.id}`}>
                   {(category.exams || []).map((exam) => (
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       key={`exam-${exam.id}`}
                       onPress={() => {
                         console.log("Selected:", exam.examName);
                         setSelectedExam(exam);
                         setShowExamModal(false);
                       }}
-                      style={{ padding: 20, borderBottomWidth: 1, borderBottomColor: colorScheme === 'dark' ? '#334155' : '#f1f5f9', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+                      style={{
+                        padding: 20,
+                        borderBottomWidth: 1,
+                        borderBottomColor:
+                          colorScheme === "dark" ? "#334155" : "#f1f5f9",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
                     >
                       <View style={{ flex: 1, marginRight: 15 }}>
-                        <Text style={{ fontSize: 15, fontWeight: 'bold', color: selectedExam?.id === exam.id ? '#FF8A50' : (colorScheme === 'dark' ? '#cbd5e1' : '#334155') }}>
+                        <Text
+                          style={{
+                            fontSize: 15,
+                            fontWeight: "bold",
+                            color:
+                              selectedExam?.id === exam.id
+                                ? "#FF8A50"
+                                : colorScheme === "dark"
+                                  ? "#cbd5e1"
+                                  : "#334155",
+                          }}
+                        >
                           {exam.fullName || exam.examName}
                         </Text>
                       </View>
-                      {selectedExam?.id === exam.id && <Feather name="check" size={20} color="#FF8A50" />}
+                      {selectedExam?.id === exam.id && (
+                        <Feather name="check" size={20} color="#FF8A50" />
+                      )}
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -512,39 +607,76 @@ const LiveTests = () => {
         animationType="fade"
         onRequestClose={() => setShowStatusModal(false)}
       >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <Pressable 
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <Pressable
             onPress={() => setShowStatusModal(false)}
-            style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}
+            style={{
+              position: "absolute",
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+            }}
           />
-          
-          <View style={{ backgroundColor: colorScheme === 'dark' ? '#1e293b' : 'white', borderRadius: 24, width: '100%', maxHeight: '40%', overflow: 'hidden' }}>
+
+          <View
+            style={{
+              backgroundColor: colorScheme === "dark" ? "#1e293b" : "white",
+              borderRadius: 24,
+              width: "100%",
+              maxHeight: "40%",
+              overflow: "hidden",
+            }}
+          >
             <ScrollView>
               {statusOptions.map((status) => (
-                <TouchableOpacity 
+                <TouchableOpacity
                   key={status}
                   onPress={() => {
                     setStatusFilter(status);
                     setShowStatusModal(false);
                   }}
-                  style={{ 
-                    padding: 20, 
-                    borderBottomWidth: 1, 
-                    borderBottomColor: colorScheme === 'dark' ? '#334155' : '#f1f5f9', 
-                    flexDirection: 'row', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    backgroundColor: statusFilter === status ? (colorScheme === 'dark' ? '#334155' : '#f8fafc') : 'transparent'
+                  style={{
+                    padding: 20,
+                    borderBottomWidth: 1,
+                    borderBottomColor:
+                      colorScheme === "dark" ? "#334155" : "#f1f5f9",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    backgroundColor:
+                      statusFilter === status
+                        ? colorScheme === "dark"
+                          ? "#334155"
+                          : "#f8fafc"
+                        : "transparent",
                   }}
                 >
-                  <Text style={{ 
-                    fontSize: 16, 
-                    fontWeight: 'bold', 
-                    color: statusFilter === status ? '#FF8A50' : (colorScheme === 'dark' ? '#cbd5e1' : '#334155') 
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "bold",
+                      color:
+                        statusFilter === status
+                          ? "#FF8A50"
+                          : colorScheme === "dark"
+                            ? "#cbd5e1"
+                            : "#334155",
+                    }}
+                  >
                     {status}
                   </Text>
-                  {statusFilter === status && <Feather name="check" size={20} color="#FF8A50" />}
+                  {statusFilter === status && (
+                    <Feather name="check" size={20} color="#FF8A50" />
+                  )}
                 </TouchableOpacity>
               ))}
             </ScrollView>

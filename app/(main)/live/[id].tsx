@@ -1,0 +1,935 @@
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+  StatusBar,
+  Share,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Feather, Ionicons } from "@expo/vector-icons";
+import { useColorScheme } from "nativewind";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import Header from "@/components/Header";
+
+const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+
+interface SocialLinks {
+  twitter: string;
+  youtube: string;
+  facebook: string;
+  linkedin: string;
+  instagram: string;
+}
+
+interface AwardCertificate {
+  title: string;
+  description: string;
+}
+
+interface TeacherProfile {
+  id: number;
+  name: string;
+  avatarUrl: string | null;
+  bio: string;
+  websiteUrl: string;
+  socialLinks: SocialLinks;
+  awardsCertificates: AwardCertificate[];
+  publicPhone: string;
+  publicEmail: string;
+  academyName: string | null;
+}
+
+interface MockTestDetails {
+  id: number;
+  title: string;
+  description: string;
+  durationMinutes: number;
+  totalQuestions: number;
+  subject: string;
+  firstTestItemId: number;
+}
+
+type PrizeDistributionStatus = "distributed" | "pending" | "none";
+type PrizeFundSource = "enrollment" | "sponsor" | "organizer";
+
+interface LiveTest {
+  id: number;
+  mockTestId: number;
+  teacherId: number;
+  title: string;
+  description: string;
+  thumbnailUrl: string | null;
+  thumbnailFileId: string | null;
+  price: number;
+  startTime: string;
+  endTime: string;
+  registrationDeadline: string | null;
+  maxSeats: number;
+  enrolledCount: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  hasPrizes: boolean;
+  totalPrizePool: number;
+  firstPrize: number;
+  secondPrize: number;
+  thirdPrize: number;
+  prizeDistributionStatus: PrizeDistributionStatus;
+  prizeFundSource: PrizeFundSource;
+  actualTotalDistributed: string;
+  teacherName: string;
+  teacherAvatarUrl: string | null;
+  teacherBio: string;
+  teacherWebsiteUrl: string;
+  teacherSocialLinks: SocialLinks;
+  teacherAwardsCertificates: AwardCertificate[];
+  teacherPublicPhone: string;
+  teacherPublicEmail: string;
+  teacherAcademyName: string | null;
+  teacherIsVerified: boolean;
+  mockTestTitle: string;
+  mockTestDescription: string;
+  mockTestDurationMinutes: number;
+  mockTestExamName: string;
+  mockTestSlug: string;
+  examSlug: string;
+  slug: string;
+  isEnrolled: boolean;
+  canEnroll: boolean;
+  hasAttempted: boolean;
+  teacherProfile: TeacherProfile;
+  mockTestDetails: MockTestDetails;
+}
+
+type CurrentUserStatus = "not_enrolled" | "enrolled" | "attempted";
+type TestStatus = "completed" | "upcoming" | "live";
+
+interface LeaderboardEntry {
+  rank: number;
+  studentName: string;
+  score: number;
+  timeTaken: number;
+}
+
+interface DynamicPrizes {
+  firstPrize: number;
+  secondPrize: number;
+  thirdPrize: number;
+  totalPrizePool: number;
+  isReduced: boolean;
+}
+
+interface LeaderboardData {
+  leaderboard: LeaderboardEntry[];
+  currentUserRank: number | null;
+  currentUserStatus: CurrentUserStatus;
+  testStatus: TestStatus;
+  dynamicPrizes: DynamicPrizes;
+}
+
+const RuleSection = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => (
+  <View className="mb-5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/50">
+    <Text className="text-base font-black text-slate-800 dark:text-white mb-3">
+      {title}
+    </Text>
+    {children}
+  </View>
+);
+
+const InfoRow = ({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentProps<typeof Feather>["name"];
+  label: string;
+  value: string;
+}) => (
+  <View className="flex-row items-center mb-2 last:mb-0">
+    <Feather name={icon} size={14} color="#64748b" />
+    <Text className="text-slate-500 dark:text-slate-400 text-sm ml-2 w-28">
+      {label}
+    </Text>
+    <Text className="text-slate-700 dark:text-slate-200 font-bold text-sm flex-1">
+      {value}
+    </Text>
+  </View>
+);
+
+const BulletItem = ({ text }: { text: string }) => (
+  <View className="flex-row mb-2 last:mb-0">
+    <Text className="text-orange-400 mr-2 mt-0.5 font-black">•</Text>
+    <Text className="text-slate-600 dark:text-slate-300 text-sm leading-5 flex-1">
+      {text}
+    </Text>
+  </View>
+);
+
+const LiveTestDetails = () => {
+  const { id } = useLocalSearchParams();
+  const { colorScheme } = useColorScheme();
+  const router = useRouter();
+  const [liveTest, setLiveTest] = useState<LiveTest | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"about" | "leaderboard">("about");
+  const [leaderboardData, setLeaderboardData] =
+    useState<LeaderboardData | null>(null);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchLiveTestDetails = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `${BASE_URL}/_api/live-tests/details?id=${id}`,
+        );
+        const data = await response.json();
+        const payload = data.json || data;
+        // console.log(payload);
+        setLiveTest(payload);
+      } catch (error: any) {
+        console.error("Error fetching live test details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchLiveTestDetails();
+  }, [id]);
+
+  useEffect(() => {
+    // if (activeTab !== "leaderboard" || !liveTest) return;
+
+    const fetchLeaderboard = async () => {
+      try {
+        // console.debug(liveTest?.id);
+        if (!liveTest?.id) return;
+        setLeaderboardLoading(true);
+        const response = await fetch(
+          `${BASE_URL}/_api/live-tests/leaderboard?liveTestId=${liveTest?.id}`,
+        );
+        const data = await response.json();
+        const payload = data.json || data;
+        setLeaderboardData(payload);
+      } catch (error: any) {
+        console.error("Error fetching leaderboard:", error);
+      } finally {
+        setLeaderboardLoading(false);
+      }
+    };
+    fetchLeaderboard();
+  }, [activeTab, liveTest]);
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Check out this live test: ${liveTest?.title}\n${BASE_URL}/live/${liveTest?.slug}`,
+      });
+    } catch (error: any) {
+      console.error(error.message);
+    }
+  };
+
+  const formatDateTime = (isoString: string) => {
+    if (!isoString) return "TBD";
+    const date = new Date(isoString);
+    return (
+      date.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }) +
+      ", " +
+      date.toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })
+    );
+  };
+
+  if (loading || !liveTest) {
+    return (
+      <View className="flex-1 bg-white dark:bg-slate-900">
+        <StatusBar
+          barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+        />
+        <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
+          <Header />
+          <View className="flex-1 items-center justify-center px-10">
+            {loading ? (
+              <ActivityIndicator size="large" color="#FF8A50" />
+            ) : (
+              <>
+                <Text className="text-xl font-bold text-slate-800 dark:text-white mb-4">
+                  Live Test not found
+                </Text>
+                <TouchableOpacity
+                  onPress={() => router.back()}
+                  className="bg-primary px-8 py-3 rounded-xl"
+                >
+                  <Text className="text-white font-bold">Go Back</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
+  const isTestEnded = new Date(liveTest.endTime) < new Date();
+
+  const seatsPercentage =
+    liveTest.maxSeats > 0
+      ? Math.min((liveTest.enrolledCount / liveTest.maxSeats) * 100, 100)
+      : 0;
+
+  const duration =
+    liveTest.mockTestDurationMinutes ||
+    liveTest.mockTestDetails?.durationMinutes ||
+    60;
+
+  const totalQuestions = liveTest.mockTestDetails?.totalQuestions || 50;
+
+  const subject =
+    liveTest.mockTestExamName || liveTest.mockTestDetails?.subject || "General";
+
+  return (
+    <View className="flex-1 bg-white dark:bg-slate-900">
+      <StatusBar
+        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+      />
+      <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
+        <Header />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
+        >
+          {/* ── Thumbnail ── */}
+          <View className="px-5 pt-4">
+            <View className="relative w-full h-[200px] rounded-[24px] overflow-hidden bg-slate-100 dark:bg-slate-800">
+              <Image
+                source={{
+                  uri:
+                    liveTest.thumbnailUrl ||
+                    "https://placehold.co/600x400/001f3f/white?text=TestKart",
+                }}
+                className="w-full h-full"
+                resizeMode="cover"
+              />
+              <View className="absolute top-4 left-4 bg-orange-500/90 px-4 py-1.5 rounded-full">
+                <Text className="text-white font-black text-xs uppercase tracking-wider">
+                  Live Test
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={handleShare}
+                className="absolute top-4 right-4 bg-white/80 dark:bg-slate-800/80 w-9 h-9 rounded-full items-center justify-center"
+              >
+                <Feather name="share-2" size={16} color="#FF8A50" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* ── Title & Author ── */}
+          <View className="px-5 pt-5">
+            <Text className="text-2xl font-black text-slate-800 dark:text-white leading-tight mb-2">
+              {liveTest.title}
+            </Text>
+
+            <View className="flex-row items-center mb-5">
+              <Text className="text-slate-500 dark:text-slate-400 text-sm">
+                By:{" "}
+              </Text>
+              <Image
+                source={{
+                  uri:
+                    liveTest.teacherAvatarUrl ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(liveTest.teacherName)}&background=FF8A50&color=fff`,
+                }}
+                className="w-5 h-5 rounded-full mx-1.5"
+              />
+              <Text className="text-slate-700 dark:text-slate-200 font-bold text-sm">
+                {liveTest.teacherName}
+              </Text>
+              {liveTest.teacherIsVerified && (
+                <Ionicons
+                  name="checkmark-circle"
+                  size={14}
+                  color="#3B82F6"
+                  style={{ marginLeft: 4 }}
+                />
+              )}
+            </View>
+
+            {/* ── Time Info ── */}
+            <View className="bg-slate-50 dark:bg-slate-800 rounded-2xl px-4 py-4 mb-5">
+              <View className="flex-row items-center mb-3">
+                <View className="w-7 h-7 bg-orange-50 dark:bg-orange-900/20 rounded-lg items-center justify-center">
+                  <Feather name="calendar" size={13} color="#FF8A50" />
+                </View>
+                <Text className="text-slate-500 dark:text-slate-400 text-xs ml-2.5 w-12">
+                  Starts
+                </Text>
+                <Text className="text-slate-700 dark:text-slate-200 font-bold text-xs flex-1">
+                  {formatDateTime(liveTest.startTime)}
+                </Text>
+              </View>
+              <View className="flex-row items-center mb-3">
+                <View className="w-7 h-7 bg-orange-50 dark:bg-orange-900/20 rounded-lg items-center justify-center">
+                  <Feather name="calendar" size={13} color="#FF8A50" />
+                </View>
+                <Text className="text-slate-500 dark:text-slate-400 text-xs ml-2.5 w-12">
+                  Ends
+                </Text>
+                <Text className="text-slate-700 dark:text-slate-200 font-bold text-xs flex-1">
+                  {formatDateTime(liveTest.endTime)}
+                </Text>
+              </View>
+              <View className="flex-row items-center">
+                <View className="w-7 h-7 bg-orange-50 dark:bg-orange-900/20 rounded-lg items-center justify-center">
+                  <Feather name="clock" size={13} color="#FF8A50" />
+                </View>
+                <Text className="text-slate-500 dark:text-slate-400 text-xs ml-2.5 w-12">
+                  Duration
+                </Text>
+                <Text className="text-slate-700 dark:text-slate-200 font-bold text-xs flex-1">
+                  {duration} mins
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* ── Prize Pool ── */}
+          {liveTest.hasPrizes && (
+            <View className="mx-5 mb-5 rounded-[24px] overflow-hidden">
+              <View
+                style={{ backgroundColor: "#FF6B35" }}
+                className="px-5 pt-5 pb-6"
+              >
+                <Text className="text-white/80 text-xs font-black uppercase tracking-widest mb-1 text-center">
+                  WIN UP TO
+                </Text>
+                <Text className="text-white/80 text-xs text-center mb-5">
+                  Total Prize Pool:{" "}
+                  <Text className="font-black text-white text-base">
+                    ₹{liveTest.totalPrizePool}
+                  </Text>
+                </Text>
+
+                <View className="flex-row justify-center items-end gap-2">
+                  {/* 1st Place */}
+                  <View className="flex-1 items-center">
+                    <View className="bg-white/25 rounded-2xl px-2 py-3 items-center w-full border border-white/30">
+                      <Text className="text-3xl mb-1">🏆</Text>
+                      <Text className="text-white/80 text-[9px] font-black uppercase tracking-wide">
+                        1st Place
+                      </Text>
+                      <Text className="text-white font-black text-xl mt-0.5">
+                        ₹{liveTest.firstPrize}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* 2nd Place */}
+                  <View className="flex-1 items-center">
+                    <View className="bg-white/15 rounded-2xl px-2 py-2.5 items-center w-full">
+                      <Text className="text-2xl mb-1">🥈</Text>
+                      <Text className="text-white/70 text-[9px] font-black uppercase tracking-wide">
+                        2nd Place
+                      </Text>
+                      <Text className="text-white font-black text-lg mt-0.5">
+                        ₹{liveTest.secondPrize}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* 3rd Place */}
+                  <View className="flex-1 items-center">
+                    <View className="bg-white/15 rounded-2xl px-2 py-2.5 items-center w-full">
+                      <Text className="text-2xl mb-1">🥉</Text>
+                      <Text className="text-white/70 text-[9px] font-black uppercase tracking-wide">
+                        3rd Place
+                      </Text>
+                      <Text className="text-white font-black text-lg mt-0.5">
+                        ₹{liveTest.thirdPrize}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {/* ── Seats Progress ── */}
+          <View className="px-5 mb-5">
+            <View className="flex-row justify-between mb-2">
+              <View className="flex-row items-center">
+                <Ionicons name="people-outline" size={14} color="#64748b" />
+                <Text className="text-slate-600 dark:text-slate-400 text-sm font-bold ml-1.5">
+                  {liveTest.enrolledCount} / {liveTest.maxSeats} seats filled
+                </Text>
+              </View>
+              <Text className="text-orange-500 font-black text-sm">
+                {liveTest.maxSeats - liveTest.enrolledCount} left
+              </Text>
+            </View>
+            <View className="h-2.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+              <View
+                className="h-full bg-orange-400 rounded-full"
+                style={{ width: `${seatsPercentage}%` }}
+              />
+            </View>
+          </View>
+
+          {/* ── Enroll Button ── */}
+          <View className="px-5 mb-6">
+            {isTestEnded && (
+              <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-2xl px-4 py-3 mb-3">
+                <Text className="text-red-600 dark:text-red-400 font-black text-sm text-center">
+                  Test Ended
+                </Text>
+              </View>
+            )}
+            <TouchableOpacity
+              disabled={isTestEnded}
+              className={`h-14 rounded-2xl flex-row items-center justify-center shadow-md ${
+                isTestEnded
+                  ? "bg-slate-300 dark:bg-slate-700"
+                  : liveTest.isEnrolled
+                    ? "bg-green-500 shadow-green-500/20"
+                    : "bg-primary shadow-orange-500/20"
+              }`}
+            >
+              <Feather
+                name={isTestEnded ? "x-circle" : liveTest.isEnrolled ? "check-circle" : "zap"}
+                size={18}
+                color="white"
+              />
+              <Text className="text-white text-lg font-black ml-2.5">
+                {isTestEnded
+                  ? "Enrollment Closed"
+                  : liveTest.isEnrolled
+                    ? "Already Enrolled"
+                    : liveTest.price === 0
+                      ? "Enroll for Free"
+                      : `Enroll for ₹${liveTest.price}`}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* ── Tabs ── */}
+          <View className="px-5 mb-6">
+            <View className="flex-row bg-slate-100 dark:bg-slate-800 rounded-2xl p-1">
+              <TouchableOpacity
+                onPress={() => setActiveTab("about")}
+                className="flex-1 py-3 rounded-xl items-center"
+                style={
+                  activeTab === "about"
+                    ? {
+                        backgroundColor:
+                          colorScheme === "dark" ? "#334155" : "#ffffff",
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.05,
+                        shadowRadius: 1,
+                      }
+                    : undefined
+                }
+              >
+                <Text
+                  className="font-black text-sm"
+                  style={{
+                    color:
+                      activeTab === "about"
+                        ? "#f97316"
+                        : colorScheme === "dark"
+                          ? "#94a3b8"
+                          : "#64748b",
+                  }}
+                >
+                  About
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setActiveTab("leaderboard")}
+                className="flex-1 py-3 rounded-xl items-center"
+                style={
+                  activeTab === "leaderboard"
+                    ? {
+                        backgroundColor:
+                          colorScheme === "dark" ? "#334155" : "#ffffff",
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.05,
+                        shadowRadius: 1,
+                      }
+                    : undefined
+                }
+              >
+                <Text
+                  className="font-black text-sm"
+                  style={{
+                    color:
+                      activeTab === "leaderboard"
+                        ? "#f97316"
+                        : colorScheme === "dark"
+                          ? "#94a3b8"
+                          : "#64748b",
+                  }}
+                >
+                  Leaderboard
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* ── Tab Content ── */}
+          {activeTab === "about" ? (
+            <View className="px-5">
+              {/* About This Test */}
+              <Text className="text-2xl font-black text-slate-800 dark:text-white mb-3">
+                About This Test
+              </Text>
+              <Text className="text-slate-600 dark:text-slate-300 text-base leading-7 mb-8">
+                {liveTest.description ||
+                  "Join this exciting live mock test and compete with thousands of students. Win prizes and improve your exam preparation."}
+              </Text>
+
+              <Text className="text-xl font-black text-slate-800 dark:text-white mb-4">
+                Comprehensive Rules & Information
+              </Text>
+
+              {/* Test Format */}
+              <RuleSection title="Test Format">
+                <InfoRow icon="book-open" label="Subject" value={subject} />
+                <InfoRow
+                  icon="list"
+                  label="Total Questions"
+                  value={String(totalQuestions)}
+                />
+                <InfoRow
+                  icon="clock"
+                  label="Duration"
+                  value={`${duration} minutes`}
+                />
+              </RuleSection>
+
+              {/* Scoring Rules */}
+              <RuleSection title="Scoring Rules">
+                <BulletItem text="Each question carries positive marks." />
+                <BulletItem text="For multiple correct questions, partial marking may be available." />
+                <BulletItem text="Leaderboard score = Sum of marks obtained across all questions." />
+              </RuleSection>
+
+              {/* Ranking */}
+              <RuleSection title="Ranking & Leaderboard">
+                <BulletItem text="Rank is determined by score first, then by time (less time = higher rank)." />
+                <BulletItem text="Leaderboard updates in real-time during the test." />
+                <BulletItem text="Final rankings are declared after the test ends." />
+              </RuleSection>
+
+              {/* Prizes */}
+              {liveTest.hasPrizes && (
+                <RuleSection title="Prizes">
+                  <BulletItem
+                    text={`1st Prize: ₹${liveTest.firstPrize} | 2nd Prize: ₹${liveTest.secondPrize} | 3rd Prize: ₹${liveTest.thirdPrize}`}
+                  />
+                  <BulletItem text="Prize money will be credited to the winner's TestKart wallet after the test ends." />
+                  <BulletItem text="Winners can withdraw prize money to their bank account." />
+                </RuleSection>
+              )}
+
+              {/* Attempt Rules */}
+              <RuleSection title="Attempt Rules">
+                <BulletItem text="Only one attempt is allowed per student." />
+                <BulletItem text="Once you start the test, you cannot re-attempt." />
+                <BulletItem text="Test will auto-submit when the time ends." />
+                <BulletItem text="You must be enrolled to be able to attempt the test." />
+              </RuleSection>
+
+              {/* Enrollment & Refund */}
+              <RuleSection title="Enrollment & Refund">
+                <BulletItem
+                  text={`Seats are limited (Max seats: ${liveTest.maxSeats}).`}
+                />
+                <BulletItem text="Registration closes at the deadline or when all seats are filled." />
+                <BulletItem text="No refund once enrolled in the contest." />
+              </RuleSection>
+
+              {/* Disclaimer */}
+              <RuleSection title="Disclaimer">
+                <BulletItem text="TestKart does not proctor the test or verify student identity." />
+                <BulletItem text="Accuracy and correctness of questions depends solely upon the teacher who created the test." />
+                <BulletItem text="By enrolling, you agree to the above rules and TestKart's Terms of Service." />
+              </RuleSection>
+
+              <View className="mt-4 mb-4">
+                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+                  About the Host
+                </Text>
+                <View className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-[24px] p-5">
+                  <View className="flex-row items-center mb-4">
+                    <Image
+                      source={{
+                        uri:
+                          liveTest.teacherAvatarUrl ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(liveTest.teacherName)}&background=FF8A50&color=fff`,
+                      }}
+                      className="w-14 h-14 rounded-2xl"
+                    />
+                    <View className="ml-4 flex-1">
+                      <View className="flex-row items-center">
+                        <Text className="text-slate-800 dark:text-white font-black text-base">
+                          {liveTest.teacherName}
+                        </Text>
+                        {liveTest.teacherIsVerified && (
+                          <Ionicons
+                            name="checkmark-circle"
+                            size={16}
+                            color="#3B82F6"
+                            style={{ marginLeft: 4 }}
+                          />
+                        )}
+                      </View>
+                      {liveTest.teacherAcademyName ? (
+                        <Text className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">
+                          {liveTest.teacherAcademyName}
+                        </Text>
+                      ) : null}
+                    </View>
+                    <TouchableOpacity
+                      onPress={() =>
+                        router.push(
+                          `/(main)/expert/${liveTest.teacherProfile?.id}` as any,
+                        )
+                      }
+                      className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/30 px-4 py-2 rounded-xl"
+                    >
+                      <Text className="text-orange-500 font-black text-xs">
+                        View Profile
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  {liveTest.teacherBio ? (
+                    <Text className="text-slate-600 dark:text-slate-300 text-sm leading-6">
+                      {liveTest.teacherBio}
+                    </Text>
+                  ) : null}
+                </View>
+              </View>
+            </View>
+          ) : (
+            <View className="px-5">
+              {leaderboardLoading ? (
+                <View className="py-16 items-center">
+                  <ActivityIndicator size="large" color="#FF8A50" />
+                </View>
+              ) : !leaderboardData ? (
+                <View className="py-16 items-center">
+                  <View className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full items-center justify-center mb-4">
+                    <Feather name="award" size={28} color="#CBD5E1" />
+                  </View>
+                  <Text className="text-slate-800 dark:text-white font-black text-lg mb-2">
+                    No Data Yet
+                  </Text>
+                  <Text className="text-slate-400 dark:text-slate-500 text-sm text-center leading-6">
+                    The leaderboard will be available once the test is live.
+                  </Text>
+                </View>
+              ) : (
+                <>
+                  {/* Status + current user rank */}
+                  <View className="flex-row items-center justify-between mb-5">
+                    <View
+                      className={`px-3 py-1.5 rounded-full ${
+                        leaderboardData.testStatus === "completed"
+                          ? "bg-slate-100 dark:bg-slate-800"
+                          : leaderboardData.testStatus === "live"
+                            ? "bg-green-100 dark:bg-green-900/30"
+                            : "bg-orange-100 dark:bg-orange-900/30"
+                      }`}
+                    >
+                      <Text
+                        className={`text-xs font-black uppercase tracking-wider ${
+                          leaderboardData.testStatus === "completed"
+                            ? "text-slate-500 dark:text-slate-400"
+                            : leaderboardData.testStatus === "live"
+                              ? "text-green-600 dark:text-green-400"
+                              : "text-orange-600 dark:text-orange-400"
+                        }`}
+                      >
+                        {leaderboardData.testStatus === "completed"
+                          ? "Test Completed"
+                          : leaderboardData.testStatus === "live"
+                            ? "• Live Now"
+                            : "Upcoming"}
+                      </Text>
+                    </View>
+
+                    {leaderboardData.currentUserRank && (
+                      <View className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/30 px-3 py-1.5 rounded-full">
+                        <Text className="text-orange-500 font-black text-xs">
+                          Your Rank: #{leaderboardData.currentUserRank}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Top 3 podium */}
+                  {leaderboardData.leaderboard.length >= 3 && (
+                    <View className="bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-4 mb-5 border border-slate-100 dark:border-slate-700/50">
+                      <View className="flex-row items-end justify-center gap-3">
+                        {/* 2nd */}
+                        <View className="flex-1 items-center">
+                          <View className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 items-center justify-center mb-1">
+                            <Text className="text-base">🥈</Text>
+                          </View>
+                          <Text
+                            className="text-slate-700 dark:text-slate-200 font-black text-xs text-center"
+                            numberOfLines={1}
+                          >
+                            {leaderboardData.leaderboard[1].studentName}
+                          </Text>
+                          <Text className="text-slate-500 dark:text-slate-400 text-xs font-bold">
+                            {leaderboardData.leaderboard[1].score} pts
+                          </Text>
+                          <View className="h-12 w-full bg-slate-200 dark:bg-slate-700 rounded-t-xl mt-2 items-center justify-center">
+                            <Text className="text-slate-600 dark:text-slate-300 font-black text-sm">
+                              #2
+                            </Text>
+                          </View>
+                        </View>
+                        {/* 1st */}
+                        <View className="flex-1 items-center">
+                          <View className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 items-center justify-center mb-1">
+                            <Text className="text-xl">🏆</Text>
+                          </View>
+                          <Text
+                            className="text-slate-800 dark:text-white font-black text-xs text-center"
+                            numberOfLines={1}
+                          >
+                            {leaderboardData.leaderboard[0].studentName}
+                          </Text>
+                          <Text className="text-orange-500 font-black text-xs">
+                            {leaderboardData.leaderboard[0].score} pts
+                          </Text>
+                          <View className="h-16 w-full bg-orange-400 rounded-t-xl mt-2 items-center justify-center">
+                            <Text className="text-white font-black text-sm">
+                              #1
+                            </Text>
+                          </View>
+                        </View>
+                        {/* 3rd */}
+                        <View className="flex-1 items-center">
+                          <View className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 items-center justify-center mb-1">
+                            <Text className="text-base">🥉</Text>
+                          </View>
+                          <Text
+                            className="text-slate-700 dark:text-slate-200 font-black text-xs text-center"
+                            numberOfLines={1}
+                          >
+                            {leaderboardData.leaderboard[2].studentName}
+                          </Text>
+                          <Text className="text-slate-500 dark:text-slate-400 text-xs font-bold">
+                            {leaderboardData.leaderboard[2].score} pts
+                          </Text>
+                          <View className="h-8 w-full bg-slate-300 dark:bg-slate-600 rounded-t-xl mt-2 items-center justify-center">
+                            <Text className="text-slate-600 dark:text-slate-300 font-black text-sm">
+                              #3
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  )}
+
+                  {/* Full list */}
+                  <View className="mb-4">
+                    {/* Header row */}
+                    <View className="flex-row px-3 py-2 mb-1">
+                      <Text className="text-slate-400 dark:text-slate-500 text-xs font-black uppercase w-10">
+                        #
+                      </Text>
+                      <Text className="text-slate-400 dark:text-slate-500 text-xs font-black uppercase flex-1">
+                        Student
+                      </Text>
+                      <Text className="text-slate-400 dark:text-slate-500 text-xs font-black uppercase w-14 text-right">
+                        Score
+                      </Text>
+                      <Text className="text-slate-400 dark:text-slate-500 text-xs font-black uppercase w-16 text-right">
+                        Time
+                      </Text>
+                    </View>
+
+                    {leaderboardData.leaderboard.map((entry) => {
+                      const isTop3 = entry.rank <= 3;
+                      const isCurrentUser =
+                        leaderboardData.currentUserRank === entry.rank;
+                      return (
+                        <View
+                          key={entry.rank}
+                          className={`flex-row items-center px-3 py-3 rounded-xl mb-1.5 ${
+                            isCurrentUser
+                              ? "bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/30"
+                              : isTop3
+                                ? "bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700/50"
+                                : ""
+                          }`}
+                        >
+                          <View className="w-10">
+                            {entry.rank === 1 ? (
+                              <Text className="text-base">🥇</Text>
+                            ) : entry.rank === 2 ? (
+                              <Text className="text-base">🥈</Text>
+                            ) : entry.rank === 3 ? (
+                              <Text className="text-base">🥉</Text>
+                            ) : (
+                              <Text className="text-slate-500 dark:text-slate-400 font-black text-sm">
+                                {entry.rank}
+                              </Text>
+                            )}
+                          </View>
+                          <Text
+                            className={`flex-1 text-sm font-bold ${
+                              isCurrentUser
+                                ? "text-orange-600 dark:text-orange-400"
+                                : "text-slate-700 dark:text-slate-200"
+                            }`}
+                            numberOfLines={1}
+                          >
+                            {entry.studentName}
+                            {isCurrentUser ? " (You)" : ""}
+                          </Text>
+                          <Text className="text-slate-800 dark:text-white font-black text-sm w-14 text-right">
+                            {entry.score}
+                          </Text>
+                          <Text className="text-slate-400 dark:text-slate-500 text-xs font-bold w-16 text-right">
+                            {entry.timeTaken}m
+                          </Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </>
+              )}
+            </View>
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    </View>
+  );
+};
+
+export default LiveTestDetails;
