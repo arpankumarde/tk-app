@@ -75,3 +75,157 @@ export interface PurchasedProduct {
   teacherName: string;
   pdfUrl?: string;
 }
+
+// Individual question (without sensitive fields)
+export interface Question {
+  id: number;
+  questionText: string;
+  options?: string[];
+  optionA?: string | null;
+  optionB?: string | null;
+  optionC?: string | null;
+  optionD?: string | null;
+  type?:
+    | "MCQ"
+    | "MSQ"
+    | "NUMERIC"
+    | "single_correct_mcq"
+    | "multiple_correct_mcq"
+    | "numerical"
+    | "assertion_reason"
+    | "comprehension";
+  questionType?:
+    | "single_correct_mcq"
+    | "multiple_correct_mcq"
+    | "numerical"
+    | "assertion_reason"
+    | "comprehension"
+    | string;
+  marks?: number;
+  positiveMarks?: string | number;
+  negativeMarks?: string | number;
+  paragraphText?: string | null;
+  subjectName?: string;
+}
+
+export interface GetTestQuestionsResponse {
+  questions: Question[];
+  calculatorEnabled: boolean;
+}
+
+export interface StartAttemptRequest {
+  testItemId: number;
+}
+
+export interface StartAttemptResponse {
+  attemptId: number;
+  startedAt: string;
+}
+
+export type OptionLetter = "A" | "B" | "C" | "D";
+
+export type SingleAnswer = {
+  questionId: number;
+  answerType: "single";
+  selectedOption: OptionLetter;
+};
+
+export type MultipleAnswer = {
+  questionId: number;
+  answerType: "multiple";
+  selectedOptions: OptionLetter[];
+};
+
+export type NumericalAnswer = {
+  questionId: number;
+  answerType: "numerical";
+  numericalAnswer: number;
+};
+
+export type MatchAnswer = {
+  questionId: number;
+  answerType: "match";
+  matchedPairs: {
+    left: string;
+    right: string;
+  }[];
+};
+
+export type StudentAnswer =
+  | SingleAnswer
+  | MultipleAnswer
+  | NumericalAnswer
+  | MatchAnswer;
+
+export interface SubmitAttemptRequest {
+  attemptId: number;
+  answers: StudentAnswer[];
+}
+
+export interface AttemptQuestionResult {
+  questionId: number;
+  isCorrect?: boolean;
+  marksObtained?: number;
+  maxMarks?: number;
+  correctAnswers?: unknown;
+  studentAnswer?: unknown;
+}
+
+export interface SubmitAttemptResponse {
+  score: number;
+  totalMarks: number;
+  maxPossibleMarks: number;
+  correctAnswers: number;
+  results: AttemptQuestionResult[];
+}
+
+export interface LatestAttemptDetails {
+  id?: number;
+  testItemId?: number;
+  startedAt?: string;
+  completedAt?: string;
+  score?: number;
+  totalMarks?: number;
+  maxPossibleMarks?: number;
+}
+
+export interface LatestAttemptResultsResponse {
+  attempt: LatestAttemptDetails | null;
+  results: AttemptQuestionResult[];
+}
+
+export interface LatestAttemptResultItem {
+  questionId: number;
+  questionText: string;
+  questionType?: string;
+  paragraphText?: string | null;
+  optionA?: string | null;
+  optionB?: string | null;
+  optionC?: string | null;
+  optionD?: string | null;
+  selectedOption?: OptionLetter | null;
+  selectedOptions?: OptionLetter[] | null;
+  studentNumericalAnswer?: number | null;
+  correctOption?: OptionLetter | null;
+  correctOptions?: OptionLetter[] | null;
+  correctNumericalAnswer?: number | null;
+  positiveMarks?: number;
+  negativeMarks?: number;
+  marksObtained?: number;
+  isCorrect?: boolean;
+  explanation?: string | null;
+}
+
+export interface LatestAttemptResultsPayload {
+  attemptId: number;
+  completedAt?: string;
+  score: number;
+  totalMarks: number;
+  maxPossibleMarks: number;
+  correctAnswers: number;
+  totalQuestions?: number;
+  timeTaken?: number;
+  mockTestId?: number;
+  testPackageTitle?: string;
+  results: LatestAttemptResultItem[];
+}

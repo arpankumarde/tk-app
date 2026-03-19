@@ -17,6 +17,7 @@ import BottomTabs from "@/components/BottomTabs";
 import ProductCard from "@/components/ProductCard";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+const PAGE_LIMIT = 20;
 
 const SORT_OPTIONS = [
   { label: "New Arrival", value: "newest" },
@@ -30,6 +31,7 @@ const ShopScreen = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [sort, setSort] = useState("newest");
   const [showSortModal, setShowSortModal] = useState(false);
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
@@ -77,46 +79,62 @@ const ShopScreen = () => {
     setSelectedLanguage("All Languages");
   };
 
-  const fetchProducts = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const fetchProducts = useCallback(
+    async (pageNum = 1) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const url = `${BASE_URL}/_api/shop/list?sort=${sort}`;
-      console.log("Fetching products from:", url);
+        const url = `${BASE_URL}/_api/shop/list?sort=${sort}&page=${pageNum}&limit=${PAGE_LIMIT}`;
+        console.log("Fetching products from:", url);
 
-      const response = await fetch(url);
+        const response = await fetch(url);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log(
+          "API Response Data:",
+          JSON.stringify(data).substring(0, 500),
+        );
+
+        // Fix: The log shows the data is inside a "json" field
+        const payload = data.json || data;
+        const productList = payload.products || payload.data?.products || [];
+        const count =
+          payload.totalCount || payload.data?.totalCount || productList.length;
+
+        setProducts(productList);
+        setTotalCount(count);
+        setCurrentPage(pageNum);
+
+        if (productList.length === 0) {
+          console.warn("No products returned from API");
+        }
+      } catch (error: any) {
+        console.error("Error fetching products:", error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
-
-      const data = await response.json();
-      console.log("API Response Data:", JSON.stringify(data).substring(0, 500));
-
-      // Fix: The log shows the data is inside a "json" field
-      const payload = data.json || data;
-      const productList = payload.products || payload.data?.products || [];
-      const count =
-        payload.totalCount || payload.data?.totalCount || productList.length;
-
-      setProducts(productList);
-      setTotalCount(count);
-
-      if (productList.length === 0) {
-        console.warn("No products returned from API");
-      }
-    } catch (error: any) {
-      console.error("Error fetching products:", error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [sort]);
+    },
+    [sort],
+  );
 
   useEffect(() => {
-    fetchProducts();
+    fetchProducts(1);
   }, [fetchProducts]);
+
+  const totalPages = Math.ceil(totalCount / PAGE_LIMIT);
+  const pageWindowStart = Math.max(1, currentPage - 2);
+  const pageWindowEnd = Math.min(totalPages, pageWindowStart + 4);
+  const pageNumbers: number[] = [];
+
+  for (let page = pageWindowStart; page <= pageWindowEnd; page += 1) {
+    pageNumbers.push(page);
+  }
 
   const activeSortLabel = SORT_OPTIONS.find((opt) => opt.value === sort)?.label;
 
@@ -135,13 +153,20 @@ const ShopScreen = () => {
         className="bg-white dark:bg-slate-900"
       >
         {/* Hero Section */}
-        <View className="px-6 py-8 items-center">
-          <Text className="text-4xl font-extrabold text-slate-800 dark:text-white text-center leading-tight">
-            Buy Study Notes{"\n"}Online
+        <View className="px-6 pt-5 pb-4">
+          <View className="self-start bg-orange-100 dark:bg-orange-900/25 px-3 py-1 rounded-full mb-3 border border-orange-200 dark:border-orange-800/40">
+            <Text className="text-primary text-[10px] font-black uppercase tracking-wider">
+              Digital Store
+            </Text>
+          </View>
+
+          <Text className="text-[34px] font-extrabold text-slate-800 dark:text-white leading-[40px]">
+            Buy Study Notes Online
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-center mt-3 text-base leading-6 px-4">
-            Premium study resources, notes, and eBooks for your exam
-            preparation.
+
+          <Text className="text-slate-500 dark:text-slate-400 mt-2 text-[15px] leading-6 pr-6">
+            Premium notes, eBooks, and practice resources curated for faster
+            exam prep.
           </Text>
         </View>
 
@@ -178,7 +203,10 @@ const ShopScreen = () => {
             <Text className="text-red-600 dark:text-red-400 text-center font-medium">
               Error: {error}
             </Text>
-            <TouchableOpacity onPress={fetchProducts} className="mt-2">
+            <TouchableOpacity
+              onPress={() => fetchProducts(currentPage)}
+              className="mt-2"
+            >
               <Text className="text-primary text-center font-bold underline">
                 Retry
               </Text>
@@ -224,11 +252,84 @@ const ShopScreen = () => {
                   looking for.
                 </Text>
                 <TouchableOpacity
-                  onPress={fetchProducts}
+                  onPress={() => fetchProducts(currentPage)}
                   className="mt-6 px-6 py-2 bg-orange-50 dark:bg-orange-900/20 rounded-full"
                 >
                   <Text className="text-primary font-bold">Refresh</Text>
                 </TouchableOpacity>
+              </View>
+            )}
+
+            {products.length > 0 && (
+              <View className="px-6 pt-2">
+                <Text className="text-center text-sm text-slate-500 dark:text-slate-400 mb-3">
+                  Showing page {currentPage} of {Math.max(totalPages, 1)}
+                </Text>
+
+                <View className="flex-row items-center justify-center">
+                  <TouchableOpacity
+                    onPress={() => fetchProducts(currentPage - 1)}
+                    disabled={loading || currentPage <= 1}
+                    className={`px-3 py-2 rounded-lg border mr-2 ${
+                      currentPage <= 1
+                        ? "border-gray-100 dark:border-slate-700"
+                        : "border-orange-200 dark:border-orange-800/50"
+                    }`}
+                  >
+                    <Text
+                      className={`font-bold ${
+                        currentPage <= 1
+                          ? "text-slate-400 dark:text-slate-600"
+                          : "text-primary"
+                      }`}
+                    >
+                      Prev
+                    </Text>
+                  </TouchableOpacity>
+
+                  {pageNumbers.map((pageNum) => (
+                    <TouchableOpacity
+                      key={pageNum}
+                      onPress={() => fetchProducts(pageNum)}
+                      disabled={loading || pageNum === currentPage}
+                      className={`w-9 h-9 rounded-lg items-center justify-center mx-1 border ${
+                        pageNum === currentPage
+                          ? "bg-primary border-primary"
+                          : "bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700"
+                      }`}
+                    >
+                      <Text
+                        className={`font-bold text-sm ${
+                          pageNum === currentPage
+                            ? "text-white"
+                            : "text-slate-700 dark:text-slate-300"
+                        }`}
+                      >
+                        {pageNum}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+
+                  <TouchableOpacity
+                    onPress={() => fetchProducts(currentPage + 1)}
+                    disabled={loading || currentPage >= totalPages}
+                    className={`px-3 py-2 rounded-lg border ml-2 ${
+                      currentPage >= totalPages
+                        ? "border-gray-100 dark:border-slate-700"
+                        : "border-orange-200 dark:border-orange-800/50"
+                    }`}
+                  >
+                    <Text
+                      className={`font-bold ${
+                        currentPage >= totalPages
+                          ? "text-slate-400 dark:text-slate-600"
+                          : "text-primary"
+                      }`}
+                    >
+                      Next
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             )}
           </View>

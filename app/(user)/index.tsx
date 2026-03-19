@@ -79,7 +79,10 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-slate-950">
+    <SafeAreaView
+      edges={["top", "left", "right"]}
+      className="flex-1 bg-white dark:bg-slate-950"
+    >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
@@ -92,7 +95,7 @@ export default function ProfileScreen() {
       >
         {/* Profile Card */}
         <View className="px-6 py-8">
-          <View className="flex-row items-center mb-10">
+          <View className="flex-row items-center mb-6">
             <View className="w-24 h-24 rounded-full bg-primary/10 border-4 border-white dark:border-slate-800 shadow-xl items-center justify-center overflow-hidden">
               {user?.avatarUrl ? (
                 <Image
@@ -127,7 +130,7 @@ export default function ProfileScreen() {
           </View>
 
           {/* Stats Bar */}
-          <View className="bg-white dark:bg-slate-900 rounded-[32px] p-6 flex-row items-center shadow-2xl shadow-slate-200 dark:shadow-none border border-gray-50 dark:border-slate-800">
+          <View className="bg-white dark:bg-slate-900 rounded-[32px] p-6 flex-row items-center shadow-lg shadow-slate-200/70 dark:shadow-none border border-gray-200 dark:border-slate-700">
             <View className="items-center flex-1">
               <Text className="text-2xl font-black text-slate-800 dark:text-white">
                 {totalTests}

@@ -52,20 +52,6 @@ type ExamTest = {
   isEnrolled: boolean;
 };
 
-type Pagination = {
-  page: number;
-  limit: number;
-  totalCount: number;
-  totalPages: number;
-};
-
-type JsonResponse = {
-  json: {
-    tests: ExamTest[];
-    pagination: Pagination;
-  };
-};
-
 const ShopScreen = () => {
   const { colorScheme } = useColorScheme();
   const [tests, setTests] = useState<ExamTest[]>([]);
@@ -111,12 +97,33 @@ const ShopScreen = () => {
     setSelectedLanguage("All Languages");
   };
 
+  const handleApplyFilters = () => {
+    setShowFilterSidebar(false);
+    fetchTests();
+  };
+
   const fetchTests = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const url = `${BASE_URL}/_api/tests/list?sort=${sort}`;
+      let url = `${BASE_URL}/_api/tests/list?sortBy=${sort}`;
+      if (searchQuery.trim()) {
+        url += `&search=${encodeURIComponent(searchQuery.trim())}`;
+      }
+      if (priceType !== "all") {
+        url += `&priceType=${priceType}`;
+      }
+      if (minPrice.trim()) {
+        url += `&minPrice=${encodeURIComponent(minPrice.trim())}`;
+      }
+      if (maxPrice.trim()) {
+        url += `&maxPrice=${encodeURIComponent(maxPrice.trim())}`;
+      }
+      if (selectedLanguage !== "All Languages") {
+        url += `&language=${encodeURIComponent(selectedLanguage)}`;
+      }
+
       console.log("Fetching tests from:", url);
 
       const response = await fetch(url);
@@ -131,13 +138,43 @@ const ShopScreen = () => {
       // Fix: The log shows the data is inside a "json" field
       const payload = data.json || data;
       const testsList = payload.tests || payload.data?.tests || [];
+
+      // Client-side fallback: some API deployments may ignore these params.
+      const getEffectivePrice = (test: ExamTest) =>
+        Number(test.discountPrice ?? test.price ?? 0);
+
+      let filteredTests: ExamTest[] = [...testsList];
+
+      if (priceType === "free") {
+        filteredTests = filteredTests.filter(
+          (test) => getEffectivePrice(test) <= 0,
+        );
+      } else if (priceType === "paid") {
+        filteredTests = filteredTests.filter(
+          (test) => getEffectivePrice(test) > 0,
+        );
+      }
+
+      if (sort === "price_asc") {
+        filteredTests.sort(
+          (a, b) => getEffectivePrice(a) - getEffectivePrice(b),
+        );
+      } else if (sort === "price_desc") {
+        filteredTests.sort(
+          (a, b) => getEffectivePrice(b) - getEffectivePrice(a),
+        );
+      }
+
       const count =
-        payload.totalCount || payload.data?.totalCount || testsList.length;
+        payload.totalCount ||
+        payload.pagination?.totalCount ||
+        payload.data?.totalCount ||
+        filteredTests.length;
 
-      setTests(testsList);
-      setTotalCount(count);
+      setTests(filteredTests);
+      setTotalCount(priceType === "all" ? count : filteredTests.length);
 
-      if (testsList.length === 0) {
+      if (filteredTests.length === 0) {
         console.warn("No tests returned from API");
       }
     } catch (error: any) {
@@ -146,7 +183,7 @@ const ShopScreen = () => {
     } finally {
       setLoading(false);
     }
-  }, [sort]);
+  }, [sort, searchQuery, priceType, minPrice, maxPrice, selectedLanguage]);
 
   useEffect(() => {
     fetchTests();
@@ -169,12 +206,19 @@ const ShopScreen = () => {
         className="bg-white dark:bg-slate-900"
       >
         {/* Hero Section */}
-        <View className="px-6 py-8 items-center">
-          <Text className="text-4xl font-extrabold text-slate-800 dark:text-white text-center leading-tight">
+        <View className="px-6 pt-5 pb-4">
+          <View className="self-start bg-orange-100 dark:bg-orange-900/25 px-3 py-1 rounded-full mb-3 border border-orange-200 dark:border-orange-800/40">
+            <Text className="text-primary text-[10px] font-black uppercase tracking-wider">
+              Mock Test Zone
+            </Text>
+          </View>
+
+          <Text className="text-[34px] font-extrabold text-slate-800 dark:text-white leading-[40px]">
             Online Mock Tests
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-center mt-3 text-base leading-6 px-4">
-            Find the perfect mock test to sharpen your skills and boost your
+
+          <Text className="text-slate-500 dark:text-slate-400 mt-2 text-[15px] leading-6 pr-6">
+            Find the right test set to sharpen your speed, accuracy, and exam
             confidence.
           </Text>
         </View>
@@ -226,7 +270,7 @@ const ShopScreen = () => {
             <Text className="text-slate-900 dark:text-white font-black">
               {totalCount}
             </Text>{" "}
-            products
+            tests
           </Text>
         </View>
 
@@ -448,6 +492,17 @@ const ShopScreen = () => {
 
                 <View className="h-10" />
               </ScrollView>
+
+              <View className="px-6 py-4 border-t border-gray-100 dark:border-slate-800">
+                <TouchableOpacity
+                  onPress={handleApplyFilters}
+                  className="bg-primary py-3.5 rounded-2xl items-center"
+                >
+                  <Text className="text-white font-black text-base">
+                    Apply Filters
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </SafeAreaView>
           </View>
         </View>

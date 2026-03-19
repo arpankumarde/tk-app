@@ -60,14 +60,26 @@ const MockTestCard = ({ test }: MockTestCardProps) => {
     >
       <View className="p-4">
         {/* Badges */}
-        <View className="flex-row justify-between mb-3">
-          <View className="px-4 py-1.5 bg-orange-50 dark:bg-orange-900/30 rounded-full border border-orange-100 dark:border-orange-800/30">
-            <Text className="text-primary text-[10px] font-black uppercase tracking-widest">
+        <View
+          className="flex-row items-center justify-between mb-3"
+          style={{ gap: 8 }}
+        >
+          <View className="max-w-[72%] px-4 py-1.5 bg-orange-50 dark:bg-orange-900/30 rounded-full border border-orange-100 dark:border-orange-800/30">
+            <Text
+              className="text-primary text-[10px] font-black uppercase tracking-widest"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
               {displaySubject}
             </Text>
           </View>
-          <View className="px-4 py-1.5 bg-cyan-50 dark:bg-cyan-900/30 rounded-full border border-cyan-100 dark:border-cyan-800/30">
-            <Text className="text-cyan-600 dark:text-cyan-400 text-[10px] font-black uppercase tracking-widest">
+
+          <View className="max-w-[34%] px-3 py-1.5 bg-cyan-50 dark:bg-cyan-900/30 rounded-full border border-cyan-100 dark:border-cyan-800/30">
+            <Text
+              className="text-cyan-600 dark:text-cyan-400 text-[10px] font-black uppercase tracking-widest"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
               {test.language?.trim() || "English"}
             </Text>
           </View>

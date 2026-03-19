@@ -251,11 +251,22 @@ const ExpertDetails = () => {
           {/* ── Hero Card ─────────────────────────────── */}
           <View className="mx-5 mt-4 bg-white dark:bg-slate-800 rounded-[32px] overflow-hidden border border-gray-100 dark:border-slate-700 shadow-sm">
             {/* Cover strip */}
-            <View className="h-20 bg-orange-500" />
+            <View className="h-20 bg-orange-500">
+              <TouchableOpacity
+                onPress={handleShare}
+                className="absolute right-5 top-4 w-11 h-11 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-white/70 dark:border-slate-600 items-center justify-center shadow-sm"
+              >
+                <Feather
+                  name="share-2"
+                  size={17}
+                  color={colorScheme === "dark" ? "#CBD5E1" : "#475569"}
+                />
+              </TouchableOpacity>
+            </View>
 
             <View className="px-5 pb-6">
-              {/* Avatar + share */}
-              <View className="flex-row items-end justify-between -mt-10 mb-4">
+              {/* Avatar */}
+              <View className="-mt-10 mb-4">
                 <View className="w-20 h-20 rounded-[24px] border-4 border-white dark:border-slate-800 overflow-hidden bg-slate-100 dark:bg-slate-700 shadow-md">
                   <Image
                     source={{
@@ -267,17 +278,6 @@ const ExpertDetails = () => {
                     resizeMode="cover"
                   />
                 </View>
-
-                <TouchableOpacity
-                  onPress={handleShare}
-                  className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-700 items-center justify-center"
-                >
-                  <Feather
-                    name="share-2"
-                    size={16}
-                    color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
-                  />
-                </TouchableOpacity>
               </View>
 
               {/* Name & verified badge */}

@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   StatusBar,
   Image,
-  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather, Ionicons } from "@expo/vector-icons";
@@ -282,7 +281,7 @@ const EnrolledTestDetails = () => {
                     className="bg-primary px-5 py-2.5 rounded-2xl shadow-sm"
                   >
                     <Text className="text-white font-black text-xs">
-                      {item.isCompleted ? "Re-attempt" : "Start Test"}
+                      View Details
                     </Text>
                   </TouchableOpacity>
                 </View>
