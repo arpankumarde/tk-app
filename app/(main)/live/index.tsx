@@ -352,16 +352,16 @@ const LiveTests = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* Hero Text Section */}
-        <View className="px-8 py-12 items-center">
-          <View className="bg-orange-100 dark:bg-orange-900/30 px-3 py-1 rounded-full mb-4">
-            <Text className="text-primary text-[10px] font-black uppercase tracking-widest">
+        <View className="px-6 pt-8 pb-6">
+          <View className="self-start bg-orange-100 dark:bg-orange-900/30 px-4 py-1.5 rounded-full mb-4 border border-orange-200 dark:border-orange-800/40">
+            <Text className="text-primary text-[11px] font-black uppercase tracking-widest">
               Real-time Exams
             </Text>
           </View>
-          <Text className="text-4xl font-black text-slate-800 dark:text-white text-center leading-[48px]">
+          <Text className="text-4xl font-black text-slate-800 dark:text-white leading-[48px]">
             Live Competitive Tests
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-center mt-4 text-lg font-medium leading-7 max-w-[300px]">
+          <Text className="text-slate-500 dark:text-slate-400 mt-4 text-lg font-medium leading-8">
             Experience the thrill of real exams. Compete with thousands of
             students.
           </Text>

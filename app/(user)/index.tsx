@@ -206,7 +206,7 @@ export default function ProfileScreen() {
               Ongoing Tests ({totalTests})
             </Text>
             <TouchableOpacity
-              onPress={() => router.push("/(main)/live" as any)}
+              onPress={() => router.push("/(user)/enrolled-test" as any)}
             >
               <View className="flex-row items-center">
                 <Text className="text-primary font-black text-sm">

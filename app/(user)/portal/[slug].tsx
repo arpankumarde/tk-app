@@ -287,20 +287,6 @@ const Portal = () => {
                 </Text>
               )}
             </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="mt-10 flex-row items-center"
-            >
-              <Feather
-                name="arrow-left"
-                size={22}
-                color={colorScheme === "dark" ? "#e2e8f0" : "#1e293b"}
-              />
-              <Text className="text-slate-800 dark:text-slate-200 text-2xl font-bold ml-3">
-                Back to Dashboard
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>

@@ -274,16 +274,44 @@ const EnrolledTestDetails = () => {
                     </Text>
                   </View>
 
-                  <TouchableOpacity
-                    onPress={() =>
-                      router.push(`/(user)/portal/${item.id}` as any)
-                    }
-                    className="bg-primary px-5 py-2.5 rounded-2xl shadow-sm"
-                  >
-                    <Text className="text-white font-black text-xs">
-                      View Details
-                    </Text>
-                  </TouchableOpacity>
+                  {(item.attemptsCount || 0) > 0 || item.isCompleted ? (
+                    <View className="flex-row items-center" style={{ gap: 8 }}>
+                      <TouchableOpacity
+                        onPress={() =>
+                          router.push(
+                            `/(user)/portal/test/results?testItemId=${item.id}` as any,
+                          )
+                        }
+                        className="bg-emerald-500 px-4 py-2.5 rounded-2xl shadow-sm"
+                      >
+                        <Text className="text-white font-black text-xs">
+                          See Result
+                        </Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        onPress={() =>
+                          router.push(`/(user)/portal/${item.id}` as any)
+                        }
+                        className="bg-primary px-4 py-2.5 rounded-2xl shadow-sm"
+                      >
+                        <Text className="text-white font-black text-xs">
+                          Retake
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() =>
+                        router.push(`/(user)/portal/${item.id}` as any)
+                      }
+                      className="bg-primary px-5 py-2.5 rounded-2xl shadow-sm"
+                    >
+                      <Text className="text-white font-black text-xs">
+                        View Details
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
             ))

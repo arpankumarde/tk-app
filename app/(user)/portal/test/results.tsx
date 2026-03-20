@@ -14,12 +14,18 @@ import { useColorScheme } from "nativewind";
 import { WebView } from "react-native-webview";
 import { useAuth } from "@/context/AuthContext";
 import {
+  EnrolledTest,
   LatestAttemptResultItem,
   LatestAttemptResultsPayload,
   OptionLetter,
 } from "../../types";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+
+type EnrolledTestsApiPayload = {
+  enrolledTests?: EnrolledTest[];
+  tests?: EnrolledTest[];
+};
 
 const hasHtmlTags = (value?: string | null) => {
   if (!value) return false;
@@ -245,6 +251,47 @@ const ResultsScreen = () => {
     fetchLatestResults();
   }, [fetchLatestResults]);
 
+  const handleBackToEnrolledTest = useCallback(async () => {
+    if (!token || !testItemNumericId || Number.isNaN(testItemNumericId)) {
+      router.replace("/(user)" as any);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${BASE_URL}/_api/student/enrolled-tests?limit=50`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const payload = (data.json || data) as EnrolledTestsApiPayload;
+        const enrolledTests = payload.enrolledTests || payload.tests || [];
+
+        const matchedTestPack = enrolledTests.find((testPack) =>
+          (testPack.testItems || []).some(
+            (item) => item.id === testItemNumericId,
+          ),
+        );
+
+        if (matchedTestPack?.slug) {
+          router.replace(
+            `/(user)/enrolled-test/${matchedTestPack.slug}` as any,
+          );
+          return;
+        }
+      }
+    } catch {
+      // Fallback navigation below.
+    }
+
+    router.replace("/(user)" as any);
+  }, [router, testItemNumericId, token]);
+
   const renderHtmlOrText = (
     value: string | null | undefined,
     className: string,
@@ -296,7 +343,10 @@ const ResultsScreen = () => {
   if (error || !resultData) {
     return (
       <SafeAreaView className="flex-1 bg-white dark:bg-slate-900 px-6">
-        <TouchableOpacity onPress={() => router.back()} className="mt-5 mb-8">
+        <TouchableOpacity
+          onPress={handleBackToEnrolledTest}
+          className="mt-5 mb-8"
+        >
           <Feather
             name="arrow-left"
             size={22}
@@ -330,7 +380,7 @@ const ResultsScreen = () => {
         <View className="px-4 pt-3">
           <View className="flex-row items-center justify-between mb-2">
             <TouchableOpacity
-              onPress={() => router.back()}
+              onPress={handleBackToEnrolledTest}
               className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 items-center justify-center"
             >
               <Feather

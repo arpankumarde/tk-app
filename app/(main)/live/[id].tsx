@@ -316,36 +316,21 @@ const LiveTestDetails = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 40 }}
         >
-          {/* ── Thumbnail ── */}
-          <View className="px-5 pt-4">
-            <View className="relative w-full h-[200px] rounded-[24px] overflow-hidden bg-slate-100 dark:bg-slate-800">
-              <Image
-                source={{
-                  uri:
-                    liveTest.thumbnailUrl ||
-                    "https://placehold.co/600x400/001f3f/white?text=TestKart",
-                }}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
-              <View className="absolute top-4 left-4 bg-orange-500/90 px-4 py-1.5 rounded-full">
-                <Text className="text-white font-black text-xs uppercase tracking-wider">
-                  Live Test
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={handleShare}
-                className="absolute top-4 right-4 bg-white/80 dark:bg-slate-800/80 w-9 h-9 rounded-full items-center justify-center"
-              >
-                <Feather name="share-2" size={16} color="#FF8A50" />
-              </TouchableOpacity>
+          {/* Heading (same style language as tests screen) */}
+          <View className="px-6 pt-6">
+            <View className="self-start bg-orange-50 dark:bg-orange-900/30 border border-orange-100 dark:border-orange-800/30 px-4 py-1.5 rounded-full mb-4">
+              <Text className="text-primary text-[11px] font-black uppercase tracking-wider">
+                Live Test Zone
+              </Text>
             </View>
-          </View>
 
-          {/* ── Title & Author ── */}
-          <View className="px-5 pt-5">
-            <Text className="text-2xl font-black text-slate-800 dark:text-white leading-tight mb-2">
+            <Text className="text-slate-800 dark:text-white text-5xl font-black leading-tight mb-3">
               {liveTest.title}
+            </Text>
+
+            <Text className="text-slate-500 dark:text-slate-400 text-base leading-8 mb-5">
+              {liveTest.description ||
+                "Join this live mock test to improve speed, accuracy, and confidence."}
             </Text>
 
             <View className="flex-row items-center mb-5">
@@ -371,10 +356,16 @@ const LiveTestDetails = () => {
                   style={{ marginLeft: 4 }}
                 />
               )}
+              <TouchableOpacity
+                onPress={handleShare}
+                className="ml-auto bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 w-9 h-9 rounded-full items-center justify-center"
+              >
+                <Feather name="share-2" size={16} color="#FF8A50" />
+              </TouchableOpacity>
             </View>
 
-            {/* ── Time Info ── */}
-            <View className="bg-slate-50 dark:bg-slate-800 rounded-2xl px-4 py-4 mb-5">
+            {/* Time Info */}
+            <View className="bg-slate-50 dark:bg-slate-800 rounded-2xl px-4 py-4 mb-6">
               <View className="flex-row items-center mb-3">
                 <View className="w-7 h-7 bg-orange-50 dark:bg-orange-900/20 rounded-lg items-center justify-center">
                   <Feather name="calendar" size={13} color="#FF8A50" />
@@ -406,6 +397,26 @@ const LiveTestDetails = () => {
                 </Text>
                 <Text className="text-slate-700 dark:text-slate-200 font-bold text-xs flex-1">
                   {duration} mins
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Hero Thumbnail */}
+          <View className="px-6 mb-5">
+            <View className="relative w-full h-[220px] rounded-[32px] overflow-hidden bg-slate-100 dark:bg-slate-800">
+              <Image
+                source={{
+                  uri:
+                    liveTest.thumbnailUrl ||
+                    "https://placehold.co/600x400/001f3f/white?text=TestKart",
+                }}
+                className="w-full h-full"
+                resizeMode="cover"
+              />
+              <View className="absolute top-4 left-4 bg-orange-500/90 px-4 py-1.5 rounded-full">
+                <Text className="text-white font-black text-xs uppercase tracking-wider">
+                  Live Test
                 </Text>
               </View>
             </View>
@@ -513,7 +524,13 @@ const LiveTestDetails = () => {
               }`}
             >
               <Feather
-                name={isTestEnded ? "x-circle" : liveTest.isEnrolled ? "check-circle" : "zap"}
+                name={
+                  isTestEnded
+                    ? "x-circle"
+                    : liveTest.isEnrolled
+                      ? "check-circle"
+                      : "zap"
+                }
                 size={18}
                 color="white"
               />
