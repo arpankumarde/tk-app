@@ -16,6 +16,7 @@ import { useColorScheme } from "nativewind";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import BottomTabs from "@/components/BottomTabs";
 import { useAuth } from "@/context/AuthContext";
+import { useAddToCart } from "@/hooks/useAddToCart";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -112,6 +113,7 @@ const TestDetails = () => {
     orderId?: number;
     message?: string;
   }>({ visible: false, success: false });
+  const { addToCart, adding: addingToCart } = useAddToCart();
 
   useEffect(() => {
     const fetchTestDetails = async () => {
@@ -653,11 +655,26 @@ const TestDetails = () => {
           <Feather name="share-2" size={18} color="#FF8A50" />
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={isFree ? handleFreeEnroll : undefined}
-          disabled={enrolling || (isFree && test.isEnrolled)}
+          onPress={
+            isFree
+              ? handleFreeEnroll
+              : async () => {
+                  const result = await addToCart(test.id, "test");
+                  if (result.success) {
+                    router.push("/(user)/cart" as any);
+                  } else {
+                    setEnrollResult({
+                      visible: true,
+                      success: false,
+                      message: result.message,
+                    });
+                  }
+                }
+          }
+          disabled={enrolling || addingToCart || (isFree && test.isEnrolled)}
           className={`${isFree ? "bg-orange-500" : "bg-primary"} h-14 px-8 rounded-2xl items-center justify-center shadow-lg shadow-orange-500/30 disabled:opacity-60`}
         >
-          {enrolling ? (
+          {enrolling || addingToCart ? (
             <ActivityIndicator color="white" />
           ) : (
             <Text className="text-white text-lg font-black">

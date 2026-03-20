@@ -18,6 +18,7 @@ import BottomTabs from "@/components/BottomTabs";
 import { WebView } from "react-native-webview";
 import PDFPreview from "@/components/PDFPreview";
 import { useAuth } from "@/context/AuthContext";
+import { useAddToCart } from "@/hooks/useAddToCart";
 
 export type CourseStatus = "published" | "draft" | "archived";
 export type CourseLevel = "beginner" | "intermediate" | "advanced";
@@ -99,6 +100,7 @@ const CourseDetails = () => {
     enrollmentId?: number;
     message?: string;
   }>({ visible: false, success: false });
+  const { addToCart, adding: addingToCart } = useAddToCart();
 
   const handleFreeEnroll = async () => {
     if (!user || !token) {
@@ -189,7 +191,7 @@ const CourseDetails = () => {
         }
 
         setCourse(details);
-        console.log(details);
+        // console.log(details);
       } catch (err: any) {
         console.error("Fetch Course Error:", err);
         setError(err.message || "Failed to load course details.");
@@ -546,11 +548,26 @@ const CourseDetails = () => {
           </Text>
         </View>
         <TouchableOpacity
-          onPress={isFree ? handleFreeEnroll : undefined}
-          disabled={enrolling || (isFree && course.isEnrolled)}
+          onPress={
+            isFree
+              ? handleFreeEnroll
+              : async () => {
+                  const result = await addToCart(course.id, "course");
+                  if (result.success) {
+                    router.push("/(user)/cart" as any);
+                  } else {
+                    setEnrollResult({
+                      visible: true,
+                      success: false,
+                      message: result.message,
+                    });
+                  }
+                }
+          }
+          disabled={enrolling || addingToCart || (isFree && course.isEnrolled)}
           className={`${isFree ? "bg-orange-500" : "bg-primary"} h-14 px-8 rounded-2xl items-center justify-center shadow-lg shadow-orange-500/30 disabled:opacity-60`}
         >
-          {enrolling ? (
+          {enrolling || addingToCart ? (
             <ActivityIndicator color="white" />
           ) : (
             <Text className="text-white text-lg font-black">

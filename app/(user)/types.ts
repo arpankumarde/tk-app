@@ -216,6 +216,46 @@ export interface LatestAttemptResultItem {
   explanation?: string | null;
 }
 
+// Orders
+export interface OrderItem {
+  orderItemId: number;
+  title: string;
+  itemType: string;
+  priceAtPurchase: number;
+  thumbnailUrl: string | null;
+  mockTestId?: number | null;
+  courseId?: number | null;
+  digitalProductId?: number | null;
+  bundleId?: number | null;
+}
+
+export interface OrderSummary {
+  id: number;
+  status: string;
+  totalAmount: number | string;
+  createdAt: string;
+  itemCount: number;
+}
+
+export interface Order {
+  id: number;
+  status: string;
+  totalAmount: number | string;
+  createdAt: string;
+  items: OrderItem[];
+  paymentTransactionId?: string | null;
+}
+
+export interface OrdersListResponse {
+  orders: Order[];
+  total: number;
+}
+
+export interface OrderDetailsResponse {
+  order: Order;
+  error?: string;
+}
+
 export interface LatestAttemptResultsPayload {
   attemptId: number;
   completedAt?: string;

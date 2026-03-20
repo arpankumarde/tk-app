@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   StatusBar,
   Image,
   Alert,
+  Linking,
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -61,23 +62,6 @@ export default function ProfileScreen() {
     }
   };
 
-  const menuItems = [
-    {
-      title: "Account Settings",
-      icon: "settings",
-      route: "/",
-      color: "text-gray-500",
-      bgColor: "bg-gray-50 dark:bg-gray-700/20",
-    },
-    {
-      title: "Help & Support",
-      icon: "headphones",
-      route: "/",
-      color: "text-green-500",
-      bgColor: "bg-green-50 dark:bg-green-900/20",
-    },
-  ];
-
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
@@ -115,17 +99,28 @@ export default function ProfileScreen() {
               >
                 {user?.displayName || "User Name"}
               </Text>
-              <Text
-                className="text-slate-500 dark:text-slate-400 font-bold text-sm mb-4"
-                numberOfLines={1}
-              >
-                {user?.email || "user@example.com"}
-              </Text>
-              <TouchableOpacity className="bg-orange-50 dark:bg-orange-950/30 px-6 py-2.5 rounded-full self-start border border-orange-100 dark:border-orange-800/30">
+              <View className="flex-row items-center mb-4">
+                <Text
+                  className="text-slate-500 dark:text-slate-400 font-bold text-sm"
+                  numberOfLines={1}
+                >
+                  {user?.email || user?.mobileNumber || "user@example.com"}
+                </Text>
+                {user?.mobileVerified && (
+                  <View className="ml-1.5 bg-green-100 dark:bg-green-900/30 rounded-full p-0.5">
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={16}
+                      color="#22C55E"
+                    />
+                  </View>
+                )}
+              </View>
+              {/* <TouchableOpacity className="bg-orange-50 dark:bg-orange-950/30 px-6 py-2.5 rounded-full self-start border border-orange-100 dark:border-orange-800/30">
                 <Text className="text-primary font-black text-sm">
                   Edit Profile
                 </Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           </View>
 
@@ -151,10 +146,10 @@ export default function ProfileScreen() {
             <View className="w-[1px] h-10 bg-gray-200 dark:bg-slate-700" />
             <View className="items-center flex-1">
               <Text className="text-2xl font-black text-slate-800 dark:text-white">
-                85%
+                {purchasedProducts.length}
               </Text>
               <Text className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">
-                Score
+                Products
               </Text>
             </View>
           </View>
@@ -281,29 +276,47 @@ export default function ProfileScreen() {
             My Account
           </Text>
           <View className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 overflow-hidden shadow-sm mb-8">
-            {menuItems.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() =>
-                  item.route !== "/" && router.push(item.route as any)
-                }
-                className={`flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 ${index !== menuItems.length - 1 ? "border-b border-gray-50 dark:border-slate-800" : ""}`}
-              >
-                <View
-                  className={`w-12 h-12 rounded-2xl ${item.bgColor} items-center justify-center mr-4`}
-                >
-                  <Feather
-                    name={item.icon as any}
-                    size={22}
-                    className={item.color}
-                  />
-                </View>
-                <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
-                  {item.title}
-                </Text>
-                <Feather name="chevron-right" size={20} color="#CBD5E1" />
-              </TouchableOpacity>
-            ))}
+            <TouchableOpacity
+              onPress={() => router.push("/(user)/orders" as any)}
+              className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800"
+            >
+              <View className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 items-center justify-center mr-4">
+                <Feather name="shopping-cart" size={22} color="#3B82F6" />
+              </View>
+              <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
+                My Orders
+              </Text>
+              <Feather name="chevron-right" size={20} color="#CBD5E1" />
+            </TouchableOpacity>
+
+            <TouchableOpacity className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800">
+              <View className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-700/20 items-center justify-center mr-4">
+                <Feather name="settings" size={22} color="#6B7280" />
+              </View>
+              <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
+                Account Settings
+              </Text>
+              <Feather name="chevron-right" size={20} color="#CBD5E1" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => {
+                let message = `Hello, I need help. I'm ${user?.displayName || "a user"}.`;
+                if (user?.email) message += ` Email: ${user.email}`;
+                Linking.openURL(
+                  `https://wa.me/+919334581138?text=${encodeURIComponent(message)}`,
+                );
+              }}
+              className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50"
+            >
+              <View className="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-900/20 items-center justify-center mr-4">
+                <Feather name="headphones" size={22} color="#22C55E" />
+              </View>
+              <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
+                Help & Support
+              </Text>
+              <Feather name="chevron-right" size={20} color="#CBD5E1" />
+            </TouchableOpacity>
           </View>
 
           {/* Logout Section */}

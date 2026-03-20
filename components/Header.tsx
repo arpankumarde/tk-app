@@ -49,6 +49,17 @@ const Header = () => {
         </TouchableOpacity>
 
         {isLoggedIn ? (
+          <>
+            <TouchableOpacity
+              className="ml-2 p-2 rounded-full active:bg-gray-100 dark:active:bg-slate-800"
+              onPress={() => router.push("/cart" as any)}
+            >
+              <Feather
+                name="shopping-cart"
+                size={22}
+                color={colorScheme === "dark" ? "#FFFFFF" : "#1A1A1A"}
+              />
+            </TouchableOpacity>
           <TouchableOpacity
             className="ml-3 pointer-events-auto"
             onPress={() => router.push("/(user)" as any)}
@@ -71,6 +82,7 @@ const Header = () => {
               </View>
             )}
           </TouchableOpacity>
+          </>
         ) : (
           <Link href="/login" asChild>
             <TouchableOpacity className="px-5 py-2 rounded-xl border border-gray-200 dark:border-slate-700 active:bg-gray-50 dark:active:bg-slate-800 ml-2">

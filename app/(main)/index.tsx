@@ -53,7 +53,7 @@ const App = () => {
       const data = await response.json();
 
       const payload = data.json || data;
-      console.log(payload.shopProducts);
+      // console.log(payload.shopProducts);
       setTests(payload.tests || []);
       setShopProducts(payload.shopProducts || []);
     } catch (err: any) {

@@ -1,0 +1,291 @@
+import { useState, useEffect, useCallback } from "react";
+
+const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+
+export interface CartItem {
+  id: number;
+  resourceId: number;
+  type: "test" | "course" | "digitalProduct";
+  title: string;
+  slug: string;
+  thumbnailUrl: string | null;
+  teacherName: string;
+  price: number;
+  originalPrice: number;
+  discount: number;
+}
+
+export interface CartData {
+  items: CartItem[];
+  subtotal: number;
+  discount: number;
+  promoDiscount: number;
+  total: number;
+  itemCount: number;
+}
+
+const computeTotals = (items: CartItem[], promoDiscount = 0): CartData => {
+  const subtotal = items.reduce((sum, item) => sum + item.originalPrice, 0);
+  const itemDiscount = subtotal - items.reduce((sum, item) => sum + item.price, 0);
+  const discount = itemDiscount + promoDiscount;
+  const total = subtotal - discount;
+  return { items, subtotal, discount, promoDiscount, total, itemCount: items.length };
+};
+
+export const useCart = (token: string | null) => {
+  const [cart, setCart] = useState<CartData>({
+    items: [],
+    subtotal: 0,
+    discount: 0,
+    promoDiscount: 0,
+    total: 0,
+    itemCount: 0,
+  });
+  const [loading, setLoading] = useState(false);
+  const [appliedPromoDiscount, setAppliedPromoDiscount] = useState(0);
+  const [appliedPromoCode, setAppliedPromoCode] = useState<string | null>(null);
+  const [appliedPromoCodeId, setAppliedPromoCodeId] = useState<number | null>(null);
+  const [eligibleItemIds, setEligibleItemIds] = useState<number[]>([]);
+
+  const fetchCart = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      setLoading(true);
+      const response = await fetch(`${BASE_URL}/_api/cart/items`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch cart");
+
+      const data = await response.json();
+      const payload = data.json || data;
+      const items: CartItem[] = (payload.items || []).map((item: any) => {
+        const originalPrice = item.price ?? 0;
+        const finalPrice = item.discountPrice ?? originalPrice;
+        return {
+          id: item.cartItemId,
+          resourceId: item.courseId || item.mockTestId || item.digitalProductId,
+          type: item.type,
+          title: item.title || "",
+          slug: item.slug || "",
+          thumbnailUrl:
+            item.thumbnailImageUrl || item.thumbnailUrl || null,
+          teacherName:
+            item.teacherName || item.creatorName || "",
+          price: finalPrice,
+          originalPrice,
+          discount: originalPrice - finalPrice,
+        };
+      });
+
+      setCart(computeTotals(items, appliedPromoDiscount));
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [token, appliedPromoDiscount]);
+
+  const removeItem = useCallback(
+    async (itemId: number) => {
+      if (!token) return;
+
+      // Optimistic removal — clear promo since cart changed
+      setAppliedPromoDiscount(0);
+      setAppliedPromoCode(null);
+      setEligibleItemIds([]);
+      setCart((prev) => computeTotals(prev.items.filter((i) => i.id !== itemId)));
+
+      try {
+        const response = await fetch(`${BASE_URL}/_api/cart/remove`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ json: { cartItemId: itemId } }),
+        });
+
+        if (!response.ok) throw new Error("Failed to remove item");
+
+        await fetchCart();
+      } catch (error) {
+        console.error("Error removing cart item:", error);
+        await fetchCart(); // Revert on failure
+      }
+    },
+    [token, fetchCart],
+  );
+
+  const applyPromoCode = useCallback(
+    async (code: string) => {
+      if (!token) return { success: false, message: "Not authenticated" };
+
+      try {
+        const items = cart.items.map((item) => ({
+          id: item.resourceId,
+          type: item.type === "digitalProduct" ? "course" : item.type,
+          price: item.price,
+        }));
+        const totalAmount = cart.items.reduce((sum, item) => sum + item.price, 0);
+
+        const response = await fetch(
+          `${BASE_URL}/_api/promo-codes/validate`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              json: { code, items, totalAmount },
+            }),
+          },
+        );
+
+        const data = await response.json();
+        const payload = data.json || data;
+
+        if (!payload.valid) {
+          return {
+            success: false,
+            message: payload.message || "Invalid promo code",
+          };
+        }
+
+        const discount = payload.discountAmount ?? 0;
+        setAppliedPromoDiscount(discount);
+        setAppliedPromoCode(code.toUpperCase());
+        setAppliedPromoCodeId(payload.promoCodeId ?? null);
+        setEligibleItemIds(payload.eligibleItemIds ?? []);
+        setCart((prev) => computeTotals(prev.items, discount));
+
+        const message = payload.discountBreakdown
+          ? `${payload.message} (${payload.discountBreakdown})`
+          : payload.message || `Promo applied! You saved ₹${discount.toFixed(2)}`;
+
+        return { success: true, message };
+      } catch (error) {
+        return { success: false, message: "Failed to apply promo code" };
+      }
+    },
+    [token, cart.items],
+  );
+
+  const clearPromo = useCallback(() => {
+    setAppliedPromoDiscount(0);
+    setAppliedPromoCode(null);
+    setAppliedPromoCodeId(null);
+    setEligibleItemIds([]);
+    setCart((prev) => computeTotals(prev.items, 0));
+  }, []);
+
+  const initiatePayment = useCallback(async () => {
+    if (!token) return { success: false, error: "Not authenticated" };
+
+    try {
+      const body: Record<string, any> = {
+        deepLinkUrl: "testkart://payment/callback",
+      };
+      if (appliedPromoCodeId != null) body.promoCodeId = appliedPromoCodeId;
+
+      const reqBody = { json: body };
+      console.log("Initiate payment request:", JSON.stringify(reqBody, null, 2));
+
+      const response = await fetch(`${BASE_URL}/_api/payment/payu/initiate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(reqBody),
+      });
+
+      const data = await response.json();
+      console.log("Initiate payment response:", JSON.stringify(data, null, 2));
+      const payload = data.json || data;
+
+      if (!response.ok || payload.error) {
+        return {
+          success: false,
+          error: payload.details || payload.error || "Failed to initiate payment",
+        };
+      }
+
+      return {
+        success: true,
+        key: payload.key as string,
+        txnid: payload.txnid as string,
+        amount: payload.amount as string,
+        productinfo: payload.productinfo as string,
+        firstname: payload.firstname as string,
+        email: payload.email as string,
+        phone: payload.phone as string,
+        surl: payload.surl as string,
+        furl: payload.furl as string,
+        hash: payload.hash as string,
+        payuUrl: payload.payuUrl as string,
+        udf1: payload.udf1 as string | undefined,
+      };
+    } catch (error) {
+      return { success: false, error: "Something went wrong" };
+    }
+  }, [token, appliedPromoCodeId]);
+
+  const verifyPayment = useCallback(
+    async (params: { txnid: string } | { orderId: number }) => {
+      if (!token) return { success: false, error: "Not authenticated" };
+
+      try {
+        const reqBody = { json: params };
+        console.log("Verify payment request:", JSON.stringify(reqBody, null, 2));
+
+        const response = await fetch(
+          `${BASE_URL}/_api/payment/payu/verify-and-complete`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(reqBody),
+          },
+        );
+
+        const data = await response.json();
+        console.log("Verify payment response:", JSON.stringify(data, null, 2));
+        const payload = data.json || data;
+
+        return {
+          success: payload.success ?? false,
+          orderStatus: payload.orderStatus as "completed" | "pending" | "failed" | undefined,
+          orderId: payload.orderId as number | undefined,
+          message: payload.message as string | undefined,
+        };
+      } catch (error) {
+        return { success: false, error: "Something went wrong" };
+      }
+    },
+    [token],
+  );
+
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
+
+  return {
+    cart,
+    loading,
+    refetch: fetchCart,
+    removeItem,
+    applyPromoCode,
+    clearPromo,
+    initiatePayment,
+    verifyPayment,
+    appliedPromoCode,
+    eligibleItemIds,
+  };
+};
+
+export default useCart;

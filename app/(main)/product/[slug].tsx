@@ -18,6 +18,7 @@ import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
 import PDFPreview from "@/components/PDFPreview";
 import { useAuth } from "@/context/AuthContext";
+import { useAddToCart } from "@/hooks/useAddToCart";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -71,6 +72,7 @@ const ProductDetails = () => {
     message?: string;
   }>({ visible: false, success: false });
   const { token } = useAuth();
+  const { addToCart, adding: addingToCart } = useAddToCart();
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -358,11 +360,33 @@ const ProductDetails = () => {
                   )}
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity className="bg-primary h-14 rounded-2xl flex-row items-center justify-center shadow-md shadow-orange-500/20 mb-3">
-                  <Feather name="shopping-cart" size={18} color="white" />
-                  <Text className="text-white text-lg font-black ml-2.5">
-                    Add to Cart
-                  </Text>
+                <TouchableOpacity
+                  className="bg-primary h-14 rounded-2xl flex-row items-center justify-center shadow-md shadow-orange-500/20 mb-3 disabled:opacity-60"
+                  disabled={addingToCart}
+                  onPress={async () => {
+                    if (!product) return;
+                    const result = await addToCart(product.id, "digitalProduct");
+                    if (result.success) {
+                      router.push("/(user)/cart" as any);
+                    } else {
+                      setEnrollResult({
+                        visible: true,
+                        success: false,
+                        message: result.message,
+                      });
+                    }
+                  }}
+                >
+                  {addingToCart ? (
+                    <ActivityIndicator size="small" color="white" />
+                  ) : (
+                    <>
+                      <Feather name="shopping-cart" size={18} color="white" />
+                      <Text className="text-white text-lg font-black ml-2.5">
+                        Add to Cart
+                      </Text>
+                    </>
+                  )}
                 </TouchableOpacity>
               )}
 
