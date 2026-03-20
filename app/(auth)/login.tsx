@@ -17,11 +17,17 @@ import { Link, router } from "expo-router";
 import { useGoogleAuth } from "@/hooks/useGoogleAuth";
 import { useAuth } from "@/context/AuthContext";
 
+const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+
 const Login = () => {
   const { colorScheme } = useColorScheme();
   const { signInWithGoogle } = useGoogleAuth();
-  const { user } = useAuth();
+  const { user, setAuth } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -39,6 +45,75 @@ const Login = () => {
       Alert.alert("Sign-in failed", "Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendOtp = async () => {
+    const trimmed = mobileNumber.trim();
+    if (trimmed.length !== 10) {
+      Alert.alert("Invalid number", "Please enter a valid 10-digit mobile number.");
+      return;
+    }
+    setOtpLoading(true);
+    try {
+      const res = await fetch(`${BASE_URL}/_api/auth/mobile-login/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ json: { mobileNumber: trimmed } }),
+      });
+      const data = await res.json();
+      const result = data.json || data;
+      if (result.error) {
+        const msg = Array.isArray(result.error) ? result.error.map((e: any) => e.message ?? e).join("\n") : String(result.error);
+        Alert.alert("Error", msg);
+      } else {
+        setOtpSent(true);
+      }
+    } catch (err) {
+      console.error("[LoginScreen] sendOtp error:", err);
+      Alert.alert("Error", "Failed to send OTP. Please try again.");
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otp.trim().length === 0) {
+      Alert.alert("Enter OTP", "Please enter the OTP sent to your mobile.");
+      return;
+    }
+    setOtpLoading(true);
+    try {
+      const res = await fetch(`${BASE_URL}/_api/auth/mobile-login/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ json: {
+          mobileNumber: mobileNumber.trim(),
+          otpCode: otp.trim(),
+          role: "user",
+        } }),
+      });
+      const data = await res.json();
+      const result = data.json || data;
+      if (result.error) {
+        const msg = Array.isArray(result.error) ? result.error.map((e: any) => e.message ?? e).join("\n") : String(result.error);
+        Alert.alert("Verification failed", msg);
+      } else if (result.user) {
+        const token = result.token || res.headers.get("x-auth-token") || res.headers.get("authorization");
+        if (token) {
+          await setAuth(result.user, token);
+          router.push("/(user)" as any);
+        } else {
+          Alert.alert("Error", "Logged in but no auth token received.");
+        }
+      } else {
+        Alert.alert("Error", "Unexpected response from server.");
+      }
+    } catch (err) {
+      console.error("[LoginScreen] verifyOtp error:", err);
+      Alert.alert("Error", "Failed to verify OTP. Please try again.");
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -95,13 +170,53 @@ const Login = () => {
               placeholder="Enter your 10-digit mobile number"
               placeholderTextColor="#999"
               keyboardType="phone-pad"
+              maxLength={10}
+              value={mobileNumber}
+              onChangeText={setMobileNumber}
+              editable={!otpSent}
               className="border border-gray-200 dark:border-slate-600 rounded-xl h-14 px-4 text-slate-900 dark:text-white text-base bg-gray-50 dark:bg-slate-700/50"
             />
           </View>
 
+          {otpSent && (
+            <View className="mb-8">
+              <Text className="text-slate-900 dark:text-white font-bold mb-2 text-lg">
+                Enter OTP
+              </Text>
+              <TextInput
+                placeholder="Enter OTP"
+                placeholderTextColor="#999"
+                keyboardType="number-pad"
+                maxLength={6}
+                value={otp}
+                onChangeText={setOtp}
+                className="border border-gray-200 dark:border-slate-600 rounded-xl h-14 px-4 text-slate-900 dark:text-white text-base bg-gray-50 dark:bg-slate-700/50"
+              />
+              <TouchableOpacity
+                onPress={handleSendOtp}
+                disabled={otpLoading}
+                className="mt-2"
+              >
+                <Text className="text-primary font-bold text-sm text-right">
+                  Resend OTP
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* Submit Button */}
-          <TouchableOpacity className="bg-primary rounded-xl h-14 items-center justify-center shadow-lg shadow-primary mb-6">
-            <Text className="text-white text-lg font-bold">Send OTP</Text>
+          <TouchableOpacity
+            className="bg-primary rounded-xl h-14 items-center justify-center shadow-lg shadow-primary mb-6"
+            onPress={otpSent ? handleVerifyOtp : handleSendOtp}
+            disabled={otpLoading}
+          >
+            {otpLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text className="text-white text-lg font-bold">
+                {otpSent ? "Verify OTP" : "Send OTP"}
+              </Text>
+            )}
           </TouchableOpacity>
 
           <View className="flex-row justify-center items-center">

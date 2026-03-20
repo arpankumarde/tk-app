@@ -60,6 +60,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setAuth = async (user: User, token: string) => {
+    if (user.avatarUrl?.includes("/svg?")) {
+      user = { ...user, avatarUrl: user.avatarUrl.replace("/svg?", "/png?") };
+    }
     setUser(user);
     setToken(token);
     await SecureStore.setItemAsync("auth_token", token);

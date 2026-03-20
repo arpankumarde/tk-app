@@ -29,7 +29,7 @@ const BottomTabs = () => {
     { name: "Live", icon: "radio", badge: true, href: "/live" },
     { name: "Shop", icon: "shopping-bag", href: "/shop" },
     {
-      name: isLoggedIn ? "Profile" : "Login",
+      name: isLoggedIn ? "Dashboard" : "Login",
       icon: isLoggedIn ? "user" : "user-plus",
       isProfile: isLoggedIn,
       href: isLoggedIn ? "/(user)" : "/login",
@@ -49,7 +49,8 @@ const BottomTabs = () => {
         if (tab.isProfile) {
           isActive = (segments as string[]).includes("(user)");
         } else {
-          isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
+          isActive =
+            pathname === href || (href !== "/" && pathname.startsWith(href));
         }
 
         return (

@@ -13,28 +13,20 @@ export function useGoogleAuth() {
   });
 
   const signInWithGoogle = async () => {
-    // console.log("[useGoogleAuth] redirectUri:", redirectUri);
     try {
       const authorizeUrl = `${BASE_URL}/_api/auth/oauth_authorize?provider=google&role=student&redirectTo=${encodeURIComponent(redirectUri)}`;
-      // console.log("[useGoogleAuth] fetching authorize URL:", authorizeUrl);
       const authorizeRes = await fetch(authorizeUrl);
       const authorizeBody = await authorizeRes.json();
-      // console.log("[useGoogleAuth] authorize response:", authorizeBody);
       const { redirectUrl } = authorizeBody;
 
       if (!redirectUrl) {
         throw new Error("No redirect URL from server");
       }
 
-      // console.log(
-      //   "[useGoogleAuth] opening browser session with redirectUrl:",
-      //   redirectUrl,
-      // );
       const result = await WebBrowser.openAuthSessionAsync(
         redirectUrl,
         redirectUri,
       );
-      // console.log("[useGoogleAuth] browser session result:", result);
 
       if (result.type !== "success") {
         console.log(
@@ -57,12 +49,10 @@ export function useGoogleAuth() {
         },
       });
       const sessionBody = await sessionRes.json();
-      // console.debug("[useGoogleAuth] session response:", sessionBody);
       const { user } = sessionBody.json ?? sessionBody;
 
       if (!user) throw new Error("Failed to get user session");
 
-      // console.debug("[useGoogleAuth] calling setAuth with user:", user);
       setAuth(user, token);
     } catch (err) {
       console.error("[useGoogleAuth] Google sign-in error:", err);
