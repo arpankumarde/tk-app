@@ -404,12 +404,12 @@ const LiveTestDetails = () => {
 
           {/* Hero Thumbnail */}
           <View className="px-6 mb-5">
-            <View className="relative w-full h-[220px] rounded-[32px] overflow-hidden bg-slate-100 dark:bg-slate-800">
+            <View className="relative w-full h-[220px] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
               <Image
                 source={{
                   uri:
                     liveTest.thumbnailUrl ||
-                    "https://placehold.co/600x400/001f3f/white?text=TestKart",
+                    "https://ik.imagekit.io/testkart/placeholders/live.png",
                 }}
                 className="w-full h-full"
                 resizeMode="cover"

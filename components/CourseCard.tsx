@@ -1,7 +1,7 @@
+import { memo } from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useColorScheme } from "nativewind";
 
 interface CourseCardProps {
   course: {
@@ -22,26 +22,15 @@ interface CourseCardProps {
 }
 
 const CourseCard = ({ course }: CourseCardProps) => {
-  const { colorScheme } = useColorScheme();
   const isFree = course.price === 0;
 
-  // Exhaustive image field checking based on potential API variations
   const displayImage =
     course.thumbnailImageUrl ||
-    course.thumbnailUrl ||
-    (course as any).image ||
-    (course as any).thumbnail ||
-    "https://placehold.co/600x400/001f3f/white?text=No+Image";
+    "https://ik.imagekit.io/testkart/placeholders/Online%20Course.jpg";
 
   const handlePress = () => {
-    console.log("Navigating to course details for slug:", course.slug);
     router.push(`/(main)/course/${course.slug}` as any);
   };
-
-  const displayAvatar =
-    (course as any).teacherAvatar ||
-    (course as any).instructorAvatar ||
-    `https://ui-avatars.com/api/?name=${course.teacherName}&background=random`;
 
   const displayLevel =
     course.level || (course as any).difficulty || "All Levels";
@@ -50,7 +39,7 @@ const CourseCard = ({ course }: CourseCardProps) => {
   return (
     <TouchableOpacity
       onPress={handlePress}
-      className="bg-white dark:bg-slate-800 rounded-[32px] overflow-hidden mb-6 shadow-xl shadow-slate-200/50 dark:shadow-none border border-gray-100 dark:border-slate-700/50"
+      className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden mb-6 shadow-xl shadow-slate-200/50 dark:shadow-none border border-gray-100 dark:border-slate-700/50"
     >
       {/* Category Badge */}
       <View className="absolute top-4 left-4 z-10 px-4 py-1.5 bg-white/90 dark:bg-slate-900/90 rounded-full border border-gray-100 dark:border-slate-700/50 shadow-sm">
@@ -122,7 +111,7 @@ const CourseCard = ({ course }: CourseCardProps) => {
         {/* Footer */}
         <View className="flex-row items-center justify-between">
           <TouchableOpacity
-            className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} flex-row items-center px-6 py-3.5 rounded-2xl shadow-lg flex-1 mr-4`}
+            className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} flex-row items-center px-6 py-3.5 rounded-xl shadow-lg w-48 mr-4`}
           >
             <Feather
               name={isFree ? "book" : "shopping-cart"}
@@ -145,4 +134,4 @@ const CourseCard = ({ course }: CourseCardProps) => {
   );
 };
 
-export default CourseCard;
+export default memo(CourseCard);

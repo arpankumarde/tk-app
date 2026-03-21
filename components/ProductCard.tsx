@@ -5,13 +5,20 @@ import { Feather } from "@expo/vector-icons";
 
 interface ProductCardProps {
   product: {
-    slug: string;
+    id: number;
     title: string;
-    author: string;
-    image: string;
     price: number;
+    pdfUrl?: string;
+    publishedAt: string;
+    rating: number | null;
+    slug: string;
+    teacherAvatar: string;
+    teacherIsVerified: boolean;
+    teacherName: string;
+    teacherSlug: string;
+    thumbnailUrl: string;
+    totalPurchases: number;
     category: string;
-    soldCount: number;
   };
 }
 
@@ -19,16 +26,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { colorScheme } = useColorScheme();
   const router = useRouter();
 
-  // Field mappings based on API logs
   const displayImage =
-    product.image ||
-    (product as any).thumbnailUrl ||
-    "https://placehold.co/600x400/001f3f/white?text=No+Image";
-  const displayAuthor =
-    product.author || (product as any).teacherName || "TestKart Expert";
-  const displayCategory = product.category || "Study Material";
-  const displayPrice = product.price ?? 0;
-  const displaySales = (product as any).totalPurchases || 0;
+    product?.thumbnailUrl ||
+    "https://ik.imagekit.io/testkart/placeholders/study-notes.png";
+  const displayAuthor = product?.teacherName || "TestKart Expert";
+  const displayCategory = product?.category || "Study Material";
+  const displayPrice = product?.price ?? 0;
 
   return (
     <TouchableOpacity
@@ -43,10 +46,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
       </View>
 
       {/* Product Image */}
-      <View className="w-full h-[220px] bg-slate-50 dark:bg-slate-900/50">
+      <View className="w-full bg-slate-50 dark:bg-slate-900/50">
         <Image
           source={{ uri: displayImage }}
-          className="w-full h-full"
+          className="w-full aspect-video"
           resizeMode="cover"
         />
       </View>
@@ -86,7 +89,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
               color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
             />
             <Text className="ml-1.5 text-slate-500 dark:text-slate-400 text-xs font-semibold">
-              {displaySales} sold
+              {product?.totalPurchases || 0} sold
             </Text>
           </View>
           {displayPrice === 0 ? (

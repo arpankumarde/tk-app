@@ -86,7 +86,6 @@ const ProductDetails = () => {
         console.log("Fetched product details:", payload.product);
         setProduct(payload.product);
 
-        // Fetch related products (simulated here with newest list)
         const listResponse = await fetch(`${BASE_URL}/_api/shop/list?limit=4`);
         const listData = await listResponse.json();
         const listPayload = listData.json || listData;
@@ -200,14 +199,14 @@ const ProductDetails = () => {
         >
           {/* Main Image & Category Badge */}
           <View className="px-5 pt-4">
-            <View className="relative w-full h-[260px] rounded-[32px] overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-800">
+            <View className="relative w-full rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-800">
               <Image
                 source={{
                   uri:
                     product?.thumbnailUrl ||
-                    "https://placehold.co/600x400/001f3f/white?text=TestKart",
+                    "https://ik.imagekit.io/testkart/placeholders/study-notes.png",
                 }}
-                className="w-full h-full"
+                className="w-full aspect-video"
                 resizeMode="cover"
               />
               {/* Category Badge */}
@@ -365,7 +364,10 @@ const ProductDetails = () => {
                   disabled={addingToCart}
                   onPress={async () => {
                     if (!product) return;
-                    const result = await addToCart(product.id, "digitalProduct");
+                    const result = await addToCart(
+                      product.id,
+                      "digitalProduct",
+                    );
                     if (result.success) {
                       router.push("/(user)/cart" as any);
                     } else {

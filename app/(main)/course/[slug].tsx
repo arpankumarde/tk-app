@@ -17,6 +17,8 @@ import { useColorScheme } from "nativewind";
 import BottomTabs from "@/components/BottomTabs";
 import { WebView } from "react-native-webview";
 import PDFPreview from "@/components/PDFPreview";
+import { useVideoPlayer, VideoView } from "expo-video";
+import * as ScreenOrientation from "expo-screen-orientation";
 import { useAuth } from "@/context/AuthContext";
 import { useAddToCart } from "@/hooks/useAddToCart";
 
@@ -93,6 +95,7 @@ const CourseDetails = () => {
   const [error, setError] = useState<string | null>(null);
   const [expandedModules, setExpandedModules] = useState<number[]>([0]);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [showIntroVideo, setShowIntroVideo] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
   const [enrollResult, setEnrollResult] = useState<{
     visible: boolean;
@@ -101,6 +104,13 @@ const CourseDetails = () => {
     message?: string;
   }>({ visible: false, success: false });
   const { addToCart, adding: addingToCart } = useAddToCart();
+
+  const introPlayer = useVideoPlayer(
+    course?.introVideoUrl ?? null,
+    (player) => {
+      player.loop = false;
+    },
+  );
 
   const handleFreeEnroll = async () => {
     if (!user || !token) {
@@ -113,6 +123,7 @@ const CourseDetails = () => {
         `${process.env.EXPO_PUBLIC_BASE_URL}/_api/courses/enroll-free`,
         {
           method: "POST",
+          credentials: "omit",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -148,6 +159,23 @@ const CourseDetails = () => {
       setEnrolling(false);
     }
   };
+
+  useEffect(() => {
+    const isVideoActive =
+      showIntroVideo || selectedLesson?.contentType === "video";
+    if (isVideoActive) {
+      ScreenOrientation.unlockAsync();
+    } else {
+      ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.PORTRAIT_UP,
+      );
+    }
+    return () => {
+      ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.PORTRAIT_UP,
+      );
+    };
+  }, [showIntroVideo, selectedLesson]);
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -189,7 +217,7 @@ const CourseDetails = () => {
           );
           throw new Error(apiError || "Course not found");
         }
-
+        console.log(details);
         setCourse(details);
         // console.log(details);
       } catch (err: any) {
@@ -304,7 +332,7 @@ const CourseDetails = () => {
             <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
               Created by{" "}
               <Link
-                href={`/course/${course?.teacher?.slug}`}
+                href={`/expert/${course?.teacher?.slug}`}
                 className="text-primary"
               >
                 {course?.teacher?.displayName}
@@ -312,7 +340,7 @@ const CourseDetails = () => {
             </Text>
           </View>
 
-          <View className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 rounded-[24px] p-5 border border-gray-100 dark:border-slate-700">
+          <View className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 rounded-xl p-5 border border-gray-100 dark:border-slate-700">
             <View className="ml-4 flex-1">
               <Text className="text-slate-800 dark:text-white font-black text-lg">
                 Course Package
@@ -328,28 +356,41 @@ const CourseDetails = () => {
 
         {/* Video Preview Section */}
         <View className="px-6 mb-8">
-          <View className="h-56 w-full rounded-[40px] overflow-hidden bg-slate-100 dark:bg-slate-800 relative shadow-2xl">
-            {course.thumbnailImageUrl || course.thumbnailUrl ? (
-              <Image
-                source={{
-                  uri:
-                    course?.thumbnailImageUrl ||
-                    course?.thumbnailUrl ||
-                    undefined,
-                }}
-                className="w-full h-full"
-                resizeMode="cover"
+          <View className="h-56 w-full rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 relative shadow-2xl">
+            {showIntroVideo && course.introVideoUrl ? (
+              <VideoView
+                player={introPlayer}
+                style={{ width: "100%", height: "100%" }}
+                nativeControls
+                contentFit="contain"
               />
             ) : (
-              <View className="w-full h-full items-center justify-center">
-                <Feather name="video" size={64} color="#e2e8f0" />
-              </View>
+              <>
+                <Image
+                  source={{
+                    uri:
+                      course?.thumbnailImageUrl ||
+                      "https://ik.imagekit.io/testkart/placeholders/Online%20Course.jpg",
+                  }}
+                  className="w-full h-full"
+                  resizeMode="cover"
+                />
+
+                {course.introVideoUrl && (
+                  <View className="absolute inset-0 bg-black/20 items-center justify-center">
+                    <TouchableOpacity
+                      onPress={() => {
+                        setShowIntroVideo(true);
+                        introPlayer.play();
+                      }}
+                      className="w-20 h-20 bg-primary/95 rounded-full items-center justify-center shadow-2xl border-[6px] border-white/30"
+                    >
+                      <Feather name="play" size={32} color="white" />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </>
             )}
-            <View className="absolute inset-0 bg-black/20 items-center justify-center">
-              <TouchableOpacity className="w-20 h-20 bg-primary/95 rounded-full items-center justify-center shadow-2xl border-[6px] border-white/30">
-                <Feather name="play" size={32} color="white" />
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
 
@@ -378,11 +419,11 @@ const CourseDetails = () => {
         </View>
 
         {/* Course Curriculum */}
-        <View className="px-6 mb-10">
+        <View className="px-6 mb-8">
           <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
             Course Curriculum
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-6">
+          <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-4">
             {course.sections?.length || 0} sections •{" "}
             {course.sections?.[0]?.lessons?.length || 0} lessons • 1h 45m total
             length
@@ -391,11 +432,11 @@ const CourseDetails = () => {
           {course.sections?.map((section, sectionIdx: number) => (
             <View
               key={sectionIdx}
-              className="mb-4 bg-gray-50 dark:bg-slate-800/30 border border-gray-100 dark:border-slate-700/50 rounded-[32px] overflow-hidden"
+              className="mb-2.5 bg-gray-50 dark:bg-slate-800/30 border border-gray-100 dark:border-slate-700/50 rounded-2xl overflow-hidden"
             >
               <TouchableOpacity
                 onPress={() => toggleModule(sectionIdx)}
-                className="p-6 flex-row items-center justify-between"
+                className="px-4 py-3.5 flex-row items-center justify-between"
               >
                 <View className="flex-1">
                   <Text className="text-slate-800 dark:text-white font-black text-lg">
@@ -417,7 +458,7 @@ const CourseDetails = () => {
               </TouchableOpacity>
 
               {expandedModules.includes(sectionIdx) && (
-                <View className="px-6 pb-6 pt-2">
+                <View className="px-4 pb-3 pt-0">
                   {section.lessons?.map((lesson, lessonIdx: number) => (
                     <TouchableOpacity
                       key={lessonIdx}
@@ -434,9 +475,9 @@ const CourseDetails = () => {
                           setSelectedLesson(lesson);
                         }
                       }}
-                      className="flex-row items-center py-4 border-t border-gray-100 dark:border-slate-700/30"
+                      className="flex-row items-center py-2.5 border-t border-gray-100 dark:border-slate-700/30"
                     >
-                      <View className="w-8 h-8 rounded-full bg-orange-50 dark:bg-orange-900/10 items-center justify-center mr-4">
+                      <View className="w-7 h-7 rounded-full bg-orange-50 dark:bg-orange-900/10 items-center justify-center mr-3">
                         {lesson.contentType === "video" ? (
                           <Feather
                             name="play-circle"
@@ -473,7 +514,7 @@ const CourseDetails = () => {
         </View>
 
         {/* Requirements & Description */}
-        <View className="px-6 mb-20">
+        <View className="px-6 mb-6">
           <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
             Requirements
           </Text>
@@ -501,13 +542,13 @@ const CourseDetails = () => {
         </View>
 
         {/* Meet your instructor */}
-        <View className="px-6 mb-10">
+        <View className="px-6">
           <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
             Meet your instructor
           </Text>
           <TouchableOpacity
             onPress={() => router.push(`/expert/${course.teacher.slug}`)}
-            className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-[24px] p-5"
+            className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-xl p-5"
           >
             <Image
               source={{
@@ -592,7 +633,7 @@ const CourseDetails = () => {
         }
       >
         <View className="flex-1 bg-black/50 items-center justify-center px-6">
-          <View className="bg-white dark:bg-slate-800 rounded-[28px] p-8 w-full max-w-sm items-center shadow-2xl">
+          <View className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-sm items-center shadow-2xl">
             {enrollResult.success ? (
               <>
                 <View className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 items-center justify-center mb-5">

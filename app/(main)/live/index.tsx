@@ -97,7 +97,7 @@ const LiveTestCard = ({
           source={{
             uri:
               test.thumbnailUrl ||
-              "https://ik.imagekit.io/testkart/placeholders/mock-test-placeholder__FmYrad7s.png",
+              "https://ik.imagekit.io/testkart/placeholders/live.png",
           }}
           className="w-full h-full"
           resizeMode="cover"
