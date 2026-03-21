@@ -27,10 +27,10 @@ const Header = () => {
               source={{
                 uri:
                   colorScheme === "dark"
-                    ? "https://ik.imagekit.io/testkart/brand/testkart-logo-dark_KnLezrS1K.png"
-                    : "https://ik.imagekit.io/testkart/brand/testkart-logo-light_3jHfyYsBp.png",
+                    ? "https://ik.imagekit.io/testkart/brand/testkart-new-white.png"
+                    : "https://ik.imagekit.io/testkart/brand/testkart-new-black.png",
               }}
-              className="w-[130px] h-[40px]"
+              className="w-[140px] h-[40px]"
               resizeMode="contain"
             />
           </TouchableOpacity>
@@ -60,28 +60,28 @@ const Header = () => {
                 color={colorScheme === "dark" ? "#FFFFFF" : "#1A1A1A"}
               />
             </TouchableOpacity>
-          <TouchableOpacity
-            className="ml-3 pointer-events-auto"
-            onPress={() => router.push("/(user)" as any)}
-          >
-            {user?.avatarUrl ? (
-              <View className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary shadow-sm">
-                <Image
-                  source={{ uri: user.avatarUrl }}
-                  className="w-full h-full"
-                  resizeMode="cover"
-                />
-              </View>
-            ) : (
-              <View className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-800 items-center justify-center border border-gray-200 dark:border-slate-700">
-                <Feather
-                  name="user"
-                  size={24}
-                  color={colorScheme === "dark" ? "#FFFFFF" : "#1A1A1A"}
-                />
-              </View>
-            )}
-          </TouchableOpacity>
+            <TouchableOpacity
+              className="ml-3 pointer-events-auto"
+              onPress={() => router.push("/(user)" as any)}
+            >
+              {user?.avatarUrl ? (
+                <View className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary shadow-sm">
+                  <Image
+                    source={{ uri: user.avatarUrl }}
+                    className="w-full h-full"
+                    resizeMode="cover"
+                  />
+                </View>
+              ) : (
+                <View className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-800 items-center justify-center border border-gray-200 dark:border-slate-700">
+                  <Feather
+                    name="user"
+                    size={24}
+                    color={colorScheme === "dark" ? "#FFFFFF" : "#1A1A1A"}
+                  />
+                </View>
+              )}
+            </TouchableOpacity>
           </>
         ) : (
           <Link href="/login" asChild>

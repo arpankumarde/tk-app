@@ -27,7 +27,7 @@ const BottomTabs = () => {
     { name: "Courses", icon: "book", href: "/courses" },
     { name: "Tests", icon: "file-text", href: "/tests" },
     { name: "Live", icon: "radio", badge: true, href: "/live" },
-    { name: "Shop", icon: "shopping-bag", href: "/shop" },
+    { name: "Notes", icon: "shopping-bag", href: "/shop" },
     {
       name: isLoggedIn ? "Dashboard" : "Login",
       icon: isLoggedIn ? "user" : "user-plus",

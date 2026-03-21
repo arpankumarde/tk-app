@@ -95,10 +95,10 @@ const ShopScreen = () => {
         }
 
         const data = await response.json();
-        console.log(
-          "API Response Data:",
-          JSON.stringify(data).substring(0, 500),
-        );
+        // console.log(
+        //   "API Response Data:",
+        //   JSON.stringify(data).substring(0, 500),
+        // );
 
         // Fix: The log shows the data is inside a "json" field
         const payload = data.json || data;
