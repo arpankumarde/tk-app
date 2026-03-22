@@ -6,6 +6,7 @@ import {
   ReactNode,
 } from "react";
 import * as SecureStore from "expo-secure-store";
+import * as WebBrowser from "expo-web-browser";
 
 type User = {
   academyName: string | null;
@@ -74,7 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     await SecureStore.deleteItemAsync("auth_token");
     await SecureStore.deleteItemAsync("auth_user");
-    await fetch(`${BASE_URL}/_api/auth/logout`, { method: "POST" });
+    await fetch(`${BASE_URL}/_api/auth/logout`, { method: "POST", credentials: "omit" });
+    await WebBrowser.coolDownAsync();
   };
 
   return (

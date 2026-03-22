@@ -58,6 +58,7 @@ export default function ProfileScreen() {
       await logout();
       router.push("/login");
     } catch (error) {
+      console.error("Logout error:", error);
       Alert.alert("Error", "Failed to logout. Please try again.");
     }
   };

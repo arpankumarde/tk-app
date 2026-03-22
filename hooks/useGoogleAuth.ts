@@ -15,7 +15,9 @@ export function useGoogleAuth() {
   const signInWithGoogle = async () => {
     try {
       const authorizeUrl = `${BASE_URL}/_api/auth/oauth_authorize?provider=google&role=student&redirectTo=${encodeURIComponent(redirectUri)}`;
-      const authorizeRes = await fetch(authorizeUrl);
+      const authorizeRes = await fetch(authorizeUrl, {
+        credentials: "omit",
+      });
       const authorizeBody = await authorizeRes.json();
       const { redirectUrl } = authorizeBody;
 
@@ -47,6 +49,7 @@ export function useGoogleAuth() {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        credentials: "omit",
       });
       const sessionBody = await sessionRes.json();
       const { user } = sessionBody.json ?? sessionBody;
