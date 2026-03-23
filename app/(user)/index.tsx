@@ -290,6 +290,19 @@ export default function ProfileScreen() {
               <Feather name="chevron-right" size={20} color="#CBD5E1" />
             </TouchableOpacity>
 
+            <TouchableOpacity
+              onPress={() => router.push("/(user)/wallet" as any)}
+              className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800"
+            >
+              <View className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 items-center justify-center mr-4">
+                <Ionicons name="wallet-outline" size={22} color="#3B82F6" />
+              </View>
+              <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
+                Wallet
+              </Text>
+              <Feather name="chevron-right" size={20} color="#CBD5E1" />
+            </TouchableOpacity>
+
             <TouchableOpacity className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800">
               <View className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-700/20 items-center justify-center mr-4">
                 <Feather name="settings" size={22} color="#6B7280" />

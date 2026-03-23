@@ -256,6 +256,35 @@ export interface OrderDetailsResponse {
   error?: string;
 }
 
+// Wallet
+export interface WalletBalance {
+  availableBalance: number;
+  totalCredits: number;
+  totalWithdrawn: number;
+  totalPurchased: number;
+  breakdown: {
+    credits: { count: number; amount: number };
+    withdrawals: { count: number; amount: number };
+    purchases: { count: number; amount: number };
+  };
+}
+
+export interface WalletTransaction {
+  id: number;
+  type: string;
+  amount: number;
+  description: string;
+  createdAt: string;
+  status?: string;
+}
+
+export interface WalletTransactionsResponse {
+  transactions: WalletTransaction[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface LatestAttemptResultsPayload {
   attemptId: number;
   completedAt?: string;
