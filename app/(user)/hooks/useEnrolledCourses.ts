@@ -3,7 +3,11 @@ import { EnrolledCourse, CourseProgressResponse } from "../types";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
-export const useEnrolledCourses = (token: string | null) => {
+export const useEnrolledCourses = (
+  token: string | null,
+  options?: { limit?: number },
+) => {
+  const limit = options?.limit ?? 5;
   const [courses, setCourses] = useState<EnrolledCourse[]>([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
@@ -14,7 +18,7 @@ export const useEnrolledCourses = (token: string | null) => {
     try {
       setLoading(true);
       const response = await fetch(
-        `${BASE_URL}/_api/student/enrolled-courses?limit=5`,
+        `${BASE_URL}/_api/student/enrolled-courses?limit=${limit}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -70,7 +74,7 @@ export const useEnrolledCourses = (token: string | null) => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, limit]);
 
   useEffect(() => {
     fetchCourses();

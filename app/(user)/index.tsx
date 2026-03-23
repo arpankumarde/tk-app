@@ -163,7 +163,7 @@ export default function ProfileScreen() {
               Ongoing Courses ({totalCourses})
             </Text>
             <TouchableOpacity
-              onPress={() => router.push("/(main)/courses" as any)}
+              onPress={() => router.push("/(user)/courses" as any)}
             >
               <View className="flex-row items-center">
                 <Text className="text-primary font-black text-sm">
