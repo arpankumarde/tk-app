@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
@@ -199,6 +199,7 @@ const TestAttemptScreen = () => {
   const { colorScheme } = useColorScheme();
   const { token } = useAuth();
   const { attemptId, testItemId, startedAt } = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(true);
   const [questions, setQuestions] = useState<NormalizedQuestion[]>([]);
@@ -758,7 +759,7 @@ const TestAttemptScreen = () => {
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 32 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
       >
         <View className="pt-4">
           <View className="px-6 pb-4 border-b border-gray-100 dark:border-slate-800">
@@ -1070,49 +1071,6 @@ const TestAttemptScreen = () => {
               )}
             </View>
 
-            <View className="mt-8 flex-row items-center justify-between">
-              <TouchableOpacity
-                onPress={() =>
-                  setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))
-                }
-                disabled={currentQuestionIndex === 0}
-                className={`px-6 py-3 rounded-xl border ${
-                  currentQuestionIndex === 0
-                    ? "border-gray-100 dark:border-slate-700"
-                    : "border-gray-200 dark:border-slate-600"
-                }`}
-              >
-                <Text
-                  className={`font-bold text-base ${
-                    currentQuestionIndex === 0
-                      ? "text-slate-400 dark:text-slate-600"
-                      : "text-slate-700 dark:text-slate-200"
-                  }`}
-                >
-                  Previous
-                </Text>
-              </TouchableOpacity>
-
-              {currentQuestionIndex < displayedQuestions.length - 1 ||
-              selectedSubject ? (
-                <TouchableOpacity
-                  onPress={handleNextFromFooter}
-                  className="bg-primary px-8 py-3 rounded-xl"
-                >
-                  <Text className="text-white font-black text-base">Next</Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  onPress={handleOpenSubmitConfirm}
-                  disabled={submitting}
-                  className="bg-green-600 px-8 py-3 rounded-xl"
-                >
-                  <Text className="text-white font-black text-base">
-                    {submitting ? "Submitting..." : "Submit Test"}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
 
             <View className="mt-8 pt-6 border-t border-gray-100 dark:border-slate-800">
               <Text className="text-slate-400 dark:text-slate-500 text-xs font-semibold mb-2">
@@ -1125,6 +1083,56 @@ const TestAttemptScreen = () => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Sticky Navigation Footer */}
+      <View 
+        className="px-6 py-4 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 shadow-lg"
+        style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+      >
+        <View className="flex-row items-center justify-between">
+          <TouchableOpacity
+            onPress={() =>
+              setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))
+            }
+            disabled={currentQuestionIndex === 0}
+            className={`px-8 py-3.5 rounded-2xl border ${
+              currentQuestionIndex === 0
+                ? "border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/20"
+                : "border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+            }`}
+          >
+            <Text
+              className={`font-black text-base ${
+                currentQuestionIndex === 0
+                  ? "text-slate-400 dark:text-slate-600"
+                  : "text-slate-700 dark:text-slate-200"
+              }`}
+            >
+              Previous
+            </Text>
+          </TouchableOpacity>
+
+          {currentQuestionIndex < displayedQuestions.length - 1 ||
+          selectedSubject ? (
+            <TouchableOpacity
+              onPress={handleNextFromFooter}
+              className="bg-primary px-12 py-3.5 rounded-2xl shadow-sm shadow-primary/20"
+            >
+              <Text className="text-white font-black text-lg">Next</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={handleOpenSubmitConfirm}
+              disabled={submitting}
+              className="bg-green-600 px-10 py-3.5 rounded-2xl shadow-sm shadow-green-500/20"
+            >
+              <Text className="text-white font-black text-lg">
+                {submitting ? "Submitting..." : "Submit Test"}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
 
       <Modal
         transparent

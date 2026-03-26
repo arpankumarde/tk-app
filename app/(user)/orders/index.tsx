@@ -126,7 +126,10 @@ export default function OrdersScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-slate-950">
+    <SafeAreaView
+      edges={["top", "left", "right"]}
+      className="flex-1 bg-white dark:bg-slate-950"
+    >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
