@@ -9,7 +9,7 @@ interface EnrolledTestCardProps {
 }
 
 const EnrolledTestCard = ({ test }: EnrolledTestCardProps) => {
-  const displayThumbnail = test.thumbnailUrl || test.thumbnailImageUrl || test.teacherAvatar || "https://ik.imagekit.io/testkart/placeholders/mock-test-placeholder__FmYrad7s.png";
+  const displayThumbnail = test.thumbnailUrl || test.thumbnailImageUrl || test.teacherAvatar || "https://ik.imagekit.io/testkart/placeholders/Mock%20Test.jpg";
   const displayExamName = test.examName || test.category || "Mock Test";
   
   const formattedDate = test.enrolledAt ? new Date(test.enrolledAt).toLocaleDateString('en-US', {

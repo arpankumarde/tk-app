@@ -1,8 +1,9 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { useColorScheme } from "nativewind";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useAddToCart } from "@/hooks/useAddToCart";
 
 interface MockTestCardProps {
   test: {
@@ -29,6 +30,8 @@ interface MockTestCardProps {
 
 const MockTestCard = ({ test }: MockTestCardProps) => {
   const { colorScheme } = useColorScheme();
+  const isFree = (test.discountPrice ?? test.price) === 0;
+  const { addToCart, adding } = useAddToCart();
 
   const handlePress = () => {
     router.push(`/(main)/tests/${test.slug}` as any);
@@ -36,7 +39,7 @@ const MockTestCard = ({ test }: MockTestCardProps) => {
 
   const displayImage =
     test.thumbnailUrl ||
-    "https://ik.imagekit.io/testkart/placeholders/mock-test-placeholder__FmYrad7s.png";
+    "https://ik.imagekit.io/testkart/placeholders/Mock%20Test.jpg";
   const displayAuthor =
     test.teacherName || test.creatorName || "TestKart Expert";
 
@@ -55,166 +58,173 @@ const MockTestCard = ({ test }: MockTestCardProps) => {
   return (
     <TouchableOpacity
       onPress={handlePress}
-      activeOpacity={0.85}
-      className="bg-white dark:bg-slate-800 rounded-[32px] mx-5 mb-6 overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none border border-gray-100 dark:border-slate-700/50"
+      activeOpacity={0.9}
+      className="bg-white dark:bg-slate-900 rounded-[32px] mx-5 mb-8 p-3.5 border border-gray-100 dark:border-slate-800"
+      style={{
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.04,
+        shadowRadius: 16,
+        elevation: 4,
+      }}
     >
-      <View className="p-4">
-        {/* Badges */}
-        <View
-          className="flex-row items-center justify-between mb-3"
-          style={{ gap: 8 }}
-        >
-          <View className="max-w-[72%] px-4 py-1.5 bg-orange-50 dark:bg-orange-900/30 rounded-full border border-orange-100 dark:border-orange-800/30">
+      <View>
+        {/* Top Badges Row */}
+        <View className="flex-row justify-between mb-2.5 px-1">
+          <View className="bg-orange-50 dark:bg-orange-950/30 px-3.5 py-1.5 rounded-full border border-orange-100/50 dark:border-orange-900/30 max-w-[60%]">
             <Text
-              className="text-primary text-[10px] font-black uppercase tracking-widest"
+              className="text-orange-500 dark:text-orange-400 font-black text-[10px] uppercase tracking-widest"
               numberOfLines={1}
-              ellipsizeMode="tail"
             >
               {displaySubject}
             </Text>
           </View>
-
-          <View className="max-w-[34%] px-3 py-1.5 bg-cyan-50 dark:bg-cyan-900/30 rounded-full border border-cyan-100 dark:border-cyan-800/30">
-            <Text
-              className="text-cyan-600 dark:text-cyan-400 text-[10px] font-black uppercase tracking-widest"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {test.language?.trim() || "English"}
+          <View className="bg-cyan-50 dark:bg-cyan-950/30 px-3.5 py-1.5 rounded-full border border-cyan-100/50 dark:border-cyan-900/30">
+            <Text className="text-cyan-600 dark:text-cyan-400 font-black text-[10px] uppercase tracking-widest">
+              {test.language?.trim() || "ENGLISH"}
             </Text>
           </View>
         </View>
 
         {/* Thumbnail with floating action */}
-        <View className="relative w-full h-[220px] rounded-[24px] overflow-hidden bg-slate-100 dark:bg-slate-900 mb-4">
+        <View className="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-900 mb-4">
           <Image
             source={{ uri: displayImage }}
             className="w-full h-full"
             resizeMode="cover"
           />
-          <TouchableOpacity
-            className="absolute bottom-4 right-4 w-12 h-12 bg-primary rounded-2xl items-center justify-center shadow-lg shadow-orange-500/40"
-            onPress={() => router.push(`/(main)/tests/${test.slug}` as any)}
-          >
+          <View className="absolute bottom-4 right-4 bg-orange-500/90 w-11 h-11 rounded-2xl items-center justify-center shadow-lg">
             <Feather name="plus" size={24} color="white" />
-          </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Content */}
-        <View className="px-1">
+        {/* Content Section */}
+        <View className="px-1.5">
           <Text
-            className="text-xl font-black text-slate-800 dark:text-white mb-2 leading-tight"
+            className="text-[22px] font-black text-slate-800 dark:text-white mb-2 leading-tight"
             numberOfLines={2}
           >
             {test.title}
           </Text>
 
-          <View className="flex-row items-center mb-4">
-            <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium">
-              By: {displayAuthor}
-            </Text>
-            <View className="ml-2 w-4 h-4 bg-orange-500 rounded-full items-center justify-center">
-              <Feather name="check" size={10} color="white" />
+          {/* Author & Rating Row */}
+          <View className="flex-row items-center justify-between mb-5">
+            <View className="flex-row items-center flex-1">
+              <Text className="text-slate-400 dark:text-slate-500 text-sm font-bold">
+                By:{" "}
+              </Text>
+              <Text
+                className="text-slate-600 dark:text-slate-300 text-sm font-black flex-1"
+                numberOfLines={1}
+              >
+                {displayAuthor}
+              </Text>
+              <MaterialIcons
+                name="verified"
+                size={16}
+                color="#22C55E"
+                style={{ marginLeft: 4 }}
+              />
             </View>
-            <View className="flex-row items-center ml-auto">
-              <Feather name="star" size={14} color="#f59e0b" fill="#f59e0b" />
-              <Text className="ml-1 text-amber-500 font-bold text-sm">
+            
+            <View className="flex-row items-center ml-4">
+              <MaterialIcons name="star-outline" size={16} color="#F97316" />
+              <Text className="ml-1 text-orange-500 font-black text-sm">
                 {test.rating || "5.0"}
               </Text>
-              <Text className="ml-1 text-slate-400 dark:text-slate-500 text-xs">
-                ({test.reviewsCount || 0} reviews)
+              <Text className="ml-1 text-slate-400 text-xs">
+                ({test.reviewsCount || 0} {test.reviewsCount === 1 ? "Review" : "Reviews"})
               </Text>
             </View>
           </View>
 
-          {/* Stats Grid */}
-          <View className="space-y-2.5 mb-6">
+          {/* Vertical Icon Stats */}
+          <View className="gap-y-3 mb-6">
             <View className="flex-row items-center">
-              <View className="w-6">
-                <Feather name="file-text" size={16} color="#FF8A50" />
-              </View>
-              <Text className="text-slate-600 dark:text-slate-300 font-bold flex-1">
+              <Feather name="file-text" size={17} color="#F97316" />
+              <Text className="ml-3 text-slate-500 dark:text-slate-400 font-bold text-sm">
                 Questions:{" "}
-                <Text className="font-black text-slate-800 dark:text-white">
+                <Text className="text-slate-800 dark:text-white font-black">
                   {test.actualQuestionCount || 0}
                 </Text>
               </Text>
             </View>
+
             <View className="flex-row items-center">
-              <View className="w-6">
-                <Feather name="clock" size={16} color="#FF8A50" />
-              </View>
-              <Text className="text-slate-600 dark:text-slate-300 font-bold flex-1">
+              <Feather name="clock" size={17} color="#F97316" />
+              <Text className="ml-3 text-slate-500 dark:text-slate-400 font-bold text-sm">
                 Total Time:{" "}
-                <Text className="font-black text-slate-800 dark:text-white">
+                <Text className="text-slate-800 dark:text-white font-black">
                   {test.durationMinutes || 0} Minutes
                 </Text>
               </Text>
             </View>
+
             <View className="flex-row items-center">
-              <View className="w-6">
-                <Feather name="trending-up" size={16} color="#FF8A50" />
-              </View>
-              <Text className="text-slate-600 dark:text-slate-300 font-bold flex-1">
+              <Feather name="trending-up" size={17} color="#F97316" />
+              <Text className="ml-3 text-slate-500 dark:text-slate-400 font-bold text-sm">
                 Test Items:{" "}
-                <Text className="font-black text-slate-800 dark:text-white">
+                <Text className="text-slate-800 dark:text-white font-black">
                   {test.totalTests || 0}
                 </Text>
-                {test.freeTestsCount && test.freeTestsCount > 0 ? (
-                  <Text className="text-green-500 ml-1">
-                    {" "}
-                    ({test.freeTestsCount} Free Test)
-                  </Text>
-                ) : null}
               </Text>
             </View>
+
             <View className="flex-row items-center">
-              <View className="w-6">
-                <Feather name="users" size={16} color="#FF8A50" />
-              </View>
-              <Text className="text-slate-600 dark:text-slate-300 font-bold flex-1">
+              <Feather name="users" size={17} color="#F97316" />
+              <Text className="ml-3 text-slate-500 dark:text-slate-400 font-bold text-sm">
                 Students Enrolled:{" "}
-                <Text className="font-black text-slate-800 dark:text-white">
+                <Text className="text-slate-800 dark:text-white font-black">
                   {test.studentsEnrolled || 0}
                 </Text>
               </Text>
             </View>
           </View>
 
-          {/* Price & CTA */}
-          <View className="flex-row items-center justify-between pt-5 border-t border-slate-50 dark:border-slate-700/50">
+          {/* Divider */}
+          <View className="h-[1px] bg-slate-50 dark:bg-slate-800 mb-6" />
+
+          {/* Footer: CTA + Price Row */}
+          <View className="flex-row items-center justify-between">
             <TouchableOpacity
-              className="bg-primary flex-row items-center px-8 py-4 rounded-2xl shadow-lg shadow-orange-500/30 grow mr-4"
-              onPress={() => router.push(`/tests/${test.slug}` as any)}
+              onPress={async () => {
+                if (isFree) {
+                  router.push(`/tests/${test.slug}` as any);
+                } else {
+                  const result = await addToCart(test.id, "test");
+                  if (result.success) {
+                    router.push("/(user)/cart" as any);
+                  }
+                }
+              }}
+              disabled={adding}
+              className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-orange-500 shadow-orange-500/40"} flex-row items-center px-6 py-3.5 rounded-xl shadow-lg w-48 mr-4`}
             >
-              <Feather name="shopping-cart" size={20} color="white" />
-              <Text className="ml-2 text-white font-black text-lg">
-                Buy Now
+              <Feather
+                name={isFree ? "book" : "shopping-cart"}
+                size={18}
+                color="white"
+              />
+              <Text className="text-white font-black ml-3 text-sm">
+                {isFree ? "Enroll Free" : "Buy Now"}
               </Text>
             </TouchableOpacity>
 
             <View className="items-end">
-              <View className="flex-row items-center mb-1">
+              <View className="flex-row items-center">
                 {originalPrice && (
-                  <>
-                    <Text className="text-slate-400 dark:text-slate-500 line-through text-base mr-2">
-                      ₹ {originalPrice}
-                    </Text>
-                    <View className="bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-md">
-                      <Text className="text-green-600 dark:text-green-400 font-black text-[10px]">
-                        {discountPercent}% OFF
-                      </Text>
-                    </View>
-                  </>
+                  <Text className="text-slate-400 line-through text-xs mr-2">
+                    ₹{originalPrice}
+                  </Text>
+                )}
+                {actualPrice === 0 ? (
+                  <Text className="text-3xl font-black text-emerald-500">FREE</Text>
+                ) : (
+                  <Text className="text-3xl font-black text-orange-500">
+                    ₹{actualPrice}
+                  </Text>
                 )}
               </View>
-              {actualPrice === 0 ? (
-                <Text className="text-3xl font-black text-green-500">FREE</Text>
-              ) : (
-                <Text className="text-3xl font-black text-primary">
-                  ₹ {actualPrice}
-                </Text>
-              )}
             </View>
           </View>
         </View>

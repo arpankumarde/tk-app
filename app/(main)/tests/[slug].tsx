@@ -11,7 +11,7 @@ import {
   Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import BottomTabs from "@/components/BottomTabs";
@@ -244,27 +244,36 @@ const TestDetails = () => {
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Navigation Header */}
-        <View className="px-6 py-4 flex-row items-center">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mr-4"
-          >
-            <Feather name="chevron-left" size={24} color="#FF8A50" />
-          </TouchableOpacity>
-          <View className="flex-row items-center">
-            <Text className="text-slate-400 dark:text-slate-500 text-xs">
-              Tests
-            </Text>
-            <Feather
-              name="chevron-right"
-              size={12}
-              color="#94a3b8"
-              className="mx-2"
-            />
-            <Text className="text-primary text-xs font-bold" numberOfLines={1}>
-              {test.examName || "Details"}
-            </Text>
+        <View className="px-6 py-4 flex-row items-center justify-between">
+          <View className="flex-row items-center flex-1">
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mr-4"
+            >
+              <Feather name="chevron-left" size={24} color="#FF8A50" />
+            </TouchableOpacity>
+            <View className="flex-row items-center">
+              <Text className="text-slate-400 dark:text-slate-500 text-xs">
+                Tests
+              </Text>
+              <Feather
+                name="chevron-right"
+                size={12}
+                color="#94a3b8"
+                className="mx-2"
+              />
+              <Text className="text-primary text-xs font-bold" numberOfLines={1}>
+                {test.examName || "Details"}
+              </Text>
+            </View>
           </View>
+
+          <TouchableOpacity
+            onPress={handleShare}
+            className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center"
+          >
+            <Feather name="share-2" size={18} color="#FF8A50" />
+          </TouchableOpacity>
         </View>
 
         {/* Title & Description */}
@@ -321,24 +330,22 @@ const TestDetails = () => {
 
         {/* Thumbnail */}
         <View className="px-6 mb-8">
-          <View className="h-56 w-full rounded-[40px] overflow-hidden bg-slate-100 dark:bg-slate-800 relative shadow-2xl">
-            {test.thumbnailUrl ? (
-              <Image
-                source={{ uri: test.thumbnailUrl }}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
-            ) : (
-              <View className="w-full h-full items-center justify-center">
-                <Feather name="edit-3" size={64} color="#e2e8f0" />
-              </View>
-            )}
+          <View className="aspect-video w-full rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 relative shadow-2xl">
+            <Image
+              source={{
+                uri:
+                  test.thumbnailUrl ||
+                  "https://ik.imagekit.io/testkart/placeholders/Mock%20Test.jpg",
+              }}
+              className="w-full h-full"
+              resizeMode="cover"
+            />
           </View>
         </View>
 
         {/* Package Stats Card */}
         <View className="px-6 mb-8">
-          <View className="bg-gray-50 dark:bg-slate-800/50 rounded-[24px] p-5 border border-gray-100 dark:border-slate-700">
+          <View className="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-5 border border-gray-100 dark:border-slate-700">
             <Text className="text-slate-800 dark:text-white font-black text-lg mb-1">
               This package includes
             </Text>
@@ -441,7 +448,7 @@ const TestDetails = () => {
 
         {/* Test Series Content (Expandable Items) */}
         {items.length > 0 && (
-          <View className="px-6 mb-10">
+          <View className="px-6 mb-8">
             <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
               Test series content
             </Text>
@@ -452,35 +459,36 @@ const TestDetails = () => {
             {items.map((item, idx) => (
               <View
                 key={item.id}
-                className="mb-4 bg-gray-50 dark:bg-slate-800/30 border border-gray-100 dark:border-slate-700/50 rounded-[32px] overflow-hidden"
+                className="mb-3 bg-white dark:bg-slate-800/20 border border-slate-100 dark:border-slate-700/50 rounded-xl overflow-hidden shadow-sm shadow-slate-200/50"
               >
                 <TouchableOpacity
                   onPress={() => toggleItem(idx)}
-                  className="p-6 flex-row items-center justify-between"
+                  className="p-4 flex-row items-center justify-between"
                 >
                   <View className="flex-1 mr-3">
-                    <View className="flex-row items-center mb-1">
+                    <View className="flex-row items-center mb-1.5">
+                      <View className="w-1 h-3 bg-orange-400 rounded-full mr-2" />
+                      <Text className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                        Test {idx + 1}
+                      </Text>
                       {item.isFree && (
-                        <View className="bg-green-50 dark:bg-green-900/20 px-2.5 py-0.5 rounded-full mr-2">
-                          <Text className="text-green-600 dark:text-green-400 text-[10px] font-black uppercase">
+                        <View className="bg-green-100/50 dark:bg-green-900/20 px-2 py-0.5 rounded-md ml-2">
+                          <Text className="text-green-600 dark:text-green-400 text-[9px] font-black uppercase">
                             Free
                           </Text>
                         </View>
                       )}
-                      <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-                        Test {idx + 1}
-                      </Text>
                     </View>
-                    <Text className="text-slate-800 dark:text-white font-black text-base">
+                    <Text className="text-slate-800 dark:text-white font-black text-sm">
                       {item.title}
                     </Text>
                     <View className="flex-row items-center mt-2">
-                      <Feather name="file-text" size={12} color="#94a3b8" />
-                      <Text className="text-slate-400 text-xs font-bold ml-1.5 mr-4">
+                      <Feather name="file-text" size={11} color="#94a3b8" />
+                      <Text className="text-slate-400 text-[10px] font-bold ml-1.5 mr-4">
                         {item.totalQuestions} Qs
                       </Text>
-                      <Feather name="clock" size={12} color="#94a3b8" />
-                      <Text className="text-slate-400 text-xs font-bold ml-1.5">
+                      <Feather name="clock" size={11} color="#94a3b8" />
+                      <Text className="text-slate-400 text-[10px] font-bold ml-1.5">
                         {item.durationMinutes} min
                       </Text>
                     </View>
@@ -491,28 +499,26 @@ const TestDetails = () => {
                         ? "chevron-up"
                         : "chevron-down"
                     }
-                    size={20}
+                    size={18}
                     color="#FF8A50"
                   />
                 </TouchableOpacity>
 
                 {expandedItems.includes(idx) && item.subjects.length > 0 && (
-                  <View className="px-6 pb-6 pt-2">
-                    <Text className="text-slate-500 dark:text-slate-400 text-xs font-black uppercase tracking-wider mb-3">
-                      Subjects covered
-                    </Text>
+                  <View className="px-4 pb-4 pt-1">
+                    <View className="h-[0.5px] bg-slate-100 dark:bg-slate-700/30 mb-3" />
                     {item.subjects.map((subject) => (
                       <View
                         key={subject.id}
-                        className="flex-row items-center py-3 border-t border-gray-100 dark:border-slate-700/30"
+                        className="flex-row items-center py-2"
                       >
-                        <View className="w-8 h-8 rounded-full bg-orange-50 dark:bg-orange-900/10 items-center justify-center mr-4">
-                          <Feather name="book-open" size={14} color="#FF8A50" />
+                        <View className="w-6 h-6 rounded-full bg-orange-50 dark:bg-orange-900/10 items-center justify-center mr-3">
+                          <Feather name="book-open" size={12} color="#FF8A50" />
                         </View>
-                        <Text className="text-slate-700 dark:text-slate-300 text-sm font-bold flex-1">
+                        <Text className="text-slate-600 dark:text-slate-300 text-xs font-bold flex-1">
                           {subject.subjectName}
                         </Text>
-                        <Text className="text-slate-400 text-xs font-bold">
+                        <Text className="text-slate-400 text-[10px] font-bold">
                           {subject.actualQuestionCount} Qs
                         </Text>
                       </View>
@@ -526,7 +532,7 @@ const TestDetails = () => {
 
         {/* What You'll Learn */}
         {test.whatYouLearn && test.whatYouLearn.length > 0 && (
-          <View className="px-6 mb-10">
+          <View className="px-6 mb-8">
             <Text className="text-2xl font-black text-slate-800 dark:text-white mb-6">
               What you&apos;ll learn
             </Text>
@@ -545,7 +551,7 @@ const TestDetails = () => {
 
         {/* Requirements */}
         {test.requirements && test.requirements.length > 0 && (
-          <View className="px-6 mb-10">
+          <View className="px-6 mb-8">
             <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
               Requirements
             </Text>
@@ -562,7 +568,7 @@ const TestDetails = () => {
 
         {/* Long Description */}
         {test.longDescription && (
-          <View className="px-6 mb-10">
+          <View className="px-6 mb-8">
             <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
               Description
             </Text>
@@ -573,13 +579,13 @@ const TestDetails = () => {
         )}
 
         {/* About the Author */}
-        <View className="px-6 mb-10">
+        <View className="px-6 mb-8">
           <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
             About the Author
           </Text>
           <TouchableOpacity
             onPress={() => router.push(`/expert/${test.teacherId}` as any)}
-            className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-[24px] p-5"
+            className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-xl p-5"
           >
             <Image
               source={{
@@ -595,9 +601,9 @@ const TestDetails = () => {
               </Text>
               {test.teacherIsVerified && (
                 <View className="flex-row items-center mt-1">
-                  <Feather name="check-circle" size={12} color="#10b981" />
-                  <Text className="text-emerald-500 text-xs font-bold ml-1">
-                    Verified Instructor
+                  <MaterialIcons name="verified" size={16} color="#22C55E" />
+                  <Text className="text-emerald-600 dark:text-emerald-400 text-xs font-bold ml-1">
+                    verified
                   </Text>
                 </View>
               )}
@@ -649,12 +655,6 @@ const TestDetails = () => {
           </View>
         </View>
         <TouchableOpacity
-          onPress={handleShare}
-          className="w-12 h-12 bg-gray-50 dark:bg-slate-800 rounded-2xl items-center justify-center mr-3"
-        >
-          <Feather name="share-2" size={18} color="#FF8A50" />
-        </TouchableOpacity>
-        <TouchableOpacity
           onPress={
             isFree
               ? handleFreeEnroll
@@ -672,7 +672,7 @@ const TestDetails = () => {
                 }
           }
           disabled={enrolling || addingToCart || (isFree && test.isEnrolled)}
-          className={`${isFree ? "bg-orange-500" : "bg-primary"} h-14 px-8 rounded-2xl items-center justify-center shadow-lg shadow-orange-500/30 disabled:opacity-60`}
+          className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} h-14 px-8 rounded-xl items-center justify-center shadow-lg disabled:opacity-60`}
         >
           {enrolling || addingToCart ? (
             <ActivityIndicator color="white" />
@@ -697,7 +697,7 @@ const TestDetails = () => {
         }
       >
         <View className="flex-1 bg-black/50 items-center justify-center px-6">
-          <View className="bg-white dark:bg-slate-800 rounded-[28px] p-8 w-full max-w-sm items-center shadow-2xl">
+          <View className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-sm items-center shadow-2xl">
             {enrollResult.success ? (
               <>
                 <View className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 items-center justify-center mb-5">

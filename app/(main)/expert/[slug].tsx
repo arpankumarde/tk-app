@@ -11,7 +11,7 @@ import {
   Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Header from "@/components/Header";
@@ -286,9 +286,7 @@ const ExpertDetails = () => {
                   {teacher.displayName}
                 </Text>
                 {teacher.isVerified && (
-                  <View className="w-5 h-5 rounded-full bg-green-500 items-center justify-center">
-                    <Feather name="check" size={11} color="white" />
-                  </View>
+                  <MaterialIcons name="verified" size={20} color="#22C55E" />
                 )}
               </View>
 

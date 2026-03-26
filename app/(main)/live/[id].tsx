@@ -10,7 +10,7 @@ import {
   Share,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Header from "@/components/Header";
@@ -316,22 +316,42 @@ const LiveTestDetails = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 40 }}
         >
+          {/* Image Hero Section */}
+          <View className="px-6 pt-5 mb-5">
+            <View className="relative w-full aspect-video rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-800">
+              <Image
+                source={{
+                  uri:
+                    liveTest.thumbnailUrl ||
+                    "https://ik.imagekit.io/testkart/placeholders/live.png",
+                }}
+                className="w-full h-full"
+                resizeMode="cover"
+              />
+              <View className="absolute top-4 left-4 bg-slate-900/90 px-4 py-1.5 rounded-full shadow-lg">
+                <Text className="text-white font-black text-[10px] uppercase tracking-wider">
+                  Live Test
+                </Text>
+              </View>
+            </View>
+          </View>
+
           {/* Heading (same style language as tests screen) */}
-          <View className="px-6 pt-6">
-            <View className="self-start bg-orange-50 dark:bg-orange-900/30 border border-orange-100 dark:border-orange-800/30 px-4 py-1.5 rounded-full mb-4">
+          <View className="px-6">
+            <View className="self-start bg-orange-50 dark:bg-orange-900/30 border border-orange-100 dark:border-orange-800/30 px-4 py-1.5 rounded-full mb-3">
               <Text className="text-primary text-[11px] font-black uppercase tracking-wider">
                 Live Test Zone
               </Text>
             </View>
 
-            <Text className="text-slate-800 dark:text-white text-5xl font-black leading-tight mb-3">
+            <Text className="text-slate-800 dark:text-white text-5xl font-black leading-tight mb-4">
               {liveTest.title}
             </Text>
 
-            <Text className="text-slate-500 dark:text-slate-400 text-base leading-8 mb-5">
-              {liveTest.description ||
-                "Join this live mock test to improve speed, accuracy, and confidence."}
-            </Text>
+            {/* <Text className="text-slate-500 dark:text-slate-400 text-base leading-7 mb-4">
+              {(liveTest.description ||
+                "Join this live mock test to improve speed, accuracy, and confidence.").trim()}
+            </Text> */}
 
             <View className="flex-row items-center mb-5">
               <Text className="text-slate-500 dark:text-slate-400 text-sm">
@@ -349,9 +369,9 @@ const LiveTestDetails = () => {
                 {liveTest.teacherName}
               </Text>
               {liveTest.teacherIsVerified && (
-                <Ionicons
-                  name="checkmark-circle"
-                  size={14}
+                <MaterialIcons
+                  name="verified"
+                  size={16}
                   color="#3B82F6"
                   style={{ marginLeft: 4 }}
                 />
@@ -402,25 +422,6 @@ const LiveTestDetails = () => {
             </View>
           </View>
 
-          {/* Hero Thumbnail */}
-          <View className="px-6 mb-5">
-            <View className="relative w-full h-[220px] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
-              <Image
-                source={{
-                  uri:
-                    liveTest.thumbnailUrl ||
-                    "https://ik.imagekit.io/testkart/placeholders/live.png",
-                }}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
-              <View className="absolute top-4 left-4 bg-orange-500/90 px-4 py-1.5 rounded-full">
-                <Text className="text-white font-black text-xs uppercase tracking-wider">
-                  Live Test
-                </Text>
-              </View>
-            </View>
-          </View>
 
           {/* ── Prize Pool ── */}
           {liveTest.hasPrizes && (
@@ -519,7 +520,7 @@ const LiveTestDetails = () => {
                 isTestEnded
                   ? "bg-slate-300 dark:bg-slate-700"
                   : liveTest.isEnrolled
-                    ? "bg-green-500 shadow-green-500/20"
+                    ? "bg-emerald-500 shadow-emerald-500/30"
                     : "bg-primary shadow-orange-500/20"
               }`}
             >
@@ -696,8 +697,15 @@ const LiveTestDetails = () => {
                 <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
                   About the Host
                 </Text>
-                <View className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-[24px] p-5">
-                  <View className="flex-row items-center mb-4">
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push(
+                      `/(main)/expert/${liveTest.teacherProfile?.id}` as any,
+                    )
+                  }
+                  className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-[24px] p-5 active:opacity-70"
+                >
+                  <View className="flex-row items-center">
                     <Image
                       source={{
                         uri:
@@ -712,11 +720,11 @@ const LiveTestDetails = () => {
                           {liveTest.teacherName}
                         </Text>
                         {liveTest.teacherIsVerified && (
-                          <Ionicons
-                            name="checkmark-circle"
-                            size={16}
-                            color="#3B82F6"
-                            style={{ marginLeft: 4 }}
+                          <MaterialIcons
+                            name="verified"
+                            size={18}
+                            color="#22C55E"
+                            className="ml-1"
                           />
                         )}
                       </View>
@@ -726,25 +734,14 @@ const LiveTestDetails = () => {
                         </Text>
                       ) : null}
                     </View>
-                    <TouchableOpacity
-                      onPress={() =>
-                        router.push(
-                          `/(main)/expert/${liveTest.teacherProfile?.id}` as any,
-                        )
-                      }
-                      className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/30 px-4 py-2 rounded-xl"
-                    >
-                      <Text className="text-orange-500 font-black text-xs">
-                        View Profile
-                      </Text>
-                    </TouchableOpacity>
+                    <Feather name="chevron-right" size={24} color="#94a3b8" />
                   </View>
                   {liveTest.teacherBio ? (
-                    <Text className="text-slate-600 dark:text-slate-300 text-sm leading-6">
+                    <Text className="text-slate-600 dark:text-slate-300 text-sm leading-6 mt-4">
                       {liveTest.teacherBio}
                     </Text>
                   ) : null}
-                </View>
+                </TouchableOpacity>
               </View>
             </View>
           ) : (

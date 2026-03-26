@@ -56,6 +56,9 @@ const ShopScreen = () => {
   const { colorScheme } = useColorScheme();
   const [tests, setTests] = useState<ExamTest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [sort, setSort] = useState("newest");
   const [showSortModal, setShowSortModal] = useState(false);
@@ -99,96 +102,132 @@ const ShopScreen = () => {
 
   const handleApplyFilters = () => {
     setShowFilterSidebar(false);
-    fetchTests();
+    setPage(1);
+    setTests([]);
+    fetchTests(1);
   };
 
-  const fetchTests = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const fetchTests = useCallback(
+    async (pageNum: number = 1, isLoadMore: boolean = false) => {
+      try {
+        if (isLoadMore) {
+          setLoadingMore(true);
+        } else {
+          setLoading(true);
+        }
+        setError(null);
 
-      let url = `${BASE_URL}/_api/tests/list?sortBy=${sort}`;
-      if (searchQuery.trim()) {
-        url += `&search=${encodeURIComponent(searchQuery.trim())}`;
+        let url = `${BASE_URL}/_api/tests/list?sortBy=${sort}&page=${pageNum}&limit=10`;
+        if (searchQuery.trim()) {
+          url += `&search=${encodeURIComponent(searchQuery.trim())}`;
+        }
+        if (priceType !== "all") {
+          url += `&priceType=${priceType}`;
+        }
+        if (minPrice.trim()) {
+          url += `&minPrice=${encodeURIComponent(minPrice.trim())}`;
+        }
+        if (maxPrice.trim()) {
+          url += `&maxPrice=${encodeURIComponent(maxPrice.trim())}`;
+        }
+        if (selectedLanguage !== "All Languages") {
+          url += `&language=${encodeURIComponent(selectedLanguage)}`;
+        }
+
+        console.log("Fetching tests from:", url);
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Fix: The log shows the data is inside a "json" field
+        const payload = data.json || data;
+        const testsList = payload.tests || payload.data?.tests || [];
+
+        // Client-side fallback: some API deployments may ignore these params.
+        const getEffectivePrice = (test: ExamTest) =>
+          Number(test.discountPrice ?? test.price ?? 0);
+
+        let filteredTests: ExamTest[] = [...testsList];
+
+        if (priceType === "free") {
+          filteredTests = filteredTests.filter(
+            (test) => getEffectivePrice(test) <= 0,
+          );
+        } else if (priceType === "paid") {
+          filteredTests = filteredTests.filter(
+            (test) => getEffectivePrice(test) > 0,
+          );
+        }
+
+        if (sort === "price_asc") {
+          filteredTests.sort(
+            (a, b) => getEffectivePrice(a) - getEffectivePrice(b),
+          );
+        } else if (sort === "price_desc") {
+          filteredTests.sort(
+            (a, b) => getEffectivePrice(b) - getEffectivePrice(a),
+          );
+        }
+
+        const count =
+          payload.totalCount ||
+          payload.pagination?.totalCount ||
+          payload.data?.totalCount ||
+          filteredTests.length;
+
+        if (isLoadMore) {
+          setTests((prev) => [...prev, ...filteredTests]);
+        } else {
+          setTests(filteredTests);
+        }
+
+        setTotalCount(priceType === "all" ? count : filteredTests.length);
+
+        // Update hasMore based on tests loaded and total count
+        const currentTotalLoaded = isLoadMore
+          ? tests.length + filteredTests.length
+          : filteredTests.length;
+        setHasMore(currentTotalLoaded < count);
+
+        if (filteredTests.length === 0 && !isLoadMore) {
+          console.warn("No tests returned from API");
+        }
+      } catch (error: any) {
+        console.error("Error fetching tests:", error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
       }
-      if (priceType !== "all") {
-        url += `&priceType=${priceType}`;
-      }
-      if (minPrice.trim()) {
-        url += `&minPrice=${encodeURIComponent(minPrice.trim())}`;
-      }
-      if (maxPrice.trim()) {
-        url += `&maxPrice=${encodeURIComponent(maxPrice.trim())}`;
-      }
-      if (selectedLanguage !== "All Languages") {
-        url += `&language=${encodeURIComponent(selectedLanguage)}`;
-      }
+    },
+    [
+      sort,
+      searchQuery,
+      priceType,
+      minPrice,
+      maxPrice,
+      selectedLanguage,
+      tests.length,
+    ],
+  );
 
-      console.log("Fetching tests from:", url);
-
-      const response = await fetch(url);
-      // console.log("API Response Status:", response);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      // console.log("API Response Data:", JSON.stringify(data).substring(0, 500));
-
-      // Fix: The log shows the data is inside a "json" field
-      const payload = data.json || data;
-      const testsList = payload.tests || payload.data?.tests || [];
-
-      // Client-side fallback: some API deployments may ignore these params.
-      const getEffectivePrice = (test: ExamTest) =>
-        Number(test.discountPrice ?? test.price ?? 0);
-
-      let filteredTests: ExamTest[] = [...testsList];
-
-      if (priceType === "free") {
-        filteredTests = filteredTests.filter(
-          (test) => getEffectivePrice(test) <= 0,
-        );
-      } else if (priceType === "paid") {
-        filteredTests = filteredTests.filter(
-          (test) => getEffectivePrice(test) > 0,
-        );
-      }
-
-      if (sort === "price_asc") {
-        filteredTests.sort(
-          (a, b) => getEffectivePrice(a) - getEffectivePrice(b),
-        );
-      } else if (sort === "price_desc") {
-        filteredTests.sort(
-          (a, b) => getEffectivePrice(b) - getEffectivePrice(a),
-        );
-      }
-
-      const count =
-        payload.totalCount ||
-        payload.pagination?.totalCount ||
-        payload.data?.totalCount ||
-        filteredTests.length;
-
-      setTests(filteredTests);
-      setTotalCount(priceType === "all" ? count : filteredTests.length);
-
-      if (filteredTests.length === 0) {
-        console.warn("No tests returned from API");
-      }
-    } catch (error: any) {
-      console.error("Error fetching tests:", error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
+  const handleLoadMore = () => {
+    if (!loading && !loadingMore && hasMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchTests(nextPage, true);
     }
-  }, [sort, searchQuery, priceType, minPrice, maxPrice, selectedLanguage]);
+  };
 
   useEffect(() => {
-    fetchTests();
-  }, [fetchTests]);
+    setPage(1);
+    fetchTests(1);
+  }, [sort, searchQuery, priceType, minPrice, maxPrice, selectedLanguage]);
 
   const activeSortLabel = SORT_OPTIONS.find((opt) => opt.value === sort)?.label;
 
@@ -257,7 +296,7 @@ const ShopScreen = () => {
             <Text className="text-red-600 dark:text-red-400 text-center font-medium">
               Error: {error}
             </Text>
-            <TouchableOpacity onPress={fetchTests} className="mt-2">
+            <TouchableOpacity onPress={() => fetchTests(1)} className="mt-2">
               <Text className="text-primary text-center font-bold underline">
                 Retry
               </Text>
@@ -283,9 +322,40 @@ const ShopScreen = () => {
         ) : (
           <View className="pb-10">
             {tests.length > 0 ? (
-              tests.map((test, index) => (
-                <MockTestCard key={test.slug || index} test={test} />
-              ))
+              <>
+                {tests.map((test, index) => (
+                  <MockTestCard key={test.slug || index} test={test} />
+                ))}
+
+                {hasMore && (
+                  <View className="px-6 mt-4">
+                    <TouchableOpacity
+                      onPress={handleLoadMore}
+                      disabled={loadingMore}
+                      className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/20 py-4 rounded-2xl items-center flex-row justify-center"
+                    >
+                      {loadingMore ? (
+                        <ActivityIndicator size="small" color="#FF8A50" />
+                      ) : (
+                        <>
+                          <Text className="text-primary font-bold text-base mr-2">
+                            Load More Tests
+                          </Text>
+                          <Feather name="refresh-cw" size={16} color="#FF8A50" />
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {!hasMore && tests.length > 0 && (
+                  <View className="items-center py-8">
+                    <Text className="text-slate-400 dark:text-slate-500 text-sm italic font-medium">
+                      You've reached the end of the list
+                    </Text>
+                  </View>
+                )}
+              </>
             ) : (
               <View className="items-center justify-center py-20 px-8">
                 <View className="w-20 h-20 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mb-6">
@@ -303,7 +373,7 @@ const ShopScreen = () => {
                   looking for.
                 </Text>
                 <TouchableOpacity
-                  onPress={fetchTests}
+                  onPress={() => fetchTests(1)}
                   className="mt-6 px-6 py-2 bg-orange-50 dark:bg-orange-900/20 rounded-full"
                 >
                   <Text className="text-primary font-bold">Refresh</Text>
@@ -336,7 +406,10 @@ const ShopScreen = () => {
                 key={option.value}
                 onPress={() => {
                   setSort(option.value);
+                  setPage(1);
+                  setTests([]);
                   setShowSortModal(false);
+                  fetchTests(1);
                 }}
                 className={`flex-row items-center justify-between px-4 py-3.5 rounded-2xl ${
                   sort === option.value

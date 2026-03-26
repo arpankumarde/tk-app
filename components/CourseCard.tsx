@@ -1,7 +1,8 @@
 import { memo } from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useAddToCart } from "@/hooks/useAddToCart";
 
 interface CourseCardProps {
   course: {
@@ -17,12 +18,14 @@ interface CourseCardProps {
     totalEnrolled: number;
     enrollmentCount?: number;
     language: string;
+    teacherIsVerified?: boolean;
     publishedAt: string;
   };
 }
 
 const CourseCard = ({ course }: CourseCardProps) => {
   const isFree = course.price === 0;
+  const { addToCart, adding } = useAddToCart();
 
   const displayImage =
     course.thumbnailImageUrl ||
@@ -49,7 +52,7 @@ const CourseCard = ({ course }: CourseCardProps) => {
       </View>
 
       {/* Thumbnail */}
-      <View className="h-56 relative bg-gray-100 dark:bg-slate-900">
+      <View className="aspect-video relative bg-gray-100 dark:bg-slate-900">
         {displayImage ? (
           <Image
             source={{ uri: displayImage }}
@@ -81,9 +84,19 @@ const CourseCard = ({ course }: CourseCardProps) => {
 
         <Text className="text-slate-500 dark:text-slate-400 text-sm mb-4 font-medium">
           By:{" "}
-          <Text className="text-slate-600 dark:text-slate-300 font-bold">
-            {course.teacherName}
-          </Text>
+          <View className="flex-row items-center">
+            <Text className="text-slate-600 dark:text-slate-300 font-bold">
+              {course.teacherName}
+            </Text>
+            {course.teacherIsVerified && (
+              <MaterialIcons
+                name="verified"
+                size={14}
+                color="#22C55E"
+                className="ml-1"
+              />
+            )}
+          </View>
         </Text>
 
         {/* Stats */}
@@ -111,6 +124,17 @@ const CourseCard = ({ course }: CourseCardProps) => {
         {/* Footer */}
         <View className="flex-row items-center justify-between">
           <TouchableOpacity
+            onPress={async () => {
+              if (isFree) {
+                router.push(`/(main)/course/${course.slug}` as any);
+              } else {
+                const result = await addToCart(course.id, "course");
+                if (result.success) {
+                  router.push("/(user)/cart" as any);
+                }
+              }
+            }}
+            disabled={adding}
             className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} flex-row items-center px-6 py-3.5 rounded-xl shadow-lg w-48 mr-4`}
           >
             <Feather
@@ -126,7 +150,7 @@ const CourseCard = ({ course }: CourseCardProps) => {
           <Text
             className={`${isFree ? "text-emerald-500" : "text-slate-800 dark:text-white"} text-xl font-black`}
           >
-            {isFree ? "Free" : `₹${course.price}`}
+            {isFree ? "FREE" : `₹${course.price}`}
           </Text>
         </View>
       </View>

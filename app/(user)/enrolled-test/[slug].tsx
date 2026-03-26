@@ -7,9 +7,12 @@ import {
   ActivityIndicator,
   StatusBar,
   Image,
+  Alert,
+  Modal,
+  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { AntDesign, Feather, Ionicons, FontAwesome } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useAuth } from "@/context/AuthContext";
@@ -27,6 +30,12 @@ const EnrolledTestDetails = () => {
   const [test, setTest] = useState<EnrolledTest | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Review Modal State
+  const [isReviewModalVisible, setIsReviewModalVisible] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [reviewText, setReviewText] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const fetchDetails = useCallback(async () => {
     if (!token || !slug) return;
@@ -68,6 +77,67 @@ const EnrolledTestDetails = () => {
   useEffect(() => {
     fetchDetails();
   }, [fetchDetails]);
+
+  const handleReviewSubmit = async () => {
+    if (!token || !test) return;
+    
+    // Determine the correct ID. EnrolledTest interface in types.ts has id and testId?.
+    // Based on common patterns, mockTestId is likely test.mockTestId or test.testId or test.id.
+    const mockTestId = (test as any).mockTestId || test.testId || test.id;
+    console.log("[ReviewSubmit] Initialized with:", {
+      mockTestId,
+      rating,
+      reviewText,
+      testDataFields: {
+        id: test.id,
+        testId: test.testId,
+        mockTestId: (test as any).mockTestId
+      }
+    });
+    
+    if (!mockTestId) {
+      Alert.alert("Error", "Could not identify the test ID for review.");
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      console.log("[ReviewSubmit] Sending request to:", `${BASE_URL}/_api/reviews/submit`);
+      const response = await fetch(`${BASE_URL}/_api/reviews/submit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          json: {
+            mockTestId: Number(mockTestId),
+            rating,
+            reviewText: reviewText.trim() || "N/A",
+          },
+        }),
+      });
+
+      console.log("[ReviewSubmit] Response Status:", response.status);
+      const data = await response.json();
+      console.log("[ReviewSubmit] Full Response Data:", JSON.stringify(data, null, 2));
+      const result = data.json || data;
+
+      if (result.success) {
+        Alert.alert("Success", "Review submitted successfully.");
+        setIsReviewModalVisible(false);
+        setReviewText("");
+        setRating(5);
+      } else {
+        throw new Error(result.message || result.error || "Failed to submit review");
+      }
+    } catch (err: any) {
+      console.error("[ReviewSubmit] caught error:", err);
+      Alert.alert("Error", err.message || "Failed to submit review. Please try again.");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -158,10 +228,22 @@ const EnrolledTestDetails = () => {
               >
                 {test.title}
               </Text>
-              <Text className="text-slate-400 dark:text-slate-500 font-bold text-xs">
-                {test.totalItems || 0} Total Tests • {test.completedItems || 0}{" "}
-                Completed
+              <Text className="text-slate-400 dark:text-slate-500 font-bold text-xs uppercase tracking-tight">
+                Enrolled on: {test.enrolledAt ? new Date(test.enrolledAt).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric"
+                }) : "N/A"}
               </Text>
+              <TouchableOpacity
+                onPress={() => setIsReviewModalVisible(true)}
+                className="mt-2 flex-row items-center self-start"
+              >
+                <View className="bg-orange-500/10 dark:bg-orange-500/20 px-3 py-1.5 rounded-full flex-row items-center border border-orange-500/20">
+                  <AntDesign name="star" size={12} color="#FF8A50" />
+                  <Text className="text-primary font-black ml-1.5 text-[10px] uppercase tracking-wider">Write Review</Text>
+                </View>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -325,6 +407,88 @@ const EnrolledTestDetails = () => {
           )}
         </View>
       </ScrollView>
+
+      {/* Review Modal */}
+      <Modal
+        visible={isReviewModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsReviewModalVisible(false)}
+      >
+        <View 
+          className="flex-1 bg-black/60 items-center justify-center px-6"
+        >
+          <View className="bg-white dark:bg-slate-900 w-full rounded-[40px] p-8 border border-gray-100 dark:border-slate-800 shadow-2xl">
+            <View className="items-center mb-6">
+              <View className="w-16 h-16 bg-orange-50 dark:bg-orange-950/40 rounded-full items-center justify-center mb-4">
+                <AntDesign name="star" size={32} color="#FF8A50" />
+              </View>
+              <Text className="text-2xl font-black text-slate-800 dark:text-white text-center">
+                Rate this Package
+              </Text>
+              <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold text-center mt-2 px-6">
+                Share your experience to help other students
+              </Text>
+            </View>
+
+            {/* Star Rating */}
+            <View className="flex-row items-center justify-center mb-8">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <TouchableOpacity
+                  key={s}
+                  onPress={() => setRating(s)}
+                  className="mx-1.5"
+                >
+                  <FontAwesome
+                    name={s <= rating ? "star" : "star-o"}
+                    size={40}
+                    color="#FF8A50"
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Review Text */}
+            <View className="mb-8">
+              <Text className="text-slate-800 dark:text-white font-black mb-3 text-sm uppercase tracking-wider">
+                Your Review
+              </Text>
+              <TextInput
+                placeholder="Tell us what you liked or how we can improve..."
+                placeholderTextColor="#94a3b8"
+                multiline
+                numberOfLines={4}
+                value={reviewText}
+                onChangeText={setReviewText}
+                className="border border-gray-100 dark:border-slate-800 rounded-3xl p-5 text-slate-900 dark:text-white text-base bg-gray-50/50 dark:bg-slate-950/50 h-32"
+                style={{ textAlignVertical: "top" }}
+              />
+            </View>
+
+            {/* Action Buttons */}
+            <View className="flex-row items-center" style={{ gap: 12 }}>
+              <TouchableOpacity
+                onPress={() => setIsReviewModalVisible(false)}
+                className="flex-1 h-14 items-center justify-center rounded-2xl border border-gray-100 dark:border-slate-800"
+              >
+                <Text className="text-slate-500 dark:text-slate-400 font-black">Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={handleReviewSubmit}
+                disabled={submittingReview}
+                className="flex-[2] bg-primary h-14 items-center justify-center rounded-2xl shadow-lg shadow-primary/30"
+              >
+                {submittingReview ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text className="text-white font-black text-lg">Submit Review</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };

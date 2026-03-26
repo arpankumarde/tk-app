@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router, Link } from "expo-router";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import BottomTabs from "@/components/BottomTabs";
 import { WebView } from "react-native-webview";
@@ -356,7 +356,7 @@ const CourseDetails = () => {
 
         {/* Video Preview Section */}
         <View className="px-6 mb-8">
-          <View className="h-56 w-full rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 relative shadow-2xl">
+          <View className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 relative shadow-2xl">
             {showIntroVideo && course.introVideoUrl ? (
               <VideoView
                 player={introPlayer}
@@ -564,9 +564,9 @@ const CourseDetails = () => {
               </Text>
               {course.teacher.isVerified && (
                 <View className="flex-row items-center mt-1">
-                  <Feather name="check-circle" size={12} color="#10b981" />
-                  <Text className="text-emerald-500 text-xs font-bold ml-1">
-                    Verified Instructor
+                  <MaterialIcons name="verified" size={16} color="#22C55E" />
+                  <Text className="text-emerald-600 dark:text-emerald-400 text-xs font-bold ml-1">
+                    verified
                   </Text>
                 </View>
               )}
@@ -585,7 +585,7 @@ const CourseDetails = () => {
             Current Price
           </Text>
           <Text className="text-2xl font-black text-slate-800 dark:text-white mt-1">
-            {isFree ? "Free" : `₹${course.price}`}
+            {isFree ? "FREE" : `₹${course.price}`}
           </Text>
         </View>
         <TouchableOpacity
@@ -606,7 +606,7 @@ const CourseDetails = () => {
                 }
           }
           disabled={enrolling || addingToCart || (isFree && course.isEnrolled)}
-          className={`${isFree ? "bg-orange-500" : "bg-primary"} h-14 px-8 rounded-2xl items-center justify-center shadow-lg shadow-orange-500/30 disabled:opacity-60`}
+          className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} h-14 px-8 rounded-xl items-center justify-center shadow-lg disabled:opacity-60`}
         >
           {enrolling || addingToCart ? (
             <ActivityIndicator color="white" />

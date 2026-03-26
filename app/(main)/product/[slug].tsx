@@ -11,7 +11,7 @@ import {
   Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import Header from "@/components/Header";
@@ -42,6 +42,7 @@ interface Product {
   teacherBio: string | null;
   teacherName: string;
   teacherSlug: string;
+  teacherIsVerified: boolean;
   thumbnailUrl: string;
   title: string;
   totalPurchases: number;
@@ -210,8 +211,8 @@ const ProductDetails = () => {
                 resizeMode="cover"
               />
               {/* Category Badge */}
-              <View className="absolute top-4 left-4 bg-orange-100/90 dark:bg-orange-900/40 px-5 py-2 rounded-full border border-orange-200/50 dark:border-orange-800/30">
-                <Text className="text-orange-600 dark:text-orange-400 font-black text-sm uppercase tracking-wider">
+              <View className="absolute top-4 left-4 bg-slate-900/90 px-5 py-2 rounded-full shadow-lg">
+                <Text className="text-white font-black text-xs uppercase tracking-wider">
                   {product.category || "Notes"}
                 </Text>
               </View>
@@ -237,16 +238,27 @@ const ProductDetails = () => {
                     className="w-full h-full"
                   />
                 </View>
-                <View>
+                <View className="flex-1 mr-4">
                   <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
                     By
                   </Text>
-                  <Link
-                    href={`/expert/${product?.teacherSlug}` as any}
-                    className="text-slate-800 dark:text-white font-black text-lg leading-tight -mt-0.5"
-                  >
-                    {product?.teacherName || "TestKart Expert"}
-                  </Link>
+                  <View className="flex-row items-center">
+                    <Link
+                      href={`/expert/${product?.teacherSlug}` as any}
+                      className="text-slate-800 dark:text-white font-black text-lg leading-tight -mt-0.5"
+                      numberOfLines={1}
+                    >
+                      {product?.teacherName || "TestKart Expert"}
+                    </Link>
+                    {product?.teacherIsVerified && (
+                      <MaterialIcons
+                        name="verified"
+                        size={16}
+                        color="#22C55E"
+                        className="ml-1"
+                      />
+                    )}
+                  </View>
                 </View>
               </View>
 
@@ -264,7 +276,7 @@ const ProductDetails = () => {
             <View className="h-[1px] bg-gray-50 dark:bg-slate-800 mb-8" />
 
             {/* Description */}
-            <View className="mb-10">
+            <View className="mb-8">
               <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
                 Description
               </Text>
@@ -276,7 +288,7 @@ const ProductDetails = () => {
             </View>
 
             {/* Tags */}
-            {product.tags && product.tags.length > 0 && (
+            {/* {product.tags && product.tags.length > 0 && (
               <View className="mb-10">
                 <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
                   Tags
@@ -294,10 +306,10 @@ const ProductDetails = () => {
                   ))}
                 </View>
               </View>
-            )}
+            )} */}
 
             {/* About the Author Card */}
-            <View className="mb-10">
+            <View className="mb-8">
               <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
                 About the Author
               </Text>
@@ -325,14 +337,14 @@ const ProductDetails = () => {
             </View>
 
             {/* Detailed Bottom Section (Dynamic Data) */}
-            <View className="bg-white dark:bg-slate-800/50 p-5 rounded-[28px] border border-gray-100 dark:border-slate-700/80 mb-10 shadow-lg shadow-slate-200/50 dark:shadow-none">
+            <View className="bg-white dark:bg-slate-800/50 p-5 rounded-[28px] border border-gray-100 dark:border-slate-700/80 mb-8 shadow-lg shadow-slate-200/50 dark:shadow-none">
               <View className="flex-row items-center justify-between mb-4">
                 <Text className="text-slate-500 dark:text-slate-400 text-base font-bold uppercase tracking-wider">
                   Price
                 </Text>
                 <Text className="text-3xl font-black text-orange-500">
                   {product.price === 0 ? (
-                    <Text className="text-green-500">FREE</Text>
+                    <Text className="text-emerald-500">FREE</Text>
                   ) : (
                     `₹ ${product.price}`
                   )}
@@ -343,7 +355,7 @@ const ProductDetails = () => {
 
               {product.price === 0 ? (
                 <TouchableOpacity
-                  className="bg-green-500 h-14 rounded-2xl flex-row items-center justify-center shadow-md shadow-green-500/20 mb-3"
+                  className="bg-emerald-500 h-14 rounded-xl flex-row items-center justify-center shadow-md shadow-emerald-500/30 mb-3"
                   onPress={handleEnrollFree}
                   disabled={enrolling}
                 >
@@ -360,7 +372,7 @@ const ProductDetails = () => {
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
-                  className="bg-primary h-14 rounded-2xl flex-row items-center justify-center shadow-md shadow-orange-500/20 mb-3 disabled:opacity-60"
+                  className="bg-primary h-14 rounded-xl flex-row items-center justify-center shadow-md shadow-orange-500/20 mb-3 disabled:opacity-60"
                   disabled={addingToCart}
                   onPress={async () => {
                     if (!product) return;

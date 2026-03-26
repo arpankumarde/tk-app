@@ -4,10 +4,12 @@ import { Feather } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import { useRouter, Link } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
+import { useCartContext } from "@/context/CartContext";
 
 const Header = () => {
   const { colorScheme, toggleColorScheme } = useColorScheme();
   const { user } = useAuth();
+  const { itemCount } = useCartContext();
   const router = useRouter();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -51,7 +53,7 @@ const Header = () => {
         {isLoggedIn ? (
           <>
             <TouchableOpacity
-              className="ml-2 p-2 rounded-full active:bg-gray-100 dark:active:bg-slate-800"
+              className="ml-2 p-2 rounded-full active:bg-gray-100 dark:active:bg-slate-800 relative"
               onPress={() => router.push("/cart" as any)}
             >
               <Feather
@@ -59,6 +61,13 @@ const Header = () => {
                 size={22}
                 color={colorScheme === "dark" ? "#FFFFFF" : "#1A1A1A"}
               />
+              {itemCount > 0 && (
+                <View className="absolute top-1 right-1 bg-red-500 min-w-4 h-4 rounded-full items-center justify-center px-1 border-2 border-white dark:border-slate-900 shadow-sm">
+                  <Text className="text-white text-[9px] font-black leading-none">
+                    {itemCount}
+                  </Text>
+                </View>
+              )}
             </TouchableOpacity>
             <TouchableOpacity
               className="ml-3 pointer-events-auto"

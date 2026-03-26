@@ -7,6 +7,9 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AntDesign } from "@expo/vector-icons";
@@ -120,34 +123,44 @@ const Login = () => {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-900"
+      className="flex-1 bg-white dark:bg-slate-950"
     >
       <Header />
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="px-5 py-8">
-        <View className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-slate-700">
-          <Text className="text-2xl font-bold text-center text-slate-900 dark:text-white mb-2">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 80 }}
+          className="px-6 py-10"
+          showsVerticalScrollIndicator={false}
+        >
+        <View className="items-center mb-10">
+          <View className="w-12 h-1 bg-orange-500 rounded-full mb-4" />
+          <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2 text-center uppercase tracking-tight">
             Student Login
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-center mb-8 px-4">
+          <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold text-center px-10">
             Log in with Google or mobile OTP to access your account
           </Text>
+        </View>
 
           {/* Google Login */}
           <TouchableOpacity
-            className="flex-row items-center justify-center border border-gray-200 dark:border-slate-600 rounded-xl h-14 mb-8"
+            className="flex-row items-center justify-center border border-gray-100 dark:border-slate-800 rounded-2xl h-14 mb-8 bg-white dark:bg-slate-900 shadow-sm"
             onPress={handleGoogleSignIn}
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={colorScheme === "dark" ? "#fff" : "#000"} />
             ) : (
               <>
                 <AntDesign
                   name="google"
                   size={24}
-                  color={colorScheme === "dark" ? "#fff" : "#4285F4"}
+                  color={colorScheme === "dark" ? "#fff" : "#000"}
                 />
-                <Text className="text-primary font-bold ml-3 text-lg">
+                <Text className="text-slate-900 dark:text-white font-bold ml-3 text-lg">
                   Continue with Google
                 </Text>
               </>
@@ -156,41 +169,41 @@ const Login = () => {
 
           {/* Divider */}
           <View className="flex-row items-center mb-8">
-            <View className="flex-1 h-[1px] bg-gray-200 dark:bg-slate-700" />
-            <Text className="px-4 text-gray-400 font-bold">OR</Text>
-            <View className="flex-1 h-[1px] bg-gray-200 dark:bg-slate-700" />
+            <View className="flex-1 h-[1px] bg-gray-100 dark:bg-slate-800" />
+            <Text className="px-4 text-gray-400 font-bold uppercase tracking-widest text-[10px]">OR</Text>
+            <View className="flex-1 h-[1px] bg-gray-100 dark:bg-slate-800" />
           </View>
 
           {/* Form */}
           <View className="mb-8">
-            <Text className="text-slate-900 dark:text-white font-bold mb-2 text-lg">
+            <Text className="text-slate-800 dark:text-white font-black mb-3 text-base">
               Mobile Number
             </Text>
             <TextInput
               placeholder="Enter your 10-digit mobile number"
-              placeholderTextColor="#999"
+              placeholderTextColor="#94a3b8"
               keyboardType="phone-pad"
               maxLength={10}
               value={mobileNumber}
               onChangeText={setMobileNumber}
               editable={!otpSent}
-              className="border border-gray-200 dark:border-slate-600 rounded-xl h-14 px-4 text-slate-900 dark:text-white text-base bg-gray-50 dark:bg-slate-700/50"
+              className="border border-gray-100 dark:border-slate-800 rounded-2xl h-16 px-5 text-slate-900 dark:text-white text-lg bg-gray-50 dark:bg-slate-900/50"
             />
           </View>
 
           {otpSent && (
             <View className="mb-8">
-              <Text className="text-slate-900 dark:text-white font-bold mb-2 text-lg">
+              <Text className="text-slate-800 dark:text-white font-black mb-3 text-base">
                 Enter OTP
               </Text>
               <TextInput
                 placeholder="Enter OTP"
-                placeholderTextColor="#999"
+                placeholderTextColor="#94a3b8"
                 keyboardType="number-pad"
                 maxLength={6}
                 value={otp}
                 onChangeText={setOtp}
-                className="border border-gray-200 dark:border-slate-600 rounded-xl h-14 px-4 text-slate-900 dark:text-white text-base bg-gray-50 dark:bg-slate-700/50"
+                className="border border-gray-100 dark:border-slate-800 rounded-2xl h-16 px-5 text-slate-900 dark:text-white text-lg bg-gray-50 dark:bg-slate-900/50"
               />
               <TouchableOpacity
                 onPress={handleSendOtp}
@@ -206,7 +219,7 @@ const Login = () => {
 
           {/* Submit Button */}
           <TouchableOpacity
-            className="bg-primary rounded-xl h-14 items-center justify-center shadow-lg shadow-primary mb-6"
+            className="bg-primary rounded-2xl h-16 items-center justify-center shadow-lg shadow-primary/30 mb-6"
             onPress={otpSent ? handleVerifyOtp : handleSendOtp}
             disabled={otpLoading}
           >
@@ -219,7 +232,7 @@ const Login = () => {
             )}
           </TouchableOpacity>
 
-          <View className="flex-row justify-center items-center">
+          <View className="flex-row justify-center items-center mt-4">
             <Text className="text-slate-500 dark:text-slate-400 text-base">
               Don&apos;t have an account?{" "}
             </Text>
@@ -231,9 +244,8 @@ const Login = () => {
               </TouchableOpacity>
             </Link>
           </View>
-        </View>
-        <View className="h-10" />
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
       <BottomTabs />
     </SafeAreaView>
   );

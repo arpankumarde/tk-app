@@ -2,7 +2,8 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { useColorScheme } from "nativewind";
 import { router } from "expo-router";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
+import { useAddToCart } from "@/hooks/useAddToCart";
 
 interface DigitalDownloadCardProps {
   product: {
@@ -21,6 +22,8 @@ interface DigitalDownloadCardProps {
 
 const DigitalDownloadCard = ({ product }: DigitalDownloadCardProps) => {
   const { colorScheme } = useColorScheme();
+  const isFree = (product.price ?? 0) === 0;
+  const { addToCart, adding } = useAddToCart();
 
   const displayImage = product.thumbnailUrl || undefined;
   const displayAuthor = product.teacherName || "TestKart Expert";
@@ -74,33 +77,41 @@ const DigitalDownloadCard = ({ product }: DigitalDownloadCardProps) => {
                 {displayAuthor}
               </Text>
               {product.teacherIsVerified && (
-                <View className="ml-1.5 w-4 h-4 bg-orange-500 rounded-full items-center justify-center">
-                  <Feather name="check" size={10} color="white" />
-                </View>
+                <MaterialIcons name="verified" size={16} color="#22C55E" className="ml-1" />
               )}
             </View>
           </View>
 
           <View className="flex-row items-center justify-between pt-5 border-t border-slate-50 dark:border-slate-700/50">
-            <View className="flex-row items-center">
-              <View className="bg-slate-50 dark:bg-slate-700/50 p-2 rounded-xl mr-2.5">
-                <Feather
-                  name="shopping-bag"
-                  size={16}
-                  color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
-                />
-              </View>
-              <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
-                {displaySales} sold
+            <TouchableOpacity
+              onPress={async () => {
+                if (isFree) {
+                  router.push(`/shop?slug=${product.slug}` as any);
+                } else {
+                  const result = await addToCart(product.id, "digitalProduct");
+                  if (result.success) {
+                    router.push("/(user)/cart" as any);
+                  }
+                }
+              }}
+              disabled={adding}
+              className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} flex-row items-center px-6 py-3.5 rounded-xl shadow-lg w-48 mr-4`}
+            >
+              <Feather
+                name={isFree ? "book" : "shopping-cart"}
+                size={18}
+                color="white"
+              />
+              <Text className="text-white font-black ml-3 text-sm">
+                {isFree ? "Enroll Free" : "Buy Now"}
               </Text>
-            </View>
-            {displayPrice === 0 ? (
-              <Text className="text-3xl font-black text-green-500">FREE</Text>
-            ) : (
-              <Text className="text-3xl font-black text-primary">
-                ₹ {displayPrice}
-              </Text>
-            )}
+            </TouchableOpacity>
+
+            <Text
+              className={`${isFree ? "text-emerald-500" : "text-slate-800 dark:text-white"} text-xl font-black`}
+            >
+              {isFree ? "Free" : `₹${product.price}`}
+            </Text>
           </View>
         </View>
       </View>

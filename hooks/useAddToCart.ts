@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "expo-router";
+import { useCartContext } from "@/context/CartContext";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -8,6 +9,7 @@ type CartItemType = "test" | "course" | "digitalProduct";
 
 export const useAddToCart = () => {
   const { token } = useAuth();
+  const { refreshCart } = useCartContext();
   const router = useRouter();
   const [adding, setAdding] = useState(false);
 
@@ -46,6 +48,8 @@ export const useAddToCart = () => {
           message: payload.error || payload.message || "Failed to add to cart",
         };
       }
+
+      await refreshCart();
 
       return {
         success: true,

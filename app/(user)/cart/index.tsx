@@ -20,7 +20,7 @@ import { WebView } from "react-native-webview";
 import Header from "@/components/Header";
 import BottomTabs from "@/components/BottomTabs";
 import { useAuth } from "@/context/AuthContext";
-import { useCart, CartItem } from "../hooks/useCart";
+import { useCartContext, CartItem } from "@/context/CartContext";
 
 const Cart = () => {
   const { colorScheme } = useColorScheme();
@@ -32,11 +32,11 @@ const Cart = () => {
     removeItem,
     applyPromoCode,
     clearPromo,
-    initiatePayment,
-    verifyPayment,
     appliedPromoCode,
     eligibleItemIds,
-  } = useCart(token);
+    initiatePayment,
+    verifyPayment,
+  } = useCartContext();
 
   const [promoExpanded, setPromoExpanded] = useState(false);
   const [promoCode, setPromoCode] = useState("");
@@ -553,8 +553,13 @@ const CartItemCard = ({
       <Image
         source={{
           uri:
-            item.thumbnailUrl ||
-            "https://placehold.co/100x100/001f3f/white?text=TestKart",
+            item.thumbnailUrl && item.thumbnailUrl !== ""
+              ? item.thumbnailUrl
+              : item.type === "course"
+                ? "https://ik.imagekit.io/testkart/placeholders/Online%20Course.jpg"
+                : item.type === "test"
+                  ? "https://ik.imagekit.io/testkart/placeholders/Mock%20Test.jpg"
+                  : "https://ik.imagekit.io/testkart/placeholders/study-notes.png",
         }}
         className="w-[72px] h-[72px] rounded-xl"
         resizeMode="cover"

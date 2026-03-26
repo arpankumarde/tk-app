@@ -11,7 +11,7 @@ interface EnrolledCourseCardProps {
 const EnrolledCourseCard = ({ course }: EnrolledCourseCardProps) => {
   return (
     <TouchableOpacity
-      onPress={() => router.push(`/(user)/courses/${course.id}` as any)}
+      onPress={() => router.push(`/(user)/enrolled-courses/${course.id}` as any)}
       className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm flex-row items-center mb-4"
     >
       <View className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-slate-800 mr-4 overflow-hidden relative">
