@@ -288,27 +288,37 @@ const CourseDetails = () => {
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Custom Navigation Header */}
-        <View className="px-6 py-4 flex-row items-center">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mr-4"
-          >
-            <Feather name="chevron-left" size={24} color="#FF8A50" />
-          </TouchableOpacity>
+        <View className="px-6 py-4 flex-row items-center justify-between">
           <View className="flex-row items-center">
-            <Text className="text-slate-400 dark:text-slate-500 text-xs">
-              Courses
-            </Text>
-            <Feather
-              name="chevron-right"
-              size={12}
-              color="#94a3b8"
-              className="mx-2"
-            />
-            <Text className="text-primary text-xs font-bold" numberOfLines={1}>
-              {course.category || "Details"}
-            </Text>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mr-4"
+            >
+              <Feather name="chevron-left" size={24} color="#FF8A50" />
+            </TouchableOpacity>
+
+            <View className="flex-row items-center gap-x-2.5">
+              {/* Category Badge */}
+              <View className="bg-orange-50 dark:bg-orange-500/10 px-3 py-1.5 rounded-full border border-orange-100 dark:border-orange-500/20 flex-row items-center">
+                <Feather name="layers" size={10} color="#FF8A50" />
+                <Text className="text-primary text-[10px] font-black uppercase tracking-widest ml-1.5">
+                  {course.category}
+                </Text>
+              </View>
+
+              {/* Level Badge */}
+              <View className="bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-100 dark:border-emerald-500/20 flex-row items-center">
+                <Feather name="trending-up" size={10} color="#10B981" />
+                <Text className="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest ml-1.5">
+                  {course.level}
+                </Text>
+              </View>
+            </View>
           </View>
+
+          <TouchableOpacity className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center">
+            <Feather name="share-2" size={18} color="#FF8A50" />
+          </TouchableOpacity>
         </View>
 
         {/* Course Main Title & Info */}
@@ -322,14 +332,10 @@ const CourseDetails = () => {
           </Text>
 
           <View className="flex-row items-center mb-6">
-            <View className="px-4 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 rounded-full border border-emerald-100 dark:border-emerald-800/30 flex-row items-center">
-              <Feather name="award" size={14} color="#10b981" />
-              <Text className="text-emerald-600 dark:text-emerald-400 text-[10px] font-black tracking-widest ml-2 capitalize">
-                {course.level}
-              </Text>
-            </View>
-            <Text className="mx-3 text-slate-300">|</Text>
-            <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
+            <Text
+              className="text-slate-500 dark:text-slate-400 text-sm font-bold flex-1"
+              numberOfLines={1}
+            >
               Created by{" "}
               <Link
                 href={`/expert/${course?.teacher?.slug}`}
@@ -338,19 +344,6 @@ const CourseDetails = () => {
                 {course?.teacher?.displayName}
               </Link>
             </Text>
-          </View>
-
-          <View className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 rounded-xl p-5 border border-gray-100 dark:border-slate-700">
-            <View className="ml-4 flex-1">
-              <Text className="text-slate-800 dark:text-white font-black text-lg">
-                Course Package
-              </Text>
-              <Text className="text-slate-500 dark:text-slate-400 text-xs font-medium mt-0.5">
-                {course.sections?.length || 0} sections •{" "}
-                {course.sections?.[0]?.lessons?.length || 0} lessons • Lifetime
-                access
-              </Text>
-            </View>
           </View>
         </View>
 
@@ -606,7 +599,7 @@ const CourseDetails = () => {
                 }
           }
           disabled={enrolling || addingToCart || (isFree && course.isEnrolled)}
-          className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} h-14 px-8 rounded-xl items-center justify-center shadow-lg disabled:opacity-60`}
+          className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} h-14 w-44 rounded-xl items-center justify-center shadow-lg disabled:opacity-60`}
         >
           {enrolling || addingToCart ? (
             <ActivityIndicator color="white" />

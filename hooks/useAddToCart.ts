@@ -5,7 +5,7 @@ import { useCartContext } from "@/context/CartContext";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
-type CartItemType = "test" | "course" | "digitalProduct";
+type CartItemType = "test" | "course" | "digitalProduct" | "live";
 
 export const useAddToCart = () => {
   const { token } = useAuth();
@@ -23,6 +23,7 @@ export const useAddToCart = () => {
       test: "mockTestId",
       course: "courseId",
       digitalProduct: "digitalProductId",
+      live: "liveTestId",
     };
 
     try {

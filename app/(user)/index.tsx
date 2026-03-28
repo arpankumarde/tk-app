@@ -42,8 +42,11 @@ export default function ProfileScreen() {
     total: totalTests,
   } = useEnrolledTests(token);
 
-  const { products: purchasedProducts, loading: loadingProducts } =
-    usePurchasedProducts(token, { limit: 1 });
+  const {
+    products: purchasedProducts,
+    loading: loadingProducts,
+    total: totalProducts,
+  } = usePurchasedProducts(token, { limit: 5 });
 
   useEffect(() => {
     if (!user) {
@@ -76,7 +79,7 @@ export default function ProfileScreen() {
           },
         },
       ],
-      { cancelable: true }
+      { cancelable: true },
     );
   };
 
@@ -142,7 +145,7 @@ export default function ProfileScreen() {
           </View>
 
           {/* Stats Bar */}
-          <View className="bg-white dark:bg-slate-900 rounded-[32px] p-6 flex-row items-center shadow-lg shadow-slate-200/70 dark:shadow-none border border-gray-200 dark:border-slate-700">
+          <View className="bg-white dark:bg-slate-900 rounded-2xl p-6 flex-row items-center shadow-lg shadow-slate-200/70 dark:shadow-none border border-gray-200 dark:border-slate-700">
             <View className="items-center flex-1">
               <Text className="text-2xl font-black text-slate-800 dark:text-white">
                 {totalTests}
@@ -163,7 +166,7 @@ export default function ProfileScreen() {
             <View className="w-[1px] h-10 bg-gray-200 dark:bg-slate-700" />
             <View className="items-center flex-1">
               <Text className="text-2xl font-black text-slate-800 dark:text-white">
-                {purchasedProducts.length}
+                {totalProducts}
               </Text>
               <Text className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">
                 Products
@@ -178,21 +181,23 @@ export default function ProfileScreen() {
             <Text className="text-xl font-black text-slate-800 dark:text-white">
               Ongoing Courses ({totalCourses})
             </Text>
-            <TouchableOpacity
-              onPress={() => router.push("/(user)/enrolled-courses" as any)}
-            >
-              <View className="flex-row items-center">
-                <Text className="text-primary font-black text-sm">
-                  View All
-                </Text>
-                <Feather
-                  name="chevron-right"
-                  size={16}
-                  color="#FF8A50"
-                  className="ml-1"
-                />
-              </View>
-            </TouchableOpacity>
+            {totalCourses > 0 && (
+              <TouchableOpacity
+                onPress={() => router.push("/(user)/enrolled-courses" as any)}
+              >
+                <View className="flex-row items-center">
+                  <Text className="text-primary font-black text-sm">
+                    View All
+                  </Text>
+                  <Feather
+                    name="chevron-right"
+                    size={16}
+                    color="#FF8A50"
+                    className="ml-1"
+                  />
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
 
           {loadingCourses ? (
@@ -200,11 +205,13 @@ export default function ProfileScreen() {
               <ActivityIndicator color="#FF8A50" />
             </View>
           ) : enrolledCourses.length > 0 ? (
-            enrolledCourses.map((course) => (
-              <EnrolledCourseCard key={course.id} course={course} />
-            ))
+            enrolledCourses
+              .slice(0, 2)
+              .map((course) => (
+                <EnrolledCourseCard key={course.id} course={course} />
+              ))
           ) : (
-            <View className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-gray-100 dark:border-slate-800 border-dashed items-center mb-8">
+            <View className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-gray-100 dark:border-slate-800 border-dashed items-center mb-8">
               <Feather name="book" size={32} color="#CBD5E1" />
               <Text className="text-slate-400 font-bold mt-2">
                 No ongoing courses yet
@@ -217,21 +224,23 @@ export default function ProfileScreen() {
             <Text className="text-xl font-black text-slate-800 dark:text-white">
               Ongoing Tests ({totalTests})
             </Text>
-            <TouchableOpacity
-              onPress={() => router.push("/(user)/enrolled-test" as any)}
-            >
-              <View className="flex-row items-center">
-                <Text className="text-primary font-black text-sm">
-                  View All
-                </Text>
-                <Feather
-                  name="chevron-right"
-                  size={16}
-                  color="#FF8A50"
-                  className="ml-1"
-                />
-              </View>
-            </TouchableOpacity>
+            {totalTests > 0 && (
+              <TouchableOpacity
+                onPress={() => router.push("/(user)/enrolled-test" as any)}
+              >
+                <View className="flex-row items-center">
+                  <Text className="text-primary font-black text-sm">
+                    View All
+                  </Text>
+                  <Feather
+                    name="chevron-right"
+                    size={16}
+                    color="#FF8A50"
+                    className="ml-1"
+                  />
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
 
           {loadingTests ? (
@@ -239,11 +248,11 @@ export default function ProfileScreen() {
               <ActivityIndicator color="#FF8A50" />
             </View>
           ) : enrolledTests.length > 0 ? (
-            enrolledTests.map((test) => (
-              <EnrolledTestCard key={test.id} test={test} />
-            ))
+            enrolledTests
+              .slice(0, 2)
+              .map((test) => <EnrolledTestCard key={test.id} test={test} />)
           ) : (
-            <View className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-gray-100 dark:border-slate-800 border-dashed items-center mb-8">
+            <View className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-gray-100 dark:border-slate-800 border-dashed items-center mb-8">
               <Feather name="file-text" size={32} color="#CBD5E1" />
               <Text className="text-slate-400 font-bold mt-2">
                 No enrolled tests yet
@@ -254,23 +263,25 @@ export default function ProfileScreen() {
           {/* My Notes Header */}
           <View className="flex-row items-center justify-between mb-4">
             <Text className="text-xl font-black text-slate-800 dark:text-white">
-              My Notes
+              My Notes ({totalProducts})
             </Text>
-            <TouchableOpacity
-              onPress={() => router.push("/(user)/products" as any)}
-            >
-              <View className="flex-row items-center">
-                <Text className="text-primary font-black text-sm">
-                  View All
-                </Text>
-                <Feather
-                  name="chevron-right"
-                  size={16}
-                  color="#FF8A50"
-                  className="ml-1"
-                />
-              </View>
-            </TouchableOpacity>
+            {totalProducts > 0 && (
+              <TouchableOpacity
+                onPress={() => router.push("/(user)/products" as any)}
+              >
+                <View className="flex-row items-center">
+                  <Text className="text-primary font-black text-sm">
+                    View All
+                  </Text>
+                  <Feather
+                    name="chevron-right"
+                    size={16}
+                    color="#FF8A50"
+                    className="ml-1"
+                  />
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
 
           {loadingProducts ? (
@@ -278,9 +289,16 @@ export default function ProfileScreen() {
               <ActivityIndicator color="#FF8A50" />
             </View>
           ) : purchasedProducts.length > 0 ? (
-            <PurchasedProductCard product={purchasedProducts[0]} />
+            purchasedProducts
+              .slice(0, 2)
+              .map((product) => (
+                <PurchasedProductCard
+                  key={product.purchaseId}
+                  product={product}
+                />
+              ))
           ) : (
-            <View className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-gray-100 dark:border-slate-800 border-dashed items-center mb-8">
+            <View className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-gray-100 dark:border-slate-800 border-dashed items-center mb-8">
               <Feather name="shopping-bag" size={32} color="#CBD5E1" />
               <Text className="text-slate-400 font-bold mt-2">
                 No purchased notes yet
@@ -292,7 +310,7 @@ export default function ProfileScreen() {
           <Text className="text-xl font-black text-slate-800 dark:text-white mb-4">
             My Account
           </Text>
-          <View className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 overflow-hidden shadow-sm mb-8">
+          <View className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden shadow-sm mb-8">
             <TouchableOpacity
               onPress={() => router.push("/(user)/orders" as any)}
               className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800"

@@ -11,7 +11,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
@@ -1071,7 +1074,6 @@ const TestAttemptScreen = () => {
               )}
             </View>
 
-
             <View className="mt-8 pt-6 border-t border-gray-100 dark:border-slate-800">
               <Text className="text-slate-400 dark:text-slate-500 text-xs font-semibold mb-2">
                 Started at: {startedAtDisplay}
@@ -1085,7 +1087,7 @@ const TestAttemptScreen = () => {
       </ScrollView>
 
       {/* Sticky Navigation Footer */}
-      <View 
+      <View
         className="px-6 py-4 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 shadow-lg"
         style={{ paddingBottom: Math.max(insets.bottom, 16) }}
       >
@@ -1144,67 +1146,73 @@ const TestAttemptScreen = () => {
           }
         }}
       >
-        <View className="flex-1 bg-black/40 px-5 items-center justify-center">
-          <View className="w-full max-w-[430px] bg-white dark:bg-slate-900 rounded-3xl p-5 border border-gray-200 dark:border-slate-700">
-            <View className="flex-row items-center justify-between mb-3">
-              <Text className="text-slate-900 dark:text-white text-3xl font-black">
+        <View className="flex-1 bg-black/50 px-6 items-center justify-center">
+          <View className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-[32px] p-6 shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-800">
+            {/* Design Element */}
+            <View className="absolute top-0 right-0 w-24 h-24 bg-orange-50 dark:bg-orange-900/10 rounded-bl-full opacity-50" />
+
+            <View className="flex-row items-center justify-between mb-4 mt-2">
+              <Text className="text-slate-900 dark:text-white text-xl font-black">
                 Confirm Submission
               </Text>
               <TouchableOpacity
                 onPress={() => setShowSubmitConfirm(false)}
                 disabled={submitting}
-                className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-800 items-center justify-center"
+                className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-800 items-center justify-center"
               >
                 <Feather
                   name="x"
-                  size={20}
-                  color={colorScheme === "dark" ? "#e2e8f0" : "#334155"}
+                  size={16}
+                  color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
                 />
               </TouchableOpacity>
             </View>
 
-            <Text className="text-slate-500 dark:text-slate-400 text-lg font-semibold mb-4">
-              Are you sure you want to submit your test?
+            <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold mb-6 leading-5">
+              Great effort! Are you certainly ready to submit your test for
+              final evaluation?
             </Text>
 
-            <View className="rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-3 mb-3 flex-row items-center justify-between">
-              <Text className="text-slate-800 dark:text-slate-100 font-black text-lg">
-                Overall Progress
-              </Text>
-              <Text className="text-slate-600 dark:text-slate-300 font-black text-xl">
-                {overallAnsweredCount} / {questions.length} answered
-              </Text>
+            <View className="rounded-2xl bg-orange-50/50 dark:bg-orange-900/10 border border-orange-100/50 dark:border-orange-900/20 px-4 py-4 mb-4 flex-row items-center justify-between">
+              <View>
+                <Text className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-widest mb-1">
+                  Overall Progress
+                </Text>
+                <Text className="text-slate-800 dark:text-white font-black text-lg">
+                  {overallAnsweredCount} / {questions.length} Answered
+                </Text>
+              </View>
+              <View className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 items-center justify-center">
+                <Feather name="bar-chart-2" size={18} color="#FF8A50" />
+              </View>
             </View>
 
-            <View className="mb-5" style={{ gap: 8 }}>
+            <View className="mb-8" style={{ gap: 8 }}>
               {subjectProgressRows.map((row) => (
                 <View
                   key={row.subjectName}
-                  className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 flex-row items-center justify-between"
+                  className="rounded-xl border border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-800/50 px-4 py-3 flex-row items-center justify-between"
                 >
                   <Text
-                    className="text-slate-800 dark:text-slate-100 font-black text-lg flex-1 pr-3"
+                    className="text-slate-600 dark:text-slate-300 font-bold text-sm flex-1 pr-3"
                     numberOfLines={1}
                   >
                     {row.subjectName}
                   </Text>
-                  <Text className="text-slate-500 dark:text-slate-300 font-black text-2xl">
+                  <Text className="text-slate-800 dark:text-white font-black text-base">
                     {row.answeredCount}/{row.totalCount}
                   </Text>
                 </View>
               ))}
             </View>
 
-            <View
-              className="flex-row items-center justify-end"
-              style={{ gap: 12 }}
-            >
+            <View className="flex-row items-center gap-x-3">
               <TouchableOpacity
                 onPress={() => setShowSubmitConfirm(false)}
                 disabled={submitting}
-                className="px-4 py-3 rounded-xl"
+                className="flex-1 h-12 rounded-xl items-center justify-center bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700"
               >
-                <Text className="text-slate-700 dark:text-slate-300 text-2xl font-semibold">
+                <Text className="text-slate-600 dark:text-slate-400 font-bold text-base">
                   Go Back
                 </Text>
               </TouchableOpacity>
@@ -1212,12 +1220,12 @@ const TestAttemptScreen = () => {
               <TouchableOpacity
                 onPress={handleSubmitTest}
                 disabled={submitting}
-                className="bg-red-500 px-5 py-3 rounded-2xl"
+                className="flex-1 h-12 bg-red-500 rounded-xl items-center justify-center shadow-lg shadow-red-500/20"
               >
                 {submitting ? (
-                  <ActivityIndicator color="#FFFFFF" />
+                  <ActivityIndicator color="#FFFFFF" size="small" />
                 ) : (
-                  <Text className="text-white text-2xl font-black">
+                  <Text className="text-white text-base font-black">
                     Submit Test
                   </Text>
                 )}

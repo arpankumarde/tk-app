@@ -46,13 +46,21 @@ const Cart = () => {
     success: boolean;
   } | null>(null);
   const [removingId, setRemovingId] = useState<number | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<CartItem | null>(null);
   const [orderLoading, setOrderLoading] = useState(false);
   const [payuData, setPayuData] = useState<Awaited<
     ReturnType<typeof initiatePayment>
   > | null>(null);
   const [webViewVisible, setWebViewVisible] = useState(false);
 
-  const handleRemoveItem = async (itemId: number) => {
+  const handleRemoveItem = (item: CartItem) => {
+    setItemToDelete(item);
+  };
+
+  const confirmRemove = async () => {
+    if (!itemToDelete) return;
+    const itemId = itemToDelete.id;
+    setItemToDelete(null);
     setRemovingId(itemId);
     setPromoMessage(null);
     await removeItem(itemId);
@@ -236,7 +244,7 @@ const Cart = () => {
                 <CartItemCard
                   key={`${item.type}-${item.id}`}
                   item={item}
-                  onRemove={() => handleRemoveItem(item.id)}
+                  onRemove={() => handleRemoveItem(item)}
                   removing={removingId === item.id}
                   colorScheme={colorScheme}
                   promoEligible={eligibleItemIds.includes(item.resourceId)}
@@ -494,6 +502,59 @@ const Cart = () => {
           </SafeAreaView>
         </Modal>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={!!itemToDelete}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setItemToDelete(null)}
+      >
+        <View className="flex-1 bg-black/50 items-center justify-center px-6">
+          <View className="bg-white dark:bg-slate-800 rounded-3xl p-6 w-full max-w-sm shadow-2xl overflow-hidden">
+            {/* Design Element */}
+            <View className="absolute top-0 right-0 w-24 h-24 bg-orange-50 dark:bg-orange-900/10 rounded-bl-full opacity-50" />
+            
+            <View className="items-center mt-2">
+              <View className="w-16 h-16 rounded-full bg-red-50 dark:bg-red-900/20 items-center justify-center mb-5">
+                <Feather name="trash-2" size={28} color="#EF4444" />
+              </View>
+              
+              <Text className="text-xl font-black text-slate-800 dark:text-white mb-2 text-center">
+                Remove from Cart?
+              </Text>
+              
+              <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold text-center mb-8 leading-5 px-2">
+                Are you sure you want to remove{"\n"}
+                <Text className="text-slate-800 dark:text-slate-200">
+                  {itemToDelete?.title}
+                </Text>
+                {"\n"}from your shopping cart?
+              </Text>
+              
+              <View className="flex-row gap-x-3 w-full">
+                <TouchableOpacity
+                  className="flex-1 h-12 rounded-xl items-center justify-center bg-gray-100 dark:bg-slate-700"
+                  onPress={() => setItemToDelete(null)}
+                >
+                  <Text className="text-slate-500 dark:text-slate-400 font-bold">
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  className="flex-1 h-12 rounded-xl items-center justify-center bg-red-500 shadow-lg shadow-red-500/30"
+                  onPress={confirmRemove}
+                >
+                  <Text className="text-white font-black">
+                    Remove
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };

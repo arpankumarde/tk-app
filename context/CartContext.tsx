@@ -35,7 +35,7 @@ interface CartContextType {
   cart: CartData;
   loading: boolean;
   itemCount: number;
-  refreshCart: () => Promise<void>;
+  refreshCart: (silent?: boolean) => Promise<void>;
   removeItem: (itemId: number) => Promise<void>;
   applyPromoCode: (
     code: string,
@@ -85,53 +85,57 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   );
   const [eligibleItemIds, setEligibleItemIds] = useState<number[]>([]);
 
-  const fetchCart = useCallback(async () => {
-    if (!token) {
-      setCart({
-        items: [],
-        subtotal: 0,
-        discount: 0,
-        promoDiscount: 0,
-        total: 0,
-        itemCount: 0,
-      });
-      return;
-    }
+  const fetchCart = useCallback(
+    async (silent = false) => {
+      if (!token) {
+        setCart({
+          items: [],
+          subtotal: 0,
+          discount: 0,
+          promoDiscount: 0,
+          total: 0,
+          itemCount: 0,
+        });
+        return;
+      }
 
-    try {
-      setLoading(true);
-      const response = await fetch(`${BASE_URL}/_api/cart/items`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      try {
+        if (!silent) setLoading(true);
+        const response = await fetch(`${BASE_URL}/_api/cart/items`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      if (!response.ok) throw new Error("Failed to fetch cart");
+        if (!response.ok) throw new Error("Failed to fetch cart");
 
-      const data = await response.json();
-      const payload = data.json || data;
-      const items: CartItem[] = (payload.items || []).map((item: any) => {
-        const originalPrice = item.price ?? 0;
-        const finalPrice = item.discountPrice ?? originalPrice;
-        return {
-          id: item.cartItemId,
-          resourceId: item.courseId || item.mockTestId || item.digitalProductId,
-          type: item.type,
-          title: item.title || "",
-          slug: item.slug || "",
-          thumbnailUrl: item.thumbnailImageUrl || item.thumbnailUrl || null,
-          teacherName: item.teacherName || item.creatorName || "",
-          price: finalPrice,
-          originalPrice,
-          discount: originalPrice - finalPrice,
-        };
-      });
+        const data = await response.json();
+        const payload = data.json || data;
+        const items: CartItem[] = (payload.items || []).map((item: any) => {
+          const originalPrice = item.price ?? 0;
+          const finalPrice = item.discountPrice ?? originalPrice;
+          return {
+            id: item.cartItemId,
+            resourceId:
+              item.courseId || item.mockTestId || item.digitalProductId,
+            type: item.type,
+            title: item.title || "",
+            slug: item.slug || "",
+            thumbnailUrl: item.thumbnailImageUrl || item.thumbnailUrl || null,
+            teacherName: item.teacherName || item.creatorName || "",
+            price: finalPrice,
+            originalPrice,
+            discount: originalPrice - finalPrice,
+          };
+        });
 
-      setCart(computeTotals(items, appliedPromoDiscount));
-    } catch (error) {
-      console.error("Error fetching cart:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [token, appliedPromoDiscount]);
+        setCart(computeTotals(items, appliedPromoDiscount));
+      } catch (error) {
+        console.error("Error fetching cart:", error);
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [token, appliedPromoDiscount],
+  );
 
   const removeItem = useCallback(
     async (itemId: number) => {
@@ -156,10 +160,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
         if (!response.ok) throw new Error("Failed to remove item");
 
-        await fetchCart();
+        await fetchCart(true);
       } catch (error) {
         console.error("Error removing cart item:", error);
-        await fetchCart();
+        await fetchCart(true);
       }
     },
     [token, fetchCart],
@@ -175,7 +179,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
           type: item.type === "digitalProduct" ? "course" : item.type,
           price: item.price,
         }));
-        const totalAmount = cart.items.reduce((sum, item) => sum + item.price, 0);
+        const totalAmount = cart.items.reduce(
+          (sum, item) => sum + item.price,
+          0,
+        );
 
         const response = await fetch(`${BASE_URL}/_api/promo-codes/validate`, {
           method: "POST",
@@ -208,7 +215,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         return {
           success: true,
           message:
-            payload.message || `Promo applied! You saved ₹${discount.toFixed(2)}`,
+            payload.message ||
+            `Promo applied! You saved ₹${discount.toFixed(2)}`,
         };
       } catch (error) {
         return { success: false, message: "Failed to apply promo code" };

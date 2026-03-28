@@ -12,6 +12,7 @@ export const usePurchasedProducts = (
 
   const [products, setProducts] = useState<PurchasedProduct[]>([]);
   const [loading, setLoading] = useState(false);
+  const [total, setTotal] = useState(0);
 
   const fetchProducts = useCallback(async () => {
     if (!token) return;
@@ -30,6 +31,7 @@ export const usePurchasedProducts = (
       const data = await response.json();
       const payload = data.json || data;
       setProducts(payload.purchases || []);
+      setTotal(payload.total || (payload.purchases || []).length);
     } catch (error) {
       console.error("Error fetching purchased products:", error);
     } finally {
@@ -41,7 +43,7 @@ export const usePurchasedProducts = (
     fetchProducts();
   }, [fetchProducts]);
 
-  return { products, loading, refetch: fetchProducts };
+  return { products, loading, total, refetch: fetchProducts };
 };
 
 export default usePurchasedProducts;

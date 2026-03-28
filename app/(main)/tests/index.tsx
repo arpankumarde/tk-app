@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   StatusBar,
   Pressable,
   TextInput,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -26,12 +27,24 @@ const SORT_OPTIONS = [
   { label: "Price Low to High", value: "price_asc" },
 ];
 
+const LANGUAGES = [
+  "All Languages",
+  "Hindi",
+  "English",
+  "Tamil",
+  "Telugu",
+  "Marathi",
+  "Bengali",
+  "Gujarati",
+  "Others",
+];
+
 type ExamTest = {
   id: number;
   slug: string;
   title: string;
   description: string;
-  subject: string; // This could be an array of strings if subjects are well defined
+  subject: string;
   price: number;
   discountPrice: number | null;
   totalQuestions: number;
@@ -47,9 +60,243 @@ type ExamTest = {
   teacherName: string;
   teacherIsVerified: boolean;
   examSlug: string;
-  durationMinutes: string; // Duration can be a string representing minutes
-  actualQuestionCount: string; // Consider if this should be a number
+  durationMinutes: string;
+  actualQuestionCount: string;
   isEnrolled: boolean;
+};
+
+// ── Separate component so filter interactions don't re-render ShopScreen ──
+const FilterSidebarContent = ({
+  initialFilters,
+  onApply,
+  onClose,
+}: {
+  initialFilters: {
+    search: string;
+    priceType: "all" | "free" | "paid";
+    minPrice: string;
+    maxPrice: string;
+    language: string;
+  };
+  onApply: (f: {
+    search: string;
+    priceType: "all" | "free" | "paid";
+    minPrice: string;
+    maxPrice: string;
+    language: string;
+  }) => void;
+  onClose: () => void;
+}) => {
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const [search, setSearch] = useState(initialFilters.search);
+  const [priceType, setPriceType] = useState(initialFilters.priceType);
+  const [minPrice, setMinPrice] = useState(initialFilters.minPrice);
+  const [maxPrice, setMaxPrice] = useState(initialFilters.maxPrice);
+  const [lang, setLang] = useState(initialFilters.language);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
+
+  const clearAll = () => {
+    setSearch("");
+    setPriceType("all");
+    setMinPrice("");
+    setMaxPrice("");
+    setLang("All Languages");
+  };
+
+  const handleApply = () => {
+    onApply({
+      search,
+      priceType,
+      minPrice,
+      maxPrice,
+      language: lang,
+    });
+  };
+
+  return (
+    <View className="flex-1 flex-row">
+      <Pressable onPress={onClose} className="flex-1 bg-black/40" />
+      <View className="w-[85%] bg-white dark:bg-slate-900 h-full shadow-2xl">
+        <SafeAreaView edges={["top", "bottom"]} className="flex-1">
+          <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
+            <View className="flex-row items-center">
+              <Text className="text-2xl font-black text-slate-800 dark:text-white">
+                Filters
+              </Text>
+              <TouchableOpacity
+                onPress={clearAll}
+                className="ml-4 px-3 py-1 bg-gray-50 dark:bg-slate-800 rounded-full"
+              >
+                <Text className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                  Clear All
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity onPress={onClose}>
+              <Feather
+                name="x"
+                size={24}
+                color={isDark ? "#94a3b8" : "#64748b"}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView className="flex-1 px-6 pt-6">
+            <View className="mb-8">
+              <Text className="text-base font-bold text-slate-800 dark:text-white mb-3">
+                Search
+              </Text>
+              <View className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-4 py-1">
+                <Feather name="search" size={18} color="#94a3b8" />
+                <TextInput
+                  value={search}
+                  onChangeText={setSearch}
+                  placeholder="Search tests..."
+                  placeholderTextColor={isDark ? "#64748b" : "#94a3b8"}
+                  className="flex-1 ml-3 h-12 text-slate-800 dark:text-white"
+                />
+              </View>
+            </View>
+
+            <View className="mb-8">
+              <Text className="text-base font-bold text-slate-800 dark:text-white mb-4">
+                Price Type
+              </Text>
+              <View className="flex-row p-1 bg-gray-100 dark:bg-slate-800 rounded-2xl">
+                {(["all", "free", "paid"] as const).map((type) => (
+                  <TouchableOpacity
+                    key={type}
+                    onPress={() => setPriceType(type)}
+                    className="flex-1 py-3 rounded-xl items-center"
+                    style={
+                      priceType === type
+                        ? {
+                            backgroundColor: isDark ? "#334155" : "#ffffff",
+                            shadowColor: "#000",
+                            shadowOffset: { width: 0, height: 1 },
+                            shadowOpacity: 0.05,
+                            shadowRadius: 1,
+                          }
+                        : undefined
+                    }
+                  >
+                    <Text
+                      className="text-xs font-black capitalize"
+                      style={{
+                        color:
+                          priceType === type
+                            ? "#FF8A50"
+                            : isDark
+                              ? "#94a3b8"
+                              : "#64748b",
+                      }}
+                    >
+                      {type}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View className="mb-8">
+              <Text className="text-base font-bold text-slate-800 dark:text-white mb-4">
+                Price Range (₹)
+              </Text>
+              <View className="flex-row items-center">
+                <TextInput
+                  value={minPrice}
+                  onChangeText={setMinPrice}
+                  placeholder="Min"
+                  placeholderTextColor="#94a3b8"
+                  keyboardType="numeric"
+                  className="flex-1 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-4 py-4 text-slate-800 dark:text-white font-bold"
+                />
+                <Text className="text-slate-400 mx-3 font-bold">-</Text>
+                <TextInput
+                  value={maxPrice}
+                  onChangeText={setMaxPrice}
+                  placeholder="Max"
+                  placeholderTextColor="#94a3b8"
+                  keyboardType="numeric"
+                  className="flex-1 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-4 py-4 text-slate-800 dark:text-white font-bold"
+                />
+              </View>
+            </View>
+
+            <View className="mb-10">
+              <Text className="text-base font-bold text-slate-800 dark:text-white mb-4">
+                Language
+              </Text>
+              <TouchableOpacity
+                onPress={() => setShowLanguageModal(true)}
+                className="flex-row items-center justify-between bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-5 py-4"
+              >
+                <Text className="text-slate-800 dark:text-white font-medium">
+                  {lang}
+                </Text>
+                <Feather name="chevron-down" size={18} color="#94a3b8" />
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+
+          <View className="p-6 border-t border-gray-100 dark:border-slate-800">
+            <TouchableOpacity
+              onPress={handleApply}
+              className="bg-primary h-14 rounded-2xl items-center justify-center shadow-lg shadow-orange-500/30"
+            >
+              <Text className="text-white text-lg font-black">
+                Apply Filters
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </View>
+
+      <Modal
+        visible={showLanguageModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLanguageModal(false)}
+      >
+        <Pressable
+          onPress={() => setShowLanguageModal(false)}
+          className="flex-1 bg-black/20 justify-center items-center px-10"
+        >
+          <View className="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-[300px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-700">
+            <View className="p-5 border-b border-gray-50 dark:border-slate-700/50">
+              <Text className="text-lg font-black text-slate-800 dark:text-white">
+                Select Language
+              </Text>
+            </View>
+            <ScrollView className="max-h-[300px]">
+              {LANGUAGES.map((l) => (
+                <TouchableOpacity
+                  key={l}
+                  onPress={() => {
+                    setLang(l);
+                    setShowLanguageModal(false);
+                  }}
+                  className={`px-6 py-4 border-b border-gray-50 dark:border-slate-700/30 ${lang === l ? "bg-orange-50 dark:bg-orange-900/10" : ""}`}
+                >
+                  <View className="flex-row items-center justify-between">
+                    <Text
+                      className={`text-base ${lang === l ? "text-primary font-bold" : "text-slate-600 dark:text-slate-300"}`}
+                    >
+                      {l}
+                    </Text>
+                    {lang === l && (
+                      <Feather name="check" size={16} color="#FF8A50" />
+                    )}
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </Pressable>
+      </Modal>
+    </View>
+  );
 };
 
 const ShopScreen = () => {
@@ -65,47 +312,12 @@ const ShopScreen = () => {
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Filter States
+  // Applied Filter States
   const [searchQuery, setSearchQuery] = useState("");
   const [priceType, setPriceType] = useState<"all" | "free" | "paid">("all");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("All Languages");
-
-  const priceTypes = [
-    { label: "All", value: "all" as const },
-    { label: "Free", value: "free" as const },
-    { label: "Paid", value: "paid" as const },
-  ];
-
-  const languages = [
-    "All Languages",
-    "Hindi",
-    "English",
-    "Tamil",
-    "Telugu",
-    "Marathi",
-    "Bengali",
-    "Gujarati",
-    "Others",
-  ];
-
-  const [showLanguageModal, setShowLanguageModal] = useState(false);
-
-  const clearFilters = () => {
-    setSearchQuery("");
-    setPriceType("all");
-    setMinPrice("");
-    setMaxPrice("");
-    setSelectedLanguage("All Languages");
-  };
-
-  const handleApplyFilters = () => {
-    setShowFilterSidebar(false);
-    setPage(1);
-    setTests([]);
-    fetchTests(1);
-  };
 
   const fetchTests = useCallback(
     async (pageNum: number = 1, isLoadMore: boolean = false) => {
@@ -134,72 +346,38 @@ const ShopScreen = () => {
           url += `&language=${encodeURIComponent(selectedLanguage)}`;
         }
 
-        console.log("Fetching tests from:", url);
-
+        console.log("[MockTests] Fetching:", url);
         const response = await fetch(url);
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`Server returned error ${response.status}`);
         }
 
         const data = await response.json();
-
-        // Fix: The log shows the data is inside a "json" field
         const payload = data.json || data;
         const testsList = payload.tests || payload.data?.tests || [];
 
-        // Client-side fallback: some API deployments may ignore these params.
-        const getEffectivePrice = (test: ExamTest) =>
-          Number(test.discountPrice ?? test.price ?? 0);
-
-        let filteredTests: ExamTest[] = [...testsList];
-
-        if (priceType === "free") {
-          filteredTests = filteredTests.filter(
-            (test) => getEffectivePrice(test) <= 0,
-          );
-        } else if (priceType === "paid") {
-          filteredTests = filteredTests.filter(
-            (test) => getEffectivePrice(test) > 0,
-          );
-        }
-
-        if (sort === "price_asc") {
-          filteredTests.sort(
-            (a, b) => getEffectivePrice(a) - getEffectivePrice(b),
-          );
-        } else if (sort === "price_desc") {
-          filteredTests.sort(
-            (a, b) => getEffectivePrice(b) - getEffectivePrice(a),
-          );
-        }
-
-        const count =
+        const totalItemsCount =
           payload.totalCount ||
           payload.pagination?.totalCount ||
           payload.data?.totalCount ||
-          filteredTests.length;
+          testsList.length;
 
         if (isLoadMore) {
-          setTests((prev) => [...prev, ...filteredTests]);
+          setTests((prev) => [...prev, ...testsList]);
         } else {
-          setTests(filteredTests);
+          setTests(testsList);
         }
 
-        setTotalCount(priceType === "all" ? count : filteredTests.length);
-
-        // Update hasMore based on tests loaded and total count
-        const currentTotalLoaded = isLoadMore
-          ? tests.length + filteredTests.length
-          : filteredTests.length;
-        setHasMore(currentTotalLoaded < count);
-
-        if (filteredTests.length === 0 && !isLoadMore) {
-          console.warn("No tests returned from API");
-        }
-      } catch (error: any) {
-        console.error("Error fetching tests:", error);
-        setError(error.message);
+        setTotalCount(totalItemsCount);
+        setHasMore(
+          isLoadMore
+            ? tests.length + testsList.length < totalItemsCount
+            : testsList.length < totalItemsCount,
+        );
+      } catch (err: any) {
+        console.error("[MockTests] caught error:", err);
+        setError(err.message);
       } finally {
         setLoading(false);
         setLoadingMore(false);
@@ -216,6 +394,11 @@ const ShopScreen = () => {
     ],
   );
 
+  useEffect(() => {
+    setPage(1);
+    fetchTests(1, false);
+  }, [sort, searchQuery, priceType, minPrice, maxPrice, selectedLanguage]);
+
   const handleLoadMore = () => {
     if (!loading && !loadingMore && hasMore) {
       const nextPage = page + 1;
@@ -224,12 +407,34 @@ const ShopScreen = () => {
     }
   };
 
-  useEffect(() => {
-    setPage(1);
-    fetchTests(1);
-  }, [sort, searchQuery, priceType, minPrice, maxPrice, selectedLanguage]);
+  const handleApplyFilters = useCallback(
+    (f: {
+      search: string;
+      priceType: "all" | "free" | "paid";
+      minPrice: string;
+      maxPrice: string;
+      language: string;
+    }) => {
+      setSearchQuery(f.search);
+      setPriceType(f.priceType);
+      setMinPrice(f.minPrice);
+      setMaxPrice(f.maxPrice);
+      setSelectedLanguage(f.language);
+      setPage(1);
+      setShowFilterSidebar(false);
+    },
+    [],
+  );
 
   const activeSortLabel = SORT_OPTIONS.find((opt) => opt.value === sort)?.label;
+
+  const testCards = useMemo(
+    () =>
+      tests.map((test, index) => (
+        <MockTestCard key={test.slug || index} test={test as any} />
+      )),
+    [tests],
+  );
 
   return (
     <SafeAreaView
@@ -244,19 +449,18 @@ const ShopScreen = () => {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         className="bg-white dark:bg-slate-900"
+        showsVerticalScrollIndicator={false}
       >
-        {/* Hero Section */}
+        {/* Header Section */}
         <View className="px-6 pt-5 pb-4">
           <View className="self-start bg-orange-100 dark:bg-orange-900/25 px-3 py-1 rounded-full mb-3 border border-orange-200 dark:border-orange-800/40">
             <Text className="text-primary text-[10px] font-black uppercase tracking-wider">
               Mock Test Zone
             </Text>
           </View>
-
           <Text className="text-[34px] font-extrabold text-slate-800 dark:text-white leading-[40px]">
             Online Mock Tests
           </Text>
-
           <Text className="text-slate-500 dark:text-slate-400 mt-2 text-[15px] leading-6 pr-6">
             Find the right test set to sharpen your speed, accuracy, and exam
             confidence.
@@ -267,7 +471,7 @@ const ShopScreen = () => {
         <View className="px-5 mb-8 flex-row items-center">
           <TouchableOpacity
             onPress={() => setShowFilterSidebar(true)}
-            className="flex-row items-center border border-orange-200 dark:border-orange-800/80 bg-white dark:bg-slate-800 px-4 py-2.5 rounded-xl mr-3 shadow-sm"
+            className="flex-row items-center border border-orange-200 dark:border-orange-800/80 bg-white dark:bg-slate-800 px-4 py-3 rounded-xl mr-3 shadow-sm flex-1 justify-center"
           >
             <Feather name="filter" size={16} color="#FF8A50" />
             <Text className="ml-2 text-primary font-bold text-sm">Filters</Text>
@@ -275,7 +479,7 @@ const ShopScreen = () => {
 
           <TouchableOpacity
             onPress={() => setShowSortModal(true)}
-            className="flex-row items-center border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 rounded-xl flex-1 shadow-sm justify-between"
+            className="flex-row items-center border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 rounded-xl flex-1 shadow-sm justify-between"
           >
             <Text
               className="text-slate-600 dark:text-slate-300 font-bold text-sm"
@@ -304,7 +508,7 @@ const ShopScreen = () => {
           </View>
         )}
 
-        <View className="px-6 mb-4">
+        <View className="px-6 mb-6">
           <Text className="text-slate-600 dark:text-slate-400 text-base">
             Found{" "}
             <Text className="text-slate-900 dark:text-white font-black">
@@ -314,7 +518,7 @@ const ShopScreen = () => {
           </Text>
         </View>
 
-        {/* Product List */}
+        {/* List Content */}
         {loading ? (
           <View className="flex-1 items-center justify-center py-10">
             <ActivityIndicator size="large" color="#FF8A50" />
@@ -323,9 +527,7 @@ const ShopScreen = () => {
           <View className="pb-10">
             {tests.length > 0 ? (
               <>
-                {tests.map((test, index) => (
-                  <MockTestCard key={test.slug || index} test={test} />
-                ))}
+                {testCards}
 
                 {hasMore && (
                   <View className="px-6 mt-4">
@@ -341,7 +543,11 @@ const ShopScreen = () => {
                           <Text className="text-primary font-bold text-base mr-2">
                             Load More Tests
                           </Text>
-                          <Feather name="refresh-cw" size={16} color="#FF8A50" />
+                          <Feather
+                            name="refresh-cw"
+                            size={16}
+                            color="#FF8A50"
+                          />
                         </>
                       )}
                     </TouchableOpacity>
@@ -387,13 +593,17 @@ const ShopScreen = () => {
       </ScrollView>
       <BottomTabs />
 
-      {/* Sort Dropdown (Absolute instead of Modal) */}
-      {showSortModal && (
-        <View className="absolute inset-0 z-[110] justify-center items-center px-10">
-          <Pressable
-            onPress={() => setShowSortModal(false)}
-            className="absolute inset-0 bg-black/20"
-          />
+      {/* Sort Dropdown */}
+      <Modal
+        visible={showSortModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSortModal(false)}
+      >
+        <Pressable
+          onPress={() => setShowSortModal(false)}
+          className="flex-1 bg-black/20 justify-center items-center px-10"
+        >
           <View className="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-[280px] p-2 shadow-2xl border border-gray-100 dark:border-slate-700">
             <View className="p-4 border-b border-gray-50 dark:border-slate-700/50">
               <Text className="text-base font-black text-slate-800 dark:text-white">
@@ -406,10 +616,7 @@ const ShopScreen = () => {
                 key={option.value}
                 onPress={() => {
                   setSort(option.value);
-                  setPage(1);
-                  setTests([]);
                   setShowSortModal(false);
-                  fetchTests(1);
                 }}
                 className={`flex-row items-center justify-between px-4 py-3.5 rounded-2xl ${
                   sort === option.value
@@ -432,202 +639,28 @@ const ShopScreen = () => {
               </TouchableOpacity>
             ))}
           </View>
-        </View>
-      )}
+        </Pressable>
+      </Modal>
 
-      {/* Filter Sidebar (Absolute instead of Modal) */}
-      {showFilterSidebar && (
-        <View className="absolute inset-0 z-[100] flex-row">
-          <Pressable
-            onPress={() => setShowFilterSidebar(false)}
-            className="flex-1 bg-black/40"
-          />
-          <View className="w-[85%] bg-white dark:bg-slate-900 h-full shadow-2xl">
-            <SafeAreaView edges={["top", "bottom"]} className="flex-1">
-              <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
-                <View className="flex-row items-center">
-                  <Text className="text-2xl font-black text-slate-800 dark:text-white">
-                    Filters
-                  </Text>
-                  <TouchableOpacity
-                    onPress={clearFilters}
-                    className="ml-4 px-3 py-1 bg-gray-50 dark:bg-slate-800 rounded-full"
-                  >
-                    <Text className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                      Clear All
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <TouchableOpacity onPress={() => setShowFilterSidebar(false)}>
-                  <Feather
-                    name="x"
-                    size={24}
-                    color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <ScrollView className="flex-1 px-6 pt-6">
-                {/* Search */}
-                <View className="mb-8">
-                  <Text className="text-base font-bold text-slate-800 dark:text-white mb-3">
-                    Search
-                  </Text>
-                  <View className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-4 py-1">
-                    <Feather name="search" size={18} color="#94a3b8" />
-                    <TextInput
-                      value={searchQuery}
-                      onChangeText={setSearchQuery}
-                      placeholder="Search tests..."
-                      placeholderTextColor={
-                        colorScheme === "dark" ? "#64748b" : "#94a3b8"
-                      }
-                      className="flex-1 ml-3 h-12 text-slate-800 dark:text-white"
-                    />
-                  </View>
-                </View>
-
-                {/* Price Type */}
-                <View className="mb-8">
-                  <Text className="text-base font-bold text-slate-800 dark:text-white mb-4">
-                    Price Type
-                  </Text>
-                  {priceTypes.map((option) => (
-                    <TouchableOpacity
-                      key={option.value}
-                      onPress={() => setPriceType(option.value)}
-                      className="flex-row items-center mb-4"
-                    >
-                      <View
-                        className={`w-6 h-6 rounded-full border items-center justify-center ${
-                          priceType === option.value
-                            ? "bg-orange-500 border-orange-500"
-                            : "border-gray-200 dark:border-slate-700"
-                        }`}
-                      >
-                        {priceType === option.value && (
-                          <View className="w-2.5 h-2.5 rounded-full bg-white" />
-                        )}
-                      </View>
-                      <Text
-                        className={`ml-4 text-base ${
-                          priceType === option.value
-                            ? "text-slate-900 dark:text-white font-bold"
-                            : "text-slate-500 dark:text-slate-400"
-                        }`}
-                      >
-                        {option.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {/* Price Range */}
-                <View className="mb-8">
-                  <Text className="text-base font-bold text-slate-800 dark:text-white mb-4">
-                    Price Range (₹)
-                  </Text>
-                  <View className="flex-row items-center space-x-4">
-                    <TextInput
-                      value={minPrice}
-                      onChangeText={setMinPrice}
-                      placeholder="Min"
-                      placeholderTextColor="#94a3b8"
-                      keyboardType="numeric"
-                      className="flex-1 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-4 py-4 text-slate-800 dark:text-white"
-                    />
-                    <Text className="text-slate-400 mx-2">-</Text>
-                    <TextInput
-                      value={maxPrice}
-                      onChangeText={setMaxPrice}
-                      placeholder="Max"
-                      placeholderTextColor="#94a3b8"
-                      keyboardType="numeric"
-                      className="flex-1 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-4 py-4 text-slate-800 dark:text-white"
-                    />
-                  </View>
-                </View>
-
-                {/* Language */}
-                <View className="mb-10">
-                  <Text className="text-base font-bold text-slate-800 dark:text-white mb-4">
-                    Language
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => setShowLanguageModal(true)}
-                    className="flex-row items-center justify-between bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-5 py-4"
-                  >
-                    <Text className="text-slate-800 dark:text-white font-medium">
-                      {selectedLanguage}
-                    </Text>
-                    <Feather name="chevron-down" size={18} color="#94a3b8" />
-                  </TouchableOpacity>
-                </View>
-
-                <View className="h-10" />
-              </ScrollView>
-
-              <View className="px-6 py-4 border-t border-gray-100 dark:border-slate-800">
-                <TouchableOpacity
-                  onPress={handleApplyFilters}
-                  className="bg-primary py-3.5 rounded-2xl items-center"
-                >
-                  <Text className="text-white font-black text-base">
-                    Apply Filters
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </SafeAreaView>
-          </View>
-        </View>
-      )}
-      {/* Language Selection (Absolute instead of Modal) */}
-      {showLanguageModal && (
-        <View className="absolute inset-0 z-[120] justify-center items-center px-10">
-          <Pressable
-            onPress={() => setShowLanguageModal(false)}
-            className="absolute inset-0 bg-black/20"
-          />
-          <View className="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-[300px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-700">
-            <View className="p-5 border-b border-gray-50 dark:border-slate-700/50">
-              <Text className="text-lg font-black text-slate-800 dark:text-white">
-                Select Language
-              </Text>
-            </View>
-            <ScrollView className="max-h-[300px]">
-              {languages.map((lang) => (
-                <TouchableOpacity
-                  key={lang}
-                  onPress={() => {
-                    setSelectedLanguage(lang);
-                    setShowLanguageModal(false);
-                  }}
-                  className={`px-6 py-4 border-b border-gray-50 dark:border-slate-700/30 ${
-                    selectedLanguage === lang
-                      ? "bg-orange-50 dark:bg-orange-900/10"
-                      : ""
-                  }`}
-                >
-                  <View className="flex-row items-center justify-between">
-                    <Text
-                      className={`text-base ${
-                        selectedLanguage === lang
-                          ? "text-primary font-bold"
-                          : "text-slate-600 dark:text-slate-300"
-                      }`}
-                    >
-                      {lang}
-                    </Text>
-                    {selectedLanguage === lang && (
-                      <Feather name="check" size={16} color="#FF8A50" />
-                    )}
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        </View>
-      )}
+      {/* Filter Sidebar Modal */}
+      <Modal
+        visible={showFilterSidebar}
+        transparent
+        animationType="none"
+        onRequestClose={() => setShowFilterSidebar(false)}
+      >
+        <FilterSidebarContent
+          initialFilters={{
+            search: searchQuery,
+            priceType,
+            minPrice,
+            maxPrice,
+            language: selectedLanguage,
+          }}
+          onApply={handleApplyFilters}
+          onClose={() => setShowFilterSidebar(false)}
+        />
+      </Modal>
     </SafeAreaView>
   );
 };

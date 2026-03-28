@@ -82,7 +82,6 @@ export interface LiveTestResponse {
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
-
 const LiveTestCard = ({
   test,
   colorScheme,
@@ -103,149 +102,143 @@ const LiveTestCard = ({
   const timeLeft = useCountdown(isLive ? test.endTime : null);
 
   return (
-    <View
-      className="bg-white dark:bg-slate-900 rounded-[32px] mb-8 p-3.5 border border-gray-100 dark:border-slate-800"
-      style={{
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.04,
-        shadowRadius: 16,
-        elevation: 6,
-      }}
+    <TouchableOpacity
+      onPress={() => router.push(`/live/${test.id}` as any)}
+      activeOpacity={0.9}
+      className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden mb-8 shadow-xl shadow-slate-200/50 dark:shadow-none border border-gray-100 dark:border-slate-700/50"
     >
-      {/* Top Badges Row */}
-      <View className="flex-row justify-between mb-2.5 px-1">
-        <View className="bg-orange-50 dark:bg-orange-950/30 px-3.5 py-1.5 rounded-full border border-orange-100/50 dark:border-orange-900/30">
-          <Text className="text-orange-500 dark:text-orange-400 font-black text-[10px] uppercase tracking-widest">
-            {test.examSlug?.replace(/-/g, " ").toUpperCase() || "MOCK TEST"}
-          </Text>
-        </View>
-        <View className="bg-cyan-50 dark:bg-cyan-950/30 px-3.5 py-1.5 rounded-full border border-cyan-100/50 dark:border-cyan-900/30">
-          <Text className="text-cyan-600 dark:text-cyan-400 font-black text-[10px] uppercase tracking-widest">
-            {test.language?.toUpperCase() || "ENGLISH"}
-          </Text>
-        </View>
-      </View>
+      <View>
+        {/* Thumbnail with floating badges */}
+        <View className="relative w-full aspect-video bg-slate-100 dark:bg-slate-900">
+          <Image
+            source={{
+              uri:
+                test.thumbnailUrl ||
+                "https://ik.imagekit.io/testkart/placeholders/live.png",
+            }}
+            className="w-full h-full"
+            resizeMode="cover"
+          />
 
-      {/* Inset Image */}
-      <View className="relative aspect-video w-full rounded-2xl overflow-hidden mb-4 bg-slate-100 dark:bg-slate-800">
-        <Image
-          source={{
-            uri:
-              test.thumbnailUrl ||
-              "https://ik.imagekit.io/testkart/placeholders/live.png",
-          }}
-          className="w-full h-full"
-          resizeMode="cover"
-        />
-        
-        {/* Floating LIVE Badge on Image */}
-        {isLive && (
-          <View className="absolute top-3 right-3">
-            <View className="bg-red-500 px-2.5 py-1 rounded-full flex-row items-center border border-red-400 shadow-sm">
-              <View className="w-1.5 h-1.5 rounded-full bg-white mr-1.5" />
-              <Text className="text-white font-black text-[9px] uppercase">LIVE</Text>
-            </View>
-          </View>
-        )}
-
-        {/* Floating Plus button from reference */}
-        <View className="absolute bottom-4 right-4 bg-orange-500/90 w-11 h-11 rounded-2xl items-center justify-center shadow-lg">
-          <Feather name="plus" size={24} color="white" />
-        </View>
-      </View>
-
-      <View className="px-1.5">
-        {/* Title */}
-        <Text className="text-[22px] font-black text-slate-800 dark:text-white mb-2 leading-tight">
-          {test.title}
-        </Text>
-
-        {/* Teacher & Rating Info Row */}
-        <View className="flex-row items-center justify-between mb-5">
-          <View className="flex-row items-center">
-            <Text className="text-slate-400 dark:text-slate-500 text-sm font-bold">
-              By:{" "}
-            </Text>
-            <Text className="text-slate-600 dark:text-slate-300 text-sm font-black">
-              {test.teacherName}
-            </Text>
-            {test.teacherIsVerified && (
-              <MaterialIcons
-                name="check-circle"
-                size={16}
-                color="#F97316"
-                style={{ marginLeft: 6 }}
-              />
-            )}
-          </View>
-          
-          <View className="flex-row items-center">
-            <MaterialIcons name="star-outline" size={16} color="#F97316" />
-            <Text className="ml-1 text-orange-500 font-black text-sm">5.0</Text>
-            <Text className="ml-1 text-slate-400 text-xs">(0 reviews)</Text>
-          </View>
-        </View>
-
-        {/* Vertical Icon Stats */}
-        <View className="gap-y-3 mb-6">
-          <View className="flex-row items-center">
-            <Feather name="file-text" size={17} color="#F97316" />
-            <Text className="ml-3 text-slate-500 dark:text-slate-400 font-bold text-sm">
-              Questions: <Text className="text-slate-800 dark:text-white font-black">{test.actualQuestionCount}</Text>
-            </Text>
-          </View>
-
-          <View className="flex-row items-center">
-            <Feather name="clock" size={17} color="#F97316" />
-            <Text className="ml-3 text-slate-500 dark:text-slate-400 font-bold text-sm">
-              Total Time: <Text className="text-slate-800 dark:text-white font-black">{test.durationMinutes} Minutes</Text>
-            </Text>
-          </View>
-
-          <View className="flex-row items-center">
-            <Feather name="book-open" size={17} color="#F97316" />
-            <Text className="ml-3 text-slate-500 dark:text-slate-400 font-bold text-sm" numberOfLines={1}>
-              Subjects: <Text className="text-slate-800 dark:text-white font-black">{test.subjects}</Text>
-            </Text>
-          </View>
-
-          <View className="flex-row items-center">
-            <Feather name="users" size={17} color="#F97316" />
-            <Text className="ml-3 text-slate-500 dark:text-slate-400 font-bold text-sm">
-              Students Enrolled: <Text className="text-slate-800 dark:text-white font-black">{test.enrolledCount}</Text>
-            </Text>
-          </View>
-
-          {/* Ends In Highlighter */}
-          {timeLeft && (
-            <View className="bg-orange-50 dark:bg-orange-950/20 px-4 py-3 rounded-2xl border border-orange-100 dark:border-orange-900/30 flex-row items-center mt-1">
-              <Feather name="activity" size={15} color="#F59E0B" />
-              <Text className="ml-3 text-orange-600 dark:text-orange-400 font-black text-sm">
-                Ends in: <Text className="text-orange-500 dark:text-orange-300">{timeLeft}</Text>
-              </Text>
+          {/* Floating LIVE Badge */}
+          {isLive && (
+            <View className="absolute top-4 right-4">
+              <View className="bg-red-500 px-3 py-1 rounded-full flex-row items-center border border-red-400 shadow-lg">
+                <View className="w-1.5 h-1.5 rounded-full bg-white mr-1.5" />
+                <Text className="text-white font-black text-[10px] uppercase tracking-wider">
+                  LIVE
+                </Text>
+              </View>
             </View>
           )}
         </View>
 
-        {/* Divider */}
-        <View className="h-[1px] bg-slate-100 dark:bg-slate-800 mb-6" />
+        {/* Content Section */}
+        <View className="p-5">
+          {/* Pills Row at Top of Content */}
+          <View className="flex-row items-center mb-4">
+            <View className="bg-orange-50 dark:bg-orange-950/20 px-3 py-1.5 rounded-full border border-orange-100/50 dark:border-orange-800/40">
+              <Text
+                className="text-primary text-[10px] font-black uppercase tracking-widest"
+                numberOfLines={1}
+              >
+                {test.examSlug?.replace(/-/g, " ").toUpperCase() || "MOCK TEST"}
+              </Text>
+            </View>
+            <View className="ml-3 bg-cyan-50 dark:bg-cyan-950/20 px-3 py-1.5 rounded-full border border-cyan-100/50 dark:border-cyan-800/40">
+              <Text className="text-cyan-600 dark:text-cyan-400 font-black text-[10px] uppercase tracking-widest">
+                {test.language?.toUpperCase() || "ENGLISH"}
+              </Text>
+            </View>
+          </View>
 
-        {/* Footer Row: CTA */}
-        <View className="items-center justify-center">
-          <TouchableOpacity
-            className="w-full bg-orange-500 items-center justify-center py-4 rounded-2xl flex-row shadow-sm shadow-orange-500/40"
-            onPress={() => router.push(`/live/${test.id}` as any)}
+          <Text
+            className="text-xl font-black text-slate-800 dark:text-white mb-2 leading-7"
+            numberOfLines={2}
           >
-            <Feather name="eye" size={20} color="white" />
-            <Text className="text-white text-lg font-black ml-3">View Details</Text>
-          </TouchableOpacity>
+            {test.title}
+          </Text>
+
+          {/* Author & Rating Row */}
+          <View className="flex-row items-center justify-between mb-6">
+            <View className="flex-row items-center flex-1">
+              <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium">
+                By:{" "}
+                <Text className="text-slate-600 dark:text-slate-300 font-bold">
+                  {test.teacherName}
+                </Text>
+              </Text>
+              {test.teacherIsVerified && (
+                <MaterialIcons
+                  name="verified"
+                  size={14}
+                  color="#22C55E"
+                  style={{ marginLeft: 4 }}
+                />
+              )}
+            </View>
+
+            <View className="flex-row items-center bg-orange-50 dark:bg-orange-950/20 px-2.5 py-1 rounded-lg">
+              <MaterialIcons name="star" size={12} color="#F97316" />
+              <Text className="ml-1 text-orange-500 font-black text-xs">
+                5.0
+              </Text>
+            </View>
+          </View>
+
+          {/* Grid Icon Stats (2x2) */}
+          <View className="flex-row flex-wrap gap-y-4 mb-6">
+            <View className="w-1/2 flex-row items-center">
+              <Feather name="file-text" size={14} color="#F97316" />
+              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+                {test.actualQuestionCount} Questions
+              </Text>
+            </View>
+
+            <View className="w-1/2 flex-row items-center">
+              <Feather name="clock" size={14} color="#F97316" />
+              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+                {test.durationMinutes} Minutes
+              </Text>
+            </View>
+
+            <View className="w-1/2 flex-row items-center">
+              <Feather name="book-open" size={14} color="#F97316" />
+              <Text
+                className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300"
+                numberOfLines={1}
+              >
+                {test.subjects}
+              </Text>
+            </View>
+
+            <View className="w-1/2 flex-row items-center">
+              <Feather name="users" size={14} color="#F97316" />
+              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+                {test.enrolledCount} Enrolled
+              </Text>
+            </View>
+          </View>
+
+          {/* Ends In Highlighter */}
+          {timeLeft && (
+            <View className="bg-orange-50 dark:bg-orange-950/30 px-5 py-4 rounded-2xl border border-orange-100 dark:border-orange-900/30 flex-row items-center justify-between">
+              <View className="flex-row items-center">
+                <View className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-2" />
+                <Text className="text-orange-600 dark:text-orange-400 font-bold text-sm">
+                  Ends In:
+                </Text>
+              </View>
+              <Text className="text-orange-500 dark:text-orange-300 font-black text-sm">
+                {timeLeft}
+              </Text>
+            </View>
+          )}
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
-
 
 const LiveTests = () => {
   const { colorScheme } = useColorScheme();

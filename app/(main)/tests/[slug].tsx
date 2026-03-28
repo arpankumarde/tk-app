@@ -59,6 +59,7 @@ interface Package {
   teacherName: string;
   teacherAvatarUrl: string;
   teacherId: number;
+  teacherSlug: string;
   teacherBio: string;
   teacherWebsiteUrl: string;
   teacherPublicPhone: string;
@@ -252,19 +253,14 @@ const TestDetails = () => {
             >
               <Feather name="chevron-left" size={24} color="#FF8A50" />
             </TouchableOpacity>
-            <View className="flex-row items-center">
-              <Text className="text-slate-400 dark:text-slate-500 text-xs">
-                Tests
-              </Text>
-              <Feather
-                name="chevron-right"
-                size={12}
-                color="#94a3b8"
-                className="mx-2"
-              />
-              <Text className="text-primary text-xs font-bold" numberOfLines={1}>
-                {test.examName || "Details"}
-              </Text>
+            <View className="flex-row items-center gap-x-2.5">
+              {/* Exam Badge */}
+              <View className="bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-700 flex-row items-center">
+                <Feather name="award" size={10} color="#64748b" />
+                <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1.5">
+                  {test.examName || "Details"}
+                </Text>
+              </View>
             </View>
           </View>
 
@@ -306,11 +302,14 @@ const TestDetails = () => {
 
           {/* Author & Rating */}
           <View className="flex-row items-center mb-6">
-            <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
+            <Text
+              className="text-slate-500 dark:text-slate-400 text-sm font-bold flex-1"
+              numberOfLines={1}
+            >
               Created by{" "}
               <Link
-                href={`/expert/${test.teacherId}` as any}
-                className="text-primary"
+                href={`/expert/${test.teacherSlug}` as any}
+                className="text-primary font-bold"
               >
                 {test.teacherName || "TestKart Expert"}
               </Link>
@@ -584,7 +583,7 @@ const TestDetails = () => {
             About the Author
           </Text>
           <TouchableOpacity
-            onPress={() => router.push(`/expert/${test.teacherId}` as any)}
+            onPress={() => router.push(`/expert/${test.teacherSlug}` as any)}
             className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-xl p-5"
           >
             <Image
@@ -672,7 +671,7 @@ const TestDetails = () => {
                 }
           }
           disabled={enrolling || addingToCart || (isFree && test.isEnrolled)}
-          className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} h-14 px-8 rounded-xl items-center justify-center shadow-lg disabled:opacity-60`}
+          className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} h-14 w-44 rounded-xl items-center justify-center shadow-lg disabled:opacity-60`}
         >
           {enrolling || addingToCart ? (
             <ActivityIndicator color="white" />
@@ -701,11 +700,7 @@ const TestDetails = () => {
             {enrollResult.success ? (
               <>
                 <View className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 items-center justify-center mb-5">
-                  <Feather
-                    name="check-circle"
-                    size={32}
-                    color="#10B981"
-                  />
+                  <Feather name="check-circle" size={32} color="#10B981" />
                 </View>
                 <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
                   Enrolled Successfully!
@@ -747,11 +742,7 @@ const TestDetails = () => {
             ) : (
               <>
                 <View className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 items-center justify-center mb-5">
-                  <Feather
-                    name="alert-circle"
-                    size={32}
-                    color="#EF4444"
-                  />
+                  <Feather name="alert-circle" size={32} color="#EF4444" />
                 </View>
                 <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
                   Enrollment Failed
