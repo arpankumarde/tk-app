@@ -12,7 +12,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.digikind.testkart",
+      "package": "com.arpankumarde.testkart",
       "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#FF8A50",
