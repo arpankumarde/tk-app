@@ -146,20 +146,22 @@ const ProductCard = ({ product: initialProduct }: ProductCardProps) => {
                 className="w-full h-full"
               />
             </View>
-            <Text
-              className="text-slate-500 dark:text-slate-400 text-sm flex-1"
-              numberOfLines={1}
-            >
-              {displayAuthor}
-            </Text>
-            {product.teacherIsVerified && (
-              <MaterialIcons
-                name="verified"
-                size={14}
-                color="#22C55E"
-                className="ml-1"
-              />
-            )}
+            <View className="flex-row items-center flex-1">
+              <Text
+                className="text-slate-500 dark:text-slate-400 text-sm"
+                numberOfLines={1}
+              >
+                {displayAuthor}
+              </Text>
+              {product.teacherIsVerified && (
+                <MaterialIcons
+                  name="verified"
+                  size={14}
+                  color="#22C55E"
+                  className="ml-1"
+                />
+              )}
+            </View>
           </View>
 
           {/* Product Stats Row */}

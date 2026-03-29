@@ -48,11 +48,14 @@ interface Teacher {
   tagline: string;
   isVerified: boolean;
   workExperiences: {
-    title: string;
-    organization: string;
-    startYear: string;
-    endYear: string | null;
-    description: string;
+    id: number;
+    companyName: string;
+    position: string;
+    startDate: string | null;
+    endDate: string | null;
+    location: string | null;
+    description: string | null;
+    isCurrent: boolean;
   }[];
 }
 
@@ -281,7 +284,7 @@ const ExpertDetails = () => {
               </View>
 
               {/* Name & verified badge */}
-              <View className="flex-row items-center mb-1">
+              <View className="flex-row items-center mb-0.5">
                 <Text className="text-2xl font-black text-slate-800 dark:text-white mr-2">
                   {teacher.displayName}
                 </Text>
@@ -289,6 +292,16 @@ const ExpertDetails = () => {
                   <MaterialIcons name="verified" size={20} color="#22C55E" />
                 )}
               </View>
+
+              {/* Current Role/Expertise */}
+              {teacher.workExperiences?.length > 0 && (() => {
+                const exp = teacher.workExperiences[0];
+                return (
+                  <Text className="text-slate-500 dark:text-slate-400 text-sm font-semibold mb-1">
+                    {exp.position}{!!exp.companyName && ` at ${exp.companyName}`}
+                  </Text>
+                );
+              })()}
 
               {!!teacher.tagline && (
                 <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-3">
@@ -326,14 +339,6 @@ const ExpertDetails = () => {
                 icon: "file-text" as const,
               },
               {
-                label: "Students",
-                value:
-                  totalStudents > 999
-                    ? `${(totalStudents / 1000).toFixed(1)}k`
-                    : String(totalStudents),
-                icon: "users" as const,
-              },
-              {
                 label: "Notes",
                 value: tabCounts.products,
                 icon: "book-open" as const,
@@ -342,6 +347,14 @@ const ExpertDetails = () => {
                 label: "Courses",
                 value: tabCounts.courses,
                 icon: "play-circle" as const,
+              },
+              {
+                label: "Students",
+                value:
+                  totalStudents > 999
+                    ? `${(totalStudents / 1000).toFixed(1)}k`
+                    : String(totalStudents),
+                icon: "users" as const,
               },
             ].map((stat) => (
               <View
@@ -446,36 +459,72 @@ const ExpertDetails = () => {
           {/* ── Work Experience ───────────────────────── */}
           {teacher.workExperiences?.length > 0 && (
             <View className="mx-5 mt-6">
-              <Text className="text-xl font-black text-slate-800 dark:text-white mb-4">
-                Experience
-              </Text>
+              <View className="flex-row items-center mb-4">
+                <View className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/20 items-center justify-center mr-3">
+                  <Feather name="briefcase" size={16} color="#FF8A50" />
+                </View>
+                <Text className="text-xl font-black text-slate-800 dark:text-white">
+                  Work Experience
+                </Text>
+              </View>
+
               <View style={{ gap: 12 }}>
-                {teacher.workExperiences.map((exp, i) => (
-                  <View
-                    key={i}
-                    className="bg-white dark:bg-slate-800 rounded-[24px] p-5 border border-gray-100 dark:border-slate-700 shadow-sm flex-row items-start"
-                  >
-                    <View className="w-10 h-10 rounded-2xl bg-orange-50 dark:bg-orange-900/20 items-center justify-center mr-4 mt-0.5 shrink-0">
-                      <Feather name="briefcase" size={18} color="#FF8A50" />
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-base font-black text-slate-800 dark:text-white leading-tight">
-                        {exp.title}
-                      </Text>
-                      <Text className="text-sm font-bold text-primary mt-0.5">
-                        {exp.organization}
-                      </Text>
-                      <Text className="text-xs text-slate-400 font-semibold mt-1">
-                        {exp.startYear} — {exp.endYear || "Present"}
-                      </Text>
+                {teacher.workExperiences.map((exp: any, i: number) => {
+                  const formatDate = (date: any) => {
+                    if (!date) return "";
+                    try {
+                      const d = new Date(date);
+                      if (!isNaN(d.getTime())) {
+                        return d.toLocaleDateString("en-US", {
+                          month: "short",
+                          year: "numeric",
+                        });
+                      }
+                      return date.toString();
+                    } catch (e) {
+                      return date?.toString() || "";
+                    }
+                  };
+
+                  const title = exp.position;
+                  const org = exp.companyName;
+                  const loc = exp.location;
+                  const start = formatDate(exp.startDate);
+                  const end = exp.endDate ? formatDate(exp.endDate) : "Present";
+
+                  if (!title && !org) return null;
+
+                  return (
+                    <View
+                      key={i}
+                      className="bg-slate-50 dark:bg-slate-800/50 rounded-[24px] p-5 border border-gray-100 dark:border-slate-700 shadow-sm"
+                    >
+                      <View className="flex-row justify-between items-start mb-2">
+                        <View className="flex-1 mr-2">
+                          <Text className="text-base font-black text-slate-800 dark:text-white leading-tight">
+                            {title}
+                          </Text>
+                          <Text className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-0.5">
+                            {org}{!!loc && ` • ${loc}`}
+                          </Text>
+                        </View>
+                        <View className="px-3 py-1 rounded-full bg-white dark:bg-slate-700 border border-gray-100 dark:border-slate-600">
+                          <Text className="text-[10px] font-black text-primary uppercase">
+                            {start} {start && end ? "–" : ""} {end}
+                          </Text>
+                        </View>
+                      </View>
+
                       {!!exp.description && (
-                        <Text className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-5">
-                          {exp.description}
-                        </Text>
+                        <View className="mt-2 pt-2 border-t border-gray-200/50 dark:border-slate-700/50">
+                          <Text className="text-sm text-slate-500 dark:text-slate-400 leading-5 italic">
+                            {exp.description}
+                          </Text>
+                        </View>
                       )}
                     </View>
-                  </View>
-                ))}
+                  );
+                })}
               </View>
             </View>
           )}

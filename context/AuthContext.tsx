@@ -37,6 +37,7 @@ type User = {
 type AuthContextType = {
   user: User | null;
   token: string | null;
+  loading: boolean;
   setAuth: (user: User, token: string) => void;
   logout: () => void;
 };
@@ -47,14 +48,21 @@ const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadAuth = async () => {
-      const savedToken = await SecureStore.getItemAsync("auth_token");
-      const savedUser = await SecureStore.getItemAsync("auth_user");
-      if (savedToken && savedUser) {
-        setToken(savedToken);
-        setUser(JSON.parse(savedUser));
+      try {
+        const savedToken = await SecureStore.getItemAsync("auth_token");
+        const savedUser = await SecureStore.getItemAsync("auth_user");
+        if (savedToken && savedUser) {
+          setToken(savedToken);
+          setUser(JSON.parse(savedUser));
+        }
+      } catch (e) {
+        console.error("Failed to load auth", e);
+      } finally {
+        setLoading(false);
       }
     };
     loadAuth();
@@ -80,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, setAuth, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, setAuth, logout }}>
       {children}
     </AuthContext.Provider>
   );

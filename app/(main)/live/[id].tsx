@@ -9,6 +9,7 @@ import {
   StatusBar,
   Share,
   Modal,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -172,11 +173,11 @@ const InfoRow = ({
   </View>
 );
 
-const BulletItem = ({ text }: { text: string }) => (
+const BulletItem = ({ text, children }: { text?: string; children?: React.ReactNode }) => (
   <View className="flex-row mb-2 last:mb-0">
     <Text className="text-orange-400 mr-2 mt-0.5 font-black">•</Text>
     <Text className="text-slate-600 dark:text-slate-300 text-sm leading-5 flex-1">
-      {text}
+      {text || children}
     </Text>
   </View>
 );
@@ -796,7 +797,16 @@ const LiveTestDetails = () => {
               <RuleSection title="Disclaimer">
                 <BulletItem text="TestKart does not proctor the test or verify student identity." />
                 <BulletItem text="Accuracy and correctness of questions depends solely upon the teacher who created the test." />
-                <BulletItem text="By enrolling, you agree to the above rules and TestKart's Terms of Service." />
+                <BulletItem>
+                  By enrolling, you agree to the above rules and{" "}
+                  <Text
+                    className="text-orange-500 font-bold"
+                    onPress={() => Linking.openURL("https://testkart.in/terms")}
+                  >
+                    TestKart's Terms of Service
+                  </Text>
+                  .
+                </BulletItem>
               </RuleSection>
 
               <View className="mt-4 mb-4">

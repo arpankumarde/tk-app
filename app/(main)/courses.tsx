@@ -9,7 +9,16 @@ import {
   Modal,
   Pressable,
   TextInput,
+  Dimensions,
 } from "react-native";
+import Animated, {
+  FadeIn,
+  FadeOut,
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
@@ -41,7 +50,7 @@ const LANGUAGES = [
 ];
 
 // ── Separate component so filter interactions don't re-render CourseScreen ──
-const FilterSidebarContent = ({
+function FilterSidebarContent({
   initialFilters,
   onApply,
   onClose,
@@ -59,7 +68,7 @@ const FilterSidebarContent = ({
     lang: string;
   }) => void;
   onClose: () => void;
-}) => {
+}) {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
   const [search, setSearch] = useState(initialFilters.search);
@@ -69,6 +78,25 @@ const FilterSidebarContent = ({
   const [showLevelModal, setShowLevelModal] = useState(false);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
 
+  const sheetHeight = Dimensions.get("window").height * 0.7;
+  const translateY = useSharedValue(sheetHeight);
+
+  useEffect(() => {
+    translateY.value = withTiming(0, { duration: 350 });
+  }, [translateY]);
+
+  const handleClose = useCallback(() => {
+    translateY.value = withTiming(sheetHeight, { duration: 300 }, (finished) => {
+      if (finished) {
+        scheduleOnRN(onClose);
+      }
+    });
+  }, [onClose, sheetHeight, translateY]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
   const clearAll = () => {
     setSearch("");
     setPrice("all");
@@ -77,34 +105,58 @@ const FilterSidebarContent = ({
   };
 
   return (
-    <View className="flex-1 flex-row">
-      <Pressable onPress={onClose} className="flex-1 bg-black/40" />
-      <View className="w-[85%] bg-white dark:bg-slate-900 h-full shadow-2xl">
-        <SafeAreaView edges={["top", "bottom"]} className="flex-1">
-          <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
+    <View className="flex-1 justify-end">
+      {/* Backdrop with Fade */}
+      <Animated.View
+        entering={FadeIn.duration(300)}
+        exiting={FadeOut.duration(200)}
+        className="absolute inset-0 bg-black/50"
+      >
+        <Pressable onPress={handleClose} className="flex-1" />
+      </Animated.View>
+
+      {/* Sheet with Manual Slide */}
+      <Animated.View
+        className="absolute bottom-0 w-full bg-white dark:bg-slate-900 rounded-t-[40px] shadow-2xl overflow-hidden"
+        style={[
+          { height: sheetHeight },
+          animatedStyle
+        ]}
+      >
+        <SafeAreaView edges={["bottom"]} className="flex-1">
+          {/* Drag Handle Container */}
+          <View className="items-center pt-3 pb-1">
+            <View className="w-12 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full" />
+          </View>
+
+          <View className="flex-row items-center justify-between px-7 py-4">
             <View className="flex-row items-center">
               <Text className="text-2xl font-black text-slate-800 dark:text-white">
                 Filters
               </Text>
               <TouchableOpacity
                 onPress={clearAll}
-                className="ml-4 px-3 py-1 bg-gray-50 dark:bg-slate-800 rounded-full"
+                className="ml-4 px-3 py-1 bg-orange-50 dark:bg-orange-900/20 rounded-full"
               >
-                <Text className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                <Text className="text-xs font-bold text-primary">
                   Clear All
                 </Text>
               </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={onClose}>
+            <TouchableOpacity
+              onPress={handleClose}
+              className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center"
+            >
               <Feather
                 name="x"
-                size={24}
+                size={20}
                 color={isDark ? "#94a3b8" : "#64748b"}
               />
             </TouchableOpacity>
           </View>
+          <View className="h-[1px] bg-gray-100 dark:bg-slate-800 mx-7" />
 
-          <ScrollView className="flex-1 px-6 pt-6">
+          <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
             {/* Search */}
             <View className="mb-8">
               <Text className="text-base font-bold text-slate-800 dark:text-white mb-3">
@@ -200,7 +252,13 @@ const FilterSidebarContent = ({
 
           <View className="p-6 border-t border-gray-100 dark:border-slate-800">
             <TouchableOpacity
-              onPress={() => onApply({ search, price, level, lang })}
+              onPress={() => {
+                translateY.value = withTiming(sheetHeight, { duration: 250 }, (finished) => {
+                  if (finished) {
+                    scheduleOnRN(onApply, { search, price, level, lang });
+                  }
+                });
+              }}
               className="bg-primary h-14 rounded-2xl items-center justify-center shadow-lg shadow-orange-500/30"
             >
               <Text className="text-white text-lg font-black">
@@ -209,7 +267,7 @@ const FilterSidebarContent = ({
             </TouchableOpacity>
           </View>
         </SafeAreaView>
-      </View>
+      </Animated.View>
 
       {/* Language Selection Modal */}
       <Modal
@@ -222,7 +280,7 @@ const FilterSidebarContent = ({
           onPress={() => setShowLanguageModal(false)}
           className="flex-1 bg-black/20 justify-center items-center px-10"
         >
-          <View className="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-[300px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-700">
+          <View className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-[300px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-700">
             <View className="p-5 border-b border-gray-50 dark:border-slate-700/50">
               <Text className="text-lg font-black text-slate-800 dark:text-white">
                 Select Language
@@ -284,7 +342,7 @@ const FilterSidebarContent = ({
           onPress={() => setShowLevelModal(false)}
           className="flex-1 bg-black/20 justify-center items-center px-10"
         >
-          <View className="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-[300px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-700">
+          <View className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-[300px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-700">
             <View className="p-5 border-b border-gray-50 dark:border-slate-700/50">
               <Text className="text-lg font-black text-slate-800 dark:text-white">
                 Select Level
@@ -336,7 +394,7 @@ const FilterSidebarContent = ({
       </Modal>
     </View>
   );
-};
+}
 
 // ── Main screen ──
 const CourseScreen = () => {
@@ -675,7 +733,7 @@ const CourseScreen = () => {
         </Pressable>
       </Modal>
 
-      {/* Filter Sidebar Modal */}
+      {/* Filter Bottom Sheet Modal */}
       <Modal
         visible={showFilterSidebar}
         transparent={true}

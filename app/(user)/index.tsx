@@ -169,7 +169,7 @@ export default function ProfileScreen() {
                 {totalProducts}
               </Text>
               <Text className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">
-                Products
+                Notes
               </Text>
             </View>
           </View>

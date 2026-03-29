@@ -282,28 +282,10 @@ const TestDetails = () => {
               "Prepare with this comprehensive test series covering all key topics and exam patterns."}
           </Text>
 
-          {/* Badges */}
-          <View className="flex-row items-center mb-6 flex-wrap">
-            {test.examName && (
-              <View className="px-4 py-1.5 bg-orange-50 dark:bg-orange-900/30 rounded-full border border-orange-100 dark:border-orange-800/30 flex-row items-center mr-3 mb-2">
-                <Feather name="target" size={14} color="#FF8A50" />
-                <Text className="text-primary text-[10px] font-black tracking-widest ml-2 uppercase">
-                  {test.examName}
-                </Text>
-              </View>
-            )}
-            <View className="px-4 py-1.5 bg-cyan-50 dark:bg-cyan-900/30 rounded-full border border-cyan-100 dark:border-cyan-800/30 flex-row items-center mb-2">
-              <Feather name="globe" size={14} color="#06b6d4" />
-              <Text className="text-cyan-600 dark:text-cyan-400 text-[10px] font-black tracking-widest ml-2 uppercase">
-                {test.language?.trim() || "English"}
-              </Text>
-            </View>
-          </View>
-
-          {/* Author & Rating */}
-          <View className="flex-row items-center mb-6">
+          {/* Metadata Row: Author, Rating, Language */}
+          <View className="flex-row items-center flex-wrap mb-6">
             <Text
-              className="text-slate-500 dark:text-slate-400 text-sm font-bold flex-1"
+              className="text-slate-500 dark:text-slate-400 text-sm font-bold"
               numberOfLines={1}
             >
               Created by{" "}
@@ -311,10 +293,12 @@ const TestDetails = () => {
                 href={`/expert/${test.teacherSlug}` as any}
                 className="text-primary font-bold"
               >
-                {test.teacherName || "TestKart Expert"}
+                {test.teacherName || "Expert"}
               </Link>
             </Text>
+
             <Text className="mx-3 text-slate-300">|</Text>
+
             <View className="flex-row items-center">
               <Ionicons name="star" size={16} color="#FF8A50" />
               <Text className="ml-1 text-slate-800 dark:text-white font-black text-sm">
@@ -322,6 +306,15 @@ const TestDetails = () => {
               </Text>
               <Text className="ml-1 text-slate-400 text-xs">
                 ({test.reviewsCount || 0})
+              </Text>
+            </View>
+
+            <Text className="mx-3 text-slate-300">|</Text>
+
+            <View className="px-3 py-1 bg-cyan-50 dark:bg-cyan-900/30 rounded-full border border-cyan-100 dark:border-cyan-800/30 flex-row items-center">
+              <Feather name="globe" size={12} color="#06b6d4" />
+              <Text className="text-cyan-600 dark:text-cyan-400 text-[10px] font-black tracking-widest ml-1.5 uppercase">
+                {test.language?.trim() || "English"}
               </Text>
             </View>
           </View>
@@ -455,77 +448,83 @@ const TestDetails = () => {
               {items.length} tests • {totalQuestions} questions
             </Text>
 
-            {items.map((item, idx) => (
-              <View
-                key={item.id}
-                className="mb-3 bg-white dark:bg-slate-800/20 border border-slate-100 dark:border-slate-700/50 rounded-xl overflow-hidden shadow-sm shadow-slate-200/50"
-              >
-                <TouchableOpacity
-                  onPress={() => toggleItem(idx)}
-                  className="p-4 flex-row items-center justify-between"
+            <View className="bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-xl overflow-hidden">
+              {items.map((item, idx) => (
+                <View
+                  key={item.id}
+                  className={`${idx !== items.length - 1 ? "border-b border-slate-50 dark:border-slate-800/50" : ""}`}
                 >
-                  <View className="flex-1 mr-3">
-                    <View className="flex-row items-center mb-1.5">
-                      <View className="w-1 h-3 bg-orange-400 rounded-full mr-2" />
-                      <Text className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                        Test {idx + 1}
-                      </Text>
-                      {item.isFree && (
-                        <View className="bg-green-100/50 dark:bg-green-900/20 px-2 py-0.5 rounded-md ml-2">
-                          <Text className="text-green-600 dark:text-green-400 text-[9px] font-black uppercase">
-                            Free
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                    <Text className="text-slate-800 dark:text-white font-black text-sm">
-                      {item.title}
-                    </Text>
-                    <View className="flex-row items-center mt-2">
-                      <Feather name="file-text" size={11} color="#94a3b8" />
-                      <Text className="text-slate-400 text-[10px] font-bold ml-1.5 mr-4">
-                        {item.totalQuestions} Qs
-                      </Text>
-                      <Feather name="clock" size={11} color="#94a3b8" />
-                      <Text className="text-slate-400 text-[10px] font-bold ml-1.5">
-                        {item.durationMinutes} min
-                      </Text>
-                    </View>
-                  </View>
-                  <Feather
-                    name={
-                      expandedItems.includes(idx)
-                        ? "chevron-up"
-                        : "chevron-down"
-                    }
-                    size={18}
-                    color="#FF8A50"
-                  />
-                </TouchableOpacity>
-
-                {expandedItems.includes(idx) && item.subjects.length > 0 && (
-                  <View className="px-4 pb-4 pt-1">
-                    <View className="h-[0.5px] bg-slate-100 dark:bg-slate-700/30 mb-3" />
-                    {item.subjects.map((subject) => (
-                      <View
-                        key={subject.id}
-                        className="flex-row items-center py-2"
-                      >
-                        <View className="w-6 h-6 rounded-full bg-orange-50 dark:bg-orange-900/10 items-center justify-center mr-3">
-                          <Feather name="book-open" size={12} color="#FF8A50" />
-                        </View>
-                        <Text className="text-slate-600 dark:text-slate-300 text-xs font-bold flex-1">
-                          {subject.subjectName}
+                  <TouchableOpacity
+                    onPress={() => toggleItem(idx)}
+                    className="p-5 flex-row items-center justify-between"
+                  >
+                    <View className="flex-1 mr-3">
+                      <View className="flex-row items-center mb-1.5">
+                        <View className="w-1 h-3 bg-orange-400 rounded-full mr-2" />
+                        <Text className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                          Test {idx + 1}
                         </Text>
-                        <Text className="text-slate-400 text-[10px] font-bold">
-                          {subject.actualQuestionCount} Qs
+                        {item.isFree && (
+                          <View className="bg-green-100/50 dark:bg-green-900/20 px-2 py-0.5 rounded-md ml-2">
+                            <Text className="text-green-600 dark:text-green-400 text-[9px] font-black uppercase">
+                              Free
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                      <Text className="text-slate-800 dark:text-white font-black text-sm">
+                        {item.title}
+                      </Text>
+                      <View className="flex-row items-center mt-2">
+                        <Feather name="file-text" size={11} color="#94a3b8" />
+                        <Text className="text-slate-400 text-[10px] font-bold ml-1.5 mr-4">
+                          {item.totalQuestions} Qs
+                        </Text>
+                        <Feather name="clock" size={11} color="#94a3b8" />
+                        <Text className="text-slate-400 text-[10px] font-bold ml-1.5">
+                          {item.durationMinutes} min
                         </Text>
                       </View>
-                    ))}
-                  </View>
-                )}
-              </View>
-            ))}
+                    </View>
+                    <Feather
+                      name={
+                        expandedItems.includes(idx)
+                          ? "chevron-up"
+                          : "chevron-down"
+                      }
+                      size={18}
+                      color="#FF8A50"
+                    />
+                  </TouchableOpacity>
+
+                  {expandedItems.includes(idx) && item.subjects.length > 0 && (
+                    <View className="px-5 pb-5 pt-1">
+                      <View className="h-[0.5px] bg-slate-100 dark:bg-slate-700/30 mb-3" />
+                      {item.subjects.map((subject) => (
+                        <View
+                          key={subject.id}
+                          className="flex-row items-center py-2"
+                        >
+                          <View className="w-6 h-6 rounded-full bg-orange-50 dark:bg-orange-900/10 items-center justify-center mr-3">
+                            <Feather
+                              name="book-open"
+                              size={12}
+                              color="#FF8A50"
+                            />
+                          </View>
+                          <Text className="text-slate-600 dark:text-slate-300 text-xs font-bold flex-1">
+                            {subject.subjectName}
+                          </Text>
+                          <Text className="text-slate-400 text-[10px] font-bold">
+                            {subject.actualQuestionCount} Qs
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </View>
+              ))}
+            </View>
           </View>
         )}
 
@@ -536,8 +535,8 @@ const TestDetails = () => {
               What you&apos;ll learn
             </Text>
             {test.whatYouLearn.map((point, id) => (
-              <View key={id} className="flex-row items-start mb-4">
-                <View className="w-6 h-6 bg-emerald-100 dark:bg-emerald-900/30 rounded-full items-center justify-center mr-4 mt-0.5">
+              <View key={id} className="flex-row items-center mb-4">
+                <View className="w-6 h-6 bg-emerald-100 dark:bg-emerald-900/30 rounded-full items-center justify-center mr-4">
                   <Feather name="check" size={14} color="#10b981" />
                 </View>
                 <Text className="text-slate-600 dark:text-slate-300 text-sm font-medium flex-1">
@@ -555,8 +554,8 @@ const TestDetails = () => {
               Requirements
             </Text>
             {test.requirements.map((req, rid) => (
-              <View key={rid} className="flex-row items-start mb-3">
-                <View className="w-1.5 h-1.5 bg-primary rounded-full mr-3 mt-2" />
+              <View key={rid} className="flex-row items-center mb-3">
+                <View className="w-1.5 h-1.5 bg-primary rounded-full mr-3" />
                 <Text className="text-slate-600 dark:text-slate-300 text-sm font-medium flex-1">
                   {req}
                 </Text>

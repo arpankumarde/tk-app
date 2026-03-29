@@ -187,34 +187,49 @@ const LiveTestCard = ({
           </View>
 
           {/* Grid Icon Stats (2x2) */}
-          <View className="flex-row flex-wrap gap-y-4 mb-6">
-            <View className="w-1/2 flex-row items-center">
-              <Feather name="file-text" size={14} color="#F97316" />
-              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+          {/* Grid Icon Stats (2x2) */}
+          <View className="flex-row flex-wrap mb-6">
+            <View className="w-1/2 flex-row items-center mb-4 pr-2">
+              <Feather
+                name="file-text"
+                size={14}
+                color="#F97316"
+                style={{ top: -1 }}
+              />
+              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300 flex-1">
                 {test.actualQuestionCount} Questions
               </Text>
             </View>
-
-            <View className="w-1/2 flex-row items-center">
-              <Feather name="clock" size={14} color="#F97316" />
-              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+            <View className="w-1/2 flex-row items-center mb-4">
+              <Feather
+                name="clock"
+                size={14}
+                color="#F97316"
+                style={{ top: -1 }}
+              />
+              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300 flex-1">
                 {test.durationMinutes} Minutes
               </Text>
             </View>
-
-            <View className="w-1/2 flex-row items-center">
-              <Feather name="book-open" size={14} color="#F97316" />
-              <Text
-                className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300"
-                numberOfLines={1}
-              >
+            <View className="w-1/2 flex-row items-center pr-2">
+              <Feather
+                name="book-open"
+                size={14}
+                color="#F97316"
+                style={{ top: -1 }}
+              />
+              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300 flex-1">
                 {test.subjects}
               </Text>
             </View>
-
             <View className="w-1/2 flex-row items-center">
-              <Feather name="users" size={14} color="#F97316" />
-              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+              <Feather
+                name="users"
+                size={14}
+                color="#F97316"
+                style={{ top: -1 }}
+              />
+              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300 flex-1">
                 {test.enrolledCount} Enrolled
               </Text>
             </View>

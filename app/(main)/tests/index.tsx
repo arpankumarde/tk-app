@@ -9,7 +9,16 @@ import {
   Pressable,
   TextInput,
   Modal,
+  Dimensions,
 } from "react-native";
+import Animated, {
+  FadeIn,
+  FadeOut,
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
@@ -66,7 +75,7 @@ type ExamTest = {
 };
 
 // ── Separate component so filter interactions don't re-render ShopScreen ──
-const FilterSidebarContent = ({
+function FilterSidebarContent({
   initialFilters,
   onApply,
   onClose,
@@ -86,7 +95,7 @@ const FilterSidebarContent = ({
     language: string;
   }) => void;
   onClose: () => void;
-}) => {
+}) {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
   const [search, setSearch] = useState(initialFilters.search);
@@ -95,6 +104,25 @@ const FilterSidebarContent = ({
   const [maxPrice, setMaxPrice] = useState(initialFilters.maxPrice);
   const [lang, setLang] = useState(initialFilters.language);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+
+  const sheetHeight = Dimensions.get("window").height * 0.7;
+  const translateY = useSharedValue(sheetHeight);
+
+  useEffect(() => {
+    translateY.value = withTiming(0, { duration: 350 });
+  }, [translateY]);
+
+  const handleClose = useCallback(() => {
+    translateY.value = withTiming(sheetHeight, { duration: 300 }, (finished) => {
+      if (finished) {
+        scheduleOnRN(onClose);
+      }
+    });
+  }, [onClose, sheetHeight, translateY]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
 
   const clearAll = () => {
     setSearch("");
@@ -105,21 +133,45 @@ const FilterSidebarContent = ({
   };
 
   const handleApply = () => {
-    onApply({
-      search,
-      priceType,
-      minPrice,
-      maxPrice,
-      language: lang,
+    translateY.value = withTiming(sheetHeight, { duration: 250 }, (finished) => {
+      if (finished) {
+        scheduleOnRN(onApply, {
+          search,
+          priceType,
+          minPrice,
+          maxPrice,
+          language: lang,
+        });
+      }
     });
   };
 
   return (
-    <View className="flex-1 flex-row">
-      <Pressable onPress={onClose} className="flex-1 bg-black/40" />
-      <View className="w-[85%] bg-white dark:bg-slate-900 h-full shadow-2xl">
-        <SafeAreaView edges={["top", "bottom"]} className="flex-1">
-          <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
+    <View className="flex-1 justify-end">
+      {/* Backdrop with Fade */}
+      <Animated.View
+        entering={FadeIn.duration(300)}
+        exiting={FadeOut.duration(200)}
+        className="absolute inset-0 bg-black/40"
+      >
+        <Pressable onPress={handleClose} className="flex-1" />
+      </Animated.View>
+
+      {/* Sheet with Manual Slide */}
+      <Animated.View
+        className="absolute bottom-0 w-full bg-white dark:bg-slate-900 rounded-t-[40px] shadow-2xl overflow-hidden"
+        style={[
+          { height: sheetHeight },
+          animatedStyle
+        ]}
+      >
+        <SafeAreaView edges={["bottom"]} className="flex-1" style={{ backgroundColor: isDark ? "#0f172a" : "#ffffff" }}>
+          {/* Drag Handle Container */}
+          <View className="items-center pt-3 pb-1">
+            <View className="w-12 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full" />
+          </View>
+
+          <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-50 dark:border-slate-800">
             <View className="flex-row items-center">
               <Text className="text-2xl font-black text-slate-800 dark:text-white">
                 Filters
@@ -133,7 +185,7 @@ const FilterSidebarContent = ({
                 </Text>
               </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={onClose}>
+            <TouchableOpacity onPress={handleClose}>
               <Feather
                 name="x"
                 size={24}
@@ -142,7 +194,7 @@ const FilterSidebarContent = ({
             </TouchableOpacity>
           </View>
 
-          <ScrollView className="flex-1 px-6 pt-6">
+          <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
             <View className="mb-8">
               <Text className="text-base font-bold text-slate-800 dark:text-white mb-3">
                 Search
@@ -251,7 +303,7 @@ const FilterSidebarContent = ({
             </TouchableOpacity>
           </View>
         </SafeAreaView>
-      </View>
+      </Animated.View>
 
       <Modal
         visible={showLanguageModal}
@@ -263,13 +315,13 @@ const FilterSidebarContent = ({
           onPress={() => setShowLanguageModal(false)}
           className="flex-1 bg-black/20 justify-center items-center px-10"
         >
-          <View className="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-[300px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-700">
+          <View className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-[300px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-700">
             <View className="p-5 border-b border-gray-50 dark:border-slate-700/50">
               <Text className="text-lg font-black text-slate-800 dark:text-white">
                 Select Language
               </Text>
             </View>
-            <ScrollView className="max-h-[300px]">
+            <ScrollView className="max-h-[300px]" showsVerticalScrollIndicator={false}>
               {LANGUAGES.map((l) => (
                 <TouchableOpacity
                   key={l}
@@ -297,7 +349,7 @@ const FilterSidebarContent = ({
       </Modal>
     </View>
   );
-};
+}
 
 const ShopScreen = () => {
   const { colorScheme } = useColorScheme();

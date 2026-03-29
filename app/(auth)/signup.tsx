@@ -14,7 +14,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AntDesign } from "@expo/vector-icons";
 import Header from "@/components/Header";
-import BottomTabs from "@/components/BottomTabs";
 import { useColorScheme } from "nativewind";
 import { Link, router } from "expo-router";
 import { useGoogleAuth } from "@/hooks/useGoogleAuth";
@@ -267,7 +266,6 @@ const Signup = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-      <BottomTabs />
     </SafeAreaView>
   );
 };

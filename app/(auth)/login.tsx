@@ -14,7 +14,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AntDesign } from "@expo/vector-icons";
 import Header from "@/components/Header";
-import BottomTabs from "@/components/BottomTabs";
 import { useColorScheme } from "nativewind";
 import { Link, router } from "expo-router";
 import { useGoogleAuth } from "@/hooks/useGoogleAuth";
@@ -231,6 +230,15 @@ const Login = () => {
               </Text>
             )}
           </TouchableOpacity>
+          
+          <TouchableOpacity
+            onPress={() => router.push("/(main)" as any)}
+            className="h-10 items-center justify-center mb-6"
+          >
+            <Text className="text-slate-500 dark:text-slate-400 font-bold underline">
+              Skip for now
+            </Text>
+          </TouchableOpacity>
 
           <View className="flex-row justify-center items-center mt-4">
             <Text className="text-slate-500 dark:text-slate-400 text-base">
@@ -246,7 +254,6 @@ const Login = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-      <BottomTabs />
     </SafeAreaView>
   );
 };
