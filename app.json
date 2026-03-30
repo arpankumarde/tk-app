@@ -2,7 +2,7 @@
   "expo": {
     "name": "Testkart",
     "slug": "testkart",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "testkart",
@@ -12,8 +12,8 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.arpankumarde.testkart",
-      "versionCode": 1,
+      "package": "com.testkart.mocktest.courses.studynotes",
+      "versionCode": 2,
       "adaptiveIcon": {
         "backgroundColor": "#FF8A50",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
