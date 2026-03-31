@@ -115,7 +115,7 @@ const Cart = () => {
         await setAuth(user, params.token);
       }
       Alert.alert("Payment Successful", "Your order has been placed!", [
-        { text: "OK", onPress: () => router.replace("/(user)" as any) },
+        { text: "OK", onPress: () => router.replace("/user") },
       ]);
     } else if (params.status === "cancelled") {
       Alert.alert(
@@ -142,7 +142,7 @@ const Cart = () => {
       Alert.alert(
         "Payment Successful",
         result.message || "Your order has been placed!",
-        [{ text: "OK", onPress: () => router.replace("/(user)" as any) }],
+        [{ text: "OK", onPress: () => router.replace("/user") }],
       );
     } else if (result.orderStatus === "pending") {
       Alert.alert(

@@ -114,7 +114,7 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
 
   const handleQuickAdd = async () => {
     if (isInCart) {
-      router.push("/(user)/cart" as any);
+      router.push("/user/cart");
       return;
     }
     await addToCart(test.id, "test");
@@ -271,18 +271,18 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
                 onPress={async () => {
                   if (isFree) {
                     if (test.isEnrolled) {
-                      router.push(`/(user)/enrolled-test/${test.slug}` as any);
+                      router.push({ pathname: "/user/enrolled-test/[slug]", params: { slug: test.slug } });
                     } else {
                       handleFreeEnroll();
                     }
                   } else {
                     if (isInCart) {
-                      router.push("/(user)/cart" as any);
+                      router.push("/user/cart");
                       return;
                     }
                     const result = await addToCart(test.id, "test");
                     if (result.success) {
-                      router.push("/(user)/cart" as any);
+                      router.push("/user/cart");
                     }
                   }
                 }}
@@ -374,7 +374,7 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
                   className="bg-green-500 w-full h-14 rounded-2xl items-center justify-center mb-3"
                   onPress={() => {
                     setEnrollResult((prev) => ({ ...prev, visible: false }));
-                    router.push("/(user)" as any);
+                    router.push("/user");
                   }}
                 >
                   <Text className="text-white font-black text-base">

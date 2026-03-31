@@ -163,7 +163,7 @@ export default function OrdersScreen() {
                   <TouchableOpacity
                     key={order.id}
                     onPress={() =>
-                      router.push(`/(user)/orders/${order.id}` as any)
+                      router.push({ pathname: "/user/orders/[id]", params: { id: String(order.id) } })
                     }
                     className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm mb-4 overflow-hidden"
                   >

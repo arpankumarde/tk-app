@@ -142,9 +142,14 @@ const Portal = () => {
         startData) as StartAttemptResponse;
 
       const startedAtParam = encodeURIComponent(startAttempt.startedAt);
-      router.push(
-        `/(user)/portal/test/${startAttempt.attemptId}?testItemId=${details.id}&startedAt=${startedAtParam}` as any,
-      );
+      router.push({
+        pathname: "/user/portal/test/[attemptId]",
+        params: {
+          attemptId: String(startAttempt.attemptId),
+          testItemId: String(details.id),
+          startedAt: startedAtParam,
+        },
+      });
     } catch (err: any) {
       Alert.alert("Error", err.message || "Could not start the test.");
     } finally {

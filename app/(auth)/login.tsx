@@ -33,7 +33,7 @@ const Login = () => {
 
   useEffect(() => {
     if (user) {
-      router.push("/(user)" as any);
+      router.push("/user");
     }
   }, [user]);
 
@@ -41,7 +41,7 @@ const Login = () => {
     setLoading(true);
     try {
       await signInWithGoogle();
-      router.push("/(user)" as any);
+      router.push("/user");
     } catch (err) {
       console.error("[LoginScreen] signInWithGoogle threw:", err);
       Alert.alert("Sign-in failed", "Please try again.");
@@ -104,7 +104,7 @@ const Login = () => {
         const token = result.token || res.headers.get("x-auth-token") || res.headers.get("authorization");
         if (token) {
           await setAuth(result.user, token);
-          router.push("/(user)" as any);
+          router.push("/user");
         } else {
           Alert.alert("Error", "Logged in but no auth token received.");
         }

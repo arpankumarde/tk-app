@@ -54,7 +54,7 @@ const Header = () => {
           <>
             <TouchableOpacity
               className="ml-2 p-2 rounded-full active:bg-gray-100 dark:active:bg-slate-800 relative"
-              onPress={() => router.push("/cart" as any)}
+              onPress={() => router.push("/user/cart")}
             >
               <Feather
                 name="shopping-cart"
@@ -71,7 +71,7 @@ const Header = () => {
             </TouchableOpacity>
             <TouchableOpacity
               className="ml-3 pointer-events-auto"
-              onPress={() => router.push("/(user)" as any)}
+              onPress={() => router.push("/user")}
             >
               {user?.avatarUrl ? (
                 <View className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary shadow-sm">

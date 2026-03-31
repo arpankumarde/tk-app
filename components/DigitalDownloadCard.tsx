@@ -163,7 +163,7 @@ const DigitalDownloadCard = ({
                 onPress={async () => {
                   if (isFree) {
                     if (product.isPurchased) {
-                      router.push("/(user)/products" as any);
+                      router.push("/user/products");
                     } else {
                       handleFreeEnroll();
                     }
@@ -173,7 +173,7 @@ const DigitalDownloadCard = ({
                       "digitalProduct",
                     );
                     if (result.success) {
-                      router.push("/(user)/cart" as any);
+                      router.push("/user/cart");
                     }
                   }
                 }}
@@ -248,7 +248,7 @@ const DigitalDownloadCard = ({
                   className="bg-green-500 w-full h-14 rounded-2xl items-center justify-center mb-3"
                   onPress={() => {
                     setEnrollResult((prev) => ({ ...prev, visible: false }));
-                    router.push("/(user)" as any);
+                    router.push("/user");
                   }}
                 >
                   <Text className="text-white font-black text-base">

@@ -400,9 +400,10 @@ const EnrolledTestDetails = () => {
                     <View className="flex-row items-center" style={{ gap: 8 }}>
                       <TouchableOpacity
                         onPress={() =>
-                          router.push(
-                            `/(user)/portal/test/results?testItemId=${item.id}` as any,
-                          )
+                          router.push({
+                            pathname: "/user/portal/test/results",
+                            params: { testItemId: String(item.id) },
+                          })
                         }
                         className="bg-emerald-500 px-4 py-2.5 rounded-2xl shadow-sm"
                       >
@@ -413,7 +414,7 @@ const EnrolledTestDetails = () => {
 
                       <TouchableOpacity
                         onPress={() =>
-                          router.push(`/(user)/portal/${item.id}` as any)
+                          router.push({ pathname: "/user/portal/[slug]", params: { slug: String(item.id) } })
                         }
                         className="bg-primary px-4 py-2.5 rounded-2xl shadow-sm"
                       >
@@ -425,7 +426,7 @@ const EnrolledTestDetails = () => {
                   ) : (
                     <TouchableOpacity
                       onPress={() =>
-                        router.push(`/(user)/portal/${item.id}` as any)
+                        router.push({ pathname: "/user/portal/[slug]", params: { slug: String(item.id) } })
                       }
                       className="bg-primary px-5 py-2.5 rounded-2xl shadow-sm"
                     >

@@ -659,7 +659,7 @@ const TestDetails = () => {
               : async () => {
                   const result = await addToCart(test.id, "test");
                   if (result.success) {
-                    router.push("/(user)/cart" as any);
+                    router.push("/user/cart");
                   } else {
                     setEnrollResult({
                       visible: true,
@@ -717,7 +717,7 @@ const TestDetails = () => {
                       ...prev,
                       visible: false,
                     }));
-                    router.push("/(user)" as any);
+                    router.push("/user");
                   }}
                 >
                   <Text className="text-white font-black text-base">

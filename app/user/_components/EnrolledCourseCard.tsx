@@ -12,7 +12,7 @@ const EnrolledCourseCard = ({ course }: EnrolledCourseCardProps) => {
   return (
     <TouchableOpacity
       onPress={() =>
-        router.push(`/(user)/enrolled-courses/${course.id}` as any)
+        router.push({ pathname: "/user/enrolled-courses/[id]", params: { id: String(course.id) } })
       }
       className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm flex-row items-center mb-4"
     >

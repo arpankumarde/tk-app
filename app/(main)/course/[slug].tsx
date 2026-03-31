@@ -588,7 +588,7 @@ const CourseDetails = () => {
               : async () => {
                   const result = await addToCart(course.id, "course");
                   if (result.success) {
-                    router.push("/(user)/cart" as any);
+                    router.push("/user/cart");
                   } else {
                     setEnrollResult({
                       visible: true,
@@ -646,7 +646,7 @@ const CourseDetails = () => {
                   className="bg-green-500 w-full h-14 rounded-2xl items-center justify-center mb-3"
                   onPress={() => {
                     setEnrollResult((prev) => ({ ...prev, visible: false }));
-                    router.push("/(user)" as any);
+                    router.push("/user");
                   }}
                 >
                   <Text className="text-white font-black text-base">

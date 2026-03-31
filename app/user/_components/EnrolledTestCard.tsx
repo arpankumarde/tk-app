@@ -36,7 +36,7 @@ const EnrolledTestCard = ({ test }: EnrolledTestCardProps) => {
     if (test.pdfUrl) {
       router.push(`/product/${test.slug}` as any);
     } else {
-      router.push(`/(user)/enrolled-test/${test.slug}` as any);
+      router.push({ pathname: "/user/enrolled-test/[slug]", params: { slug: test.slug } });
     }
   };
 
