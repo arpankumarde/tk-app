@@ -35,6 +35,7 @@ interface MockTestCardProps {
     examName?: string;
     teacherName?: string;
     isEnrolled?: boolean;
+    views?: number;
   };
 }
 
@@ -172,18 +173,26 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
           {/* Content Section */}
           <View className="p-5">
             {/* Pills Row at Top of Content */}
-            <View className="flex-row items-center mb-4">
-              <View className="bg-orange-50 dark:bg-orange-950/20 px-3 py-1.5 rounded-full border border-orange-100/50 dark:border-orange-800/40">
-                <Text
-                  className="text-primary text-[10px] font-black uppercase tracking-widest"
-                  numberOfLines={1}
-                >
-                  {displaySubject}
-                </Text>
+            <View className="flex-row items-center flex-wrap gap-y-2 mb-4">
+              <View className="flex-row items-center flex-wrap flex-1">
+                <View className="bg-orange-50 dark:bg-orange-950/20 px-3 py-1.5 rounded-full border border-orange-100/50 dark:border-orange-800/40 mr-2 mb-1">
+                  <Text
+                    className="text-primary text-[10px] font-black uppercase tracking-widest"
+                    numberOfLines={1}
+                  >
+                    {displaySubject}
+                  </Text>
+                </View>
+                <View className="bg-cyan-50 dark:bg-cyan-950/20 px-3 py-1.5 rounded-full border border-cyan-100/50 dark:border-cyan-800/40 mr-2 mb-1">
+                  <Text className="text-cyan-600 dark:text-cyan-400 font-black text-[10px] uppercase tracking-widest">
+                    {test.language?.trim() || "ENGLISH"}
+                  </Text>
+                </View>
               </View>
-              <View className="ml-3 bg-cyan-50 dark:bg-cyan-950/20 px-3 py-1.5 rounded-full border border-cyan-100/50 dark:border-cyan-800/40">
-                <Text className="text-cyan-600 dark:text-cyan-400 font-black text-[10px] uppercase tracking-widest">
-                  {test.language?.trim() || "ENGLISH"}
+              <View className="flex-row items-center mb-1">
+                <Feather name="eye" size={12} color="#94a3b8" />
+                <Text className="ml-1.5 text-slate-400 dark:text-slate-500 font-bold text-[10px]">
+                  {test.views || 0} { (test.views || 0) <= 1 ? "View" : "Views" }
                 </Text>
               </View>
             </View>
@@ -225,7 +234,6 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
               </View>
             </View>
 
-            {/* Grid Icon Stats (2x2) */}
             <View className="flex-row flex-wrap gap-y-4 mb-6 pb-6 border-b border-gray-50 dark:border-slate-700/50">
               <View className="w-1/2 flex-row items-center">
                 <Feather name="file-text" size={14} color="#F97316" />
@@ -242,17 +250,17 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
               </View>
 
               <View className="w-1/2 flex-row items-center">
-                <Feather name="layers" size={14} color="#F97316" />
+                <Feather name="users" size={14} color="#F97316" />
                 <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">
-                  {test.totalTests || 0} Test{" "}
-                  {test.totalTests === 1 ? "Set" : "Sets"}
+                  {test.studentsEnrolled || 0} Enrolled
                 </Text>
               </View>
 
               <View className="w-1/2 flex-row items-center">
-                <Feather name="users" size={14} color="#F97316" />
+                <Feather name="layers" size={14} color="#F97316" />
                 <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">
-                  {test.studentsEnrolled || 0} Enrolled
+                  {test.totalTests || 0} Test{" "}
+                  {test.totalTests === 1 ? "Set" : "Sets"}
                 </Text>
               </View>
             </View>
@@ -319,11 +327,11 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
                     </Text>
                   )}
                   {actualPrice === 0 ? (
-                    <Text className="text-xl font-black text-emerald-500">
+                    <Text className="text-2xl font-black text-emerald-500">
                       FREE
                     </Text>
                   ) : (
-                    <Text className="text-xl font-black text-slate-800 dark:text-white">
+                    <Text className="text-2xl font-black text-slate-800 dark:text-white">
                       ₹{actualPrice}
                     </Text>
                   )}

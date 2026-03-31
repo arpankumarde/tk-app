@@ -289,19 +289,19 @@ const CourseDetails = () => {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Custom Navigation Header */}
         <View className="px-6 py-4 flex-row items-center justify-between">
-          <View className="flex-row items-center">
+          <View className="flex-row items-center flex-1 mr-4">
             <TouchableOpacity
               onPress={() => router.back()}
-              className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mr-4"
+              className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mr-3"
             >
               <Feather name="chevron-left" size={24} color="#FF8A50" />
             </TouchableOpacity>
 
-            <View className="flex-row items-center gap-x-2.5">
+            <View className="flex-1 flex-row items-center flex-wrap gap-2">
               {/* Category Badge */}
               <View className="bg-orange-50 dark:bg-orange-500/10 px-3 py-1.5 rounded-full border border-orange-100 dark:border-orange-500/20 flex-row items-center">
                 <Feather name="layers" size={10} color="#FF8A50" />
-                <Text className="text-primary text-[10px] font-black uppercase tracking-widest ml-1.5">
+                <Text className="text-primary text-[10px] font-black uppercase tracking-widest ml-1.5" numberOfLines={1}>
                   {course.category}
                 </Text>
               </View>
@@ -309,7 +309,7 @@ const CourseDetails = () => {
               {/* Level Badge */}
               <View className="bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-100 dark:border-emerald-500/20 flex-row items-center">
                 <Feather name="trending-up" size={10} color="#10B981" />
-                <Text className="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest ml-1.5">
+                <Text className="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest ml-1.5" numberOfLines={1}>
                   {course.level}
                 </Text>
               </View>

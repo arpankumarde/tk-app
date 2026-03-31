@@ -29,6 +29,7 @@ interface CourseCardProps {
     teacherIsVerified?: boolean;
     publishedAt: string;
     isEnrolled?: boolean;
+    views?: number;
   };
 }
 
@@ -142,40 +143,48 @@ const CourseCard = ({ course: initialCourse }: CourseCardProps) => {
             {course.title}
           </Text>
 
-          <View className="flex-row items-center mb-4">
-            <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium">
-              By:{" "}
-            </Text>
-            <Text className="text-slate-600 dark:text-slate-300 font-bold text-sm">
-              {course.teacherName}
-            </Text>
-            {course.teacherIsVerified && (
-              <MaterialIcons
-                name="verified"
-                size={14}
-                color="#22C55E"
-                style={{ marginLeft: 4 }}
-              />
-            )}
-          </View>
-
-          {/* Stats */}
-          <View className="flex-row items-center justify-between mb-6 pb-4 border-b border-gray-50 dark:border-slate-700/50">
-            <View className="flex-row items-center">
-              <Feather name="bar-chart" size={14} color="#FF8A50" />
-              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300 capitalize">
+          <View className="flex-row items-center justify-between mb-4">
+            <View className="flex-row items-center flex-1">
+              <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium">
+                By:{" "}
+              </Text>
+              <Text className="text-slate-600 dark:text-slate-300 font-bold text-sm">
+                {course.teacherName}
+              </Text>
+              {course.teacherIsVerified && (
+                <MaterialIcons
+                  name="verified"
+                  size={14}
+                  color="#22C55E"
+                  style={{ marginLeft: 4 }}
+                />
+              )}
+            </View>
+            <View className="flex-row items-center bg-gray-50 dark:bg-slate-700/50 px-2.5 py-1 rounded-lg border border-gray-100 dark:border-slate-700">
+              <Feather name="bar-chart" size={12} color="#FF8A50" />
+              <Text className="ml-1.5 text-[10px] font-black text-slate-600 dark:text-slate-300 capitalize">
                 {displayLevel}
               </Text>
             </View>
+          </View>
+
+          {/* Stats Linear */}
+          <View className="flex-row items-center justify-between mb-6 pb-5 border-b border-gray-50 dark:border-slate-700/50">
             <View className="flex-row items-center">
-              <Feather name="users" size={14} color="#FF8A50" />
-              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">
-                {displayStudents} Students
+              <Feather name="users" size={12} color="#FF8A50" />
+              <Text className="ml-1.5 text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                {displayStudents} {displayStudents <= 1 ? "Student" : "Students"}
               </Text>
             </View>
             <View className="flex-row items-center">
-              <Feather name="globe" size={14} color="#FF8A50" />
-              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+              <Feather name="eye" size={12} color="#FF8A50" />
+              <Text className="ml-1.5 text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                {course.views || 0} Views
+              </Text>
+            </View>
+            <View className="flex-row items-center">
+              <Feather name="globe" size={12} color="#FF8A50" />
+              <Text className="ml-1.5 text-[11px] font-bold text-slate-600 dark:text-slate-300">
                 {course.language || "English"}
               </Text>
             </View>
@@ -228,7 +237,7 @@ const CourseCard = ({ course: initialCourse }: CourseCardProps) => {
             </TouchableOpacity>
 
             <Text
-              className={`${isFree ? "text-emerald-500" : "text-slate-800 dark:text-white"} text-xl font-black`}
+              className={`${isFree ? "text-emerald-500" : "text-slate-800 dark:text-white"} text-2xl font-black`}
             >
               {isFree ? "FREE" : `₹${course.price}`}
             </Text>

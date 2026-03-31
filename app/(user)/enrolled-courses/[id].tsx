@@ -294,44 +294,60 @@ const CourseLessons = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-slate-900" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-slate-900" edges={["top", "left", "right"]}>
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View className="px-6 py-4 flex-row items-center">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mr-4"
+      {/* Header */}
+      <View className="px-6 pt-6 pb-6 flex-row items-center bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="w-11 h-11 bg-gray-50 dark:bg-slate-800 rounded-xl items-center justify-center mr-4 border border-gray-100 dark:border-slate-700"
+        >
+          <Feather name="chevron-left" size={26} color="#FF8A50" />
+        </TouchableOpacity>
+        <View className="flex-1">
+          <Text
+            className="text-slate-800 dark:text-white font-black text-xl tracking-tight"
+            numberOfLines={1}
           >
-            <Feather name="chevron-left" size={24} color="#FF8A50" />
-          </TouchableOpacity>
-          <View className="flex-1">
-            <Text
-              className="text-slate-800 dark:text-white font-black text-lg"
-              numberOfLines={1}
-            >
-              {course.title}
-            </Text>
-            <Text className="text-slate-400 dark:text-slate-500 text-xs font-bold mt-0.5">
-              {course.category} • {course.level}
+            {course.title}
+          </Text>
+          <View className="flex-row items-center mt-0.5">
+            <View className="bg-orange-50 dark:bg-orange-950/30 px-2 py-0.5 rounded-md mr-2">
+              <Text className="text-primary text-[9px] font-black uppercase">
+                {course.category}
+              </Text>
+            </View>
+            <Text className="text-slate-400 dark:text-slate-500 text-[10px] font-bold">
+              {course.level} • {totalLessons} Lessons
             </Text>
           </View>
         </View>
+      </View>
+
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
 
         {/* Progress Card */}
-        <View className="mx-6 mb-6 p-5 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700">
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-slate-800 dark:text-white font-black text-base">
-              Your Progress
-            </Text>
-            <Text className="text-primary font-black text-lg">
-              {Math.round(progress?.completionPercentage ?? 0)}%
-            </Text>
+        <View className="mx-6 mt-6 mb-8 p-6 bg-gray-50 dark:bg-slate-800/40 rounded-2xl border border-gray-100 dark:border-slate-700/50">
+          <View className="flex-row items-center justify-between mb-5">
+            <View>
+              <Text className="text-slate-800 dark:text-white font-black text-xl">
+                Course Progress
+              </Text>
+              <Text className="text-slate-400 dark:text-slate-500 text-xs font-bold mt-1">
+                Keep it up! Almost there.
+              </Text>
+            </View>
+            <View className="items-end">
+              <Text className="text-primary font-black text-2xl">
+                {Math.round(progress?.completionPercentage ?? 0)}%
+              </Text>
+            </View>
           </View>
-          <View className="h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+
+          <View className="h-3 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden mb-6">
             <View
               className="h-full bg-primary rounded-full"
               style={{
@@ -339,65 +355,89 @@ const CourseLessons = () => {
               }}
             />
           </View>
-          <View className="flex-row items-center mt-3">
-            <View className="flex-row items-center mr-6">
-              <Feather name="book-open" size={14} color="#94a3b8" />
-              <Text className="text-slate-500 dark:text-slate-400 text-xs font-bold ml-1.5">
-                {progress?.completedLessonIds.length ?? 0} / {totalLessons}{" "}
-                Lessons
-              </Text>
+
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center bg-white dark:bg-slate-800 px-4 py-2.5 rounded-2xl border border-gray-100 dark:border-slate-700 flex-1 mr-3">
+              <Feather name="book-open" size={16} color="#FF8A50" />
+              <View className="ml-3">
+                <Text className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase">
+                  Completed
+                </Text>
+                <Text className="text-slate-700 dark:text-slate-200 text-xs font-black">
+                  {progress?.completedLessonIds.length ?? 0} / {totalLessons}
+                </Text>
+              </View>
             </View>
-            <View className="flex-row items-center">
-              <Feather name="layers" size={14} color="#94a3b8" />
-              <Text className="text-slate-500 dark:text-slate-400 text-xs font-bold ml-1.5">
-                {sections.length} Sections
-              </Text>
+            
+            <View className="flex-row items-center bg-white dark:bg-slate-800 px-4 py-2.5 rounded-2xl border border-gray-100 dark:border-slate-700 flex-1">
+              <Feather name="clock" size={16} color="#FF8A50" />
+              <View className="ml-3">
+                <Text className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase">
+                  Sections
+                </Text>
+                <Text className="text-slate-700 dark:text-slate-200 text-xs font-black">
+                  {sections.length} Ready
+                </Text>
+              </View>
             </View>
           </View>
         </View>
 
         {/* Sections & Lessons */}
-        <View className="px-6 mb-8">
-          <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
-            Course Content
-          </Text>
+        <View className="px-6 mb-10">
+          <View className="flex-row items-baseline justify-between mb-6">
+            <Text className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">
+              Course Content
+            </Text>
+            <Text className="text-slate-400 dark:text-slate-500 text-xs font-bold">
+              {sections.length} Sections
+            </Text>
+          </View>
 
-          {sections.map((section, sectionIdx) => (
-            <View
-              key={section.id}
-              className="mb-2.5 bg-gray-50 dark:bg-slate-800/30 border border-gray-100 dark:border-slate-700/50 rounded-2xl overflow-hidden"
-            >
-              <TouchableOpacity
-                onPress={() => toggleSection(sectionIdx)}
-                className="px-4 py-3.5 flex-row items-center justify-between"
+          {sections.map((section, sectionIdx) => {
+            const isExpanded = expandedSections.includes(sectionIdx);
+            const completedCount = section.lessons.filter((l) => isLessonCompleted(l.id)).length;
+            const isFullyCompleted = completedCount === section.lessons.length && section.lessons.length > 0;
+
+            return (
+              <View
+                key={section.id}
+                className={`mb-4 bg-gray-50 dark:bg-slate-800/20 border border-gray-100 dark:border-slate-700/50 rounded-2xl overflow-hidden ${isExpanded ? "border-primary/30 bg-white dark:bg-slate-800/40" : ""}`}
               >
-                <View className="flex-1 mr-3">
-                  <Text className="text-slate-800 dark:text-white font-black text-lg">
-                    {section.title}
-                  </Text>
-                  <Text className="text-slate-500 dark:text-slate-400 text-xs font-bold mt-1">
-                    {section.lessons.length} lessons •{" "}
-                    {
-                      section.lessons.filter((l) => isLessonCompleted(l.id))
-                        .length
-                    }{" "}
-                    completed
-                  </Text>
-                </View>
-                <Feather
-                  name={
-                    expandedSections.includes(sectionIdx)
-                      ? "chevron-up"
-                      : "chevron-down"
-                  }
-                  size={20}
-                  color="#FF8A50"
-                />
-              </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => toggleSection(sectionIdx)}
+                  activeOpacity={0.7}
+                  className="px-5 py-4 flex-row items-center justify-between"
+                >
+                  <View className="flex-1 mr-4">
+                    <View className="flex-row items-center mb-1">
+                      {isFullyCompleted && (
+                        <View className="bg-emerald-500 rounded-full w-4 h-4 items-center justify-center mr-2">
+                          <Feather name="check" size={10} color="white" />
+                        </View>
+                      )}
+                      <Text className={`text-slate-800 dark:text-white font-black text-lg ${isFullyCompleted ? "text-slate-400 dark:text-slate-500" : ""}`}>
+                        {section.title}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center">
+                      <Text className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider">
+                        {section.lessons.length} Lessons • {completedCount} Completed
+                      </Text>
+                    </View>
+                  </View>
+                  <View className={`w-10 h-10 rounded-xl items-center justify-center ${isExpanded ? "bg-primary" : "bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700"}`}>
+                    <Feather
+                      name={isExpanded ? "chevron-up" : "chevron-down"}
+                      size={20}
+                      color={isExpanded ? "white" : "#FF8A50"}
+                    />
+                  </View>
+                </TouchableOpacity>
 
               {expandedSections.includes(sectionIdx) && (
-                <View className="px-4 pb-3 pt-0">
-                  {section.lessons.map((lesson) => {
+                <View className="px-5 pb-5 pt-2">
+                  {section.lessons.map((lesson, lessonIdx) => {
                     const completed = isLessonCompleted(lesson.id);
                     const icon = getLessonIcon(lesson.contentType, completed);
 
@@ -406,54 +446,70 @@ const CourseLessons = () => {
                         key={lesson.id}
                         onPress={() => handleLessonPress(lesson)}
                         disabled={loadingVideo}
-                        className="flex-row items-center py-3 border-t border-gray-100 dark:border-slate-700/30"
+                        activeOpacity={0.6}
+                        className={`flex-row items-center py-4 ${lessonIdx !== section.lessons.length - 1 ? "border-b border-gray-100 dark:border-slate-700/30" : ""}`}
                       >
                         <View
-                          className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${completed ? "bg-emerald-50 dark:bg-emerald-900/20" : "bg-orange-50 dark:bg-orange-900/10"}`}
+                          className={`w-11 h-11 rounded-2xl items-center justify-center mr-4 ${completed ? "bg-emerald-50 dark:bg-emerald-900/20" : "bg-orange-50 dark:bg-orange-900/10"}`}
                         >
                           <Feather
                             name={icon.name}
-                            size={16}
+                            size={20}
                             color={icon.color}
                           />
                         </View>
                         <View className="flex-1">
                           <Text
-                            className={`text-sm font-bold ${completed ? "text-slate-400 dark:text-slate-500" : "text-slate-700 dark:text-slate-300"}`}
+                            className={`text-[15px] font-bold leading-tight ${completed ? "text-slate-400 dark:text-slate-500 line-through decoration-slate-300 dark:decoration-slate-700" : "text-slate-700 dark:text-slate-200"}`}
                           >
                             {lesson.title}
                           </Text>
-                          <View className="flex-row items-center mt-0.5">
-                            <Text className="text-slate-400 dark:text-slate-500 text-[10px] font-bold capitalize">
-                              {lesson.contentType}
-                            </Text>
-                            {lesson.durationMinutes ? (
-                              <Text className="text-slate-400 dark:text-slate-500 text-[10px] font-bold ml-2">
-                                • {lesson.durationMinutes} min
+                          <View className="flex-row items-center mt-1.5">
+                            <View className="bg-gray-100 dark:bg-slate-700/50 px-2 py-0.5 rounded-md mr-2">
+                              <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase">
+                                {lesson.contentType}
                               </Text>
+                            </View>
+                            {lesson.durationMinutes ? (
+                              <View className="flex-row items-center">
+                                <Feather name="clock" size={10} color="#94a3b8" />
+                                <Text className="text-slate-400 dark:text-slate-500 text-[10px] font-bold ml-1">
+                                  {lesson.durationMinutes} min
+                                </Text>
+                              </View>
                             ) : null}
                           </View>
                         </View>
-                        {completed ? (
-                          <Ionicons
-                            name="checkmark-circle"
-                            size={18}
-                            color="#10b981"
-                          />
-                        ) : (
-                          <Feather
-                            name="chevron-right"
-                            size={16}
-                            color="#cbd5e1"
-                          />
-                        )}
+                        <View className={`w-8 h-8 rounded-full items-center justify-center ${completed ? "bg-emerald-50 dark:bg-emerald-900/20" : "bg-gray-50 dark:bg-slate-800"}`}>
+                          {completed ? (
+                            <Ionicons
+                              name="checkmark-circle"
+                              size={20}
+                              color="#10b981"
+                            />
+                          ) : lesson.contentType === "video" ? (
+                            <Feather
+                              name="play"
+                              size={14}
+                              color="#FF8A50"
+                              style={{ marginLeft: 2 }}
+                            />
+                          ) : (
+                            <Feather
+                              name="chevron-right"
+                              size={20}
+                              color="#cbd5e1"
+                            />
+                          )}
+                        </View>
                       </TouchableOpacity>
                     );
                   })}
                 </View>
               )}
-            </View>
-          ))}
+              </View>
+            );
+          })}
         </View>
 
         <View className="h-6" />
