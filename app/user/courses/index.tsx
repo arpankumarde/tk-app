@@ -12,7 +12,7 @@ import { Feather } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import Header from "@/components/Header";
 import BottomTabs from "@/components/BottomTabs";
-import { useEnrolledCourses } from "../hooks/useEnrolledCourses";
+import { useEnrolledCourses } from "../_hooks/useEnrolledCourses";
 import EnrolledCourseCard from "../_components/EnrolledCourseCard";
 
 export default function EnrolledCoursesScreen() {

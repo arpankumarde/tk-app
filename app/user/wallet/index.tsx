@@ -12,7 +12,7 @@ import { Feather } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import Header from "@/components/Header";
 import BottomTabs from "@/components/BottomTabs";
-import { useWallet } from "../hooks/useWallet";
+import { useWallet } from "../_hooks/useWallet";
 import { WalletTransaction } from "../types";
 
 function formatCurrency(amount: number) {

@@ -12,7 +12,7 @@ import { useColorScheme } from "nativewind";
 import { useAuth } from "@/context/AuthContext";
 import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams, router } from "expo-router";
-import { useOrderDetails } from "../hooks/useOrders";
+import { useOrderDetails } from "../_hooks/useOrders";
 
 const statusColors: Record<
   string,

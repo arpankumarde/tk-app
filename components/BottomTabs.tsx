@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
-import { Link, usePathname, useSegments } from "expo-router";
+import { Link, usePathname, useSegments, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
 
@@ -32,7 +32,7 @@ const BottomTabs = () => {
       name: isLoggedIn ? "Dashboard" : "Login",
       icon: isLoggedIn ? "user" : "user-plus",
       isProfile: isLoggedIn,
-      href: isLoggedIn ? "/(user)" : "/login",
+      href: isLoggedIn ? "/user" : "/login",
     },
   ];
 
@@ -42,19 +42,20 @@ const BottomTabs = () => {
       className="flex-row bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 pb-2 pt-3 justify-around items-center"
     >
       {tabs.map((tab, index) => {
-        const href = tab.href;
+        const href = tab.href as Href;
         let isActive = false;
 
         // More robust active state detection
         if (tab.isProfile) {
-          isActive = (segments as string[]).includes("(user)");
+          isActive = (segments as string[]).includes("user");
         } else {
           isActive =
-            pathname === href || (href !== "/" && pathname.startsWith(href));
+            pathname === href ||
+            (href !== "/" && pathname.startsWith(href as string));
         }
 
         return (
-          <Link href={href as any} key={index} asChild>
+          <Link href={href} key={index} asChild>
             <TouchableOpacity className="items-center justify-center flex-1 active:opacity-70">
               <View className="items-center justify-center">
                 {tab.isProfile && isLoggedIn ? (

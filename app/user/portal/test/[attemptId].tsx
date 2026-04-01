@@ -651,9 +651,10 @@ const TestAttemptScreen = () => {
       console.log("[TestAttempt] Latest results:", latest);
 
       setShowSubmitConfirm(false);
-      router.replace(
-        `/(user)/portal/test/results?testItemId=${testItemNumericId}` as any,
-      );
+      router.replace({
+        pathname: "/user/portal/test/results",
+        params: { testItemId: String(testItemNumericId) },
+      });
     } catch (err: any) {
       Alert.alert("Error", err.message || "Unable to submit test.");
     } finally {

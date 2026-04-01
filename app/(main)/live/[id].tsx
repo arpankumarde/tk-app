@@ -608,7 +608,7 @@ const LiveTestDetails = () => {
                 } else {
                   const result = await addToCart(liveTest.id, "live");
                   if (result.success) {
-                    router.push("/(user)/cart" as any);
+                    router.push("/user/cart");
                   }
                 }
               }}
@@ -1135,7 +1135,7 @@ const LiveTestDetails = () => {
                   activeOpacity={0.7}
                   onPress={() => {
                     setEnrollResult((prev) => ({ ...prev, visible: false }));
-                    router.push("/(user)");
+                    router.push("/user");
                   }}
                   className="mt-6 py-2"
                 >

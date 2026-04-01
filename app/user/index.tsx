@@ -18,13 +18,13 @@ import { useColorScheme } from "nativewind";
 import Header from "@/components/Header";
 import BottomTabs from "@/components/BottomTabs";
 
-import { useEnrolledCourses } from "./hooks/useEnrolledCourses";
-import { useEnrolledTests } from "./hooks/useEnrolledTests";
+import { useEnrolledCourses } from "./_hooks/useEnrolledCourses";
+import { useEnrolledTests } from "./_hooks/useEnrolledTests";
 import EnrolledCourseCard from "./_components/EnrolledCourseCard";
 import EnrolledTestCard from "./_components/EnrolledTestCard";
 import PurchasedProductCard from "./_components/PurchasedProductCard";
 
-import { usePurchasedProducts } from "./hooks/usePurchasedProducts";
+import { usePurchasedProducts } from "./_hooks/usePurchasedProducts";
 
 export default function ProfileScreen() {
   const { user, token, logout } = useAuth();
@@ -183,7 +183,7 @@ export default function ProfileScreen() {
             </Text>
             {totalCourses > 0 && (
               <TouchableOpacity
-                onPress={() => router.push("/(user)/enrolled-courses" as any)}
+                onPress={() => router.push("/user/courses")}
               >
                 <View className="flex-row items-center">
                   <Text className="text-primary font-black text-sm">
@@ -226,7 +226,7 @@ export default function ProfileScreen() {
             </Text>
             {totalTests > 0 && (
               <TouchableOpacity
-                onPress={() => router.push("/(user)/enrolled-test" as any)}
+                onPress={() => router.push("/user/tests")}
               >
                 <View className="flex-row items-center">
                   <Text className="text-primary font-black text-sm">
@@ -267,7 +267,7 @@ export default function ProfileScreen() {
             </Text>
             {totalProducts > 0 && (
               <TouchableOpacity
-                onPress={() => router.push("/(user)/products" as any)}
+                onPress={() => router.push("/user/products")}
               >
                 <View className="flex-row items-center">
                   <Text className="text-primary font-black text-sm">
@@ -312,7 +312,7 @@ export default function ProfileScreen() {
           </Text>
           <View className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden shadow-sm mb-8">
             <TouchableOpacity
-              onPress={() => router.push("/(user)/orders" as any)}
+              onPress={() => router.push("/user/orders")}
               className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800"
             >
               <View className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 items-center justify-center mr-4">
@@ -325,7 +325,7 @@ export default function ProfileScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => router.push("/(user)/wallet" as any)}
+              onPress={() => router.push("/user/wallet")}
               className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800"
             >
               <View className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 items-center justify-center mr-4">

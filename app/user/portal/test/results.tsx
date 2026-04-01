@@ -253,7 +253,7 @@ const ResultsScreen = () => {
 
   const handleBackToEnrolledTest = useCallback(async () => {
     if (!token || !testItemNumericId || Number.isNaN(testItemNumericId)) {
-      router.replace("/(user)" as any);
+      router.replace("/user");
       return;
     }
 
@@ -279,9 +279,10 @@ const ResultsScreen = () => {
         );
 
         if (matchedTestPack?.slug) {
-          router.replace(
-            `/(user)/enrolled-test/${matchedTestPack.slug}` as any,
-          );
+          router.replace({
+            pathname: "/user/tests/[slug]",
+            params: { slug: matchedTestPack.slug },
+          });
           return;
         }
       }
@@ -289,7 +290,7 @@ const ResultsScreen = () => {
       // Fallback navigation below.
     }
 
-    router.replace("/(user)" as any);
+    router.replace("/user");
   }, [router, testItemNumericId, token]);
 
   const renderHtmlOrText = (

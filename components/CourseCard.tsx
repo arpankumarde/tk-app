@@ -196,14 +196,14 @@ const CourseCard = ({ course: initialCourse }: CourseCardProps) => {
               onPress={async () => {
                 if (isFree) {
                   if (course.isEnrolled) {
-                    router.push(`/(user)/enrolled-courses/${course.id}` as any);
+                    router.push({ pathname: "/user/courses/[id]", params: { id: String(course.id) } });
                   } else {
                     handleFreeEnroll();
                   }
                 } else {
                   const result = await addToCart(course.id, "course");
                   if (result.success) {
-                    router.push("/(user)/cart" as any);
+                    router.push("/user/cart");
                   }
                 }
               }}
@@ -277,7 +277,7 @@ const CourseCard = ({ course: initialCourse }: CourseCardProps) => {
                   className="bg-green-500 w-full h-14 rounded-2xl items-center justify-center mb-3"
                   onPress={() => {
                     setEnrollResult((prev) => ({ ...prev, visible: false }));
-                    router.push("/(user)" as any);
+                    router.push("/user");
                   }}
                 >
                   <Text className="text-white font-black text-base">
