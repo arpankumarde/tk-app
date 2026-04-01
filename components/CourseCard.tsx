@@ -196,7 +196,7 @@ const CourseCard = ({ course: initialCourse }: CourseCardProps) => {
               onPress={async () => {
                 if (isFree) {
                   if (course.isEnrolled) {
-                    router.push({ pathname: "/user/enrolled-courses/[id]", params: { id: String(course.id) } });
+                    router.push({ pathname: "/user/courses/[id]", params: { id: String(course.id) } });
                   } else {
                     handleFreeEnroll();
                   }

@@ -280,7 +280,7 @@ const ResultsScreen = () => {
 
         if (matchedTestPack?.slug) {
           router.replace({
-            pathname: "/user/enrolled-test/[slug]",
+            pathname: "/user/tests/[slug]",
             params: { slug: matchedTestPack.slug },
           });
           return;

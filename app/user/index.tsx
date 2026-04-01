@@ -183,7 +183,7 @@ export default function ProfileScreen() {
             </Text>
             {totalCourses > 0 && (
               <TouchableOpacity
-                onPress={() => router.push("/user/enrolled-courses")}
+                onPress={() => router.push("/user/courses")}
               >
                 <View className="flex-row items-center">
                   <Text className="text-primary font-black text-sm">
@@ -226,7 +226,7 @@ export default function ProfileScreen() {
             </Text>
             {totalTests > 0 && (
               <TouchableOpacity
-                onPress={() => router.push("/user/enrolled-test")}
+                onPress={() => router.push("/user/tests")}
               >
                 <View className="flex-row items-center">
                   <Text className="text-primary font-black text-sm">

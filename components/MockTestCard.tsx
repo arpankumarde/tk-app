@@ -271,7 +271,7 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
                 onPress={async () => {
                   if (isFree) {
                     if (test.isEnrolled) {
-                      router.push({ pathname: "/user/enrolled-test/[slug]", params: { slug: test.slug } });
+                      router.push({ pathname: "/user/tests/[slug]", params: { slug: test.slug } });
                     } else {
                       handleFreeEnroll();
                     }
