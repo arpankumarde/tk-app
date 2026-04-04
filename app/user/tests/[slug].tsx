@@ -18,8 +18,12 @@ import { useColorScheme } from "nativewind";
 import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/Header";
 import { EnrolledTest } from "../types";
+import * as SecureStore from "expo-secure-store";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+
+const getReviewStorageKey = (mockTestId: number | string) =>
+  `reviewed_test_${String(mockTestId)}`;
 
 const EnrolledTestDetails = () => {
   const { slug } = useLocalSearchParams();
@@ -65,6 +69,27 @@ const EnrolledTestDetails = () => {
 
       if (foundTest) {
         setTest(foundTest);
+
+        const mockTestId =
+          foundTest.mockTestId || foundTest.testId || foundTest.id;
+
+        const serverHasReviewed = Boolean(
+          foundTest.hasReviewed ||
+            foundTest.reviewSubmitted ||
+            foundTest.userReviewId ||
+            foundTest.reviewId ||
+            foundTest.myReview,
+        );
+
+        let locallyReviewed = false;
+        if (mockTestId) {
+          const stored = await SecureStore.getItemAsync(
+            getReviewStorageKey(mockTestId),
+          );
+          locallyReviewed = stored === "1";
+        }
+
+        setHasReviewedInSession(serverHasReviewed || locallyReviewed);
       } else {
         throw new Error("Test package not found among your enrollments");
       }
@@ -134,6 +159,7 @@ const EnrolledTestDetails = () => {
       if (result.success) {
         setIsReviewModalVisible(false);
         setHasReviewedInSession(true);
+        await SecureStore.setItemAsync(getReviewStorageKey(mockTestId), "1");
         setReviewText("");
         setRating(0);
         setShowSuccessReviewModal(true);
@@ -145,6 +171,7 @@ const EnrolledTestDetails = () => {
         if (errorMsg.toLowerCase().includes("already reviewed")) {
           setIsReviewModalVisible(false);
           setHasReviewedInSession(true);
+          await SecureStore.setItemAsync(getReviewStorageKey(mockTestId), "1");
           setShowSuccessReviewModal(true);
           return;
         }
@@ -200,6 +227,43 @@ const EnrolledTestDetails = () => {
     test.thumbnailUrl ||
     test.thumbnailImageUrl ||
     "https://ik.imagekit.io/testkart/placeholders/mock-test-placeholder__FmYrad7s.png";
+
+  const parseScore = (value: number | string | null | undefined) => {
+    if (value === null || value === undefined || value === "") return null;
+    if (typeof value === "number") return Number.isFinite(value) ? value : null;
+
+    const normalized = String(value).replace(/%/g, "").trim();
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
+  const formatScore = (value: number | string | null | undefined) => {
+    const numeric = parseScore(value);
+    if (numeric === null) return "N/A";
+    return `${numeric % 1 === 0 ? numeric.toFixed(0) : numeric.toFixed(1)}%`;
+  };
+
+  const itemBestScores = (test.testItems || [])
+    .map((item) => parseScore(item.bestScore))
+    .filter((score): score is number => score !== null);
+
+  const computedAverageScore =
+    itemBestScores.length > 0
+      ? itemBestScores.reduce((sum, score) => sum + score, 0) /
+        itemBestScores.length
+      : null;
+
+  const packageAverageScore =
+    computedAverageScore !== null
+      ? computedAverageScore
+      : parseScore(test.averageScore);
+
+  const totalItemsCount = Number(test.totalItems || 0);
+  const completedItemsCount = Number(test.completedItems || 0);
+  const isPackageCompleted =
+    totalItemsCount > 0
+      ? completedItemsCount >= totalItemsCount
+      : (test.testItems || []).some((item) => item.isCompleted);
 
   return (
     <SafeAreaView
@@ -261,7 +325,7 @@ const EnrolledTestDetails = () => {
                     })
                   : "N/A"}
               </Text>
-              {!hasReviewedInSession && (
+              {!hasReviewedInSession && isPackageCompleted && (
                 <TouchableOpacity
                   onPress={() => setIsReviewModalVisible(true)}
                   className="mt-2 flex-row items-center self-start"
@@ -334,7 +398,7 @@ const EnrolledTestDetails = () => {
                   className="mr-1"
                 />
                 <Text className="text-slate-800 dark:text-white font-black text-base">
-                  {test.averageScore || "N/A"}
+                  {formatScore(packageAverageScore)}
                 </Text>
               </View>
               <Text className="text-slate-400 font-bold text-[8px] uppercase tracking-widest">
@@ -376,6 +440,11 @@ const EnrolledTestDetails = () => {
                         {item.durationMinutes} Min
                       </Text>
                     </View>
+                    {(item.attemptsCount || 0) > 0 && (
+                      <Text className="text-slate-500 dark:text-slate-400 font-bold text-xs mt-1">
+                        Best Score: <Text className="text-primary">{formatScore(item.bestScore)}</Text>
+                      </Text>
+                    )}
                   </View>
                   <View
                     className={`px-3 py-1 rounded-xl ${item.isCompleted ? "bg-green-50 dark:bg-green-900/20" : "bg-orange-50 dark:bg-orange-900/20"}`}

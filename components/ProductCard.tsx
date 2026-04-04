@@ -228,7 +228,7 @@ const ProductCard = ({ product: initialProduct }: ProductCardProps) => {
             <Text
               className={`${isFree ? "text-emerald-500" : "text-slate-800 dark:text-white"} text-2xl font-black`}
             >
-              {isFree ? "Free" : `₹${product.price}`}
+              {isFree ? "FREE" : `₹${product.price}`}
             </Text>
           </View>
         </View>

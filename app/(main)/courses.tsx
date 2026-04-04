@@ -492,7 +492,7 @@ const CourseScreen = () => {
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Header Section */}
-        <View className="px-6 pt-6 pb-8">
+        <View className="px-6 pt-6 pb-4">
           <View className="flex-row items-center justify-between mb-2">
             <View className="bg-orange-100 dark:bg-orange-900/30 px-3 py-1 rounded-full">
               <Text className="text-primary text-[10px] font-black uppercase tracking-widest">
@@ -513,7 +513,7 @@ const CourseScreen = () => {
         <View className="px-5 mb-8 flex-row items-center">
           <TouchableOpacity
             onPress={() => setShowFilterSidebar(true)}
-            className="flex-row items-center border border-orange-200 dark:border-orange-800/80 bg-white dark:bg-slate-800 px-4 py-3 rounded-xl mr-3 shadow-sm flex-1 justify-center"
+            className="flex-row items-center border border-orange-200 dark:border-orange-800/80 bg-white dark:bg-slate-800 px-4 py-2.5 rounded-xl mr-3 shadow-sm"
           >
             <Feather name="filter" size={16} color="#FF8A50" />
             <Text className="ml-2 text-primary font-bold text-sm">Filters</Text>
@@ -521,12 +521,19 @@ const CourseScreen = () => {
 
           <TouchableOpacity
             onPress={() => setShowSortModal(true)}
-            className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 px-5 py-3 rounded-xl flex-1 justify-between border border-gray-100 dark:border-slate-700"
+            className="flex-row items-center border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 rounded-xl flex-1 shadow-sm justify-between"
           >
-            <Text className="text-slate-600 dark:text-slate-300 font-bold text-sm">
+            <Text
+              className="text-slate-600 dark:text-slate-300 font-bold text-sm"
+              numberOfLines={1}
+            >
               {SORT_OPTIONS.find((o) => o.value === sort)?.label}
             </Text>
-            <Feather name="chevron-down" size={14} color="#FF8A50" />
+            <Feather
+              name="chevron-down"
+              size={16}
+              color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
+            />
           </TouchableOpacity>
         </View>
 

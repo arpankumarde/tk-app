@@ -145,32 +145,59 @@ export default function ProfileScreen() {
           </View>
 
           {/* Stats Bar */}
-          <View className="bg-white dark:bg-slate-900 rounded-2xl p-6 flex-row items-center shadow-lg shadow-slate-200/70 dark:shadow-none border border-gray-200 dark:border-slate-700">
+          <View className="bg-white dark:bg-slate-900 rounded-2xl p-5 flex-row items-center shadow-lg shadow-slate-200/70 dark:shadow-none border border-gray-200 dark:border-slate-700">
             <View className="items-center flex-1">
               <Text className="text-2xl font-black text-slate-800 dark:text-white">
                 {totalTests}
               </Text>
-              <Text className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">
-                Tests
-              </Text>
+              <View className="flex-row items-center mt-2">
+                <View className="w-6 h-6 rounded-lg items-center justify-center bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+                  <Feather
+                    name="file-text"
+                    size={12}
+                    color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
+                  />
+                </View>
+                <Text className="ml-2 text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[1px]">
+                  Tests
+                </Text>
+              </View>
             </View>
-            <View className="w-[1px] h-10 bg-gray-200 dark:bg-slate-700" />
+            <View className="w-[1px] h-12 bg-gray-200 dark:bg-slate-700" />
             <View className="items-center flex-1">
               <Text className="text-2xl font-black text-slate-800 dark:text-white">
                 {totalCourses}
               </Text>
-              <Text className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">
-                Courses
-              </Text>
+              <View className="flex-row items-center mt-2">
+                <View className="w-6 h-6 rounded-lg items-center justify-center bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+                  <Feather
+                    name="book-open"
+                    size={12}
+                    color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
+                  />
+                </View>
+                <Text className="ml-2 text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[1px]">
+                  Courses
+                </Text>
+              </View>
             </View>
-            <View className="w-[1px] h-10 bg-gray-200 dark:bg-slate-700" />
+            <View className="w-[1px] h-12 bg-gray-200 dark:bg-slate-700" />
             <View className="items-center flex-1">
               <Text className="text-2xl font-black text-slate-800 dark:text-white">
                 {totalProducts}
               </Text>
-              <Text className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">
-                Notes
-              </Text>
+              <View className="flex-row items-center mt-2">
+                <View className="w-6 h-6 rounded-lg items-center justify-center bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+                  <Feather
+                    name="shopping-bag"
+                    size={12}
+                    color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
+                  />
+                </View>
+                <Text className="ml-2 text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[1px]">
+                  Notes
+                </Text>
+              </View>
             </View>
           </View>
         </View>

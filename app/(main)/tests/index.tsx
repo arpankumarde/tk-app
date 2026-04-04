@@ -27,6 +27,7 @@ import BottomTabs from "@/components/BottomTabs";
 import MockTestCard from "@/components/MockTestCard";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+const PAGE_LIMIT = 10;
 
 const SORT_OPTIONS = [
   { label: "New Arrival", value: "newest" },
@@ -381,7 +382,7 @@ const ShopScreen = () => {
         }
         setError(null);
 
-        let url = `${BASE_URL}/_api/tests/list?sortBy=${sort}&page=${pageNum}&limit=10`;
+        let url = `${BASE_URL}/_api/tests/list?sortBy=${sort}&page=${pageNum}&limit=${PAGE_LIMIT}`;
         if (searchQuery.trim()) {
           url += `&search=${encodeURIComponent(searchQuery.trim())}`;
         }
@@ -422,11 +423,7 @@ const ShopScreen = () => {
         }
 
         setTotalCount(totalItemsCount);
-        setHasMore(
-          isLoadMore
-            ? tests.length + testsList.length < totalItemsCount
-            : testsList.length < totalItemsCount,
-        );
+        setHasMore(pageNum * PAGE_LIMIT < totalItemsCount);
       } catch (err: any) {
         console.error("[MockTests] caught error:", err);
         setError(err.message);
@@ -442,14 +439,13 @@ const ShopScreen = () => {
       minPrice,
       maxPrice,
       selectedLanguage,
-      tests.length,
     ],
   );
 
   useEffect(() => {
     setPage(1);
     fetchTests(1, false);
-  }, [sort, searchQuery, priceType, minPrice, maxPrice, selectedLanguage]);
+  }, [fetchTests]);
 
   const handleLoadMore = () => {
     if (!loading && !loadingMore && hasMore) {
@@ -483,7 +479,7 @@ const ShopScreen = () => {
   const testCards = useMemo(
     () =>
       tests.map((test, index) => (
-        <MockTestCard key={test.slug || index} test={test as any} />
+        <MockTestCard key={`${test.id}-${index}`} test={test as any} />
       )),
     [tests],
   );
@@ -523,7 +519,7 @@ const ShopScreen = () => {
         <View className="px-5 mb-8 flex-row items-center">
           <TouchableOpacity
             onPress={() => setShowFilterSidebar(true)}
-            className="flex-row items-center border border-orange-200 dark:border-orange-800/80 bg-white dark:bg-slate-800 px-4 py-3 rounded-xl mr-3 shadow-sm flex-1 justify-center"
+            className="flex-row items-center border border-orange-200 dark:border-orange-800/80 bg-white dark:bg-slate-800 px-4 py-2.5 rounded-xl mr-3 shadow-sm"
           >
             <Feather name="filter" size={16} color="#FF8A50" />
             <Text className="ml-2 text-primary font-bold text-sm">Filters</Text>
@@ -531,7 +527,7 @@ const ShopScreen = () => {
 
           <TouchableOpacity
             onPress={() => setShowSortModal(true)}
-            className="flex-row items-center border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 rounded-xl flex-1 shadow-sm justify-between"
+            className="flex-row items-center border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 rounded-xl flex-1 shadow-sm justify-between"
           >
             <Text
               className="text-slate-600 dark:text-slate-300 font-bold text-sm"
@@ -609,7 +605,7 @@ const ShopScreen = () => {
                 {!hasMore && tests.length > 0 && (
                   <View className="items-center py-8">
                     <Text className="text-slate-400 dark:text-slate-500 text-sm italic font-medium">
-                      You've reached the end of the list
+                      You&apos;ve reached the end of the list
                     </Text>
                   </View>
                 )}

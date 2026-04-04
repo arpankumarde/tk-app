@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Modal,
 } from "react-native";
-import { useColorScheme } from "nativewind";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useAddToCart } from "@/hooks/useAddToCart";
@@ -34,13 +33,13 @@ interface MockTestCardProps {
     reviewsCount?: number;
     examName?: string;
     teacherName?: string;
+    teacherIsVerified?: boolean;
     isEnrolled?: boolean;
     views?: number;
   };
 }
 
 const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
-  const { colorScheme } = useColorScheme();
   const { user, token } = useAuth();
   const { cart } = useCartContext();
   const [test, setTest] = useState(initialTest);
@@ -127,7 +126,14 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
     test.teacherName || test.creatorName || "TestKart Expert";
 
   const actualPrice = test.discountPrice ?? test.price;
-  const originalPrice = test.discountPrice ? test.price : null;
+  const hasDiscount =
+    typeof test.discountPrice === "number" && test.discountPrice < test.price;
+  const originalPrice = hasDiscount ? test.price : null;
+  const discountPercent =
+    hasDiscount && test.price > 0
+      ? Math.round(((test.price - actualPrice) / test.price) * 100)
+      : null;
+  const formatInr = (amount: number) => amount.toLocaleString("en-IN");
 
   let displaySubject = test.examName || "Mock Test";
   if (test.subject && test.subject !== "[]") {
@@ -213,15 +219,17 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
                     {displayAuthor}
                   </Text>
                 </Text>
-                <MaterialIcons
-                  name="verified"
-                  size={14}
-                  color="#22C55E"
-                  style={{ marginLeft: 4 }}
-                />
+                {test.teacherIsVerified && (
+                  <MaterialIcons
+                    name="verified"
+                    size={14}
+                    color="#22C55E"
+                    style={{ marginLeft: 4 }}
+                  />
+                )}
               </View>
 
-              <View className="flex-row items-center bg-orange-50 dark:bg-orange-950/20 px-2.5 py-1 rounded-lg">
+              <View className="flex-row items-center bg-orange-50 dark:bg-slate-700/40 px-2.5 py-1 rounded-lg border border-orange-100 dark:border-slate-600/60">
                 <MaterialIcons name="star" size={12} color="#F97316" />
                 <Text className="ml-1 text-orange-500 font-black text-xs">
                   {test.rating || "5.0"}
@@ -260,7 +268,15 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
                 <Feather name="layers" size={14} color="#F97316" />
                 <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">
                   {test.totalTests || 0} Test{" "}
-                  {test.totalTests === 1 ? "Set" : "Sets"}
+                  {(test.totalTests || 0) === 1 ? "Item" : "Items"}
+                  {(test.freeTestsCount || 0) > 0
+                    ? " "
+                    : ""}
+                  {(test.freeTestsCount || 0) > 0 && (
+                    <Text className="text-emerald-500">
+                      ({test.freeTestsCount} Free {(test.freeTestsCount || 0) === 1 ? "Test" : "Tests"})
+                    </Text>
+                  )}
                 </Text>
               </View>
             </View>
@@ -287,7 +303,7 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
                   }
                 }}
                 disabled={addingToCart || enrolling}
-                className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} flex-row items-center justify-center px-6 py-3.5 rounded-xl shadow-lg w-48 mr-4`}
+                className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} flex-row items-center justify-center px-4 py-3 rounded-xl shadow-lg w-40 mr-3`}
               >
                 {addingToCart || enrolling ? (
                   <ActivityIndicator size="small" color="white" />
@@ -319,11 +335,16 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
                 )}
               </TouchableOpacity>
 
-              <View className="items-end">
+              <View className="items-end flex-shrink">
                 <View className="flex-row items-center">
                   {originalPrice && (
                     <Text className="text-slate-400 line-through text-[10px] mr-2">
-                      ₹{originalPrice}
+                      ₹{formatInr(originalPrice)}
+                    </Text>
+                  )}
+                  {discountPercent !== null && (
+                    <Text className="text-emerald-500 font-black text-[10px] mr-2">
+                      {discountPercent}% OFF
                     </Text>
                   )}
                   {actualPrice === 0 ? (
@@ -332,7 +353,7 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
                     </Text>
                   ) : (
                     <Text className="text-2xl font-black text-slate-800 dark:text-white">
-                      ₹{actualPrice}
+                      ₹{formatInr(actualPrice)}
                     </Text>
                   )}
                 </View>
