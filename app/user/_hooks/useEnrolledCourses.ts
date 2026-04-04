@@ -82,5 +82,3 @@ export const useEnrolledCourses = (
 
   return { courses, loading, total, refetch: fetchCourses };
 };
-
-export default useEnrolledCourses;

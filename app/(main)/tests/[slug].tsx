@@ -227,12 +227,16 @@ const TestDetails = () => {
     );
   }
 
-  const isFree = test.price === 0;
   const actualPrice = test.discountPrice ?? test.price;
-  const originalPrice = test.discountPrice ? test.price : null;
-  const discountPercent = originalPrice
-    ? Math.round(((originalPrice - actualPrice) / originalPrice) * 100)
-    : null;
+  const isFree = actualPrice === 0;
+  const hasDiscount =
+    typeof test.discountPrice === "number" && test.discountPrice < test.price;
+  const originalPrice = hasDiscount ? test.price : null;
+  const discountPercent =
+    hasDiscount && test.price > 0
+      ? Math.round(((test.price - actualPrice) / test.price) * 100)
+      : null;
+  const formatInr = (amount: number) => amount.toLocaleString("en-IN");
 
   const totalQuestions = items.reduce((sum, t) => sum + t.totalQuestions, 0);
   const totalDuration = items.reduce((sum, t) => sum + t.durationMinutes, 0);
@@ -282,24 +286,25 @@ const TestDetails = () => {
               "Prepare with this comprehensive test series covering all key topics and exam patterns."}
           </Text>
 
-          {/* Metadata Row: Author, Rating, Language */}
-          <View className="flex-row items-center flex-wrap mb-6">
-            <Text
-              className="text-slate-500 dark:text-slate-400 text-sm font-bold"
-              numberOfLines={1}
-            >
-              Created by{" "}
-              <Link
-                href={`/expert/${test.teacherSlug}` as any}
-                className="text-primary font-bold"
+          {/* Metadata Row: Author + Rating */}
+          <View className="flex-row items-center justify-between mb-2">
+            <View className="flex-1 pr-3">
+              <Text
+                className="text-slate-500 dark:text-slate-400 text-sm font-bold"
+                numberOfLines={1}
               >
-                {test.teacherName || "Expert"}
-              </Link>
-            </Text>
-
-            <Text className="mx-3 text-slate-300">|</Text>
+                Created by{" "}
+                <Link
+                  href={`/expert/${test.teacherSlug}` as any}
+                  className="text-primary font-bold"
+                >
+                  {test.teacherName || "Expert"}
+                </Link>
+              </Text>
+            </View>
 
             <View className="flex-row items-center">
+              <Text className="mr-3 text-slate-300">|</Text>
               <Ionicons name="star" size={16} color="#FF8A50" />
               <Text className="ml-1 text-slate-800 dark:text-white font-black text-sm">
                 {test.rating ? test.rating.toFixed(1) : "New"}
@@ -308,10 +313,11 @@ const TestDetails = () => {
                 ({test.reviewsCount || 0})
               </Text>
             </View>
+          </View>
 
-            <Text className="mx-3 text-slate-300">|</Text>
-
-            <View className="px-3 py-1 bg-cyan-50 dark:bg-cyan-900/30 rounded-full border border-cyan-100 dark:border-cyan-800/30 flex-row items-center">
+          {/* Language Pill */}
+          <View className="mb-6">
+            <View className="self-start px-3 py-1 bg-cyan-50 dark:bg-cyan-900/30 rounded-full border border-cyan-100 dark:border-cyan-800/30 flex-row items-center">
               <Feather name="globe" size={12} color="#06b6d4" />
               <Text className="text-cyan-600 dark:text-cyan-400 text-[10px] font-black tracking-widest ml-1.5 uppercase">
                 {test.language?.trim() || "English"}
@@ -635,13 +641,13 @@ const TestDetails = () => {
               <Text className="text-2xl font-black text-green-500">Free</Text>
             ) : (
               <Text className="text-2xl font-black text-slate-800 dark:text-white">
-                ₹{actualPrice}
+                ₹{formatInr(actualPrice)}
               </Text>
             )}
             {originalPrice && (
               <>
                 <Text className="ml-2 text-slate-400 line-through text-sm">
-                  ₹{originalPrice}
+                  ₹{formatInr(originalPrice)}
                 </Text>
                 <View className="ml-2 bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-md">
                   <Text className="text-green-600 dark:text-green-400 font-black text-[10px]">
