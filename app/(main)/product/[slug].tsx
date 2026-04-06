@@ -87,7 +87,7 @@ const ProductDetails = () => {
         console.log("Fetched product details:", payload.product);
         setProduct(payload.product);
 
-        const listResponse = await fetch(`${BASE_URL}/_api/shop/list?limit=4`);
+        const listResponse = await fetch(`${BASE_URL}/_api/shop/list?limit=5&category=${payload.product.category.replace(/ /g, "+")}`);
         const listData = await listResponse.json();
         const listPayload = listData.json || listData;
         setRelatedProducts(

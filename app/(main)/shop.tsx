@@ -30,8 +30,8 @@ const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 const PAGE_LIMIT = 20;
 
 const SORT_OPTIONS = [
-  { label: "New Arrival", value: "newest" },
   { label: "Most Popular", value: "popular" },
+  { label: "New Arrival", value: "newest" },
   { label: "Price High to Low", value: "price_desc" },
   { label: "Price Low to High", value: "price_asc" },
 ];
@@ -189,20 +189,7 @@ function FilterSidebarContent({
                   return (
                     <TouchableOpacity
                       key={cat}
-                      onPress={() => {
-                        if (cat === "All Categories") {
-                          setSelectedCats(["All Categories"]);
-                        } else {
-                          let newCats = selectedCats.filter((c) => c !== "All Categories");
-                          if (newCats.includes(cat)) {
-                            newCats = newCats.filter((c) => c !== cat);
-                            if (newCats.length === 0) newCats = ["All Categories"];
-                          } else {
-                            newCats.push(cat);
-                          }
-                          setSelectedCats(newCats);
-                        }
-                      }}
+                      onPress={() => setSelectedCats([cat])}
                       className={`px-4 py-2 rounded-xl border ${
                         isActive 
                         ? "bg-orange-50 border-primary" 
@@ -330,7 +317,7 @@ const ShopScreen = () => {
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sort, setSort] = useState("newest");
+  const [sort, setSort] = useState("popular");
   const [showSortModal, setShowSortModal] = useState(false);
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -385,9 +372,9 @@ const ShopScreen = () => {
 
         let url = `${BASE_URL}/_api/shop/list?sort=${sort}&page=${pageNum}&limit=${PAGE_LIMIT}`;
         
-        if (searchQuery.trim()) url += `&search=${encodeURIComponent(searchQuery.trim())}`;
+        if (searchQuery.trim()) url += `&search=${searchQuery.trim().replace(/ /g, "+")}`;
         if (selectedCategories[0] !== "All Categories") {
-          url += `&categories=${encodeURIComponent(selectedCategories.join(","))}`;
+          url += `&category=${selectedCategories[0].replace(/ /g, "+")}`;
         }
         if (minPrice.trim()) url += `&minPrice=${encodeURIComponent(minPrice.trim())}`;
         if (maxPrice.trim()) url += `&maxPrice=${encodeURIComponent(maxPrice.trim())}`;
@@ -448,8 +435,7 @@ const ShopScreen = () => {
     setMaxPrice(f.maxPrice);
     setSelectedLanguage(f.language);
     setShowFilterSidebar(false);
-    fetchProducts(1);
-  }, [fetchProducts]);
+  }, []);
 
   return (
     <SafeAreaView
