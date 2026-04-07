@@ -209,9 +209,7 @@ export default function ProfileScreen() {
               Ongoing Courses ({totalCourses})
             </Text>
             {totalCourses > 0 && (
-              <TouchableOpacity
-                onPress={() => router.push("/user/courses")}
-              >
+              <TouchableOpacity onPress={() => router.push("/user/courses")}>
                 <View className="flex-row items-center">
                   <Text className="text-primary font-black text-sm">
                     View All
@@ -252,9 +250,7 @@ export default function ProfileScreen() {
               Ongoing Tests ({totalTests})
             </Text>
             {totalTests > 0 && (
-              <TouchableOpacity
-                onPress={() => router.push("/user/tests")}
-              >
+              <TouchableOpacity onPress={() => router.push("/user/tests")}>
                 <View className="flex-row items-center">
                   <Text className="text-primary font-black text-sm">
                     View All
@@ -293,9 +289,7 @@ export default function ProfileScreen() {
               My Notes ({totalProducts})
             </Text>
             {totalProducts > 0 && (
-              <TouchableOpacity
-                onPress={() => router.push("/user/products")}
-              >
+              <TouchableOpacity onPress={() => router.push("/user/products")}>
                 <View className="flex-row items-center">
                   <Text className="text-primary font-black text-sm">
                     View All
@@ -378,8 +372,9 @@ export default function ProfileScreen() {
               onPress={() => {
                 let message = `Hello, I need help. I'm ${user?.displayName || "a user"}.`;
                 if (user?.email) message += ` Email: ${user.email}`;
+                const supportUrl = process.env.EXPO_PUBLIC_SUPPORT_URL;
                 Linking.openURL(
-                  `https://wa.me/+919334581138?text=${encodeURIComponent(message)}`,
+                  `${supportUrl}?text=${encodeURIComponent(message)}`,
                 );
               }}
               className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50"
