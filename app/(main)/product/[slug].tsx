@@ -607,8 +607,8 @@ const ProductDetails = () => {
                   contentContainerStyle={{ paddingRight: 24 }}
                 >
                   {relatedProducts.map((p, i) => (
-                    <View key={p.id || i} style={{ width: 320 }}>
-                      <ProductCard product={p} />
+                    <View key={p.id || i} style={{ width: 320, height: 400 }}>
+                      <ProductCard product={p} className="h-full mb-0" />
                     </View>
                   ))}
                 </ScrollView>

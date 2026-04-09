@@ -30,10 +30,17 @@ interface ProductCardProps {
     totalPurchases: number;
     category: string;
     isPurchased?: boolean;
+    views?: number;
   };
+  className?: string;
+  style?: any;
 }
 
-const ProductCard = ({ product: initialProduct }: ProductCardProps) => {
+const ProductCard = ({
+  product: initialProduct,
+  className = "",
+  style = {},
+}: ProductCardProps) => {
   const { colorScheme } = useColorScheme();
   const { user, token } = useAuth();
   const router = useRouter();
@@ -105,11 +112,11 @@ const ProductCard = ({ product: initialProduct }: ProductCardProps) => {
   };
 
   return (
-    <View>
+    <View style={style}>
       <TouchableOpacity
         onPress={() => router.push(`/product/${product.slug}` as any)}
         activeOpacity={0.9}
-        className="bg-white dark:bg-slate-800 rounded-3xl mx-5 mb-5 overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700"
+        className={`bg-white dark:bg-slate-800 rounded-3xl mx-5 mb-5 overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700 ${className}`}
       >
         {/* Category Badge */}
         <View className="absolute top-3 left-3 z-10 px-3 py-1.5 bg-slate-900/90 rounded-full shadow-sm">
@@ -127,60 +134,62 @@ const ProductCard = ({ product: initialProduct }: ProductCardProps) => {
           />
         </View>
 
-        <View className="p-5">
-          <Text
-            className="text-xl font-bold text-slate-800 dark:text-white mb-2 leading-tight"
-            numberOfLines={2}
-          >
-            {product.title}
-          </Text>
+        <View className="p-5 flex-1">
+          <View className="flex-1">
+            <Text
+              className="text-xl font-bold text-slate-800 dark:text-white mb-1.5 leading-tight"
+              numberOfLines={2}
+            >
+              {product.title}
+            </Text>
 
-          <View className="flex-row items-center mb-4">
-            <View className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 mr-2 items-center justify-center overflow-hidden">
-              <Image
-                source={{
-                  uri:
-                    product.teacherAvatar ||
-                    `https://ui-avatars.com/api/?name=${displayAuthor}&background=random`,
-                }}
-                className="w-full h-full"
-              />
-            </View>
-            <View className="flex-row items-center flex-1">
-              <Text
-                className="text-slate-500 dark:text-slate-400 text-sm"
-                numberOfLines={1}
-              >
-                {displayAuthor}
-              </Text>
-              {product.teacherIsVerified && (
-                <MaterialIcons
-                  name="verified"
-                  size={14}
-                  color="#22C55E"
-                  className="ml-1"
+            <View className="flex-row items-center mb-3">
+              <View className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 mr-2 items-center justify-center overflow-hidden">
+                <Image
+                  source={{
+                    uri:
+                      product.teacherAvatar ||
+                      `https://ui-avatars.com/api/?name=${displayAuthor}&background=random`,
+                  }}
+                  className="w-full h-full"
                 />
-              )}
+              </View>
+              <View className="flex-row items-center flex-1">
+                <Text
+                  className="text-slate-500 dark:text-slate-400 text-sm"
+                  numberOfLines={1}
+                >
+                  {displayAuthor}
+                </Text>
+                {product.teacherIsVerified && (
+                  <MaterialIcons
+                    name="verified"
+                    size={14}
+                    color="#22C55E"
+                    className="ml-1"
+                  />
+                )}
+              </View>
+            </View>
+
+            {/* Product Stats Row */}
+            <View className="flex-row items-center mb-4 gap-x-4">
+              <View className="flex-row items-center">
+                <Feather name="eye" size={13} color="#94a3b8" />
+                <Text className="text-slate-400 dark:text-slate-500 text-[11px] font-bold ml-1.5">
+                  {product.views || 0} Views
+                </Text>
+              </View>
+              <View className="flex-row items-center">
+                <Feather name="shopping-bag" size={13} color="#94a3b8" />
+                <Text className="text-slate-400 dark:text-slate-500 text-[11px] font-bold ml-1.5">
+                  {product.totalPurchases || 0} Purchases
+                </Text>
+              </View>
             </View>
           </View>
 
-          {/* Product Stats Row */}
-          <View className="flex-row items-center mb-5 gap-x-4">
-            <View className="flex-row items-center">
-              <Feather name="eye" size={14} color="#94a3b8" />
-              <Text className="text-slate-400 dark:text-slate-500 text-xs font-bold ml-1.5">
-                {(product as any).views || 0} Views
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Feather name="shopping-bag" size={14} color="#94a3b8" />
-              <Text className="text-slate-400 dark:text-slate-500 text-xs font-bold ml-1.5">
-                {product.totalPurchases || 0} Purchases
-              </Text>
-            </View>
-          </View>
-
-          <View className="flex-row items-center justify-between pt-4 border-t border-gray-50 dark:border-slate-700">
+          <View className="flex-row items-center justify-between pt-4 border-t border-gray-50 dark:border-slate-700 mt-auto">
             <TouchableOpacity
               onPress={async () => {
                 if (isFree) {
@@ -197,7 +206,7 @@ const ProductCard = ({ product: initialProduct }: ProductCardProps) => {
                 }
               }}
               disabled={addingToCart || enrolling}
-              className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} flex-row items-center justify-center px-6 py-3.5 rounded-xl shadow-lg w-48 mr-4`}
+              className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} w-36 flex-row items-center justify-center px-3 py-2.5 rounded-xl shadow-lg mr-3`}
             >
               {addingToCart || enrolling ? (
                 <ActivityIndicator size="small" color="white" />
@@ -211,28 +220,29 @@ const ProductCard = ({ product: initialProduct }: ProductCardProps) => {
                           : "book"
                         : "shopping-cart"
                     }
-                    size={18}
+                    size={16}
                     color="white"
                   />
-                  <Text className="text-white font-black ml-3 text-sm">
+                  <Text className="text-white font-black ml-2 text-[13px]" numberOfLines={1}>
                     {isFree
                       ? product.isPurchased
-                        ? "Go to Library"
-                        : "Enroll Free"
-                      : "Buy Now"}
+                        ? "GO TO LIBRARY"
+                        : "ENROLL FREE"
+                      : "BUY NOW"}
                   </Text>
                 </>
               )}
             </TouchableOpacity>
 
             <Text
-              className={`${isFree ? "text-emerald-500" : "text-slate-800 dark:text-white"} text-2xl font-black`}
+              className={`${isFree ? "text-emerald-500" : "text-slate-800 dark:text-white"} text-lg font-black`}
             >
               {isFree ? "FREE" : `₹${product.price}`}
             </Text>
           </View>
         </View>
       </TouchableOpacity>
+
 
       {/* Result Modal */}
       <Modal

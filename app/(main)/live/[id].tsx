@@ -108,6 +108,7 @@ interface LiveTest {
   isEnrolled: boolean;
   canEnroll: boolean;
   hasAttempted: boolean;
+  language: string | null;
   teacherProfile: TeacherProfile;
   mockTestDetails: MockTestDetails;
 }
@@ -399,10 +400,13 @@ const LiveTestDetails = () => {
                 className="w-full h-full"
                 resizeMode="cover"
               />
-              <View className="absolute top-4 left-4 bg-slate-900/90 px-4 py-1.5 rounded-full shadow-lg">
-                <Text className="text-white font-black text-[10px] uppercase tracking-wider">
-                  Live Test
-                </Text>
+              <View className="absolute top-4 right-4">
+                <View className="bg-red-500 px-3 py-1.5 rounded-full flex-row items-center border border-red-400 shadow-lg">
+                  <View className="w-1.5 h-1.5 rounded-full bg-white mr-1.5" />
+                  <Text className="text-white font-black text-[10px] uppercase tracking-wider">
+                    LIVE
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
@@ -426,10 +430,17 @@ const LiveTestDetails = () => {
 
           {/* Heading (same style language as tests screen) */}
           <View className="px-6">
-            <View className="self-start bg-orange-50 dark:bg-orange-900/30 border border-orange-100 dark:border-orange-800/30 px-4 py-1.5 rounded-full mb-3">
-              <Text className="text-primary text-[11px] font-black uppercase tracking-wider">
-                Live Test Zone
-              </Text>
+            <View className="flex-row items-center mb-4">
+              <View className="bg-orange-50 dark:bg-orange-900/30 border border-orange-100 dark:border-orange-800/30 px-4 py-1.5 rounded-full">
+                <Text className="text-primary text-[11px] font-black uppercase tracking-wider">
+                  {liveTest.examSlug?.replace(/-/g, " ").toUpperCase() || "MOCK TEST"}
+                </Text>
+              </View>
+              <View className="ml-3 bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-100 dark:border-cyan-800/30 px-4 py-1.5 rounded-full">
+                <Text className="text-cyan-600 dark:text-cyan-400 font-black text-[11px] uppercase tracking-wider">
+                  {liveTest.language?.toUpperCase() || "ENGLISH"}
+                </Text>
+              </View>
             </View>
 
             <Text className="text-slate-800 dark:text-white text-5xl font-black leading-tight mb-4">

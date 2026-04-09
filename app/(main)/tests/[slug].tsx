@@ -257,11 +257,11 @@ const TestDetails = () => {
             >
               <Feather name="chevron-left" size={24} color="#FF8A50" />
             </TouchableOpacity>
-            <View className="flex-row items-center gap-x-2.5">
+            <View className="flex-row items-center flex-1 mr-4">
               {/* Exam Badge */}
-              <View className="bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-700 flex-row items-center">
+              <View className="bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-700 flex-row items-center flex-shrink-1">
                 <Feather name="award" size={10} color="#64748b" />
-                <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1.5">
+                <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1.5 flex-shrink-1 leading-4">
                   {test.examName || "Details"}
                 </Text>
               </View>
@@ -607,7 +607,7 @@ const TestDetails = () => {
                 <View className="flex-row items-center mt-1">
                   <MaterialIcons name="verified" size={16} color="#22C55E" />
                   <Text className="text-emerald-600 dark:text-emerald-400 text-xs font-bold ml-1">
-                    verified
+                    Verified
                   </Text>
                 </View>
               )}

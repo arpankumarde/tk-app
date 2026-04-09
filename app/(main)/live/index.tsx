@@ -105,7 +105,7 @@ const LiveTestCard = ({
     <TouchableOpacity
       onPress={() => router.push(`/live/${test.id}` as any)}
       activeOpacity={0.9}
-      className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden mb-8 shadow-xl shadow-slate-200/50 dark:shadow-none border border-gray-100 dark:border-slate-700/50"
+      className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden mb-6 shadow-xl shadow-slate-200/50 dark:shadow-none border border-gray-100 dark:border-slate-700/50"
     >
       <View>
         {/* Thumbnail with floating badges */}
@@ -134,9 +134,9 @@ const LiveTestCard = ({
         </View>
 
         {/* Content Section */}
-        <View className="p-5">
+        <View className="p-4">
           {/* Pills Row at Top of Content */}
-          <View className="flex-row items-center mb-4">
+          <View className="flex-row items-center mb-3">
             <View className="bg-orange-50 dark:bg-orange-950/20 px-3 py-1.5 rounded-full border border-orange-100/50 dark:border-orange-800/40">
               <Text
                 className="text-primary text-[10px] font-black uppercase tracking-widest"
@@ -145,7 +145,7 @@ const LiveTestCard = ({
                 {test.examSlug?.replace(/-/g, " ").toUpperCase() || "MOCK TEST"}
               </Text>
             </View>
-            <View className="ml-3 bg-cyan-50 dark:bg-cyan-950/20 px-3 py-1.5 rounded-full border border-cyan-100/50 dark:border-cyan-800/40">
+            <View className="ml-2.5 bg-cyan-50 dark:bg-cyan-950/20 px-3 py-1.5 rounded-full border border-cyan-100/50 dark:border-cyan-800/40">
               <Text className="text-cyan-600 dark:text-cyan-400 font-black text-[10px] uppercase tracking-widest">
                 {test.language?.toUpperCase() || "ENGLISH"}
               </Text>
@@ -153,14 +153,14 @@ const LiveTestCard = ({
           </View>
 
           <Text
-            className="text-xl font-black text-slate-800 dark:text-white mb-2 leading-7"
+            className="text-[17px] font-extrabold text-slate-800 dark:text-white mb-1.5 leading-6"
             numberOfLines={2}
           >
             {test.title}
           </Text>
 
           {/* Author & Rating Row */}
-          <View className="flex-row items-center justify-between mb-6">
+          <View className="flex-row items-center justify-between mb-4">
             <View className="flex-row items-center flex-1">
               <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium">
                 By:{" "}
@@ -187,8 +187,7 @@ const LiveTestCard = ({
           </View>
 
           {/* Grid Icon Stats (2x2) */}
-          {/* Grid Icon Stats (2x2) */}
-          <View className="flex-row flex-wrap mb-6">
+          <View className="flex-row flex-wrap mb-4">
             <View className="w-1/2 flex-row items-center mb-4 pr-2">
               <Feather
                 name="file-text"
@@ -196,7 +195,7 @@ const LiveTestCard = ({
                 color="#F97316"
                 style={{ top: -1 }}
               />
-              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300 flex-1">
+              <Text className="ml-2 text-xs font-bold text-slate-500 dark:text-slate-400 flex-1">
                 {test.actualQuestionCount} Questions
               </Text>
             </View>
@@ -207,7 +206,7 @@ const LiveTestCard = ({
                 color="#F97316"
                 style={{ top: -1 }}
               />
-              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300 flex-1">
+              <Text className="ml-2 text-xs font-bold text-slate-500 dark:text-slate-400 flex-1">
                 {test.durationMinutes} Minutes
               </Text>
             </View>
@@ -218,7 +217,7 @@ const LiveTestCard = ({
                 color="#F97316"
                 style={{ top: -1 }}
               />
-              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300 flex-1">
+              <Text className="ml-2 text-xs font-bold text-slate-500 dark:text-slate-400 flex-1">
                 {test.subjects}
               </Text>
             </View>
@@ -229,7 +228,7 @@ const LiveTestCard = ({
                 color="#F97316"
                 style={{ top: -1 }}
               />
-              <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300 flex-1">
+              <Text className="ml-2 text-xs font-bold text-slate-500 dark:text-slate-400 flex-1">
                 {test.enrolledCount} Enrolled
               </Text>
             </View>
@@ -237,7 +236,7 @@ const LiveTestCard = ({
 
           {/* Ends In Highlighter */}
           {timeLeft && (
-            <View className="bg-orange-50 dark:bg-orange-950/30 px-5 py-4 rounded-2xl border border-orange-100 dark:border-orange-900/30 flex-row items-center justify-between">
+            <View className="bg-orange-50 dark:bg-orange-950/30 px-4 py-3.5 rounded-xl border border-orange-100 dark:border-orange-900/30 flex-row items-center justify-between">
               <View className="flex-row items-center">
                 <View className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-2" />
                 <Text className="text-orange-600 dark:text-orange-400 font-bold text-sm">
@@ -361,16 +360,16 @@ const LiveTests = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* Hero Text Section */}
-        <View className="px-6 pt-8 pb-6">
-          <View className="self-start bg-orange-100 dark:bg-orange-900/30 px-4 py-1.5 rounded-full mb-4 border border-orange-200 dark:border-orange-800/40">
-            <Text className="text-primary text-[11px] font-black uppercase tracking-widest">
+        <View className="px-6 pt-6 pb-4">
+          <View className="self-start bg-orange-100 dark:bg-orange-900/30 px-3 py-1 rounded-full mb-3 border border-orange-200 dark:border-orange-800/40">
+            <Text className="text-primary text-[10px] font-black uppercase tracking-widest">
               Real-time Exams
             </Text>
           </View>
-          <Text className="text-4xl font-black text-slate-800 dark:text-white leading-[48px]">
+          <Text className="text-3xl font-extrabold text-slate-800 dark:text-white leading-9">
             Live Competitive Tests
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 mt-4 text-lg font-medium leading-8">
+          <Text className="text-slate-500 dark:text-slate-400 mt-2 text-sm font-medium leading-5">
             Experience the thrill of real exams. Compete with thousands of
             students.
           </Text>
@@ -378,12 +377,12 @@ const LiveTests = () => {
 
         {/* Filter Card Container */}
         <View className="px-6">
-          <View className="bg-white dark:bg-slate-800 rounded-[32px] p-6 shadow-sm border border-gray-100 dark:border-slate-800">
+          <View className="bg-white dark:bg-slate-800 rounded-3xl p-4 shadow-sm border border-gray-100 dark:border-slate-800">
             {/* Search Input */}
-            <View className="flex-row items-center bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-700 rounded-2xl px-4 h-14 mb-4">
+            <View className="flex-row items-center bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-700 rounded-2xl px-4 h-12 mb-3">
               <Feather
                 name="search"
-                size={20}
+                size={18}
                 color={colorScheme === "dark" ? "#64748b" : "#94a3b8"}
               />
               <TextInput
@@ -393,38 +392,57 @@ const LiveTests = () => {
                 placeholderTextColor={
                   colorScheme === "dark" ? "#64748b" : "#94a3b8"
                 }
-                className="flex-1 ml-3 text-slate-900 dark:text-white text-base font-semibold"
+                className="flex-1 ml-3 text-slate-900 dark:text-white text-sm font-semibold"
               />
             </View>
 
-            {/* Exam Selector */}
-            <TouchableOpacity
-              onPress={() => setShowExamModal(true)}
-              className="flex-row items-center justify-between bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-700 rounded-2xl px-5 h-14 mb-4"
-            >
-              <View className="flex-1 mr-4">
-                <Text
-                  numberOfLines={1}
-                  className={`text-base font-bold ${selectedExam ? "text-slate-800 dark:text-white" : "text-slate-400 dark:text-slate-500"}`}
-                >
-                  {selectedExam
-                    ? selectedExam.fullName || selectedExam.examName
-                    : "Select Exam Category"}
-                </Text>
-              </View>
-              <Feather name="chevron-down" size={18} color="#FF8A50" />
-            </TouchableOpacity>
+            <View className="flex-row items-center gap-3">
+              {/* Exam Selector */}
+              <TouchableOpacity
+                onPress={() => setShowExamModal(true)}
+                className="flex-[1.8] flex-row items-center justify-between bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-700 rounded-2xl px-4 h-12"
+              >
+                <View className="flex-row items-center flex-1 mr-2">
+                  <Feather
+                    name="grid"
+                    size={14}
+                    color="#FF8A50"
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text
+                    numberOfLines={1}
+                    className={`text-[13px] font-bold flex-1 ${selectedExam ? "text-slate-800 dark:text-white" : "text-slate-400 dark:text-slate-500"}`}
+                  >
+                    {selectedExam
+                      ? selectedExam.fullName || selectedExam.examName
+                      : "Category"}
+                  </Text>
+                </View>
+                <Feather name="chevron-down" size={14} color="#FF8A50" />
+              </TouchableOpacity>
 
-            {/* Status Filter */}
-            <TouchableOpacity
-              onPress={() => setShowStatusModal(true)}
-              className="flex-row items-center justify-between bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-700 rounded-2xl px-5 h-14"
-            >
-              <Text className="text-base font-bold text-slate-800 dark:text-white">
-                {statusFilter}
-              </Text>
-              <Feather name="chevron-down" size={18} color="#FF8A50" />
-            </TouchableOpacity>
+              {/* Status Filter */}
+              <TouchableOpacity
+                onPress={() => setShowStatusModal(true)}
+                className="flex-1 flex-row items-center justify-between bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-700 rounded-2xl px-4 h-12"
+              >
+                <View className="flex-row items-center flex-1 mr-2">
+                  <Feather
+                    name="filter"
+                    size={14}
+                    color="#FF8A50"
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text
+                    numberOfLines={1}
+                    className="text-[13px] font-bold text-slate-800 dark:text-white flex-1"
+                  >
+                    {statusFilter}
+                  </Text>
+                </View>
+                <Feather name="chevron-down" size={14} color="#FF8A50" />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -98,99 +98,78 @@ const shouldUseWebView = (html: string) => {
   );
 };
 
+// Pure CSS-only HTML template — NO scripts, NO event listeners.
+// Height measurement is done via onLoadEnd + injectJavaScript (see HtmlContent).
 const getHtmlDocument = (html: string, isDark: boolean) => {
   const textColor = isDark ? "#e2e8f0" : "#1e293b";
   const mutedColor = isDark ? "#94a3b8" : "#475569";
-  const bg = "transparent";
-
   const cleanedHtml = sanitizeHtml(html);
 
-  return `
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <style>
-          body {
-            margin: 0;
-            padding: 0;
-            color: ${textColor};
-            background: ${bg};
-            font-family: -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;
-            font-size: 16px;
-            line-height: 1.5;
-          }
-          p { margin: 0 0 10px 0; color: ${textColor}; }
-          img { max-width: 100%; height: auto; border-radius: 8px; }
-          span { color: ${textColor}; }
-          .muted { color: ${mutedColor}; }
-        </style>
-      </head>
-      <body>
-        ${cleanedHtml}
-        <script>
-          function sendHeight() {
-            var body = document.body;
-            var html = document.documentElement;
-            var height = Math.max(
-              body ? body.scrollHeight : 0,
-              body ? body.offsetHeight : 0,
-              html ? html.clientHeight : 0,
-              html ? html.scrollHeight : 0,
-              html ? html.offsetHeight : 0
-            );
-
-            window.ReactNativeWebView.postMessage(String(height));
-          }
-
-          function watchImages() {
-            var images = document.querySelectorAll('img');
-            images.forEach(function (img) {
-              if (!img.complete) {
-                img.addEventListener('load', sendHeight);
-                img.addEventListener('error', sendHeight);
-              }
-            });
-          }
-
-          document.addEventListener('DOMContentLoaded', function () {
-            sendHeight();
-            watchImages();
-          });
-
-          window.addEventListener('load', function () {
-            sendHeight();
-            setTimeout(sendHeight, 120);
-            setTimeout(sendHeight, 300);
-            setTimeout(sendHeight, 700);
-          });
-
-          var observer = new MutationObserver(function () {
-            sendHeight();
-          });
-
-          observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-
-          sendHeight();
-        </script>
-      </body>
-    </html>
-  `;
+  return `<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        background: transparent;
+        color: ${textColor};
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+      }
+      p { margin-bottom: 8px; color: ${textColor}; }
+      ol, ul { padding-left: 20px; margin-bottom: 8px; }
+      li { margin-bottom: 4px; color: ${textColor}; }
+      img { max-width: 100%; height: auto; border-radius: 8px; display: block; }
+      span, strong, em { color: ${textColor}; }
+      .muted { color: ${mutedColor}; }
+      table { width: 100%; border-collapse: collapse; }
+      td, th { border: 1px solid #475569; padding: 6px; color: ${textColor}; }
+    </style>
+  </head>
+  <body>${cleanedHtml}</body>
+</html>`;
 };
+
+// Script injected via onLoadEnd — runs exactly once after full page load.
+// Using body.scrollHeight ONLY (never html.* properties which equal viewport size).
+const MEASURE_SCRIPT = `
+(function() {
+  var h = document.body.scrollHeight;
+  if (h > 0) { window.ReactNativeWebView.postMessage(String(h)); }
+})(); true;`;
 
 const HtmlContent = ({ html, isDark }: { html: string; isDark: boolean }) => {
   const [contentHeight, setContentHeight] = useState(40);
+  const webViewRef = useRef<any>(null);
+  // Ref-based lock: synchronous mutation, never stale in closures.
+  const lockedRef = useRef(false);
+
+  useEffect(() => {
+    setContentHeight(40);
+    lockedRef.current = false;
+  }, [html]);
 
   return (
     <WebView
+      ref={webViewRef}
       originWhitelist={["*"]}
       source={{ html: getHtmlDocument(html, isDark) }}
       style={{ height: contentHeight, backgroundColor: "transparent" }}
       scrollEnabled={false}
       showsVerticalScrollIndicator={false}
+      // onLoadEnd fires once when the page (including images) finishes loading.
+      // We then inject the measurement script programmatically — exactly one call.
+      onLoadEnd={() => {
+        webViewRef.current?.injectJavaScript(MEASURE_SCRIPT);
+      }}
       onMessage={(event) => {
-        const nextHeight = Number(event.nativeEvent.data);
-        if (!Number.isNaN(nextHeight) && nextHeight > 0) {
-          setContentHeight(nextHeight + 8);
+        if (lockedRef.current) return;
+        const reported = Number(event.nativeEvent.data);
+        if (!Number.isNaN(reported) && reported > 0) {
+          setContentHeight(reported + 4);
+          lockedRef.current = true;
         }
       }}
     />
@@ -740,11 +719,13 @@ const TestAttemptScreen = () => {
   const renderHtmlOrText = (
     value: string | null | undefined,
     className: string,
+    key?: string,
   ) => {
     if (!value) return null;
 
     if (hasHtmlTags(value) && shouldUseWebView(value)) {
-      return <HtmlContent html={value} isDark={isDark} />;
+      // key forces a remount on question change so contentHeight resets cleanly.
+      return <HtmlContent key={key} html={value} isDark={isDark} />;
     }
 
     const displayValue = hasHtmlTags(value) ? htmlToPlainText(value) : value;
@@ -957,12 +938,14 @@ const TestAttemptScreen = () => {
                 ? renderHtmlOrText(
                     currentQuestion.paragraphText,
                     "text-slate-700 dark:text-slate-200 text-base font-semibold mb-4",
+                    `para-${currentQuestion.id}`,
                   )
                 : null}
 
               {renderHtmlOrText(
                 currentQuestion.questionText,
                 "text-slate-800 dark:text-white text-2xl font-black leading-9",
+                `q-${currentQuestion.id}`,
               )}
 
               {currentQuestion.subjectName && (
@@ -1065,6 +1048,7 @@ const TestAttemptScreen = () => {
                                   ? "text-primary"
                                   : "text-slate-700 dark:text-slate-200"
                               }`,
+                              `opt-${currentQuestion.id}-${optionIndex}`,
                             )}
                           </View>
                         </View>
