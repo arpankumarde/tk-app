@@ -358,7 +358,10 @@ export default function ProfileScreen() {
               <Feather name="chevron-right" size={20} color="#CBD5E1" />
             </TouchableOpacity>
 
-            <TouchableOpacity className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800">
+            <TouchableOpacity
+              onPress={() => router.push("/user/profile")}
+              className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800"
+            >
               <View className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-700/20 items-center justify-center mr-4">
                 <Feather name="settings" size={22} color="#6B7280" />
               </View>
