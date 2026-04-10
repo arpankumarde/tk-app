@@ -180,7 +180,8 @@ const TestAttemptScreen = () => {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const { token } = useAuth();
-  const { attemptId, testItemId, startedAt } = useLocalSearchParams();
+  const { attemptId, testItemId, startedAt, durationMinutes, mode } =
+    useLocalSearchParams();
   const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(true);
@@ -197,9 +198,7 @@ const TestAttemptScreen = () => {
     useState(false);
   const [isQuestionNavigatorCollapsed, setIsQuestionNavigatorCollapsed] =
     useState(false);
-  const [remainingSeconds, setRemainingSeconds] = useState(
-    DEFAULT_DURATION_MINUTES * 60,
-  );
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
 
   const attemptNumericId = useMemo(() => {
     const raw = Array.isArray(attemptId) ? attemptId[0] : attemptId;
@@ -236,6 +235,14 @@ const TestAttemptScreen = () => {
       hour12: true,
     });
   }, [startedAtRaw]);
+
+  const testDurationMinutes = useMemo(() => {
+    const raw = Array.isArray(durationMinutes)
+      ? durationMinutes[0]
+      : durationMinutes;
+    const parsed = Number(raw);
+    return parsed > 0 ? parsed : DEFAULT_DURATION_MINUTES;
+  }, [durationMinutes]);
 
   const attemptStartTime = useMemo(() => {
     if (!startedAtRaw) {
@@ -294,8 +301,6 @@ const TestAttemptScreen = () => {
         };
       });
 
-      console.log("[TestAttempt] Questions:", transformedQuestions);
-
       setQuestions(transformedQuestions);
       setCalculatorEnabled(Boolean(payload.calculatorEnabled));
       setCurrentQuestionIndex(0);
@@ -314,7 +319,7 @@ const TestAttemptScreen = () => {
 
   useEffect(() => {
     const initialRemaining =
-      DEFAULT_DURATION_MINUTES * 60 -
+      testDurationMinutes * 60 -
       Math.floor((Date.now() - attemptStartTime) / 1000);
     setRemainingSeconds(Math.max(0, initialRemaining));
 
@@ -330,7 +335,7 @@ const TestAttemptScreen = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [attemptStartTime]);
+  }, [attemptStartTime, testDurationMinutes]);
 
   const timerLabel = useMemo(() => {
     const minutes = Math.floor(remainingSeconds / 60)
@@ -625,15 +630,25 @@ const TestAttemptScreen = () => {
 
       const latest = await fetchLatestResults();
 
-      console.log("[TestAttempt] Submit payload:", payload);
-      console.log("[TestAttempt] Submit result:", submitResult);
-      console.log("[TestAttempt] Latest results:", latest);
+      // console.log("[TestAttempt] Submit payload:", payload);
+      // console.log("[TestAttempt] Submit result:", submitResult);
+      // console.log("[TestAttempt] Latest results:", latest);
 
       setShowSubmitConfirm(false);
-      router.replace({
-        pathname: "/user/portal/test/results",
-        params: { testItemId: String(testItemNumericId) },
-      });
+      if (mode === "live") {
+        router.replace({
+          pathname: "/user/live-portal/results",
+          params: {
+            testItemId: String(testItemNumericId),
+            submitResult: JSON.stringify(submitResult),
+          },
+        });
+      } else {
+        router.replace({
+          pathname: "/user/portal/test/results",
+          params: { testItemId: String(testItemNumericId) },
+        });
+      }
     } catch (err: any) {
       Alert.alert("Error", err.message || "Unable to submit test.");
     } finally {
@@ -643,6 +658,7 @@ const TestAttemptScreen = () => {
     attemptNumericId,
     buildSubmitAnswers,
     fetchLatestResults,
+    mode,
     router,
     testItemNumericId,
     token,
@@ -1057,15 +1073,6 @@ const TestAttemptScreen = () => {
                   })}
                 </>
               )}
-            </View>
-
-            <View className="mt-8 pt-6 border-t border-gray-100 dark:border-slate-800">
-              <Text className="text-slate-400 dark:text-slate-500 text-xs font-semibold mb-2">
-                Started at: {startedAtDisplay}
-              </Text>
-              <Text className="text-slate-400 dark:text-slate-500 text-xs font-semibold">
-                Calculator: {calculatorEnabled ? "Enabled" : "Disabled"}
-              </Text>
             </View>
           </View>
         </View>

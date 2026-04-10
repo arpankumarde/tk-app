@@ -8,15 +8,13 @@ import {
   ActivityIndicator,
   Modal,
   Pressable,
-  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather, MaterialIcons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import Header from "@/components/Header";
 import BottomTabs from "@/components/BottomTabs";
+import LiveTestCard from "@/components/LiveTestCard";
 import { useColorScheme } from "nativewind";
-import { router } from "expo-router";
-import { useCountdown } from "@/hooks/useCountdown";
 
 export interface ExamData {
   categories: Category[];
@@ -81,178 +79,6 @@ export interface LiveTestResponse {
 }
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
-
-const LiveTestCard = ({
-  test,
-  colorScheme,
-}: {
-  test: LiveTest;
-  colorScheme: "light" | "dark" | undefined;
-}) => {
-  const enrollmentProgress = Math.min(
-    (test.enrolledCount / test.maxSeats) * 100,
-    100,
-  );
-
-  const isLive =
-    test.status?.toLowerCase().includes("live") ||
-    (new Date(test.startTime) <= new Date() &&
-      new Date(test.endTime) >= new Date());
-
-  const timeLeft = useCountdown(isLive ? test.endTime : null);
-
-  return (
-    <TouchableOpacity
-      onPress={() => router.push(`/live/${test.id}` as any)}
-      activeOpacity={0.9}
-      className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden mb-6 shadow-xl shadow-slate-200/50 dark:shadow-none border border-gray-100 dark:border-slate-700/50"
-    >
-      <View>
-        {/* Thumbnail with floating badges */}
-        <View className="relative w-full aspect-video bg-slate-100 dark:bg-slate-900">
-          <Image
-            source={{
-              uri:
-                test.thumbnailUrl ||
-                "https://ik.imagekit.io/testkart/placeholders/live.png",
-            }}
-            className="w-full h-full"
-            resizeMode="cover"
-          />
-
-          {/* Floating LIVE Badge */}
-          {isLive && (
-            <View className="absolute top-4 right-4">
-              <View className="bg-red-500 px-3 py-1 rounded-full flex-row items-center border border-red-400 shadow-lg">
-                <View className="w-1.5 h-1.5 rounded-full bg-white mr-1.5" />
-                <Text className="text-white font-black text-[10px] uppercase tracking-wider">
-                  LIVE
-                </Text>
-              </View>
-            </View>
-          )}
-        </View>
-
-        {/* Content Section */}
-        <View className="p-4">
-          {/* Pills Row at Top of Content */}
-          <View className="flex-row items-center mb-3">
-            <View className="bg-orange-50 dark:bg-orange-950/20 px-3 py-1.5 rounded-full border border-orange-100/50 dark:border-orange-800/40">
-              <Text
-                className="text-primary text-[10px] font-black uppercase tracking-widest"
-                numberOfLines={1}
-              >
-                {test.examSlug?.replace(/-/g, " ").toUpperCase() || "MOCK TEST"}
-              </Text>
-            </View>
-            <View className="ml-2.5 bg-cyan-50 dark:bg-cyan-950/20 px-3 py-1.5 rounded-full border border-cyan-100/50 dark:border-cyan-800/40">
-              <Text className="text-cyan-600 dark:text-cyan-400 font-black text-[10px] uppercase tracking-widest">
-                {test.language?.toUpperCase() || "ENGLISH"}
-              </Text>
-            </View>
-          </View>
-
-          <Text
-            className="text-[17px] font-extrabold text-slate-800 dark:text-white mb-1.5 leading-6"
-            numberOfLines={2}
-          >
-            {test.title}
-          </Text>
-
-          {/* Author & Rating Row */}
-          <View className="flex-row items-center justify-between mb-4">
-            <View className="flex-row items-center flex-1">
-              <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium">
-                By:{" "}
-                <Text className="text-slate-600 dark:text-slate-300 font-bold">
-                  {test.teacherName}
-                </Text>
-              </Text>
-              {test.teacherIsVerified && (
-                <MaterialIcons
-                  name="verified"
-                  size={14}
-                  color="#22C55E"
-                  style={{ marginLeft: 4 }}
-                />
-              )}
-            </View>
-
-            <View className="flex-row items-center bg-orange-50 dark:bg-orange-950/20 px-2.5 py-1 rounded-lg">
-              <MaterialIcons name="star" size={12} color="#F97316" />
-              <Text className="ml-1 text-orange-500 font-black text-xs">
-                5.0
-              </Text>
-            </View>
-          </View>
-
-          {/* Grid Icon Stats (2x2) */}
-          <View className="flex-row flex-wrap mb-4">
-            <View className="w-1/2 flex-row items-center mb-4 pr-2">
-              <Feather
-                name="file-text"
-                size={14}
-                color="#F97316"
-                style={{ top: -1 }}
-              />
-              <Text className="ml-2 text-xs font-bold text-slate-500 dark:text-slate-400 flex-1">
-                {test.actualQuestionCount} Questions
-              </Text>
-            </View>
-            <View className="w-1/2 flex-row items-center mb-4">
-              <Feather
-                name="clock"
-                size={14}
-                color="#F97316"
-                style={{ top: -1 }}
-              />
-              <Text className="ml-2 text-xs font-bold text-slate-500 dark:text-slate-400 flex-1">
-                {test.durationMinutes} Minutes
-              </Text>
-            </View>
-            <View className="w-1/2 flex-row items-center pr-2">
-              <Feather
-                name="book-open"
-                size={14}
-                color="#F97316"
-                style={{ top: -1 }}
-              />
-              <Text className="ml-2 text-xs font-bold text-slate-500 dark:text-slate-400 flex-1">
-                {test.subjects}
-              </Text>
-            </View>
-            <View className="w-1/2 flex-row items-center">
-              <Feather
-                name="users"
-                size={14}
-                color="#F97316"
-                style={{ top: -1 }}
-              />
-              <Text className="ml-2 text-xs font-bold text-slate-500 dark:text-slate-400 flex-1">
-                {test.enrolledCount} Enrolled
-              </Text>
-            </View>
-          </View>
-
-          {/* Ends In Highlighter */}
-          {timeLeft && (
-            <View className="bg-orange-50 dark:bg-orange-950/30 px-4 py-3.5 rounded-xl border border-orange-100 dark:border-orange-900/30 flex-row items-center justify-between">
-              <View className="flex-row items-center">
-                <View className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-2" />
-                <Text className="text-orange-600 dark:text-orange-400 font-bold text-sm">
-                  Ends In:
-                </Text>
-              </View>
-              <Text className="text-orange-500 dark:text-orange-300 font-black text-sm">
-                {timeLeft}
-              </Text>
-            </View>
-          )}
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-};
 
 const LiveTests = () => {
   const { colorScheme } = useColorScheme();
@@ -331,7 +157,6 @@ const LiveTests = () => {
       const data = await response.json();
       const payload = data.json || data;
       const testsData = payload.tests || [];
-
       setTests(testsData);
     } catch (err) {
       console.log("Fetch Tests Error:", err);

@@ -19,6 +19,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useCountdown } from "@/hooks/useCountdown";
 import Header from "@/components/Header";
+import BlinkingDot from "@/components/BlinkingDot";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -174,7 +175,13 @@ const InfoRow = ({
   </View>
 );
 
-const BulletItem = ({ text, children }: { text?: string; children?: React.ReactNode }) => (
+const BulletItem = ({
+  text,
+  children,
+}: {
+  text?: string;
+  children?: React.ReactNode;
+}) => (
   <View className="flex-row mb-2 last:mb-0">
     <Text className="text-orange-400 mr-2 mt-0.5 font-black">•</Text>
     <Text className="text-slate-600 dark:text-slate-300 text-sm leading-5 flex-1">
@@ -207,7 +214,40 @@ const LiveTestDetails = () => {
     new Date(liveTest.startTime) <= new Date() &&
     new Date(liveTest.endTime) >= new Date();
 
-  const timeLeft = useCountdown(isLive ? liveTest.endTime : null);
+  const now = Date.now();
+  const hasDeadline =
+    liveTest?.registrationDeadline &&
+    new Date(liveTest.registrationDeadline).getTime() > now;
+  const hasNotStarted =
+    liveTest?.startTime && new Date(liveTest.startTime).getTime() > now;
+
+  const isEnrolled = liveTest?.isEnrolled;
+
+  const countdownTarget = isLive
+    ? liveTest.endTime
+    : isEnrolled
+      ? hasNotStarted
+        ? liveTest.startTime
+        : liveTest.endTime
+      : hasDeadline
+        ? liveTest.registrationDeadline
+        : hasNotStarted
+          ? liveTest.startTime
+          : null;
+
+  const countdownLabel = isLive
+    ? "Test Ends In"
+    : isEnrolled
+      ? hasNotStarted
+        ? "Test Starts In"
+        : "Test Ends In"
+      : hasDeadline
+        ? "Registration Closes In"
+        : hasNotStarted
+          ? "Test Starts In"
+          : "";
+
+  const timeLeft = useCountdown(countdownTarget);
 
   useEffect(() => {
     const fetchLiveTestDetails = async () => {
@@ -215,10 +255,16 @@ const LiveTestDetails = () => {
         setLoading(true);
         const response = await fetch(
           `${BASE_URL}/_api/live-tests/details?id=${id}`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          },
         );
         const data = await response.json();
         const payload = data.json || data;
-        // console.log(payload);
+        // console.log(
+        //   "[LiveTestDetails] API response:",
+        //   JSON.stringify(payload, null, 2),
+        // );
         setLiveTest(payload);
       } catch (error: any) {
         console.error("Error fetching live test details:", error);
@@ -228,7 +274,7 @@ const LiveTestDetails = () => {
     };
 
     if (id) fetchLiveTestDetails();
-  }, [id]);
+  }, [id, token]);
 
   useEffect(() => {
     // if (activeTab !== "leaderboard" || !liveTest) return;
@@ -272,6 +318,10 @@ const LiveTestDetails = () => {
 
       const data = await res.json();
       const payload = data.json || data;
+      console.log("[LiveTestDetails] Enroll response:", {
+        status: res.status,
+        payload,
+      });
 
       if (res.ok) {
         setLiveTest((prev) => (prev ? { ...prev, isEnrolled: true } : null));
@@ -365,8 +415,8 @@ const LiveTestDetails = () => {
       : 0;
 
   const duration =
-    liveTest.mockTestDurationMinutes ||
     liveTest.mockTestDetails?.durationMinutes ||
+    liveTest.mockTestDurationMinutes ||
     60;
 
   const totalQuestions = liveTest.mockTestDetails?.totalQuestions || 50;
@@ -400,13 +450,27 @@ const LiveTestDetails = () => {
                 className="w-full h-full"
                 resizeMode="cover"
               />
-              <View className="absolute top-4 right-4">
-                <View className="bg-red-500 px-3 py-1.5 rounded-full flex-row items-center border border-red-400 shadow-lg">
-                  <View className="w-1.5 h-1.5 rounded-full bg-white mr-1.5" />
-                  <Text className="text-white font-black text-[10px] uppercase tracking-wider">
-                    LIVE
-                  </Text>
-                </View>
+              <View className="absolute top-4 left-4">
+                {isLive ? (
+                  <View className="bg-red-500 px-3 py-1.5 rounded-full flex-row items-center border border-red-400 shadow-lg">
+                    <BlinkingDot />
+                    <Text className="text-white font-black text-[10px] uppercase tracking-wider">
+                      LIVE
+                    </Text>
+                  </View>
+                ) : (
+                  <View className="bg-blue-500 px-3 py-1.5 rounded-full flex-row items-center border border-blue-400 shadow-lg">
+                    <Feather
+                      name="clock"
+                      size={10}
+                      color="white"
+                      style={{ marginRight: 4 }}
+                    />
+                    <Text className="text-white font-black text-[10px] uppercase tracking-wider">
+                      UPCOMING
+                    </Text>
+                  </View>
+                )}
               </View>
             </View>
           </View>
@@ -418,7 +482,7 @@ const LiveTestDetails = () => {
                 <View className="flex-row items-center">
                   <View className="w-2 h-2 rounded-full bg-orange-500 mr-2.5 animate-pulse" />
                   <Text className="text-orange-600 dark:text-orange-400 font-black text-sm uppercase tracking-wider">
-                    Test Ends In:
+                    {countdownLabel}:
                   </Text>
                 </View>
                 <Text className="text-orange-500 dark:text-orange-300 font-black text-lg tabular-nums">
@@ -433,7 +497,8 @@ const LiveTestDetails = () => {
             <View className="flex-row items-center mb-4">
               <View className="bg-orange-50 dark:bg-orange-900/30 border border-orange-100 dark:border-orange-800/30 px-4 py-1.5 rounded-full">
                 <Text className="text-primary text-[11px] font-black uppercase tracking-wider">
-                  {liveTest.examSlug?.replace(/-/g, " ").toUpperCase() || "MOCK TEST"}
+                  {liveTest.examSlug?.replace(/-/g, " ").toUpperCase() ||
+                    "MOCK TEST"}
                 </Text>
               </View>
               <View className="ml-3 bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-100 dark:border-cyan-800/30 px-4 py-1.5 rounded-full">
@@ -524,24 +589,26 @@ const LiveTestDetails = () => {
           {/* ── Prize Pool ── */}
           {liveTest.hasPrizes && (
             <View className="mx-5 mb-5 rounded-[24px] overflow-hidden">
-              <View
-                style={{ backgroundColor: "#FF6B35" }}
-                className="px-5 pt-5 pb-6"
-              >
+              <View className="px-5 pt-5 pb-6 bg-[#FF6B35]">
                 <Text className="text-white/80 text-xs font-black uppercase tracking-widest mb-1 text-center">
                   WIN UP TO
                 </Text>
-                <Text className="text-white/80 text-xs text-center mb-5">
-                  Total Prize Pool:{" "}
-                  <Text className="font-black text-white text-base">
-                    ₹{liveTest.totalPrizePool}
-                  </Text>
+                <Text className="font-black text-white text-4xl text-center mb-2">
+                  ₹{liveTest.firstPrize}
                 </Text>
+                <View className="self-center bg-black/20 px-4 py-1.5 rounded-full mb-5">
+                  <Text className="text-white/90 text-xs font-bold text-center">
+                    Total Prize Pool:{" "}
+                    <Text className="font-black text-white">
+                      ₹{liveTest.totalPrizePool}
+                    </Text>
+                  </Text>
+                </View>
 
                 <View className="flex-row justify-center items-end gap-2">
                   {/* 1st Place */}
                   <View className="flex-1 items-center">
-                    <View className="bg-white/25 rounded-2xl px-2 py-3 items-center w-full border border-white/30">
+                    <View className="bg-white/30 rounded-2xl px-2 py-3 items-center w-full border border-white/30">
                       <Text className="text-3xl mb-1">🏆</Text>
                       <Text className="text-white/80 text-[9px] font-black uppercase tracking-wide">
                         1st Place
@@ -554,7 +621,7 @@ const LiveTestDetails = () => {
 
                   {/* 2nd Place */}
                   <View className="flex-1 items-center">
-                    <View className="bg-white/15 rounded-2xl px-2 py-2.5 items-center w-full">
+                    <View className="bg-white/20 rounded-2xl px-2 py-2.5 items-center w-full">
                       <Text className="text-2xl mb-1">🥈</Text>
                       <Text className="text-white/70 text-[9px] font-black uppercase tracking-wide">
                         2nd Place
@@ -603,7 +670,7 @@ const LiveTestDetails = () => {
             </View>
           </View>
 
-          {/* ── Enroll Button ── */}
+          {/* ── Action Button ── */}
           <View className="px-5 mb-6">
             {isTestEnded && (
               <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-2xl px-4 py-3 mb-3">
@@ -612,57 +679,99 @@ const LiveTestDetails = () => {
                 </Text>
               </View>
             )}
-            <TouchableOpacity
-              onPress={async () => {
-                if (liveTest.price === 0) {
-                  await handleFreeEnroll();
-                } else {
-                  const result = await addToCart(liveTest.id, "live");
-                  if (result.success) {
-                    router.push("/user/cart");
-                  }
+            {liveTest.hasAttempted ? (
+              <TouchableOpacity
+                disabled
+                className="h-14 w-full rounded-2xl flex-row items-center justify-center shadow-md bg-slate-400 dark:bg-slate-600"
+              >
+                <Feather name="check-circle" size={18} color="white" />
+                <Text className="text-white text-lg font-black ml-2.5">
+                  Already Attempted
+                </Text>
+              </TouchableOpacity>
+            ) : liveTest.isEnrolled &&
+              (!liveTest.startTime ||
+                new Date(liveTest.startTime) <= new Date()) &&
+              !isTestEnded ? (
+              <TouchableOpacity
+                onPress={() =>
+                  router.push(`/user/live-portal/${liveTest.id}` as any)
                 }
-              }}
-              disabled={
-                isTestEnded || adding || enrolling || liveTest.isEnrolled
-              }
-              className={`h-14 w-full rounded-2xl flex-row items-center justify-center shadow-md ${
-                isTestEnded
-                  ? "bg-slate-300 dark:bg-slate-700"
-                  : liveTest.isEnrolled
-                    ? "bg-emerald-500 shadow-emerald-500/30"
-                    : liveTest.price === 0
-                      ? "bg-emerald-500 shadow-emerald-500/20"
-                      : "bg-primary shadow-orange-500/20"
-              }`}
-            >
-              {adding || enrolling ? (
-                <ActivityIndicator size="small" color="white" />
-              ) : (
-                <>
-                  <Feather
-                    name={
-                      isTestEnded
-                        ? "x-circle"
-                        : liveTest.isEnrolled
-                          ? "check-circle"
-                          : "zap"
+                className="h-14 w-full rounded-2xl flex-row items-center justify-center shadow-md bg-emerald-500 shadow-emerald-500/30"
+              >
+                <Feather name="play-circle" size={18} color="white" />
+                <Text className="text-white text-lg font-black ml-2.5">
+                  Start Test
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                onPress={async () => {
+                  if (liveTest.price === 0) {
+                    await handleFreeEnroll();
+                  } else {
+                    const result = await addToCart(liveTest.id, "live");
+                    console.log(
+                      "[LiveTestDetails] Add to cart result:",
+                      result,
+                    );
+                    if (result.success) {
+                      router.push("/user/cart");
                     }
-                    size={18}
-                    color="white"
-                  />
-                  <Text className="text-white text-lg font-black ml-2.5">
-                    {isTestEnded
-                      ? "Enrollment Closed"
-                      : liveTest.isEnrolled
-                        ? "Already Enrolled"
-                        : liveTest.price === 0
-                          ? "Enroll for Free"
-                          : `Enroll for ₹${liveTest.price}`}
-                  </Text>
-                </>
-              )}
-            </TouchableOpacity>
+                  }
+                }}
+                disabled={
+                  isTestEnded ||
+                  adding ||
+                  enrolling ||
+                  liveTest.isEnrolled ||
+                  liveTest.enrolledCount >= liveTest.maxSeats
+                }
+                className={`h-14 w-full rounded-2xl flex-row items-center justify-center shadow-md ${
+                  isTestEnded ||
+                  (!liveTest.isEnrolled &&
+                    liveTest.enrolledCount >= liveTest.maxSeats)
+                    ? "bg-slate-300 dark:bg-slate-700"
+                    : liveTest.isEnrolled
+                      ? "bg-emerald-500 shadow-emerald-500/30"
+                      : liveTest.price === 0
+                        ? "bg-emerald-500 shadow-emerald-500/20"
+                        : "bg-primary shadow-orange-500/20"
+                }`}
+              >
+                {adding || enrolling ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <>
+                    <Feather
+                      name={
+                        isTestEnded ||
+                        (!liveTest.isEnrolled &&
+                          liveTest.enrolledCount >= liveTest.maxSeats)
+                          ? "x-circle"
+                          : liveTest.isEnrolled
+                            ? "check-circle"
+                            : "zap"
+                      }
+                      size={18}
+                      color="white"
+                    />
+                    <Text className="text-white text-lg font-black ml-2.5">
+                      {isTestEnded
+                        ? "Enrollment Closed"
+                        : !liveTest.isEnrolled &&
+                            liveTest.enrolledCount >= liveTest.maxSeats
+                          ? "Registration Closed"
+                          : liveTest.isEnrolled
+                            ? "Already Enrolled"
+                            : liveTest.price === 0
+                              ? "Enroll for Free"
+                              : `Enroll for ₹${liveTest.price}`}
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* ── Tabs ── */}
@@ -814,7 +923,7 @@ const LiveTestDetails = () => {
                     className="text-orange-500 font-bold"
                     onPress={() => Linking.openURL("https://testkart.in/terms")}
                   >
-                    TestKart's Terms of Service
+                    TestKart&apos;s Terms of Service
                   </Text>
                   .
                 </BulletItem>
@@ -874,12 +983,12 @@ const LiveTestDetails = () => {
           ) : (
             <View className="px-5 min-h-[200px]">
               {leaderboardLoading ? (
-                <View className="py-16 items-center">
+                <View className="py-36 items-center">
                   <ActivityIndicator size="large" color="#FF8A50" />
                 </View>
               ) : !leaderboardData ||
                 leaderboardData.leaderboard.length === 0 ? (
-                <View className="py-12 items-center justify-center">
+                <View className="py-24 items-center justify-center">
                   <View className="w-20 h-20 bg-slate-50 dark:bg-slate-800/50 rounded-[30px] items-center justify-center mb-6">
                     <Feather name="bar-chart-2" size={32} color="#94a3b8" />
                   </View>
@@ -1079,81 +1188,98 @@ const LiveTestDetails = () => {
             setEnrollResult((prev) => ({ ...prev, visible: false }))
           }
         >
-          <View className="flex-1 bg-black/60 items-center justify-center px-6">
-            <View className="bg-white dark:bg-slate-900 w-full rounded-[48px] p-8 items-center shadow-2xl relative overflow-hidden">
-              {enrollResult.success && (
-                <View className="absolute top-0 left-0 w-full h-2 bg-emerald-500" />
-              )}
-
-              {/* Decorative background circle */}
-              <View
-                className={`absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-5 ${
-                  enrollResult.success ? "bg-emerald-500" : "bg-red-500"
-                }`}
-              />
-
-              <View
-                className={`w-24 h-24 rounded-full items-center justify-center mb-8 shadow-sm ${
-                  enrollResult.success
-                    ? "bg-emerald-50 dark:bg-emerald-900/10"
-                    : "bg-red-50 dark:bg-red-900/10"
-                }`}
-              >
-                <View
-                  className={`w-18 h-18 rounded-full items-center justify-center ${
-                    enrollResult.success ? "bg-emerald-100/50" : "bg-red-100/50"
-                  }`}
-                >
-                  <Feather
-                    name={
-                      enrollResult.success ? "check-circle" : "alert-circle"
-                    }
-                    size={48}
-                    color={enrollResult.success ? "#10B981" : "#EF4444"}
-                  />
-                </View>
-              </View>
-
-              <Text className="text-3xl font-black text-slate-800 dark:text-white mb-3 text-center tracking-tight">
-                {enrollResult.success ? "Congratulations!" : "Oops!"}
-              </Text>
-
-              <Text className="text-slate-500 dark:text-slate-400 text-base text-center mb-10 leading-7 px-2 font-medium">
-                {enrollResult.message ||
-                  (enrollResult.success
-                    ? "You have been successfully enrolled in this live test."
-                    : "We couldn't process your enrollment right now.")}
-              </Text>
-
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() =>
-                  setEnrollResult((prev) => ({ ...prev, visible: false }))
-                }
-                className={`w-full h-16 rounded-[24px] items-center justify-center shadow-lg ${
-                  enrollResult.success
-                    ? "bg-emerald-500 shadow-emerald-500/20"
-                    : "bg-slate-800 dark:bg-slate-700 shadow-slate-900/20"
-                }`}
-              >
-                <Text className="text-white font-black text-lg">
-                  {enrollResult.success ? "Got it" : "Try Again"}
-                </Text>
-              </TouchableOpacity>
-
-              {enrollResult.success && (
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => {
-                    setEnrollResult((prev) => ({ ...prev, visible: false }));
-                    router.push("/user");
-                  }}
-                  className="mt-6 py-2"
-                >
-                  <Text className="text-slate-400 dark:text-slate-500 font-black text-sm tracking-wide">
-                    Go to Dashboard
+          <View className="flex-1 bg-black/50 items-center justify-center px-6">
+            <View className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-sm items-center shadow-2xl">
+              {enrollResult.success ? (
+                <>
+                  <View className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 items-center justify-center mb-5">
+                    <Feather name="check-circle" size={32} color="#10B981" />
+                  </View>
+                  <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                    Enrolled Successfully!
                   </Text>
-                </TouchableOpacity>
+                  <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                    {enrollResult.message ||
+                      "You have been successfully enrolled in this live test."}
+                  </Text>
+                  {!liveTest.hasAttempted &&
+                  (!liveTest.startTime ||
+                    new Date(liveTest.startTime) <= new Date()) &&
+                  !isTestEnded ? (
+                    <>
+                      <TouchableOpacity
+                        className="bg-emerald-500 w-full h-14 rounded-2xl items-center justify-center flex-row mb-3"
+                        onPress={() => {
+                          setEnrollResult((prev) => ({
+                            ...prev,
+                            visible: false,
+                          }));
+                          router.push(
+                            `/user/live-portal/${liveTest.id}` as any,
+                          );
+                        }}
+                      >
+                        <Feather name="play-circle" size={18} color="white" />
+                        <Text className="text-white font-black text-base ml-2">
+                          Start Test
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        className="w-full h-12 rounded-2xl items-center justify-center"
+                        onPress={() =>
+                          setEnrollResult((prev) => ({
+                            ...prev,
+                            visible: false,
+                          }))
+                        }
+                      >
+                        <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+                          Close
+                        </Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <TouchableOpacity
+                      className="bg-green-500 w-full h-14 rounded-2xl items-center justify-center"
+                      onPress={() =>
+                        setEnrollResult((prev) => ({
+                          ...prev,
+                          visible: false,
+                        }))
+                      }
+                    >
+                      <Text className="text-white font-black text-base">
+                        Got it
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </>
+              ) : (
+                <>
+                  <View className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 items-center justify-center mb-5">
+                    <Feather name="alert-circle" size={32} color="#EF4444" />
+                  </View>
+                  <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                    Enrollment Failed
+                  </Text>
+                  <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                    {enrollResult.message ||
+                      "We couldn't process your enrollment right now."}
+                  </Text>
+                  <TouchableOpacity
+                    className="bg-primary w-full h-14 rounded-2xl items-center justify-center"
+                    onPress={() =>
+                      setEnrollResult((prev) => ({
+                        ...prev,
+                        visible: false,
+                      }))
+                    }
+                  >
+                    <Text className="text-white font-black text-base">
+                      Try Again
+                    </Text>
+                  </TouchableOpacity>
+                </>
               )}
             </View>
           </View>
