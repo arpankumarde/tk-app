@@ -69,6 +69,8 @@ export interface LiveTest {
   status: string;
   isEnrolled: boolean;
   hasAttempted: boolean;
+  rating?: number | null;
+  reviewsCount?: number;
 }
 
 export interface LiveTestResponse {

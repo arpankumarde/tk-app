@@ -642,7 +642,7 @@ const ExpertDetails = () => {
               <View>
                 {products?.length > 0 ? (
                   products.map((product) => (
-                    <ProductCard key={product.id} product={product as any} />
+                    <ProductCard key={product.id} product={product as any} className="mx-5 mb-5" />
                   ))
                 ) : (
                   <EmptyState label="No study notes yet" />

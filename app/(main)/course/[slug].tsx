@@ -32,6 +32,8 @@ export interface Teacher {
   profilePicture: string | null;
   isVerified: boolean;
   slug: string;
+  academyName?: string | null;
+  bio?: string | null;
 }
 
 export interface Lesson {
@@ -81,6 +83,8 @@ export interface Course {
   teacherDisplayName: string;
   teacherProfilePicture: string | null;
   teacherIsVerified: boolean;
+  teacherAcademyName?: string | null;
+  teacherBio?: string | null;
   teacher: Teacher;
   sections: Section[];
   isEnrolled: boolean;
@@ -322,28 +326,31 @@ const CourseDetails = () => {
         </View>
 
         {/* Course Main Title & Info */}
-        <View className="px-6 pt-2 pb-6">
+        <View className="px-6 pt-2 pb-2">
           <Text className="text-3xl font-black text-slate-800 dark:text-white leading-[42px] mb-4">
             {course.title}
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-base font-medium leading-6 mb-6">
-            {course.description ||
-              "Master this subject with our expert-led comprehensive course modules and practical exercises."}
-          </Text>
 
-          <View className="flex-row items-center mb-6">
-            <Text
-              className="text-slate-500 dark:text-slate-400 text-sm font-bold flex-1"
-              numberOfLines={1}
-            >
+          <View className="flex-row items-center flex-wrap mb-2">
+            <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
               Created by{" "}
+            </Text>
+            <View className="flex-row items-center">
               <Link
                 href={`/expert/${course?.teacher?.slug}`}
-                className="text-primary"
+                className="text-primary font-bold text-sm"
               >
                 {course?.teacher?.displayName}
               </Link>
-            </Text>
+              {course?.teacherIsVerified && (
+                <MaterialIcons
+                  name="verified"
+                  size={14}
+                  color="#22C55E"
+                  className="ml-1"
+                />
+              )}
+            </View>
           </View>
         </View>
 
@@ -530,7 +537,9 @@ const CourseDetails = () => {
             Description
           </Text>
           <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-6">
-            {course.description || "No detailed description provided."}
+            {course.description
+              ? course.description.replace(/<[^>]*>?/gm, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;/g, " ").replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim()
+              : "No detailed description provided."}
           </Text>
         </View>
 
@@ -539,33 +548,48 @@ const CourseDetails = () => {
           <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
             Meet your instructor
           </Text>
-          <TouchableOpacity
-            onPress={() => router.push(`/expert/${course.teacher.slug}`)}
-            className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-xl p-5"
-          >
-            <Image
-              source={{
-                uri:
-                  course.teacher.profilePicture ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(course.teacher.displayName)}&background=FF8A50&color=fff`,
-              }}
-              className="w-14 h-14 rounded-2xl"
-            />
-            <View className="ml-4 flex-1">
-              <Text className="text-slate-800 dark:text-white font-black text-base">
-                {course.teacher.displayName}
-              </Text>
-              {course.teacher.isVerified && (
-                <View className="flex-row items-center mt-1">
-                  <MaterialIcons name="verified" size={16} color="#22C55E" />
-                  <Text className="text-emerald-600 dark:text-emerald-400 text-xs font-bold ml-1">
-                    verified
+          <View className="bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-xl p-5">
+            <TouchableOpacity
+              onPress={() => router.push(`/expert/${course.teacher.slug}` as any)}
+              className="flex-row items-center"
+            >
+              <Image
+                source={{
+                  uri:
+                    course.teacher.profilePicture ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(course.teacher.displayName)}&background=FF8A50&color=fff`,
+                }}
+                className="w-14 h-14 rounded-2xl"
+              />
+              <View className="ml-4 flex-1">
+                <View className="flex-row items-center">
+                  <Text className="text-slate-800 dark:text-white font-black text-base">
+                    {course.teacher.displayName}
                   </Text>
+                  {(course.teacher.isVerified || course.teacherIsVerified) && (
+                    <MaterialIcons
+                      name="verified"
+                      size={15}
+                      color="#22C55E"
+                      style={{ marginLeft: 4 }}
+                    />
+                  )}
                 </View>
-              )}
-            </View>
-            <Feather name="chevron-right" size={20} color="#FF8A50" />
-          </TouchableOpacity>
+                {(course.teacher.academyName || course.teacherAcademyName) && (
+                  <Text className="text-slate-400 text-xs font-medium mt-0.5">
+                    {course.teacher.academyName || course.teacherAcademyName}
+                  </Text>
+                )}
+              </View>
+              <Feather name="chevron-right" size={20} color="#FF8A50" />
+            </TouchableOpacity>
+
+            {(course.teacher.bio || course.teacherBio) && (
+              <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-6 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700/50 px-1">
+                {course.teacher.bio || course.teacherBio}
+              </Text>
+            )}
+          </View>
         </View>
 
         <View className="h-20" />

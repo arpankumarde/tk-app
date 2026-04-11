@@ -144,61 +144,55 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          {/* Stats Bar */}
-          <View className="bg-white dark:bg-slate-900 rounded-2xl p-5 flex-row items-center shadow-lg shadow-slate-200/70 dark:shadow-none border border-gray-200 dark:border-slate-700">
-            <View className="items-center flex-1">
-              <Text className="text-2xl font-black text-slate-800 dark:text-white">
+          {/* Stats Cards */}
+          <View className="flex-row justify-between mb-2">
+            <TouchableOpacity 
+              activeOpacity={0.7}
+              onPress={() => router.push("/user/tests")}
+              className="flex-1 bg-white dark:bg-slate-800 rounded-2xl py-3 px-2 items-center mr-3 border border-slate-100 dark:border-slate-700/50 shadow-sm shadow-slate-200/50 dark:shadow-none"
+            >
+              <View className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/20 items-center justify-center mb-1.5">
+                <Feather name="file-text" size={14} color="#3B82F6" />
+              </View>
+              <Text className="text-xl font-black text-slate-800 dark:text-white">
                 {totalTests}
               </Text>
-              <View className="flex-row items-center mt-2">
-                <View className="w-6 h-6 rounded-lg items-center justify-center bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
-                  <Feather
-                    name="file-text"
-                    size={12}
-                    color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
-                  />
-                </View>
-                <Text className="ml-2 text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[1px]">
-                  Tests
-                </Text>
+              <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-bold mt-0.5 uppercase tracking-wider">
+                Tests
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              activeOpacity={0.7}
+              onPress={() => router.push("/user/courses")}
+              className="flex-1 bg-white dark:bg-slate-800 rounded-2xl py-3 px-2 items-center mr-3 border border-slate-100 dark:border-slate-700/50 shadow-sm shadow-slate-200/50 dark:shadow-none"
+            >
+              <View className="w-8 h-8 rounded-full bg-orange-50 dark:bg-orange-900/20 items-center justify-center mb-1.5">
+                <Feather name="book-open" size={14} color="#FF8A50" />
               </View>
-            </View>
-            <View className="w-[1px] h-12 bg-gray-200 dark:bg-slate-700" />
-            <View className="items-center flex-1">
-              <Text className="text-2xl font-black text-slate-800 dark:text-white">
+              <Text className="text-xl font-black text-slate-800 dark:text-white">
                 {totalCourses}
               </Text>
-              <View className="flex-row items-center mt-2">
-                <View className="w-6 h-6 rounded-lg items-center justify-center bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
-                  <Feather
-                    name="book-open"
-                    size={12}
-                    color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
-                  />
-                </View>
-                <Text className="ml-2 text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[1px]">
-                  Courses
-                </Text>
+              <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-bold mt-0.5 uppercase tracking-wider">
+                Courses
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              activeOpacity={0.7}
+              onPress={() => router.push("/user/products")}
+              className="flex-1 bg-white dark:bg-slate-800 rounded-2xl py-3 px-2 items-center border border-slate-100 dark:border-slate-700/50 shadow-sm shadow-slate-200/50 dark:shadow-none"
+            >
+              <View className="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/20 items-center justify-center mb-1.5">
+                <Feather name="shopping-bag" size={14} color="#10B981" />
               </View>
-            </View>
-            <View className="w-[1px] h-12 bg-gray-200 dark:bg-slate-700" />
-            <View className="items-center flex-1">
-              <Text className="text-2xl font-black text-slate-800 dark:text-white">
+              <Text className="text-xl font-black text-slate-800 dark:text-white">
                 {totalProducts}
               </Text>
-              <View className="flex-row items-center mt-2">
-                <View className="w-6 h-6 rounded-lg items-center justify-center bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
-                  <Feather
-                    name="shopping-bag"
-                    size={12}
-                    color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
-                  />
-                </View>
-                <Text className="ml-2 text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[1px]">
-                  Notes
-                </Text>
-              </View>
-            </View>
+              <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-bold mt-0.5 uppercase tracking-wider">
+                Notes
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
 

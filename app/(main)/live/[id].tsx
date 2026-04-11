@@ -470,7 +470,7 @@ const LiveTestDetails = () => {
         <StatusBar
           barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
         />
-        <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
+        <SafeAreaView edges={["top", "left", "right", "bottom"]} className="flex-1">
           <Header />
           <View className="flex-1 items-center justify-center px-10">
             {loading ? (
@@ -519,7 +519,7 @@ const LiveTestDetails = () => {
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
-      <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
+      <SafeAreaView edges={["top", "left", "right", "bottom"]} className="flex-1">
         <Header />
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -757,102 +757,6 @@ const LiveTestDetails = () => {
             </View>
           </View>
 
-          {/* ── Action Button ── */}
-          <View className="px-5 mb-6">
-            {isTestEnded && (
-              <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-2xl px-4 py-3 mb-3">
-                <Text className="text-red-600 dark:text-red-400 font-black text-sm text-center">
-                  Test Ended
-                </Text>
-              </View>
-            )}
-            {liveTest.hasAttempted ? (
-              <TouchableOpacity
-                disabled
-                className="h-14 w-full rounded-2xl flex-row items-center justify-center shadow-md bg-slate-400 dark:bg-slate-600"
-              >
-                <Feather name="check-circle" size={18} color="white" />
-                <Text className="text-white text-lg font-black ml-2.5">
-                  Already Attempted
-                </Text>
-              </TouchableOpacity>
-            ) : liveTest.isEnrolled &&
-              (!liveTest.startTime ||
-                new Date(liveTest.startTime) <= new Date()) &&
-              !isTestEnded ? (
-              <TouchableOpacity
-                onPress={() =>
-                  router.push(`/user/live-portal/${liveTest.id}` as any)
-                }
-                className="h-14 w-full rounded-2xl flex-row items-center justify-center shadow-md bg-emerald-500 shadow-emerald-500/30"
-              >
-                <Feather name="play-circle" size={18} color="white" />
-                <Text className="text-white text-lg font-black ml-2.5">
-                  Start Test
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                onPress={async () => {
-                  if (liveTest.price === 0) {
-                    await handleFreeEnroll();
-                  } else {
-                    await handlePaidEnroll();
-                  }
-                }}
-                disabled={
-                  isTestEnded ||
-                  purchaseLoading ||
-                  enrolling ||
-                  liveTest.isEnrolled ||
-                  liveTest.enrolledCount >= liveTest.maxSeats
-                }
-                className={`h-14 w-full rounded-2xl flex-row items-center justify-center shadow-md ${
-                  isTestEnded ||
-                  (!liveTest.isEnrolled &&
-                    liveTest.enrolledCount >= liveTest.maxSeats)
-                    ? "bg-slate-300 dark:bg-slate-700"
-                    : liveTest.isEnrolled
-                      ? "bg-emerald-500 shadow-emerald-500/30"
-                      : liveTest.price === 0
-                        ? "bg-emerald-500 shadow-emerald-500/20"
-                        : "bg-primary shadow-orange-500/20"
-                }`}
-              >
-                {purchaseLoading || enrolling ? (
-                  <ActivityIndicator size="small" color="white" />
-                ) : (
-                  <>
-                    <Feather
-                      name={
-                        isTestEnded ||
-                        (!liveTest.isEnrolled &&
-                          liveTest.enrolledCount >= liveTest.maxSeats)
-                          ? "x-circle"
-                          : liveTest.isEnrolled
-                            ? "check-circle"
-                            : "zap"
-                      }
-                      size={18}
-                      color="white"
-                    />
-                    <Text className="text-white text-lg font-black ml-2.5">
-                      {isTestEnded
-                        ? "Enrollment Closed"
-                        : !liveTest.isEnrolled &&
-                            liveTest.enrolledCount >= liveTest.maxSeats
-                          ? "Registration Closed"
-                          : liveTest.isEnrolled
-                            ? "Already Enrolled"
-                            : liveTest.price === 0
-                              ? "Enroll for Free"
-                              : `Enroll for ₹${liveTest.price}`}
-                    </Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            )}
-          </View>
 
           {/* ── Tabs ── */}
           <View className="px-5 mb-6">
@@ -1009,19 +913,19 @@ const LiveTestDetails = () => {
                 </BulletItem>
               </RuleSection>
 
-              <View className="mt-4 mb-4">
+              <View className="mt-4">
                 <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
                   About the Host
                 </Text>
-                <TouchableOpacity
-                  onPress={() =>
-                    router.push(
-                      `/expert/${liveTest.teacherSlug || liveTest.teacherProfile?.slug}` as any,
-                    )
-                  }
-                  className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-[24px] p-5 active:opacity-70"
-                >
-                  <View className="flex-row items-center">
+                <View className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl p-5">
+                  <TouchableOpacity
+                    onPress={() =>
+                      router.push(
+                        `/expert/${liveTest.teacherSlug || liveTest.teacherProfile?.slug}` as any,
+                      )
+                    }
+                    className="flex-row items-center active:opacity-70"
+                  >
                     <Image
                       source={{
                         uri:
@@ -1038,9 +942,9 @@ const LiveTestDetails = () => {
                         {liveTest.teacherIsVerified && (
                           <MaterialIcons
                             name="verified"
-                            size={18}
+                            size={15}
                             color="#22C55E"
-                            className="ml-1"
+                            style={{ marginLeft: 4 }}
                           />
                         )}
                       </View>
@@ -1050,14 +954,14 @@ const LiveTestDetails = () => {
                         </Text>
                       ) : null}
                     </View>
-                    <Feather name="chevron-right" size={24} color="#FF8A50" />
-                  </View>
+                    <Feather name="chevron-right" size={20} color="#FF8A50" />
+                  </TouchableOpacity>
                   {liveTest.teacherBio ? (
-                    <Text className="text-slate-600 dark:text-slate-300 text-sm leading-6 mt-4">
+                    <Text className="text-slate-600 dark:text-slate-300 text-sm leading-6 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700/50">
                       {liveTest.teacherBio}
                     </Text>
                   ) : null}
-                </TouchableOpacity>
+                </View>
               </View>
             </View>
           ) : (
@@ -1258,7 +1162,105 @@ const LiveTestDetails = () => {
               )}
             </View>
           )}
+          <View className="h-10" />
         </ScrollView>
+
+        {/* Sticky Action Footer */}
+        <View className="bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 px-6 py-4">
+          {isTestEnded && (
+            <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-2xl px-4 py-3 mb-3">
+              <Text className="text-red-600 dark:text-red-400 font-black text-sm text-center">
+                Test Ended
+              </Text>
+            </View>
+          )}
+          {liveTest.hasAttempted ? (
+            <TouchableOpacity
+              disabled
+              className="h-14 w-full rounded-2xl flex-row items-center justify-center shadow-md bg-slate-400 dark:bg-slate-600"
+            >
+              <Feather name="check-circle" size={18} color="white" />
+              <Text className="text-white text-lg font-black ml-2.5">
+                Already Attempted
+              </Text>
+            </TouchableOpacity>
+          ) : liveTest.isEnrolled &&
+            (!liveTest.startTime ||
+              new Date(liveTest.startTime) <= new Date()) &&
+            !isTestEnded ? (
+            <TouchableOpacity
+              onPress={() =>
+                router.push(`/user/live-portal/${liveTest.id}` as any)
+              }
+              className="h-14 w-full rounded-2xl flex-row items-center justify-center shadow-md bg-emerald-500 shadow-emerald-500/30"
+            >
+              <Feather name="play-circle" size={18} color="white" />
+              <Text className="text-white text-lg font-black ml-2.5">
+                Start Test
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={async () => {
+                if (liveTest.price === 0) {
+                  await handleFreeEnroll();
+                } else {
+                  await handlePaidEnroll();
+                }
+              }}
+              disabled={
+                isTestEnded ||
+                purchaseLoading ||
+                enrolling ||
+                liveTest.isEnrolled ||
+                liveTest.enrolledCount >= liveTest.maxSeats
+              }
+              className={`h-14 w-full rounded-2xl flex-row items-center justify-center shadow-md ${
+                isTestEnded ||
+                (!liveTest.isEnrolled &&
+                  liveTest.enrolledCount >= liveTest.maxSeats)
+                  ? "bg-slate-300 dark:bg-slate-700"
+                  : liveTest.isEnrolled
+                    ? "bg-emerald-500 shadow-emerald-500/30"
+                    : liveTest.price === 0
+                      ? "bg-emerald-500 shadow-emerald-500/20"
+                      : "bg-primary shadow-orange-500/20"
+              }`}
+            >
+              {purchaseLoading || enrolling ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <>
+                  <Feather
+                    name={
+                      isTestEnded ||
+                      (!liveTest.isEnrolled &&
+                        liveTest.enrolledCount >= liveTest.maxSeats)
+                        ? "x-circle"
+                        : liveTest.isEnrolled
+                          ? "check-circle"
+                          : "zap"
+                    }
+                    size={18}
+                    color="white"
+                  />
+                  <Text className="text-white text-lg font-black ml-2.5">
+                    {isTestEnded
+                      ? "Enrollment Closed"
+                      : !liveTest.isEnrolled &&
+                          liveTest.enrolledCount >= liveTest.maxSeats
+                        ? "Registration Closed"
+                        : liveTest.isEnrolled
+                          ? "Already Enrolled"
+                          : liveTest.price === 0
+                            ? "Enroll for Free"
+                            : `Enroll for ₹${liveTest.price}`}
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
+        </View>
         {/* ── Feedback Modal ─────────────────────────── */}
         <Modal
           visible={enrollResult.visible}

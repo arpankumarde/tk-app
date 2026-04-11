@@ -470,7 +470,7 @@ const ShopScreen = () => {
         </View>
 
         {/* Filters & Sorting */}
-        <View className="px-5 mb-8 flex-row items-center">
+        <View className="px-6 mb-8 flex-row items-center">
           <TouchableOpacity
             onPress={() => setShowFilterSidebar(true)}
             className="flex-row items-center border border-orange-200 dark:border-orange-800/80 bg-white dark:bg-slate-800 px-4 py-2.5 rounded-xl mr-3 shadow-sm"
@@ -529,10 +529,10 @@ const ShopScreen = () => {
             <ActivityIndicator size="large" color="#FF8A50" />
           </View>
         ) : (
-          <View className="pb-10">
+          <View className="pb-10 px-6">
             {products.length > 0 ? (
               products.map((product, index) => (
-                <ProductCard key={product.slug || index} product={product} />
+                <ProductCard key={product.slug || index} product={product} className="mb-8" />
               ))
             ) : (
               <View className="items-center justify-center py-20 px-8">

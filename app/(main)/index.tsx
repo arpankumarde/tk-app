@@ -119,14 +119,14 @@ const App = () => {
               )}
 
               <TouchableOpacity
-                className="mx-5 mb-5 bg-orange-100/50 dark:bg-orange-900/20 py-5 rounded-3xl items-center border border-orange-200 dark:border-orange-800/30"
+                className="mx-12 mb-10 bg-orange-100/50 dark:bg-orange-900/20 py-3 rounded-2xl items-center border border-orange-200 dark:border-orange-800/30 shadow-sm"
                 onPress={() => router.push("/tests")}
               >
                 <View className="flex-row items-center">
-                  <Text className="text-primary font-black text-xl mr-2">
+                  <Text className="text-primary font-black text-lg mr-2">
                     Explore All Tests
                   </Text>
-                  <Feather name="arrow-right" size={24} color="#FF8A50" />
+                  <Feather name="arrow-right" size={20} color="#FF8A50" />
                 </View>
               </TouchableOpacity>
             </View>

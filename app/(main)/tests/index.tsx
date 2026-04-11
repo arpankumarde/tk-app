@@ -25,6 +25,7 @@ import { useColorScheme } from "nativewind";
 import Header from "@/components/Header";
 import BottomTabs from "@/components/BottomTabs";
 import MockTestCard from "@/components/MockTestCard";
+import { useAuth } from "@/context/AuthContext";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 const PAGE_LIMIT = 10;
@@ -354,6 +355,7 @@ function FilterSidebarContent({
 
 const ShopScreen = () => {
   const { colorScheme } = useColorScheme();
+  const { token } = useAuth();
   const [tests, setTests] = useState<ExamTest[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -400,7 +402,9 @@ const ShopScreen = () => {
         }
 
         console.log("[MockTests] Fetching:", url);
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
 
         if (!response.ok) {
           throw new Error(`Server returned error ${response.status}`);
@@ -439,6 +443,7 @@ const ShopScreen = () => {
       minPrice,
       maxPrice,
       selectedLanguage,
+      token,
     ],
   );
 

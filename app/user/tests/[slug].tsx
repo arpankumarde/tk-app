@@ -282,7 +282,7 @@ const EnrolledTestDetails = () => {
       >
         {/* Compact Header Section */}
         <View className="px-6 pt-4 mb-6">
-          <View className="flex-row items-center justify-between mb-4">
+          <View className="flex-row items-center mb-4">
             <TouchableOpacity
               onPress={() => router.back()}
               className="w-10 h-10 bg-gray-50 dark:bg-slate-900 rounded-full items-center justify-center border border-gray-100 dark:border-slate-800"
@@ -293,8 +293,8 @@ const EnrolledTestDetails = () => {
                 color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
               />
             </TouchableOpacity>
-            <View className="bg-orange-50 dark:bg-orange-950/40 px-3 py-1 rounded-full border border-orange-100 dark:border-orange-900/30">
-              <Text className="text-primary font-black text-[10px] uppercase tracking-wider">
+            <View className="flex-shrink ml-3 bg-orange-100/80 dark:bg-orange-900/40 px-3 py-2 rounded-2xl border border-orange-200/50 dark:border-orange-900/30">
+              <Text className="text-primary font-black text-[10px] uppercase tracking-wider leading-4">
                 {test.examName || "Mock Test"}
               </Text>
             </View>
@@ -466,7 +466,7 @@ const EnrolledTestDetails = () => {
                   </View>
 
                   {(item.attemptsCount || 0) > 0 || item.isCompleted ? (
-                    <View className="flex-row items-center" style={{ gap: 8 }}>
+                    <View className="flex-row items-center flex-wrap justify-end flex-1" style={{ gap: 8 }}>
                       <TouchableOpacity
                         onPress={() =>
                           router.push({

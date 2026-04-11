@@ -122,6 +122,9 @@ const TestDetails = () => {
         setLoading(true);
         const response = await fetch(
           `${BASE_URL}/_api/tests/details?slug=${slug}`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          },
         );
         const data = await response.json();
         const payload: PackageResponse = data.json || data;
@@ -137,7 +140,7 @@ const TestDetails = () => {
     };
 
     if (slug) fetchTestDetails();
-  }, [slug]);
+  }, [slug, token]);
 
   const handleShare = async () => {
     try {
@@ -288,19 +291,26 @@ const TestDetails = () => {
 
           {/* Metadata Row: Author + Rating */}
           <View className="flex-row items-center justify-between mb-2">
-            <View className="flex-1 pr-3">
-              <Text
-                className="text-slate-500 dark:text-slate-400 text-sm font-bold"
-                numberOfLines={1}
-              >
+            <View className="flex-1 pr-3 flex-row items-center flex-wrap">
+              <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
                 Created by{" "}
+              </Text>
+              <View className="flex-row items-center">
                 <Link
                   href={`/expert/${test.teacherSlug}` as any}
-                  className="text-primary font-bold"
+                  className="text-primary font-bold text-sm"
                 >
                   {test.teacherName || "Expert"}
                 </Link>
-              </Text>
+                {test.teacherIsVerified && (
+                  <MaterialIcons
+                    name="verified"
+                    size={14}
+                    color="#22C55E"
+                    className="ml-1"
+                  />
+                )}
+              </View>
             </View>
 
             <View className="flex-row items-center">
@@ -526,6 +536,27 @@ const TestDetails = () => {
                           </Text>
                         </View>
                       ))}
+
+                      {/* {item.isFree && (
+                        <TouchableOpacity
+                          onPress={() => {
+                            if (!user) {
+                              router.push("/login");
+                              return;
+                            }
+                            router.push({
+                              pathname: "/user/portal/[slug]",
+                              params: { slug: String(item.id) },
+                            });
+                          }}
+                          className="mt-4 bg-emerald-500 h-11 rounded-2xl flex-row items-center justify-center shadow-lg shadow-emerald-500/20"
+                        >
+                          <Feather name="play" size={16} color="white" />
+                          <Text className="text-white font-black text-sm ml-2">
+                            Take Test
+                          </Text>
+                        </TouchableOpacity>
+                      )} */}
                     </View>
                   )}
                 </View>
@@ -587,44 +618,48 @@ const TestDetails = () => {
           <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
             About the Author
           </Text>
-          <TouchableOpacity
-            onPress={() => router.push(`/expert/${test.teacherSlug}` as any)}
-            className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-xl p-5"
-          >
-            <Image
-              source={{
-                uri:
-                  test.teacherAvatarUrl ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(test.teacherName)}&background=FF8A50&color=fff`,
-              }}
-              className="w-14 h-14 rounded-2xl"
-            />
-            <View className="ml-4 flex-1">
-              <Text className="text-slate-800 dark:text-white font-black text-base">
-                {test.teacherName || "Author"}
-              </Text>
-              {test.teacherIsVerified && (
-                <View className="flex-row items-center mt-1">
-                  <MaterialIcons name="verified" size={16} color="#22C55E" />
-                  <Text className="text-emerald-600 dark:text-emerald-400 text-xs font-bold ml-1">
-                    Verified
+          <View className="bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-xl p-5">
+            <TouchableOpacity
+              onPress={() => router.push(`/expert/${test.teacherSlug}` as any)}
+              className="flex-row items-center"
+            >
+              <Image
+                source={{
+                  uri:
+                    test.teacherAvatarUrl ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(test.teacherName)}&background=FF8A50&color=fff`,
+                }}
+                className="w-14 h-14 rounded-2xl"
+              />
+              <View className="ml-4 flex-1">
+                <View className="flex-row items-center">
+                  <Text className="text-slate-800 dark:text-white font-black text-base">
+                    {test.teacherName || "Author"}
                   </Text>
+                  {test.teacherIsVerified && (
+                    <MaterialIcons
+                      name="verified"
+                      size={15}
+                      color="#22C55E"
+                      style={{ marginLeft: 4 }}
+                    />
+                  )}
                 </View>
-              )}
-              {test.teacherAcademyName && (
-                <Text className="text-slate-400 text-xs font-medium mt-0.5">
-                  {test.teacherAcademyName}
-                </Text>
-              )}
-            </View>
-            <Feather name="chevron-right" size={20} color="#FF8A50" />
-          </TouchableOpacity>
+                {test.teacherAcademyName && (
+                  <Text className="text-slate-400 text-xs font-medium mt-0.5">
+                    {test.teacherAcademyName}
+                  </Text>
+                )}
+              </View>
+              <Feather name="chevron-right" size={20} color="#FF8A50" />
+            </TouchableOpacity>
 
-          {test.teacherBio && (
-            <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-6 mt-4 px-1">
-              {test.teacherBio}
-            </Text>
-          )}
+            {test.teacherBio && (
+              <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-6 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700/50 px-1">
+                {test.teacherBio}
+              </Text>
+            )}
+          </View>
         </View>
 
         <View className="h-20" />

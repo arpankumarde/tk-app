@@ -43,6 +43,8 @@ interface Product {
   teacherName: string;
   teacherSlug: string;
   teacherIsVerified: boolean;
+  teacherVerified: boolean;
+  teacherAcademyName: string | null;
   thumbnailUrl: string;
   title: string;
   totalPurchases: number;
@@ -250,12 +252,12 @@ const ProductDetails = () => {
                     >
                       {product?.teacherName || "TestKart Expert"}
                     </Link>
-                    {product?.teacherIsVerified && (
+                    {(product?.teacherIsVerified || product?.teacherVerified) && (
                       <MaterialIcons
                         name="verified"
                         size={16}
                         color="#22C55E"
-                        className="ml-1"
+                        style={{ marginLeft: 4 }}
                       />
                     )}
                   </View>
@@ -281,7 +283,7 @@ const ProductDetails = () => {
                 Description
               </Text>
               <Text className="text-slate-600 dark:text-slate-300 text-base leading-7">
-                {product.shortDescription ||
+                {product.shortDescription?.replace(/<[^>]*>?/gm, "") ||
                   product.description?.replace(/<[^>]*>?/gm, "") ||
                   "No description available for this product."}
               </Text>
@@ -313,27 +315,50 @@ const ProductDetails = () => {
               <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
                 About the Author
               </Text>
-              <TouchableOpacity
-                onPress={() =>
-                  router.push(`/(main)/expert/${product.teacherSlug}`)
-                }
-                className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-[24px] p-5"
-              >
-                <Image
-                  source={{
-                    uri:
-                      product.teacherAvatar ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(product.teacherName)}&background=FF8A50&color=fff`,
-                  }}
-                  className="w-14 h-14 rounded-2xl"
-                />
-                <View className="ml-4 flex-1">
-                  <Text className="text-slate-800 dark:text-white font-black text-base">
-                    {product.teacherName || "Author"}
+              <View className="bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-xl p-5">
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push(`/expert/${product.teacherSlug}` as any)
+                  }
+                  className="flex-row items-center"
+                >
+                  <Image
+                    source={{
+                      uri:
+                        product.teacherAvatar ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(product.teacherName)}&background=FF8A50&color=fff`,
+                    }}
+                    className="w-14 h-14 rounded-2xl"
+                  />
+                  <View className="ml-4 flex-1">
+                    <View className="flex-row items-center">
+                      <Text className="text-slate-800 dark:text-white font-black text-base">
+                        {product.teacherName || "Author"}
+                      </Text>
+                      {(product.teacherIsVerified || product.teacherVerified) && (
+                        <MaterialIcons
+                          name="verified"
+                          size={15}
+                          color="#22C55E"
+                          style={{ marginLeft: 4 }}
+                        />
+                      )}
+                    </View>
+                    {product.teacherAcademyName && (
+                      <Text className="text-slate-400 text-xs font-medium mt-0.5">
+                        {product.teacherAcademyName}
+                      </Text>
+                    )}
+                  </View>
+                  <Feather name="chevron-right" size={20} color="#FF8A50" />
+                </TouchableOpacity>
+
+                {product.teacherBio && (
+                  <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-6 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700/50 px-1">
+                    {product.teacherBio}
                   </Text>
-                </View>
-                <Feather name="chevron-right" size={20} color="#FF8A50" />
-              </TouchableOpacity>
+                )}
+              </View>
             </View>
 
             {/* Detailed Bottom Section (Dynamic Data) */}
@@ -404,15 +429,15 @@ const ProductDetails = () => {
                 </TouchableOpacity>
               )}
 
-              <View className="flex-row items-center justify-between mb-6 px-1">
+              <View className="flex-row items-center mb-6">
                 {product?.pdfUrl && product?.previewPages > 0 && (
                   <TouchableOpacity
-                    className="flex-1 h-12 rounded-2xl bg-orange-50/60 dark:bg-orange-400/10 border border-orange-100 dark:border-orange-400/20 items-center justify-center mr-2"
+                    className="flex-1 h-14 rounded-2xl bg-transparent border border-orange-100 dark:border-orange-400/20 items-center justify-center mr-2 shadow-sm shadow-orange-500/10"
                     onPress={() => setPreviewVisible(true)}
                   >
                     <View className="flex-row items-center">
-                      <Feather name="external-link" size={16} color="#FF8A50" />
-                      <Text className="text-primary font-black text-sm ml-2">
+                      <Feather name="external-link" size={18} color="#FF8A50" />
+                      <Text className="text-primary font-black text-base ml-2">
                         Preview
                       </Text>
                     </View>
@@ -420,11 +445,11 @@ const ProductDetails = () => {
                 )}
                 <TouchableOpacity
                   onPress={handleShare}
-                  className="flex-1 h-12 rounded-2xl bg-orange-50/60 dark:bg-orange-400/10 border border-orange-100 dark:border-orange-400/20 items-center justify-center ml-2"
+                  className={`flex-1 h-14 rounded-2xl bg-transparent border border-orange-100 dark:border-orange-400/20 items-center justify-center shadow-sm shadow-orange-500/10 ${product?.pdfUrl && product?.previewPages > 0 ? "ml-2" : ""}`}
                 >
                   <View className="flex-row items-center">
-                    <Feather name="share-2" size={16} color="#FF8A50" />
-                    <Text className="text-primary font-black text-sm ml-2">
+                    <Feather name="share-2" size={18} color="#FF8A50" />
+                    <Text className="text-primary font-black text-base ml-2">
                       Share
                     </Text>
                   </View>
@@ -607,7 +632,7 @@ const ProductDetails = () => {
                   contentContainerStyle={{ paddingRight: 24 }}
                 >
                   {relatedProducts.map((p, i) => (
-                    <View key={p.id || i} style={{ width: 320, height: 400 }}>
+                    <View key={p.id || i} className="w-[320px] mr-5" style={{ height: 385 }}>
                       <ProductCard product={p} className="h-full mb-0" />
                     </View>
                   ))}

@@ -328,8 +328,8 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
                           ? "Go to Test"
                           : "Enroll Free"
                         : isInCart
-                          ? "GO TO CART"
-                          : "BUY NOW"}
+                          ? "Go to Cart"
+                          : "Buy Now"}
                     </Text>
                   </>
                 )}

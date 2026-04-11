@@ -1,9 +1,18 @@
+import { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
+import { router } from "expo-router";
 
 const HeroSection = () => {
   const { colorScheme } = useColorScheme();
+  const [query, setQuery] = useState("");
+
+  const handleSearch = () => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    router.push(`/(main)/search?q=${encodeURIComponent(trimmed)}` as any);
+  };
 
   return (
     <View className="px-5 py-10 items-center bg-white dark:bg-slate-900">
@@ -20,16 +29,22 @@ const HeroSection = () => {
           <Feather
             name="search"
             size={20}
-            color={colorScheme === "dark" ? "#999" : "#999"}
-            className="mr-2"
+            color="#999"
           />
           <TextInput
+            value={query}
+            onChangeText={setQuery}
+            onSubmitEditing={handleSearch}
             placeholder="Search for exams, tests, or courses..."
-            className="flex-1 text-base text-[#333] dark:text-white"
+            className="flex-1 text-base text-[#333] dark:text-white ml-2"
             placeholderTextColor="#999"
+            returnKeyType="search"
           />
         </View>
-        <TouchableOpacity className="bg-primary rounded-full h-14 items-center justify-center shadow-lg shadow-primary">
+        <TouchableOpacity
+          onPress={handleSearch}
+          className="bg-primary rounded-full h-14 items-center justify-center shadow-lg shadow-primary"
+        >
           <Text className="text-white text-lg font-bold">Search</Text>
         </TouchableOpacity>
       </View>

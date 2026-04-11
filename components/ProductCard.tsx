@@ -31,6 +31,7 @@ interface ProductCardProps {
     category: string;
     isPurchased?: boolean;
     views?: number;
+    reviewsCount?: number;
   };
   className?: string;
   style?: any;
@@ -116,7 +117,7 @@ const ProductCard = ({
       <TouchableOpacity
         onPress={() => router.push(`/product/${product.slug}` as any)}
         activeOpacity={0.9}
-        className={`bg-white dark:bg-slate-800 rounded-3xl mx-5 mb-5 overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700 ${className}`}
+        className={`bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700 ${className}`}
       >
         {/* Category Badge */}
         <View className="absolute top-3 left-3 z-10 px-3 py-1.5 bg-slate-900/90 rounded-full shadow-sm">
@@ -154,9 +155,9 @@ const ProductCard = ({
                   className="w-full h-full"
                 />
               </View>
-              <View className="flex-row items-center flex-1">
+              <View className="flex-row items-center flex-1 mr-2">
                 <Text
-                  className="text-slate-500 dark:text-slate-400 text-sm"
+                  className="text-slate-500 dark:text-slate-400 text-sm flex-shrink"
                   numberOfLines={1}
                 >
                   {displayAuthor}
@@ -166,14 +167,14 @@ const ProductCard = ({
                     name="verified"
                     size={14}
                     color="#22C55E"
-                    className="ml-1"
+                    className="ml-1 flex-shrink-0"
                   />
                 )}
               </View>
             </View>
 
             {/* Product Stats Row */}
-            <View className="flex-row items-center mb-4 gap-x-4">
+            <View className="flex-row items-center flex-wrap mb-4 gap-2">
               <View className="flex-row items-center">
                 <Feather name="eye" size={13} color="#94a3b8" />
                 <Text className="text-slate-400 dark:text-slate-500 text-[11px] font-bold ml-1.5">
@@ -186,10 +187,22 @@ const ProductCard = ({
                   {product.totalPurchases || 0} Purchases
                 </Text>
               </View>
+              {/* Dot Separator & Reviews */}
+              {product.rating && (
+                <>
+                  <View className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-1" />
+                  <View className="flex-row items-center">
+                    <MaterialIcons name="star" size={13} color="#F59E0B" />
+                    <Text className="text-amber-600 dark:text-amber-500 text-[11px] font-black ml-1">
+                      {product.rating} Reviews
+                    </Text>
+                  </View>
+                </>
+              )}
             </View>
           </View>
 
-          <View className="flex-row items-center justify-between pt-4 border-t border-gray-50 dark:border-slate-700 mt-auto">
+          <View className="flex-row items-center justify-between pt-4 border-t border-gray-50 dark:border-slate-700 mt-auto gap-x-2">
             <TouchableOpacity
               onPress={async () => {
                 if (isFree) {
@@ -206,7 +219,7 @@ const ProductCard = ({
                 }
               }}
               disabled={addingToCart || enrolling}
-              className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} w-36 flex-row items-center justify-center px-3 py-2.5 rounded-xl shadow-lg mr-3`}
+              className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} w-48 shrink flex-row items-center justify-center px-4 py-3.5 rounded-xl shadow-lg`}
             >
               {addingToCart || enrolling ? (
                 <ActivityIndicator size="small" color="white" />
@@ -220,22 +233,22 @@ const ProductCard = ({
                           : "book"
                         : "shopping-cart"
                     }
-                    size={16}
+                    size={18}
                     color="white"
                   />
-                  <Text className="text-white font-black ml-2 text-[13px]" numberOfLines={1}>
+                  <Text className="text-white font-black ml-3 text-sm" numberOfLines={1}>
                     {isFree
                       ? product.isPurchased
                         ? "GO TO LIBRARY"
-                        : "ENROLL FREE"
-                      : "BUY NOW"}
+                        : "Enroll Free"
+                      : "Buy Now"}
                   </Text>
                 </>
               )}
             </TouchableOpacity>
 
             <Text
-              className={`${isFree ? "text-emerald-500" : "text-slate-800 dark:text-white"} text-lg font-black`}
+              className={`${isFree ? "text-emerald-500" : "text-slate-800 dark:text-white"} text-2xl font-black flex-shrink-0`}
             >
               {isFree ? "FREE" : `₹${product.price}`}
             </Text>

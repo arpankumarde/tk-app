@@ -118,11 +118,16 @@ const LiveTestCard = ({
               )}
             </View>
 
-            <View className="flex-row items-center bg-orange-50 dark:bg-orange-950/20 px-2.5 py-1 rounded-lg">
+            <View className="flex-row items-center bg-orange-50 dark:bg-slate-700/40 px-2.5 py-1 rounded-lg border border-orange-100 dark:border-slate-600/60">
               <MaterialIcons name="star" size={12} color="#F97316" />
               <Text className="ml-1 text-orange-500 font-black text-xs">
-                5.0
+                {test.rating || "5.0"}
               </Text>
+              {test.reviewsCount !== undefined && (
+                <Text className="ml-1 text-slate-400 dark:text-slate-500 font-bold text-[10px]">
+                  ({test.reviewsCount})
+                </Text>
+              )}
             </View>
           </View>
 
