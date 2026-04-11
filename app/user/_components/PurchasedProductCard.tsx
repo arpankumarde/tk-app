@@ -111,7 +111,7 @@ const PurchasedProductCard = ({ product }: PurchasedProductCardProps) => {
           source={{
             uri:
               product.thumbnailUrl ||
-              "https://ik.imagekit.io/testkart/placeholders/mock-test-placeholder__FmYrad7s.png",
+              "https://ik.imagekit.io/testkart/placeholders/study-notes.png",
           }}
           className="w-full h-full"
           resizeMode="cover"
