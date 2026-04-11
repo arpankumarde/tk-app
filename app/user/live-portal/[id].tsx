@@ -88,7 +88,7 @@ const LivePortal = () => {
 
       const data = await response.json();
       const payload = data.json || data;
-      console.log("[LivePortal] Details response:", JSON.stringify(payload, null, 2));
+      // console.log("[LivePortal] Details response:", JSON.stringify(payload, null, 2));
 
       if (!payload.isEnrolled) {
         throw new Error("You are not enrolled in this live test.");

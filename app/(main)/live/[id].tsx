@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
+  Alert,
   ScrollView,
   TouchableOpacity,
   Image,
@@ -15,8 +16,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { WebView } from "react-native-webview";
 import { useAuth } from "@/context/AuthContext";
-import { useAddToCart } from "@/hooks/useAddToCart";
 import { useCountdown } from "@/hooks/useCountdown";
 import Header from "@/components/Header";
 import BlinkingDot from "@/components/BlinkingDot";
@@ -200,14 +201,16 @@ const LiveTestDetails = () => {
   const [leaderboardData, setLeaderboardData] =
     useState<LeaderboardData | null>(null);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
-  const { user, token } = useAuth();
-  const { addToCart, adding } = useAddToCart();
+  const { user, token, setAuth } = useAuth();
   const [enrolling, setEnrolling] = useState(false);
   const [enrollResult, setEnrollResult] = useState<{
     visible: boolean;
     success: boolean;
     message?: string;
   }>({ visible: false, success: false });
+  const [payuData, setPayuData] = useState<any>(null);
+  const [webViewVisible, setWebViewVisible] = useState(false);
+  const [purchaseLoading, setPurchaseLoading] = useState(false);
 
   const isLive =
     liveTest &&
@@ -347,6 +350,90 @@ const LiveTestDetails = () => {
     } finally {
       setEnrolling(false);
     }
+  };
+
+  const handlePaidEnroll = async () => {
+    if (!user || !token) {
+      router.push("/login");
+      return;
+    }
+
+    try {
+      setPurchaseLoading(true);
+      const res = await fetch(`${BASE_URL}/_api/live-tests/purchase`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          json: {
+            liveTestId: liveTest!.id,
+            deepLinkUrl: "testkart://payment/callback",
+          },
+        }),
+      });
+
+      const data = await res.json();
+      const payload = data.json || data;
+
+      if (!res.ok || payload.error) {
+        Alert.alert(
+          "Payment Failed",
+          payload.details || payload.error || "Failed to initiate payment",
+        );
+        return;
+      }
+
+      setPayuData(payload);
+      setWebViewVisible(true);
+    } catch (err) {
+      console.error("[LiveTestDetails] Purchase error:", err);
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    } finally {
+      setPurchaseLoading(false);
+    }
+  };
+
+  const handleDeepLinkResult = async (params: {
+    status: string | null;
+    orderId: string | null;
+    txnid: string | null;
+    token: string | null;
+  }) => {
+    setWebViewVisible(false);
+    setPayuData(null);
+
+    if (params.status === "success") {
+      if (params.token && user) {
+        await setAuth(user, params.token);
+      }
+      setLiveTest((prev) => (prev ? { ...prev, isEnrolled: true } : null));
+      setEnrollResult({
+        visible: true,
+        success: true,
+        message: "Payment successful! You are now enrolled in this live test.",
+      });
+    } else if (params.status === "cancelled") {
+      Alert.alert(
+        "Payment Cancelled",
+        "Your payment was cancelled. You can try again.",
+      );
+    } else {
+      Alert.alert(
+        "Payment Failed",
+        "Your payment could not be completed. Please try again.",
+      );
+    }
+  };
+
+  const handleWebViewClose = () => {
+    setWebViewVisible(false);
+    setPayuData(null);
+    Alert.alert(
+      "Payment Incomplete",
+      "If you completed the payment, your enrollment will be updated shortly. Check back in a few minutes.",
+    );
   };
 
   const handleShare = async () => {
@@ -508,7 +595,7 @@ const LiveTestDetails = () => {
               </View>
             </View>
 
-            <Text className="text-slate-800 dark:text-white text-5xl font-black leading-tight mb-4">
+            <Text className="text-slate-800 dark:text-white text-3xl font-black leading-tight mb-4">
               {liveTest.title}
             </Text>
 
@@ -710,19 +797,12 @@ const LiveTestDetails = () => {
                   if (liveTest.price === 0) {
                     await handleFreeEnroll();
                   } else {
-                    const result = await addToCart(liveTest.id, "live");
-                    console.log(
-                      "[LiveTestDetails] Add to cart result:",
-                      result,
-                    );
-                    if (result.success) {
-                      router.push("/user/cart");
-                    }
+                    await handlePaidEnroll();
                   }
                 }}
                 disabled={
                   isTestEnded ||
-                  adding ||
+                  purchaseLoading ||
                   enrolling ||
                   liveTest.isEnrolled ||
                   liveTest.enrolledCount >= liveTest.maxSeats
@@ -739,7 +819,7 @@ const LiveTestDetails = () => {
                         : "bg-primary shadow-orange-500/20"
                 }`}
               >
-                {adding || enrolling ? (
+                {purchaseLoading || enrolling ? (
                   <ActivityIndicator size="small" color="white" />
                 ) : (
                   <>
@@ -1284,9 +1364,119 @@ const LiveTestDetails = () => {
             </View>
           </View>
         </Modal>
+
+        {/* ── PayU Payment WebView ─────────────────────── */}
+        {payuData && (
+          <Modal
+            visible={webViewVisible}
+            animationType="slide"
+            onRequestClose={handleWebViewClose}
+          >
+            <SafeAreaView className="flex-1 bg-white dark:bg-slate-900">
+              <View className="flex-row items-center px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+                <TouchableOpacity
+                  onPress={handleWebViewClose}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Feather
+                    name="x"
+                    size={24}
+                    color={colorScheme === "dark" ? "#fff" : "#1e293b"}
+                  />
+                </TouchableOpacity>
+                <Text className="ml-4 text-base font-black text-slate-800 dark:text-white">
+                  Complete Payment
+                </Text>
+              </View>
+              <WebView
+                source={{ html: buildPayuForm(payuData) }}
+                onShouldStartLoadWithRequest={(request) => {
+                  const { url } = request;
+                  if (url.startsWith("testkart://")) {
+                    const queryString = url.split("?")[1] || "";
+                    const params = new URLSearchParams(queryString);
+                    handleDeepLinkResult({
+                      status: params.get("status"),
+                      orderId: params.get("order_id"),
+                      txnid: params.get("txnid"),
+                      token: params.get("token"),
+                    });
+                    return false;
+                  }
+                  if (
+                    url.startsWith("upi://") ||
+                    url.startsWith("tez://") ||
+                    url.startsWith("phonepe://") ||
+                    url.startsWith("paytmmp://") ||
+                    url.startsWith("intent://")
+                  ) {
+                    Linking.openURL(url).catch(() => {
+                      Alert.alert(
+                        "App Not Found",
+                        "No UPI app found to handle this payment.",
+                      );
+                    });
+                    return false;
+                  }
+                  return true;
+                }}
+                originWhitelist={[
+                  "https://*",
+                  "http://*",
+                  "upi://*",
+                  "tez://*",
+                  "phonepe://*",
+                  "paytmmp://*",
+                  "intent://*",
+                  "testkart://*",
+                ]}
+                startInLoadingState
+                renderLoading={() => (
+                  <View className="flex-1 items-center justify-center">
+                    <ActivityIndicator size="large" color="#FF8A50" />
+                  </View>
+                )}
+              />
+            </SafeAreaView>
+          </Modal>
+        )}
       </SafeAreaView>
     </View>
   );
 };
+
+const buildPayuForm = (data: {
+  key: string;
+  txnid: string;
+  amount: string;
+  productinfo: string;
+  firstname: string;
+  email: string;
+  phone: string;
+  surl: string;
+  furl: string;
+  hash: string;
+  payuUrl: string;
+  udf1?: string;
+}) => `
+<!DOCTYPE html>
+<html>
+<body onload="document.forms[0].submit()">
+  <form method="POST" action="${data.payuUrl}">
+    <input type="hidden" name="key" value="${data.key}" />
+    <input type="hidden" name="txnid" value="${data.txnid}" />
+    <input type="hidden" name="amount" value="${data.amount}" />
+    <input type="hidden" name="productinfo" value="${data.productinfo}" />
+    <input type="hidden" name="firstname" value="${data.firstname}" />
+    <input type="hidden" name="email" value="${data.email}" />
+    <input type="hidden" name="phone" value="${data.phone}" />
+    <input type="hidden" name="surl" value="${data.surl}" />
+    <input type="hidden" name="furl" value="${data.furl}" />
+    <input type="hidden" name="hash" value="${data.hash}" />
+    ${data.udf1 ? `<input type="hidden" name="udf1" value="${data.udf1}" />` : ""}
+  </form>
+</body>
+</html>
+`;
 
 export default LiveTestDetails;
