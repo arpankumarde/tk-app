@@ -12,6 +12,7 @@ import { router } from "expo-router";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useAuth } from "@/context/AuthContext";
 import { useCartContext } from "@/context/CartContext";
+import Placeholder from "@/constants/placeholder";
 
 interface MockTestCardProps {
   test: {
@@ -119,9 +120,7 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
     await addToCart(test.id, "test");
   };
 
-  const displayImage =
-    test.thumbnailUrl ||
-    "https://ik.imagekit.io/testkart/placeholders/Mock%20Test.jpg";
+  const displayImage = test.thumbnailUrl || Placeholder.TEST;
   const displayAuthor =
     test.teacherName || test.creatorName || "TestKart Expert";
 

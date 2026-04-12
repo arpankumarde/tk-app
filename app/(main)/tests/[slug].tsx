@@ -17,6 +17,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import BottomTabs from "@/components/BottomTabs";
 import { useAuth } from "@/context/AuthContext";
 import { useAddToCart } from "@/hooks/useAddToCart";
+import Placeholder from "@/constants/placeholder";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -420,8 +421,7 @@ const TestDetails = () => {
             <Image
               source={{
                 uri:
-                  test.thumbnailUrl ||
-                  "https://ik.imagekit.io/testkart/placeholders/Mock%20Test.jpg",
+                  test.thumbnailUrl || Placeholder.TEST,
               }}
               className="w-full h-full"
               resizeMode="cover"

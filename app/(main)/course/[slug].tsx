@@ -18,6 +18,7 @@ import BottomTabs from "@/components/BottomTabs";
 import { WebView } from "react-native-webview";
 import PDFPreview from "@/components/PDFPreview";
 import { useVideoPlayer, VideoView } from "expo-video";
+import Placeholder from "@/constants/placeholder";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useAuth } from "@/context/AuthContext";
 import { useAddToCart } from "@/hooks/useAddToCart";
@@ -374,8 +375,7 @@ const CourseDetails = () => {
                 <Image
                   source={{
                     uri:
-                      course?.thumbnailImageUrl ||
-                      "https://ik.imagekit.io/testkart/placeholders/Online%20Course.jpg",
+                      course?.thumbnailImageUrl || Placeholder.COURSE,
                   }}
                   className="w-full h-full"
                   resizeMode="cover"

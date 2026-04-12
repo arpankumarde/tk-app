@@ -18,6 +18,7 @@ import { useColorScheme } from "nativewind";
 import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/Header";
 import { EnrolledTest } from "../types";
+import Placeholder from "@/constants/placeholder";
 import * as SecureStore from "expo-secure-store";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
@@ -224,9 +225,7 @@ const EnrolledTestDetails = () => {
   }
 
   const displayThumbnail =
-    test.thumbnailUrl ||
-    test.thumbnailImageUrl ||
-    "https://ik.imagekit.io/testkart/placeholders/mock-test-placeholder__FmYrad7s.png";
+    test.thumbnailUrl || test.thumbnailImageUrl || Placeholder.TEST;
 
   const parseScore = (value: number | string | null | undefined) => {
     if (value === null || value === undefined || value === "") return null;

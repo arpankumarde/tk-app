@@ -21,6 +21,7 @@ import Header from "@/components/Header";
 import BottomTabs from "@/components/BottomTabs";
 import { useAuth } from "@/context/AuthContext";
 import { useCartContext, CartItem } from "@/context/CartContext";
+import Placeholder from "@/constants/placeholder";
 
 const Cart = () => {
   const { colorScheme } = useColorScheme();
@@ -617,10 +618,10 @@ const CartItemCard = ({
             item.thumbnailUrl && item.thumbnailUrl !== ""
               ? item.thumbnailUrl
               : item.type === "course"
-                ? "https://ik.imagekit.io/testkart/placeholders/Online%20Course.jpg"
+                ? Placeholder.COURSE
                 : item.type === "test"
-                  ? "https://ik.imagekit.io/testkart/placeholders/Mock%20Test.jpg"
-                  : "https://ik.imagekit.io/testkart/placeholders/study-notes.png",
+                  ? Placeholder.TEST
+                  : Placeholder.NOTE,
         }}
         className="w-[72px] h-[72px] rounded-xl"
         resizeMode="cover"

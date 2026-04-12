@@ -16,6 +16,7 @@ import * as IntentLauncher from "expo-intent-launcher";
 import * as Sharing from "expo-sharing";
 import { useAuth } from "@/context/AuthContext";
 import { PurchasedProduct } from "../types";
+import Placeholder from "@/constants/placeholder";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -111,8 +112,7 @@ const PurchasedProductCard = ({ product }: PurchasedProductCardProps) => {
         <Image
           source={{
             uri:
-              product.thumbnailUrl ||
-              "https://ik.imagekit.io/testkart/placeholders/study-notes.png",
+              product.thumbnailUrl || Placeholder.NOTE,
           }}
           className="w-full h-full"
           resizeMode="cover"

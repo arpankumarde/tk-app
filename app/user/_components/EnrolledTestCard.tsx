@@ -11,6 +11,7 @@ import {
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { EnrolledTest } from "../types";
+import Placeholder from "@/constants/placeholder";
 
 interface EnrolledTestCardProps {
   test: EnrolledTest;
@@ -21,7 +22,7 @@ const EnrolledTestCard = ({ test }: EnrolledTestCardProps) => {
     test.thumbnailUrl ||
     test.thumbnailImageUrl ||
     test.teacherAvatar ||
-    "https://ik.imagekit.io/testkart/placeholders/Mock%20Test.jpg";
+    Placeholder.TEST;
   const displayExamName = test.examName || test.category || "Mock Test";
 
   const formattedDate = test.enrolledAt

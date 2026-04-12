@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useAuth } from "@/context/AuthContext";
+import Placeholder from "@/constants/placeholder";
 
 interface ProductCardProps {
   product: {
@@ -54,9 +55,7 @@ const ProductCard = ({
     message?: string;
   }>({ visible: false, success: false });
 
-  const displayImage =
-    product?.thumbnailUrl ||
-    "https://ik.imagekit.io/testkart/placeholders/study-notes.png";
+  const displayImage = product?.thumbnailUrl || Placeholder.NOTE;
   const displayAuthor = product?.teacherName || "TestKart Expert";
   const displayCategory = product?.category || "Study Material";
   const reviewCount = product.ratingsCount ?? 0;

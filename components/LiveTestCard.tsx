@@ -10,6 +10,7 @@ import { router } from "expo-router";
 import { useCountdown } from "@/hooks/useCountdown";
 import BlinkingDot from "@/components/BlinkingDot";
 import type { LiveTest } from "@/app/(main)/live/index";
+import Placeholder from "@/constants/placeholder";
 
 const LiveTestCard = ({
   test,
@@ -46,8 +47,7 @@ const LiveTestCard = ({
           <Image
             source={{
               uri:
-                test.thumbnailUrl ||
-                "https://ik.imagekit.io/testkart/placeholders/live.png",
+                test.thumbnailUrl || Placeholder.LIVE,
             }}
             className="w-full h-full"
             resizeMode="cover"

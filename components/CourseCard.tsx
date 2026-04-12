@@ -11,6 +11,7 @@ import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useAuth } from "@/context/AuthContext";
+import Placeholder from "@/constants/placeholder";
 
 interface CourseCardProps {
   course: {
@@ -46,9 +47,7 @@ const CourseCard = ({ course: initialCourse }: CourseCardProps) => {
     message?: string;
   }>({ visible: false, success: false });
 
-  const displayImage =
-    course.thumbnailImageUrl ||
-    "https://ik.imagekit.io/testkart/placeholders/Online%20Course.jpg";
+  const displayImage = course.thumbnailImageUrl || Placeholder.COURSE;
 
   const handlePress = () => {
     router.push(`/(main)/course/${course.slug}` as any);

@@ -2,6 +2,7 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { EnrolledCourse } from "../types";
+import Placeholder from "@/constants/placeholder";
 
 interface EnrolledCourseCardProps {
   course: EnrolledCourse;
@@ -22,8 +23,7 @@ const EnrolledCourseCard = ({ course }: EnrolledCourseCardProps) => {
         <Image
           source={{
             uri:
-              course.thumbnailUrl ||
-              "https://ik.imagekit.io/testkart/placeholders/Online%20Course.jpg",
+              course.thumbnailUrl || Placeholder.COURSE,
           }}
           className="w-full h-full"
           resizeMode="cover"

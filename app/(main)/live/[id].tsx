@@ -18,6 +18,7 @@ import { useColorScheme } from "nativewind";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { WebView } from "react-native-webview";
 import { useAuth } from "@/context/AuthContext";
+import Placeholder from "@/constants/placeholder";
 import { useCountdown } from "@/hooks/useCountdown";
 import Header from "@/components/Header";
 import BlinkingDot from "@/components/BlinkingDot";
@@ -531,8 +532,7 @@ const LiveTestDetails = () => {
               <Image
                 source={{
                   uri:
-                    liveTest.thumbnailUrl ||
-                    "https://ik.imagekit.io/testkart/placeholders/live.png",
+                    liveTest.thumbnailUrl || Placeholder.LIVE,
                 }}
                 className="w-full h-full"
                 resizeMode="cover"

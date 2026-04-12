@@ -18,6 +18,7 @@ import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
 import PDFPreview from "@/components/PDFPreview";
 import { useAuth } from "@/context/AuthContext";
+import Placeholder from "@/constants/placeholder";
 import { useAddToCart } from "@/hooks/useAddToCart";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
@@ -206,8 +207,7 @@ const ProductDetails = () => {
               <Image
                 source={{
                   uri:
-                    product?.thumbnailUrl ||
-                    "https://ik.imagekit.io/testkart/placeholders/study-notes.png",
+                    product?.thumbnailUrl || Placeholder.NOTE,
                 }}
                 className="w-full aspect-video"
                 resizeMode="cover"

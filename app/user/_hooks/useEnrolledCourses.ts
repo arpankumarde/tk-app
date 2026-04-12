@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { EnrolledCourse, CourseProgressResponse } from "../types";
+import Placeholder from "@/constants/placeholder";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -51,9 +52,7 @@ export const useEnrolledCourses = (
             return {
               ...c,
               thumbnailUrl:
-                !isVideo && thumbUrl
-                  ? thumbUrl
-                  : "https://ik.imagekit.io/testkart/placeholders/mock-test-placeholder__FmYrad7s.png",
+                !isVideo && thumbUrl ? thumbUrl : Placeholder.COURSE,
               completionPercentage:
                 progressPayload.completionPercentage ??
                 c.completionPercentage ??
@@ -62,6 +61,7 @@ export const useEnrolledCourses = (
               totalLessons: c.totalLessons || 0,
             };
           } catch (e) {
+            console.error("Error fetching course progress:", e);
             return c;
           }
         }),
