@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Modal,
 } from "react-native";
-import { useColorScheme } from "nativewind";
 import { useRouter } from "expo-router";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useAddToCart } from "@/hooks/useAddToCart";
@@ -31,7 +30,7 @@ interface ProductCardProps {
     category: string;
     isPurchased?: boolean;
     views?: number;
-    reviewsCount?: number;
+    ratingsCount?: number;
   };
   className?: string;
   style?: any;
@@ -42,7 +41,6 @@ const ProductCard = ({
   className = "",
   style = {},
 }: ProductCardProps) => {
-  const { colorScheme } = useColorScheme();
   const { user, token } = useAuth();
   const router = useRouter();
   const [product, setProduct] = useState(initialProduct);
@@ -61,6 +59,22 @@ const ProductCard = ({
     "https://ik.imagekit.io/testkart/placeholders/study-notes.png";
   const displayAuthor = product?.teacherName || "TestKart Expert";
   const displayCategory = product?.category || "Study Material";
+  const reviewCount = product.ratingsCount ?? 0;
+  const hasRating = typeof product.rating === "number" && product.rating > 0;
+  const showReviewMeta = reviewCount > 0 || hasRating;
+  const ratingDisplay =
+    typeof product.rating === "number"
+      ? Number.isInteger(product.rating)
+        ? String(product.rating)
+        : product.rating.toFixed(1)
+      : "0";
+  const teacherInitials = displayAuthor
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || "")
+    .join("") || "TE";
+  const hasTeacherAvatar = !!product.teacherAvatar?.trim();
 
   const handleFreeEnroll = async () => {
     if (!user || !token) {
@@ -146,14 +160,16 @@ const ProductCard = ({
 
             <View className="flex-row items-center mb-3">
               <View className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 mr-2 items-center justify-center overflow-hidden">
-                <Image
-                  source={{
-                    uri:
-                      product.teacherAvatar ||
-                      `https://ui-avatars.com/api/?name=${displayAuthor}&background=random`,
-                  }}
-                  className="w-full h-full"
-                />
+                {hasTeacherAvatar ? (
+                  <Image
+                    source={{ uri: product.teacherAvatar }}
+                    className="w-full h-full"
+                  />
+                ) : (
+                  <Text className="text-slate-600 dark:text-slate-200 text-[10px] font-black">
+                    {teacherInitials}
+                  </Text>
+                )}
               </View>
               <View className="flex-row items-center flex-1 mr-2">
                 <Text
@@ -188,13 +204,13 @@ const ProductCard = ({
                 </Text>
               </View>
               {/* Dot Separator & Reviews */}
-              {product.rating && (
+              {showReviewMeta && (
                 <>
                   <View className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-1" />
                   <View className="flex-row items-center">
                     <MaterialIcons name="star" size={13} color="#F59E0B" />
                     <Text className="text-amber-600 dark:text-amber-500 text-[11px] font-black ml-1">
-                      {product.rating} Reviews
+                      {reviewCount > 0 ? `${ratingDisplay} (${reviewCount})` : ratingDisplay}
                     </Text>
                   </View>
                 </>

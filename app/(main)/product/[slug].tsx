@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
 import PDFPreview from "@/components/PDFPreview";
@@ -242,16 +242,23 @@ const ProductDetails = () => {
                 </View>
                 <View className="flex-1 mr-4">
                   <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
-                    By
+                    Created by
                   </Text>
-                  <View className="flex-row items-center">
-                    <Link
-                      href={`/expert/${product?.teacherSlug}` as any}
-                      className="text-slate-800 dark:text-white font-black text-lg leading-tight -mt-0.5"
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (product?.teacherSlug) {
+                        router.push(`/expert/${product.teacherSlug}` as any);
+                      }
+                    }}
+                    disabled={!product?.teacherSlug}
+                    className="flex-row items-center"
+                  >
+                    <Text
+                      className="text-primary font-black text-lg leading-tight -mt-0.5"
                       numberOfLines={1}
                     >
                       {product?.teacherName || "TestKart Expert"}
-                    </Link>
+                    </Text>
                     {(product?.teacherIsVerified || product?.teacherVerified) && (
                       <MaterialIcons
                         name="verified"
@@ -260,7 +267,7 @@ const ProductDetails = () => {
                         style={{ marginLeft: 4 }}
                       />
                     )}
-                  </View>
+                  </TouchableOpacity>
                 </View>
               </View>
 

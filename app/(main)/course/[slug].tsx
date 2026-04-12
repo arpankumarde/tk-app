@@ -11,7 +11,7 @@ import {
   Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, router, Link } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import BottomTabs from "@/components/BottomTabs";
@@ -312,7 +312,7 @@ const CourseDetails = () => {
 
               {/* Level Badge */}
               <View className="bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-100 dark:border-emerald-500/20 flex-row items-center">
-                <Feather name="trending-up" size={10} color="#10B981" />
+                <Feather name="bar-chart" size={10} color="#10B981" />
                 <Text className="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest ml-1.5" numberOfLines={1}>
                   {course.level}
                 </Text>
@@ -335,13 +335,18 @@ const CourseDetails = () => {
             <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
               Created by{" "}
             </Text>
-            <View className="flex-row items-center">
-              <Link
-                href={`/expert/${course?.teacher?.slug}`}
-                className="text-primary font-bold text-sm"
-              >
+            <TouchableOpacity
+              onPress={() => {
+                if (course?.teacher?.slug) {
+                  router.push(`/expert/${course.teacher.slug}` as any);
+                }
+              }}
+              disabled={!course?.teacher?.slug}
+              className="flex-row items-center"
+            >
+              <Text className="text-primary font-bold text-sm">
                 {course?.teacher?.displayName}
-              </Link>
+              </Text>
               {course?.teacherIsVerified && (
                 <MaterialIcons
                   name="verified"
@@ -350,7 +355,7 @@ const CourseDetails = () => {
                   className="ml-1"
                 />
               )}
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
 

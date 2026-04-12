@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import BottomTabs from "@/components/BottomTabs";
 import { useAuth } from "@/context/AuthContext";
 import { useAddToCart } from "@/hooks/useAddToCart";
@@ -368,13 +368,18 @@ const TestDetails = () => {
               <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
                 Created by{" "}
               </Text>
-              <View className="flex-row items-center">
-                <Link
-                  href={`/expert/${test.teacherSlug}` as any}
-                  className="text-primary font-bold text-sm"
-                >
+              <TouchableOpacity
+                onPress={() => {
+                  if (test.teacherSlug) {
+                    router.push(`/expert/${test.teacherSlug}` as any);
+                  }
+                }}
+                disabled={!test.teacherSlug}
+                className="flex-row items-center"
+              >
+                <Text className="text-primary font-bold text-sm">
                   {test.teacherName || "Expert"}
-                </Link>
+                </Text>
                 {test.teacherIsVerified && (
                   <MaterialIcons
                     name="verified"
@@ -383,7 +388,7 @@ const TestDetails = () => {
                     className="ml-1"
                   />
                 )}
-              </View>
+              </TouchableOpacity>
             </View>
 
             <View className="flex-row items-center">

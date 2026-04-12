@@ -26,6 +26,7 @@ interface PurchasedProductCardProps {
 const PurchasedProductCard = ({ product }: PurchasedProductCardProps) => {
   const { token } = useAuth();
   const [downloading, setDownloading] = useState(false);
+  const displayCategory = product.category?.trim() || "Notes";
 
   const handleDownload = async () => {
     if (!token || downloading) return;
@@ -128,13 +129,11 @@ const PurchasedProductCard = ({ product }: PurchasedProductCardProps) => {
         <Text className="text-slate-500 dark:text-slate-400 font-bold text-xs mb-1">
           By: {product.teacherName || "TestKart Expert"}
         </Text>
-        {product.category ? (
-          <View className="bg-purple-50 dark:bg-purple-900/20 px-2.5 py-0.5 rounded-full self-start">
-            <Text className="text-purple-600 dark:text-purple-400 font-bold text-[10px]">
-              {product.category}
-            </Text>
-          </View>
-        ) : null}
+        <View className="bg-purple-50 dark:bg-purple-900/20 px-2.5 py-0.5 rounded-full self-start">
+          <Text className="text-purple-600 dark:text-purple-400 font-bold text-[10px]">
+            {displayCategory}
+          </Text>
+        </View>
       </View>
 
       <TouchableOpacity

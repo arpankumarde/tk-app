@@ -317,7 +317,7 @@ const ShopScreen = () => {
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sort, setSort] = useState("popular");
+  const [sort, setSort] = useState("newest");
   const [showSortModal, setShowSortModal] = useState(false);
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const [error, setError] = useState<string | null>(null);

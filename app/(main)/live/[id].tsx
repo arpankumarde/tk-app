@@ -605,28 +605,40 @@ const LiveTestDetails = () => {
             </Text> */}
 
             <View className="flex-row items-center mb-5">
-              <Text className="text-slate-500 dark:text-slate-400 text-sm">
-                By:{" "}
+              <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
+                Created by{" "}
               </Text>
-              <Image
-                source={{
-                  uri:
-                    liveTest.teacherAvatarUrl ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(liveTest.teacherName)}&background=FF8A50&color=fff`,
+              <TouchableOpacity
+                onPress={() => {
+                  const expertSlug =
+                    liveTest.teacherSlug || liveTest.teacherProfile?.slug;
+                  if (expertSlug) {
+                    router.push(`/expert/${expertSlug}` as any);
+                  }
                 }}
-                className="w-5 h-5 rounded-full mx-1.5"
-              />
-              <Text className="text-slate-700 dark:text-slate-200 font-bold text-sm">
-                {liveTest.teacherName}
-              </Text>
-              {liveTest.teacherIsVerified && (
-                <MaterialIcons
-                  name="verified"
-                  size={16}
-                  color="#22C55E"
-                  style={{ marginLeft: 4 }}
+                disabled={!(liveTest.teacherSlug || liveTest.teacherProfile?.slug)}
+                className="flex-row items-center"
+              >
+                <Image
+                  source={{
+                    uri:
+                      liveTest.teacherAvatarUrl ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(liveTest.teacherName)}&background=FF8A50&color=fff`,
+                  }}
+                  className="w-5 h-5 rounded-full mx-1.5"
                 />
-              )}
+                <Text className="text-primary font-bold text-sm">
+                  {liveTest.teacherName}
+                </Text>
+                {liveTest.teacherIsVerified && (
+                  <MaterialIcons
+                    name="verified"
+                    size={16}
+                    color="#22C55E"
+                    style={{ marginLeft: 4 }}
+                  />
+                )}
+              </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleShare}
                 className="ml-auto bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 w-9 h-9 rounded-full items-center justify-center"
@@ -637,17 +649,19 @@ const LiveTestDetails = () => {
 
             {/* Time Info */}
             <View className="bg-slate-50 dark:bg-slate-800 rounded-2xl px-4 py-4 mb-6">
-              <View className="flex-row items-center mb-3">
-                <View className="w-7 h-7 bg-orange-50 dark:bg-orange-900/20 rounded-lg items-center justify-center">
-                  <Feather name="calendar" size={13} color="#FF8A50" />
+              {!!liveTest.startTime && (
+                <View className="flex-row items-center mb-3">
+                  <View className="w-7 h-7 bg-orange-50 dark:bg-orange-900/20 rounded-lg items-center justify-center">
+                    <Feather name="calendar" size={13} color="#FF8A50" />
+                  </View>
+                  <Text className="text-slate-500 dark:text-slate-400 text-xs ml-2.5 w-12">
+                    Starts
+                  </Text>
+                  <Text className="text-slate-700 dark:text-slate-200 font-bold text-xs flex-1">
+                    {formatDateTime(liveTest.startTime)}
+                  </Text>
                 </View>
-                <Text className="text-slate-500 dark:text-slate-400 text-xs ml-2.5 w-12">
-                  Starts
-                </Text>
-                <Text className="text-slate-700 dark:text-slate-200 font-bold text-xs flex-1">
-                  {formatDateTime(liveTest.startTime)}
-                </Text>
-              </View>
+              )}
               <View className="flex-row items-center mb-3">
                 <View className="w-7 h-7 bg-orange-50 dark:bg-orange-900/20 rounded-lg items-center justify-center">
                   <Feather name="calendar" size={13} color="#FF8A50" />

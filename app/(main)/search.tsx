@@ -27,6 +27,7 @@ interface CourseResult {
   thumbnailImageUrl: string | null;
   price: number;
   level: string;
+  teacherName?: string;
   teacherDisplayName: string;
   teacherIsVerified: boolean;
 }
@@ -114,7 +115,7 @@ const ResultCard = ({
         </Text>
         <View className="flex-row items-center mt-1">
           <Text
-            className="text-slate-500 dark:text-slate-400 text-xs font-medium flex-1"
+            className="text-slate-500 dark:text-slate-400 text-xs font-medium"
             numberOfLines={1}
           >
             {subtitle}
@@ -211,7 +212,7 @@ const SearchScreen = () => {
   // Trigger search on mount if q param provided
   useEffect(() => {
     if (q) doSearch(q);
-  }, []);
+  }, [q, doSearch]);
 
   const handleSubmit = () => {
     doSearch(query);
@@ -230,11 +231,10 @@ const SearchScreen = () => {
           onPress={() => router.back()}
           className="w-10 h-10 rounded-full bg-gray-50 dark:bg-slate-800 items-center justify-center"
         >
-          <Feather name="arrow-left" size={20} color={isDark ? "#94a3b8" : "#64748b"} />
+          <Feather name="chevron-left" size={20} color={isDark ? "#94a3b8" : "#64748b"} />
         </TouchableOpacity>
 
         <View className="flex-1 flex-row items-center bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-full px-4 h-12">
-          <Feather name="search" size={18} color="#FF8A50" />
           <TextInput
             ref={inputRef}
             value={query}
@@ -242,7 +242,7 @@ const SearchScreen = () => {
             onSubmitEditing={handleSubmit}
             placeholder="Search courses, tests, notes..."
             placeholderTextColor={isDark ? "#475569" : "#94a3b8"}
-            className="flex-1 ml-3 text-slate-800 dark:text-white text-sm font-medium"
+            className="flex-1 text-slate-800 dark:text-white text-sm font-medium"
             returnKeyType="search"
             autoFocus={!q}
           />
@@ -262,7 +262,7 @@ const SearchScreen = () => {
           onPress={handleSubmit}
           className="bg-primary px-4 h-10 rounded-full items-center justify-center shadow-sm shadow-orange-500/30"
         >
-          <Text className="text-white font-black text-sm">Go</Text>
+          <Feather name="search" size={18} color="white" />
         </TouchableOpacity>
       </View>
 
@@ -328,7 +328,7 @@ const SearchScreen = () => {
             <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium">
               <Text className="text-slate-800 dark:text-white font-black">{totalResults} </Text>
               results for{" "}
-              <Text className="text-primary font-black">"{query}"</Text>
+              <Text className="text-primary font-black">{`"${query}"`}</Text>
             </Text>
           </View>
 
@@ -341,7 +341,7 @@ const SearchScreen = () => {
                   key={`course-${c.id}`}
                   thumbnail={c.thumbnailUrl || c.thumbnailImageUrl}
                   title={c.title}
-                  subtitle={c.teacherDisplayName}
+                  subtitle={c.teacherName || c.teacherDisplayName || "TestKart Expert"}
                   badge={c.level}
                   price={c.price}
                   verified={c.teacherIsVerified}
