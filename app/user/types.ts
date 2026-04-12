@@ -269,13 +269,23 @@ export interface WalletBalance {
   };
 }
 
+export type WalletTransactionType =
+  | "prize_credit"
+  | "prize_lock_refund"
+  | "purchase_debit"
+  | "withdrawal_debit";
+
+export type WithdrawalStatus = "pending" | "completed" | "rejected";
+
 export interface WalletTransaction {
   id: number;
-  type: string;
+  transactionType: WalletTransactionType;
   amount: number;
   description: string;
   createdAt: string;
-  status?: string;
+  referenceId?: number | null;
+  studentId?: number;
+  withdrawalStatus?: WithdrawalStatus;
 }
 
 export interface WalletTransactionsResponse {

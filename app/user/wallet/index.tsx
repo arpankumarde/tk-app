@@ -5,7 +5,11 @@ import {
   StatusBar,
   ActivityIndicator,
   RefreshControl,
+  TouchableOpacity,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
 } from "react-native";
+import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
 import { Feather } from "@expo/vector-icons";
@@ -13,66 +17,49 @@ import { useColorScheme } from "nativewind";
 import Header from "@/components/Header";
 import BottomTabs from "@/components/BottomTabs";
 import { useWallet } from "../_hooks/useWallet";
-import { WalletTransaction } from "../types";
+import WalletTransaction from "./_components/WalletTransaction";
+import WalletBank from "./_components/WalletBank";
+import WalletWithdrawl from "./_components/WalletWithdrawl";
+
+type WalletTab = "transactions" | "bank" | "withdrawal";
+
+const TABS: {
+  key: WalletTab;
+  label: string;
+  icon: keyof typeof Feather.glyphMap;
+}[] = [
+  { key: "transactions", label: "Transactions", icon: "list" },
+  { key: "bank", label: "Bank Details", icon: "credit-card" },
+  { key: "withdrawal", label: "Withdrawal", icon: "download" },
+];
 
 function formatCurrency(amount: number) {
   return `₹${amount.toLocaleString("en-IN")}`;
 }
 
-function formatDate(dateStr: string) {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function TransactionItem({ item }: { item: WalletTransaction }) {
-  const isCredit = item.type === "credit";
-
-  return (
-    <View className="flex-row items-center py-4 border-b border-gray-100 dark:border-slate-800">
-      <View
-        className={`w-10 h-10 rounded-full items-center justify-center mr-3 ${
-          isCredit
-            ? "bg-green-50 dark:bg-green-900/20"
-            : "bg-red-50 dark:bg-red-900/20"
-        }`}
-      >
-        <Feather
-          name={isCredit ? "arrow-down-left" : "arrow-up-right"}
-          size={18}
-          color={isCredit ? "#22C55E" : "#EF4444"}
-        />
-      </View>
-      <View className="flex-1">
-        <Text
-          className="text-slate-700 dark:text-slate-200 font-bold text-[15px]"
-          numberOfLines={1}
-        >
-          {item.description || (isCredit ? "Credit" : "Debit")}
-        </Text>
-        <Text className="text-slate-400 text-xs mt-0.5">
-          {formatDate(item.createdAt)}
-        </Text>
-      </View>
-      <Text
-        className={`font-black text-base ${
-          isCredit ? "text-green-600 dark:text-green-400" : "text-red-500 dark:text-red-400"
-        }`}
-      >
-        {isCredit ? "+" : "-"}
-        {formatCurrency(Math.abs(item.amount))}
-      </Text>
-    </View>
-  );
-}
-
 export default function WalletScreen() {
   const { token } = useAuth();
   const { colorScheme } = useColorScheme();
-  const { balance, transactions, loading, refetch } = useWallet(token);
+  const {
+    balance,
+    transactions,
+    loading,
+    loadingMore,
+    hasMore,
+    refetch,
+    loadMore,
+  } = useWallet(token);
+  const [activeTab, setActiveTab] = useState<WalletTab>("transactions");
+
+  const availableBalance = balance?.availableBalance ?? 0;
+
+  const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (activeTab !== "transactions" || !hasMore || loadingMore) return;
+    const { layoutMeasurement, contentOffset, contentSize } = e.nativeEvent;
+    const distanceFromBottom =
+      contentSize.height - (contentOffset.y + layoutMeasurement.height);
+    if (distanceFromBottom < 200) loadMore();
+  };
 
   return (
     <SafeAreaView
@@ -91,6 +78,8 @@ export default function WalletScreen() {
         refreshControl={
           <RefreshControl refreshing={false} onRefresh={refetch} />
         }
+        onScroll={handleScroll}
+        scrollEventThrottle={100}
       >
         {loading && !balance ? (
           <View className="py-20 items-center justify-center">
@@ -105,7 +94,7 @@ export default function WalletScreen() {
                   Available Balance
                 </Text>
                 <Text className="text-white text-4xl font-black">
-                  {formatCurrency(balance?.availableBalance ?? 0)}
+                  {formatCurrency(availableBalance)}
                 </Text>
               </View>
             </View>
@@ -142,25 +131,87 @@ export default function WalletScreen() {
               </View>
             </View>
 
-            {/* Transactions */}
-            <View className="px-6">
-              <Text className="text-xl font-black text-slate-800 dark:text-white mb-3">
-                Transactions
-              </Text>
+            {/* Tabs */}
+            <View className="px-6 mb-4">
+              <View
+                style={{
+                  flexDirection: "row",
+                  backgroundColor:
+                    colorScheme === "dark" ? "#0F172A" : "#F3F4F6",
+                  borderRadius: 16,
+                  padding: 4,
+                }}
+              >
+                {TABS.map((tab) => {
+                  const isActive = activeTab === tab.key;
+                  const inactiveIconColor =
+                    colorScheme === "dark" ? "#94A3B8" : "#64748B";
+                  return (
+                    <TouchableOpacity
+                      key={tab.key}
+                      activeOpacity={0.8}
+                      onPress={() => setActiveTab(tab.key)}
+                      style={{
+                        flex: 1,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        paddingVertical: 10,
+                        borderRadius: 12,
+                        backgroundColor: isActive
+                          ? colorScheme === "dark"
+                            ? "#1E293B"
+                            : "#FFFFFF"
+                          : "transparent",
+                        shadowColor: isActive ? "#000" : "transparent",
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: isActive ? 0.05 : 0,
+                        shadowRadius: 2,
+                        elevation: isActive ? 1 : 0,
+                      }}
+                    >
+                      <Feather
+                        name={tab.icon}
+                        size={14}
+                        color={isActive ? "#FF8A50" : inactiveIconColor}
+                      />
+                      <Text
+                        style={{
+                          marginLeft: 6,
+                          fontSize: 12,
+                          fontWeight: "700",
+                          color: isActive ? "#FF8A50" : inactiveIconColor,
+                        }}
+                      >
+                        {tab.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
 
-              {transactions.length > 0 ? (
-                <View className="bg-white dark:bg-slate-900 rounded-3xl px-5 border border-gray-100 dark:border-slate-800">
-                  {transactions.map((tx) => (
-                    <TransactionItem key={tx.id} item={tx} />
-                  ))}
-                </View>
-              ) : (
-                <View className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-gray-100 dark:border-slate-800 border-dashed items-center">
-                  <Feather name="inbox" size={32} color="#CBD5E1" />
-                  <Text className="text-slate-400 font-bold mt-2">
-                    No transactions yet
-                  </Text>
-                </View>
+            {/* Tab Content */}
+            <View className="px-6">
+              {activeTab === "transactions" && (
+                <WalletTransaction
+                  transactions={transactions}
+                  loadingMore={loadingMore}
+                  hasMore={hasMore}
+                />
+              )}
+
+              {activeTab === "bank" && (
+                <WalletBank token={token} colorScheme={colorScheme} />
+              )}
+
+              {activeTab === "withdrawal" && (
+                <WalletWithdrawl
+                  token={token}
+                  availableBalance={availableBalance}
+                  colorScheme={colorScheme}
+                  onWithdrawalCreated={refetch}
+                />
               )}
             </View>
           </>
