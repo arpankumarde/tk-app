@@ -18,6 +18,8 @@ import Header from "@/components/Header";
 import MockTestCard from "@/components/MockTestCard";
 import ProductCard from "@/components/ProductCard";
 import CourseCard from "@/components/CourseCard";
+import LiveTestCard from "@/components/LiveTestCard";
+import type { LiveTest } from "@/app/(main)/live/index";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -107,7 +109,14 @@ interface Data {
   teacher: Teacher;
   courses: any[];
   tests: Test[];
-  liveTests: Test[];
+  liveTests: (
+    Partial<LiveTest> & {
+      id: number;
+      title: string;
+      creatorName?: string;
+      studentsEnrolled?: number;
+    }
+  )[];
   products: Product[];
 }
 
@@ -128,6 +137,9 @@ const ExpertDetails = () => {
   const [data, setData] = useState<Data | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>("tests");
+  const [liveTestsCanonicalMap, setLiveTestsCanonicalMap] = useState<
+    Record<number, Partial<LiveTest>>
+  >({});
 
   useEffect(() => {
     const fetchExpertDetails = async () => {
@@ -148,6 +160,39 @@ const ExpertDetails = () => {
 
     if (slug) fetchExpertDetails();
   }, [slug]);
+
+  useEffect(() => {
+    const ids = (data?.liveTests || []).map((t) => t.id).filter(Boolean);
+    if (ids.length === 0) {
+      setLiveTestsCanonicalMap({});
+      return;
+    }
+
+    const fetchCanonicalLiveTests = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/_api/live-tests/list?status=`);
+        const json = await response.json();
+        const payload = json.json || json;
+        const list: LiveTest[] = payload.tests || [];
+
+        const idSet = new Set(ids);
+        const nextMap: Record<number, Partial<LiveTest>> = {};
+
+        list.forEach((item) => {
+          if (idSet.has(item.id)) {
+            nextMap[item.id] = item;
+          }
+        });
+
+        setLiveTestsCanonicalMap(nextMap);
+      } catch (error) {
+        console.error("Error fetching canonical live tests:", error);
+        setLiveTestsCanonicalMap({});
+      }
+    };
+
+    fetchCanonicalLiveTests();
+  }, [data?.liveTests]);
 
   const handleShare = async () => {
     try {
@@ -235,10 +280,57 @@ const ExpertDetails = () => {
     courses: courses?.length || 0,
   };
 
-  const totalStudents = [...(tests || []), ...(liveTests || [])].reduce(
-    (acc, t) => acc + (t.studentsEnrolled || 0),
-    0,
-  );
+  const totalStudents =
+    (tests || []).reduce((acc, t) => acc + (t.studentsEnrolled || 0), 0) +
+    (liveTests || []).reduce(
+      (acc, t) => acc + (t.studentsEnrolled || t.enrolledCount || 0),
+      0,
+    );
+
+  const mapToLiveCardTest = (
+    liveTest: Data["liveTests"][number],
+  ): LiveTest => {
+    const canonical = liveTestsCanonicalMap[liveTest.id] || {};
+    const merged = { ...liveTest, ...canonical };
+
+    const startTime =
+      merged.startTime || new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const endTime =
+      merged.endTime || new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+
+    return {
+      id: merged.id,
+      title: merged.title || liveTest.title,
+      description: merged.description || "",
+      price: merged.price ?? 0,
+      startTime,
+      endTime,
+      registrationDeadline: merged.registrationDeadline || null,
+      maxSeats: merged.maxSeats ?? 0,
+      enrolledCount: merged.enrolledCount ?? merged.studentsEnrolled ?? 0,
+      thumbnailUrl: merged.thumbnailUrl || null,
+      hasPrizes: merged.hasPrizes ?? false,
+      mockTestId: merged.mockTestId ?? merged.id,
+      teacherName: merged.teacherName || merged.creatorName || teacher.displayName,
+      teacherIsVerified: merged.teacherIsVerified ?? teacher.isVerified,
+      durationMinutes: Number(merged.durationMinutes ?? 0),
+      language: merged.language || "English",
+      examSlug: merged.examSlug || "mock-test",
+      actualQuestionCount: String(merged.actualQuestionCount ?? 0),
+      subjects:
+        merged.subjects ||
+        (merged.examSlug ? merged.examSlug.replace(/-/g, " ") : "General"),
+      status: merged.status || "upcoming",
+      isEnrolled: merged.isEnrolled ?? false,
+      hasAttempted: merged.hasAttempted ?? false,
+      rating: merged.rating ?? null,
+      reviewsCount: merged.reviewsCount,
+      totalPrizePool: merged.totalPrizePool,
+      firstPrize: merged.firstPrize,
+      secondPrize: merged.secondPrize,
+      thirdPrize: merged.thirdPrize,
+    };
+  };
 
   return (
     <View className="flex-1 bg-white dark:bg-slate-900">
@@ -481,7 +573,7 @@ const ExpertDetails = () => {
                         });
                       }
                       return date.toString();
-                    } catch (e) {
+                    } catch {
                       return date?.toString() || "";
                     }
                   };
@@ -629,9 +721,15 @@ const ExpertDetails = () => {
             {activeTab === "liveTests" && (
               <View>
                 {liveTests?.length > 0 ? (
-                  liveTests.map((test) => (
-                    <MockTestCard key={test.id} test={test} />
-                  ))
+                  <View className="px-5">
+                    {liveTests.map((test) => (
+                      <LiveTestCard
+                        key={test.id}
+                        test={mapToLiveCardTest(test)}
+                        colorScheme={colorScheme}
+                      />
+                    ))}
+                  </View>
                 ) : (
                   <EmptyState label="No live tests yet" />
                 )}

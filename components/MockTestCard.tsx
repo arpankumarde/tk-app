@@ -303,7 +303,7 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
                   }
                 }}
                 disabled={addingToCart || enrolling}
-                className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} flex-row items-center justify-center px-4 py-3 rounded-xl shadow-lg w-40 mr-3`}
+                className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} flex-row items-center justify-center px-6 py-3.5 rounded-xl shadow-lg w-48 mr-4`}
               >
                 {addingToCart || enrolling ? (
                   <ActivityIndicator size="small" color="white" />

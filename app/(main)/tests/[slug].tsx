@@ -97,6 +97,19 @@ interface FreeEnrollResponse {
   };
 }
 
+interface StartAttemptResponse {
+  json?: {
+    attemptId: number;
+    startedAt: string;
+    message?: string;
+    error?: string;
+  };
+  attemptId?: number;
+  startedAt?: string;
+  message?: string;
+  error?: string;
+}
+
 const TestDetails = () => {
   const { slug } = useLocalSearchParams();
   const router = useRouter();
@@ -108,6 +121,7 @@ const TestDetails = () => {
   const [loading, setLoading] = useState(true);
   const [expandedItems, setExpandedItems] = useState<number[]>([]);
   const [enrolling, setEnrolling] = useState(false);
+  const [startingAttempt, setStartingAttempt] = useState(false);
   const [enrollResult, setEnrollResult] = useState<{
     visible: boolean;
     success: boolean;
@@ -158,7 +172,7 @@ const TestDetails = () => {
       return;
     }
     try {
-      setEnrolling(true);
+      setStartingAttempt(true);
       const res = await fetch(`${BASE_URL}/_api/tests/enroll-free`, {
         method: "POST",
         headers: {
@@ -196,6 +210,65 @@ const TestDetails = () => {
     } finally {
       setEnrolling(false);
     }
+  };
+
+  const startTestItemAttempt = async (testItemId: number) => {
+    if (!user || !token) {
+      router.push("/login");
+      return;
+    }
+
+    try {
+      setEnrolling(true);
+
+      const startResponse = await fetch(
+        `${BASE_URL}/_api/student/test-item/start-attempt`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ json: { testItemId } }),
+        },
+      );
+
+      const startData: StartAttemptResponse = await startResponse.json();
+      const payload = startData.json || startData;
+
+      if (!startResponse.ok || !payload?.attemptId || !payload?.startedAt) {
+        throw new Error(
+          payload?.message || payload?.error || "Could not start free test.",
+        );
+      }
+
+      router.push({
+        pathname: "/user/portal/test/[attemptId]",
+        params: {
+          attemptId: String(payload.attemptId),
+          testItemId: String(testItemId),
+          startedAt: encodeURIComponent(payload.startedAt),
+        },
+      });
+    } catch (err: any) {
+      setEnrollResult({
+        visible: true,
+        success: false,
+        message: err?.message || "Could not start free test.",
+      });
+    } finally {
+      setStartingAttempt(false);
+    }
+  };
+
+  const handleStartFreeTest = async () => {
+    const targetItem = items.find((item) => item.isFree) || items[0];
+    if (!targetItem) {
+      handleFreeEnroll();
+      return;
+    }
+
+    await startTestItemAttempt(targetItem.id);
   };
 
   const toggleItem = (index: number) => {
@@ -354,14 +427,8 @@ const TestDetails = () => {
         {/* Package Stats Card */}
         <View className="px-6 mb-8">
           <View className="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-5 border border-gray-100 dark:border-slate-700">
-            <Text className="text-slate-800 dark:text-white font-black text-lg mb-1">
+            <Text className="text-slate-800 dark:text-white font-black text-lg mb-5">
               This package includes
-            </Text>
-            <Text className="text-slate-500 dark:text-slate-400 text-xs font-medium mb-5">
-              {test.totalTests || items.length} tests
-              {test.freeTestsCount > 0 &&
-                ` • ${test.freeTestsCount} free`} • {totalQuestions} questions •{" "}
-              {totalDuration} min total
             </Text>
 
             <View className="flex-row flex-wrap">
@@ -537,18 +604,10 @@ const TestDetails = () => {
                         </View>
                       ))}
 
-                      {/* {item.isFree && (
+                      {item.isFree && (
                         <TouchableOpacity
-                          onPress={() => {
-                            if (!user) {
-                              router.push("/login");
-                              return;
-                            }
-                            router.push({
-                              pathname: "/user/portal/[slug]",
-                              params: { slug: String(item.id) },
-                            });
-                          }}
+                          onPress={() => startTestItemAttempt(item.id)}
+                          disabled={startingAttempt}
                           className="mt-4 bg-emerald-500 h-11 rounded-2xl flex-row items-center justify-center shadow-lg shadow-emerald-500/20"
                         >
                           <Feather name="play" size={16} color="white" />
@@ -556,7 +615,7 @@ const TestDetails = () => {
                             Take Test
                           </Text>
                         </TouchableOpacity>
-                      )} */}
+                      )}
                     </View>
                   )}
                 </View>
@@ -696,7 +755,7 @@ const TestDetails = () => {
         <TouchableOpacity
           onPress={
             isFree
-              ? handleFreeEnroll
+              ? handleStartFreeTest
               : async () => {
                   const result = await addToCart(test.id, "test");
                   if (result.success) {
@@ -710,18 +769,14 @@ const TestDetails = () => {
                   }
                 }
           }
-          disabled={enrolling || addingToCart || (isFree && test.isEnrolled)}
+          disabled={addingToCart || (isFree && (startingAttempt || enrolling))}
           className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} h-14 w-44 rounded-xl items-center justify-center shadow-lg disabled:opacity-60`}
         >
-          {enrolling || addingToCart ? (
+          {addingToCart || (isFree && (startingAttempt || enrolling)) ? (
             <ActivityIndicator color="white" />
           ) : (
             <Text className="text-white text-lg font-black">
-              {isFree
-                ? test.isEnrolled
-                  ? "Enrolled"
-                  : "Enroll Free"
-                : "Buy Now"}
+              {isFree ? (!user || !token ? "Login to Start" : "Start Test") : "Buy Now"}
             </Text>
           )}
         </TouchableOpacity>
