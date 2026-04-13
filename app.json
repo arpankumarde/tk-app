@@ -2,7 +2,7 @@
   "expo": {
     "name": "Testkart",
     "slug": "testkart",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "testkart",
@@ -13,7 +13,7 @@
     },
     "android": {
       "package": "com.testkart.mocktest.courses.studynotes",
-      "versionCode": 16,
+      "versionCode": 17,
       "adaptiveIcon": {
         "backgroundColor": "#FF8A50",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -28,7 +28,6 @@
           "autoVerify": true,
           "data": [
             { "scheme": "https", "host": "testkart.in" },
-            { "scheme": "https", "host": "www.testkart.in" },
             { "path": "/" },
             { "path": "/course" },
             { "pathPrefix": "/course/" },
