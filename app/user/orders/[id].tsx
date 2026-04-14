@@ -13,9 +13,11 @@ import { useAuth } from "@/context/AuthContext";
 import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams, router } from "expo-router";
 import { useOrderDetails } from "../_hooks/useOrders";
+import Placeholder from "@/constants/placeholder";
+import { OrderItemType, OrderStatus } from "../types";
 
 const statusColors: Record<
-  string,
+  OrderStatus,
   { bg: string; text: string; label: string }
 > = {
   completed: {
@@ -27,11 +29,6 @@ const statusColors: Record<
     bg: "bg-yellow-50 dark:bg-yellow-900/20",
     text: "text-yellow-600 dark:text-yellow-400",
     label: "Pending",
-  },
-  processing: {
-    bg: "bg-blue-50 dark:bg-blue-900/20",
-    text: "text-blue-600 dark:text-blue-400",
-    label: "Processing",
   },
   cancelled: {
     bg: "bg-red-50 dark:bg-red-900/20",
@@ -45,8 +42,8 @@ const statusColors: Record<
   },
 };
 
-const getStatusStyle = (status: string) =>
-  statusColors[status.toLowerCase()] || {
+const getStatusStyle = (status: OrderStatus) =>
+  statusColors[status] || {
     bg: "bg-gray-50 dark:bg-gray-900/20",
     text: "text-gray-600 dark:text-gray-400",
     label: status,
@@ -61,6 +58,19 @@ const formatDate = (dateStr: string) => {
     hour: "2-digit",
     minute: "2-digit",
   });
+};
+
+const getPlaceholder = (itemType: OrderItemType) => {
+  switch (itemType) {
+    case "course":
+      return Placeholder.COURSE;
+    case "test":
+      return Placeholder.TEST;
+    case "product":
+      return Placeholder.NOTE;
+    default:
+      return null;
+  }
 };
 
 export default function OrderDetailsScreen() {
@@ -160,9 +170,11 @@ export default function OrderDetailsScreen() {
                 key={item.orderItemId}
                 className={`flex-row items-center p-4 ${index !== order.items.length - 1 ? "border-b border-gray-50 dark:border-slate-800" : ""}`}
               >
-                {item.thumbnailUrl ? (
+                {item.thumbnailUrl || getPlaceholder(item.itemType) ? (
                   <Image
-                    source={{ uri: item.thumbnailUrl }}
+                    source={{
+                      uri: item.thumbnailUrl || getPlaceholder(item.itemType)!,
+                    }}
                     className="w-16 h-16 rounded-xl mr-3"
                     resizeMode="cover"
                   />
