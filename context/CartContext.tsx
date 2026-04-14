@@ -45,6 +45,13 @@ interface CartContextType {
   eligibleItemIds: number[];
   initiatePayment: () => Promise<any>;
   verifyPayment: (params: any) => Promise<any>;
+  walletPurchase: () => Promise<{
+    success: boolean;
+    orderId?: number;
+    walletBalanceAfter?: number;
+    amountDeducted?: number;
+    error?: string;
+  }>;
 }
 
 const computeTotals = (items: CartItem[], promoDiscount = 0): CartData => {
@@ -315,11 +322,56 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
           message: payload.message as string | undefined,
         };
       } catch (error) {
+        console.error("Error verifying payment:", error);
         return { success: false, error: "Something went wrong" };
       }
     },
     [token],
   );
+
+  const walletPurchase = useCallback(async () => {
+    if (!token) return { success: false, error: "Not authenticated" };
+
+    try {
+      const body: Record<string, any> = {};
+      if (appliedPromoCodeId != null) body.promoCodeId = appliedPromoCodeId;
+
+      const response = await fetch(`${BASE_URL}/_api/student/wallet/purchase`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ json: body }),
+      });
+
+      const data = await response.json();
+      const payload = data.json || data;
+
+      if (!response.ok || payload.error) {
+        const errMsg = Array.isArray(payload.error)
+          ? payload.error.map((e: any) => e.message).join(", ")
+          : payload.error || "Failed to complete wallet purchase";
+        return { success: false, error: errMsg };
+      }
+
+      setAppliedPromoDiscount(0);
+      setAppliedPromoCode(null);
+      setAppliedPromoCodeId(null);
+      setEligibleItemIds([]);
+      await fetchCart(true);
+
+      return {
+        success: true,
+        orderId: payload.orderId as number,
+        walletBalanceAfter: payload.walletBalanceAfter as number,
+        amountDeducted: payload.amountDeducted as number,
+      };
+    } catch (error) {
+      console.error("Error during wallet purchase:", error);
+      return { success: false, error: "Something went wrong" };
+    }
+  }, [token, appliedPromoCodeId, fetchCart]);
 
   useEffect(() => {
     fetchCart();
@@ -339,6 +391,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         eligibleItemIds,
         initiatePayment,
         verifyPayment,
+        walletPurchase,
       }}
     >
       {children}
