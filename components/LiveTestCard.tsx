@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-} from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useCountdown } from "@/hooks/useCountdown";
@@ -43,7 +38,9 @@ const LiveTestCard = ({
     : test.endTime;
 
   const timeLeft = useCountdown(countdownTarget);
-  const countdownLabel = isDeadlineActive ? "Registration Closes In" : "Ends In";
+  const countdownLabel = isDeadlineActive
+    ? "Registration Closes In"
+    : "Ends In";
 
   return (
     <TouchableOpacity
@@ -56,8 +53,7 @@ const LiveTestCard = ({
         <View className="relative w-full aspect-video bg-slate-100 dark:bg-slate-900">
           <Image
             source={{
-              uri:
-                test.thumbnailUrl || Placeholder.LIVE,
+              uri: test.thumbnailUrl || Placeholder.LIVE,
             }}
             className="w-full h-full"
             resizeMode="cover"
@@ -74,14 +70,24 @@ const LiveTestCard = ({
               </View>
             ) : isEnded ? (
               <View className="bg-slate-600 px-3 py-1 rounded-full flex-row items-center border border-slate-500 shadow-lg">
-                <Feather name="check-circle" size={10} color="white" style={{ marginRight: 4 }} />
+                <Feather
+                  name="check-circle"
+                  size={10}
+                  color="white"
+                  style={{ marginRight: 4 }}
+                />
                 <Text className="text-white font-black text-[10px] uppercase tracking-wider">
                   ENDED
                 </Text>
               </View>
             ) : (
               <View className="bg-blue-500 px-3 py-1 rounded-full flex-row items-center border border-blue-400 shadow-lg">
-                <Feather name="clock" size={10} color="white" style={{ marginRight: 4 }} />
+                <Feather
+                  name="clock"
+                  size={10}
+                  color="white"
+                  style={{ marginRight: 4 }}
+                />
                 <Text className="text-white font-black text-[10px] uppercase tracking-wider">
                   UPCOMING
                 </Text>
@@ -210,6 +216,56 @@ const LiveTestCard = ({
               </Text>
             </View>
           )}
+
+          <View
+            className={`h-12 rounded-xl flex-row items-center justify-center ${timeLeft ? "mt-3" : ""} ${
+              test.hasAttempted
+                ? "bg-slate-400 dark:bg-slate-600"
+                : test.isEnrolled && isLive
+                  ? "bg-emerald-500"
+                  : isEnded ||
+                      (!test.isEnrolled && test.enrolledCount >= test.maxSeats)
+                    ? "bg-slate-300 dark:bg-slate-700"
+                    : test.isEnrolled
+                      ? "bg-emerald-500"
+                      : test.price === 0
+                        ? "bg-emerald-500"
+                        : "bg-primary"
+            }`}
+          >
+            <Feather
+              name={
+                test.hasAttempted
+                  ? "check-circle"
+                  : test.isEnrolled && isLive
+                    ? "play-circle"
+                    : isEnded ||
+                        (!test.isEnrolled &&
+                          test.enrolledCount >= test.maxSeats)
+                      ? "x-circle"
+                      : test.isEnrolled
+                        ? "check-circle"
+                        : "zap"
+              }
+              size={16}
+              color="white"
+            />
+            <Text className="text-white text-sm font-black ml-2">
+              {test.hasAttempted
+                ? "Already Attempted"
+                : test.isEnrolled && isLive
+                  ? "Start Test"
+                  : isEnded
+                    ? "Enrollment Closed"
+                    : !test.isEnrolled && test.enrolledCount >= test.maxSeats
+                      ? "Registration Closed"
+                      : test.isEnrolled
+                        ? "Already Enrolled"
+                        : test.price === 0
+                          ? "Enroll for Free"
+                          : `Enroll for ₹${test.price}`}
+            </Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>

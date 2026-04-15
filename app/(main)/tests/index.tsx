@@ -115,11 +115,15 @@ function FilterSidebarContent({
   }, [translateY]);
 
   const handleClose = useCallback(() => {
-    translateY.value = withTiming(sheetHeight, { duration: 300 }, (finished) => {
-      if (finished) {
-        scheduleOnRN(onClose);
-      }
-    });
+    translateY.value = withTiming(
+      sheetHeight,
+      { duration: 300 },
+      (finished) => {
+        if (finished) {
+          scheduleOnRN(onClose);
+        }
+      },
+    );
   }, [onClose, sheetHeight, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -135,17 +139,21 @@ function FilterSidebarContent({
   };
 
   const handleApply = () => {
-    translateY.value = withTiming(sheetHeight, { duration: 250 }, (finished) => {
-      if (finished) {
-        scheduleOnRN(onApply, {
-          search,
-          priceType,
-          minPrice,
-          maxPrice,
-          language: lang,
-        });
-      }
-    });
+    translateY.value = withTiming(
+      sheetHeight,
+      { duration: 250 },
+      (finished) => {
+        if (finished) {
+          scheduleOnRN(onApply, {
+            search,
+            priceType,
+            minPrice,
+            maxPrice,
+            language: lang,
+          });
+        }
+      },
+    );
   };
 
   return (
@@ -162,12 +170,13 @@ function FilterSidebarContent({
       {/* Sheet with Manual Slide */}
       <Animated.View
         className="absolute bottom-0 w-full bg-white dark:bg-slate-900 rounded-t-[40px] shadow-2xl overflow-hidden"
-        style={[
-          { height: sheetHeight },
-          animatedStyle
-        ]}
+        style={[{ height: sheetHeight }, animatedStyle]}
       >
-        <SafeAreaView edges={["bottom"]} className="flex-1" style={{ backgroundColor: isDark ? "#0f172a" : "#ffffff" }}>
+        <SafeAreaView
+          edges={["bottom"]}
+          className="flex-1"
+          style={{ backgroundColor: isDark ? "#0f172a" : "#ffffff" }}
+        >
           {/* Drag Handle Container */}
           <View className="items-center pt-3 pb-1">
             <View className="w-12 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full" />
@@ -196,7 +205,10 @@ function FilterSidebarContent({
             </TouchableOpacity>
           </View>
 
-          <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
+          <ScrollView
+            className="flex-1 px-6 pt-6"
+            showsVerticalScrollIndicator={false}
+          >
             <View className="mb-8">
               <Text className="text-base font-bold text-slate-800 dark:text-white mb-3">
                 Search
@@ -323,7 +335,10 @@ function FilterSidebarContent({
                 Select Language
               </Text>
             </View>
-            <ScrollView className="max-h-[300px]" showsVerticalScrollIndicator={false}>
+            <ScrollView
+              className="max-h-[300px]"
+              showsVerticalScrollIndicator={false}
+            >
               {LANGUAGES.map((l) => (
                 <TouchableOpacity
                   key={l}
@@ -436,15 +451,7 @@ const ShopScreen = () => {
         setLoadingMore(false);
       }
     },
-    [
-      sort,
-      searchQuery,
-      priceType,
-      minPrice,
-      maxPrice,
-      selectedLanguage,
-      token,
-    ],
+    [sort, searchQuery, priceType, minPrice, maxPrice, selectedLanguage, token],
   );
 
   useEffect(() => {
@@ -506,11 +513,6 @@ const ShopScreen = () => {
       >
         {/* Header Section */}
         <View className="px-6 pt-5 pb-4">
-          <View className="self-start bg-orange-100 dark:bg-orange-900/25 px-3 py-1 rounded-full mb-3 border border-orange-200 dark:border-orange-800/40">
-            <Text className="text-primary text-[10px] font-black uppercase tracking-wider">
-              Mock Test Zone
-            </Text>
-          </View>
           <Text className="text-[34px] font-extrabold text-slate-800 dark:text-white leading-[40px]">
             Online Mock Tests
           </Text>

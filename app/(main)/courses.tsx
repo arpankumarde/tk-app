@@ -86,11 +86,15 @@ function FilterSidebarContent({
   }, [translateY]);
 
   const handleClose = useCallback(() => {
-    translateY.value = withTiming(sheetHeight, { duration: 300 }, (finished) => {
-      if (finished) {
-        scheduleOnRN(onClose);
-      }
-    });
+    translateY.value = withTiming(
+      sheetHeight,
+      { duration: 300 },
+      (finished) => {
+        if (finished) {
+          scheduleOnRN(onClose);
+        }
+      },
+    );
   }, [onClose, sheetHeight, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -118,10 +122,7 @@ function FilterSidebarContent({
       {/* Sheet with Manual Slide */}
       <Animated.View
         className="absolute bottom-0 w-full bg-white dark:bg-slate-900 rounded-t-[40px] shadow-2xl overflow-hidden"
-        style={[
-          { height: sheetHeight },
-          animatedStyle
-        ]}
+        style={[{ height: sheetHeight }, animatedStyle]}
       >
         <SafeAreaView edges={["bottom"]} className="flex-1">
           {/* Drag Handle Container */}
@@ -156,7 +157,10 @@ function FilterSidebarContent({
           </View>
           <View className="h-[1px] bg-gray-100 dark:bg-slate-800 mx-7" />
 
-          <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
+          <ScrollView
+            className="flex-1 px-6 pt-6"
+            showsVerticalScrollIndicator={false}
+          >
             {/* Search */}
             <View className="mb-8">
               <Text className="text-base font-bold text-slate-800 dark:text-white mb-3">
@@ -253,11 +257,15 @@ function FilterSidebarContent({
           <View className="p-6 border-t border-gray-100 dark:border-slate-800">
             <TouchableOpacity
               onPress={() => {
-                translateY.value = withTiming(sheetHeight, { duration: 250 }, (finished) => {
-                  if (finished) {
-                    scheduleOnRN(onApply, { search, price, level, lang });
-                  }
-                });
+                translateY.value = withTiming(
+                  sheetHeight,
+                  { duration: 250 },
+                  (finished) => {
+                    if (finished) {
+                      scheduleOnRN(onApply, { search, price, level, lang });
+                    }
+                  },
+                );
               }}
               className="bg-primary h-14 rounded-2xl items-center justify-center shadow-lg shadow-orange-500/30"
             >
@@ -493,13 +501,6 @@ const CourseScreen = () => {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Header Section */}
         <View className="px-6 pt-6 pb-4">
-          <View className="flex-row items-center justify-between mb-2">
-            <View className="bg-orange-100 dark:bg-orange-900/30 px-3 py-1 rounded-full">
-              <Text className="text-primary text-[10px] font-black uppercase tracking-widest">
-                Premium Learning
-              </Text>
-            </View>
-          </View>
           <Text className="text-4xl font-black text-slate-800 dark:text-white leading-[48px]">
             Online Courses
           </Text>

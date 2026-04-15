@@ -237,11 +237,6 @@ const LiveTests = () => {
       >
         {/* Hero Text Section */}
         <View className="px-6 pt-6 pb-4">
-          <View className="self-start bg-orange-100 dark:bg-orange-900/30 px-3 py-1 rounded-full mb-3 border border-orange-200 dark:border-orange-800/40">
-            <Text className="text-primary text-[10px] font-black uppercase tracking-widest">
-              Real-time Exams
-            </Text>
-          </View>
           <Text className="text-3xl font-extrabold text-slate-800 dark:text-white leading-9">
             Live Competitive Tests
           </Text>

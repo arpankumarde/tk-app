@@ -65,7 +65,9 @@ function FilterSidebarContent({
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
   const [search, setSearch] = useState(initialFilters.search);
-  const [selectedCats, setSelectedCats] = useState<string[]>(initialFilters.categories);
+  const [selectedCats, setSelectedCats] = useState<string[]>(
+    initialFilters.categories,
+  );
   const [minPrice, setMinPrice] = useState(initialFilters.minPrice);
   const [maxPrice, setMaxPrice] = useState(initialFilters.maxPrice);
   const [lang, setLang] = useState(initialFilters.language);
@@ -79,11 +81,15 @@ function FilterSidebarContent({
   }, [translateY]);
 
   const handleClose = useCallback(() => {
-    translateY.value = withTiming(sheetHeight, { duration: 300 }, (finished) => {
-      if (finished) {
-        scheduleOnRN(onClose);
-      }
-    });
+    translateY.value = withTiming(
+      sheetHeight,
+      { duration: 300 },
+      (finished) => {
+        if (finished) {
+          scheduleOnRN(onClose);
+        }
+      },
+    );
   }, [onClose, sheetHeight, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -99,17 +105,21 @@ function FilterSidebarContent({
   };
 
   const handleApply = () => {
-    translateY.value = withTiming(sheetHeight, { duration: 250 }, (finished) => {
-      if (finished) {
-        scheduleOnRN(onApply, {
-          search,
-          categories: selectedCats,
-          minPrice,
-          maxPrice,
-          language: lang,
-        });
-      }
-    });
+    translateY.value = withTiming(
+      sheetHeight,
+      { duration: 250 },
+      (finished) => {
+        if (finished) {
+          scheduleOnRN(onApply, {
+            search,
+            categories: selectedCats,
+            minPrice,
+            maxPrice,
+            language: lang,
+          });
+        }
+      },
+    );
   };
 
   return (
@@ -126,12 +136,13 @@ function FilterSidebarContent({
       {/* Sheet with Manual Slide */}
       <Animated.View
         className="absolute bottom-0 w-full bg-white dark:bg-slate-900 rounded-t-[40px] shadow-2xl overflow-hidden"
-        style={[
-          { height: sheetHeight },
-          animatedStyle
-        ]}
+        style={[{ height: sheetHeight }, animatedStyle]}
       >
-        <SafeAreaView edges={["bottom"]} className="flex-1" style={{ backgroundColor: isDark ? "#0f172a" : "#ffffff" }}>
+        <SafeAreaView
+          edges={["bottom"]}
+          className="flex-1"
+          style={{ backgroundColor: isDark ? "#0f172a" : "#ffffff" }}
+        >
           {/* Drag Handle Container */}
           <View className="items-center pt-3 pb-1">
             <View className="w-12 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full" />
@@ -160,7 +171,10 @@ function FilterSidebarContent({
             </TouchableOpacity>
           </View>
 
-          <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
+          <ScrollView
+            className="flex-1 px-6 pt-6"
+            showsVerticalScrollIndicator={false}
+          >
             {/* Search */}
             <View className="mb-8">
               <Text className="text-base font-bold text-slate-800 dark:text-white mb-3">
@@ -191,14 +205,16 @@ function FilterSidebarContent({
                       key={cat}
                       onPress={() => setSelectedCats([cat])}
                       className={`px-4 py-2 rounded-xl border ${
-                        isActive 
-                        ? "bg-orange-50 border-primary" 
-                        : "bg-gray-50 dark:bg-slate-800/50 border-gray-100 dark:border-slate-700"
+                        isActive
+                          ? "bg-orange-50 border-primary"
+                          : "bg-gray-50 dark:bg-slate-800/50 border-gray-100 dark:border-slate-700"
                       }`}
                     >
-                      <Text 
+                      <Text
                         className={`text-sm font-bold ${
-                          isActive ? "text-primary" : "text-slate-500 dark:text-slate-400"
+                          isActive
+                            ? "text-primary"
+                            : "text-slate-500 dark:text-slate-400"
                         }`}
                       >
                         {cat}
@@ -281,7 +297,10 @@ function FilterSidebarContent({
                 Select Language
               </Text>
             </View>
-            <ScrollView className="max-h-[300px]" showsVerticalScrollIndicator={false}>
+            <ScrollView
+              className="max-h-[300px]"
+              showsVerticalScrollIndicator={false}
+            >
               {languages.map((l) => (
                 <TouchableOpacity
                   key={l}
@@ -371,13 +390,16 @@ const ShopScreen = () => {
         setError(null);
 
         let url = `${BASE_URL}/_api/shop/list?sort=${sort}&page=${pageNum}&limit=${PAGE_LIMIT}`;
-        
-        if (searchQuery.trim()) url += `&search=${searchQuery.trim().replace(/ /g, "+")}`;
+
+        if (searchQuery.trim())
+          url += `&search=${searchQuery.trim().replace(/ /g, "+")}`;
         if (selectedCategories[0] !== "All Categories") {
           url += `&category=${selectedCategories[0].replace(/ /g, "+")}`;
         }
-        if (minPrice.trim()) url += `&minPrice=${encodeURIComponent(minPrice.trim())}`;
-        if (maxPrice.trim()) url += `&maxPrice=${encodeURIComponent(maxPrice.trim())}`;
+        if (minPrice.trim())
+          url += `&minPrice=${encodeURIComponent(minPrice.trim())}`;
+        if (maxPrice.trim())
+          url += `&maxPrice=${encodeURIComponent(maxPrice.trim())}`;
         if (selectedLanguage !== "All Languages") {
           url += `&language=${encodeURIComponent(selectedLanguage)}`;
         }
@@ -392,7 +414,8 @@ const ShopScreen = () => {
         const data = await response.json();
         const payload = data.json || data;
         const productList = payload.products || payload.data?.products || [];
-        const count = payload.totalCount || payload.data?.totalCount || productList.length;
+        const count =
+          payload.totalCount || payload.data?.totalCount || productList.length;
 
         setProducts(productList);
         setTotalCount(count);
@@ -404,7 +427,14 @@ const ShopScreen = () => {
         setLoading(false);
       }
     },
-    [sort, searchQuery, selectedCategories, minPrice, maxPrice, selectedLanguage],
+    [
+      sort,
+      searchQuery,
+      selectedCategories,
+      minPrice,
+      maxPrice,
+      selectedLanguage,
+    ],
   );
 
   useEffect(() => {
@@ -422,20 +452,23 @@ const ShopScreen = () => {
 
   const activeSortLabel = SORT_OPTIONS.find((opt) => opt.value === sort)?.label;
 
-  const handleApplyFilters = useCallback((f: {
-    search: string;
-    categories: string[];
-    minPrice: string;
-    maxPrice: string;
-    language: string;
-  }) => {
-    setSearchQuery(f.search);
-    setSelectedCategories(f.categories);
-    setMinPrice(f.minPrice);
-    setMaxPrice(f.maxPrice);
-    setSelectedLanguage(f.language);
-    setShowFilterSidebar(false);
-  }, []);
+  const handleApplyFilters = useCallback(
+    (f: {
+      search: string;
+      categories: string[];
+      minPrice: string;
+      maxPrice: string;
+      language: string;
+    }) => {
+      setSearchQuery(f.search);
+      setSelectedCategories(f.categories);
+      setMinPrice(f.minPrice);
+      setMaxPrice(f.maxPrice);
+      setSelectedLanguage(f.language);
+      setShowFilterSidebar(false);
+    },
+    [],
+  );
 
   return (
     <SafeAreaView
@@ -453,12 +486,6 @@ const ShopScreen = () => {
       >
         {/* Hero Section */}
         <View className="px-6 pt-5 pb-4">
-          <View className="self-start bg-orange-100 dark:bg-orange-900/25 px-3 py-1 rounded-full mb-3 border border-orange-200 dark:border-orange-800/40">
-            <Text className="text-primary text-[10px] font-black uppercase tracking-wider">
-              Digital Store
-            </Text>
-          </View>
-
           <Text className="text-[34px] font-extrabold text-slate-800 dark:text-white leading-[40px]">
             Buy Study Notes Online
           </Text>
@@ -532,7 +559,11 @@ const ShopScreen = () => {
           <View className="pb-10 px-6">
             {products.length > 0 ? (
               products.map((product, index) => (
-                <ProductCard key={product.slug || index} product={product} className="mb-8" />
+                <ProductCard
+                  key={product.slug || index}
+                  product={product}
+                  className="mb-8"
+                />
               ))
             ) : (
               <View className="items-center justify-center py-20 px-8">

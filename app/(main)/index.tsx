@@ -89,7 +89,7 @@ const App = () => {
           <View className="py-20 items-center justify-center">
             <ActivityIndicator size="large" color="#FF8A50" />
             <Text className="mt-4 text-slate-500 dark:text-slate-400 font-medium">
-              Loading premium content...
+              Loading content...
             </Text>
           </View>
         ) : error ? (
