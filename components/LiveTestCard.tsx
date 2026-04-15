@@ -19,10 +19,20 @@ const LiveTestCard = ({
   test: LiveTest;
   colorScheme: "light" | "dark" | undefined;
 }) => {
+  const normalizedStatus = test.status?.trim().toLowerCase() || "";
+  const now = Date.now();
+  const startTimeMs = new Date(test.startTime).getTime();
+  const endTimeMs = new Date(test.endTime).getTime();
+
+  const isEnded =
+    normalizedStatus.includes("ended") ||
+    normalizedStatus.includes("completed") ||
+    endTimeMs < now;
+
   const isLive =
-    test.status?.toLowerCase().includes("live") ||
-    (new Date(test.startTime) <= new Date() &&
-      new Date(test.endTime) >= new Date());
+    !isEnded &&
+    (normalizedStatus.includes("live") ||
+      (startTimeMs <= now && endTimeMs >= now));
 
   const isDeadlineActive =
     test.registrationDeadline &&
@@ -60,6 +70,13 @@ const LiveTestCard = ({
                 <BlinkingDot />
                 <Text className="text-white font-black text-[10px] uppercase tracking-wider">
                   LIVE
+                </Text>
+              </View>
+            ) : isEnded ? (
+              <View className="bg-slate-600 px-3 py-1 rounded-full flex-row items-center border border-slate-500 shadow-lg">
+                <Feather name="check-circle" size={10} color="white" style={{ marginRight: 4 }} />
+                <Text className="text-white font-black text-[10px] uppercase tracking-wider">
+                  ENDED
                 </Text>
               </View>
             ) : (

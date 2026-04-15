@@ -81,6 +81,8 @@ export interface LiveTestResponse {
 }
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+const LIVE_TESTS_PAGE = 1;
+const LIVE_TESTS_LIMIT = 12;
 
 const LiveTests = () => {
   const { colorScheme } = useColorScheme();
@@ -90,6 +92,7 @@ const LiveTests = () => {
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [showExamModal, setShowExamModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState("All");
@@ -100,6 +103,14 @@ const LiveTests = () => {
   const [loadingTests, setLoadingTests] = useState(false);
 
   const statusOptions = ["All", "Live Now", "Upcoming", "Ended"];
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const fetchExams = useCallback(async () => {
     try {
@@ -135,18 +146,26 @@ const LiveTests = () => {
   const fetchTests = useCallback(async () => {
     try {
       setLoadingTests(true);
-      const statusParam =
-        statusFilter === "All"
-          ? ""
-          : statusFilter.toLowerCase().replace(/ /g, "-");
-      let apiUrl = `${BASE_URL}/_api/live-tests/list?status=${statusParam}`;
+      const statusMap: Record<string, string> = {
+        All: "",
+        "Live Now": "live",
+        Upcoming: "upcoming",
+        Ended: "ended",
+      };
+      const statusParam = statusMap[statusFilter] ?? "";
+      let apiUrl = `${BASE_URL}/_api/live-tests/list?page=${LIVE_TESTS_PAGE}&limit=${LIVE_TESTS_LIMIT}`;
 
-      if (selectedExam) {
-        apiUrl += `&exam=${selectedExam.examSlug}`;
+      if (statusParam) {
+        apiUrl += `&status=${statusParam}`;
       }
 
-      if (searchQuery) {
-        apiUrl += `&search=${encodeURIComponent(searchQuery)}`;
+      if (selectedExam) {
+        const encodedExamSlug = encodeURIComponent(selectedExam.examSlug);
+        apiUrl += `&exam=${encodedExamSlug}&examSlug=${encodedExamSlug}`;
+      }
+
+      if (debouncedSearchQuery) {
+        apiUrl += `&searchQuery=${encodeURIComponent(debouncedSearchQuery)}`;
       }
 
       console.log("Fetching live tests from:", apiUrl);
@@ -159,13 +178,43 @@ const LiveTests = () => {
       const data = await response.json();
       const payload = data.json || data;
       const testsData = payload.tests || [];
-      setTests(testsData);
+
+      const normalizedSearch = debouncedSearchQuery.trim().toLowerCase();
+      const searchTerms = normalizedSearch.split(/\s+/).filter(Boolean);
+
+      const filteredTests = testsData.filter((test: LiveTest) => {
+        const matchesExam = selectedExam
+          ? test.examSlug === selectedExam.examSlug
+          : true;
+
+        if (!matchesExam) {
+          return false;
+        }
+
+        if (!normalizedSearch) {
+          return true;
+        }
+
+        const searchableText = [
+          test.title,
+          test.teacherName,
+          test.subjects,
+          test.examSlug,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchTerms.every((term) => searchableText.includes(term));
+      });
+
+      setTests(filteredTests);
     } catch (err) {
       console.log("Fetch Tests Error:", err);
     } finally {
       setLoadingTests(false);
     }
-  }, [statusFilter, selectedExam, searchQuery]);
+  }, [statusFilter, selectedExam, debouncedSearchQuery]);
 
   useEffect(() => {
     fetchExams();
