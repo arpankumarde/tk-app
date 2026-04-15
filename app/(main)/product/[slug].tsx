@@ -90,7 +90,9 @@ const ProductDetails = () => {
         console.log("Fetched product details:", payload.product);
         setProduct(payload.product);
 
-        const listResponse = await fetch(`${BASE_URL}/_api/shop/list?limit=5&category=${payload.product.category.replace(/ /g, "+")}`);
+        const listResponse = await fetch(
+          `${BASE_URL}/_api/shop/list?limit=5&category=${payload.product.category.replace(/ /g, "+")}`,
+        );
         const listData = await listResponse.json();
         const listPayload = listData.json || listData;
         setRelatedProducts(
@@ -206,8 +208,7 @@ const ProductDetails = () => {
             <View className="relative w-full rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-800">
               <Image
                 source={{
-                  uri:
-                    product?.thumbnailUrl || Placeholder.NOTE,
+                  uri: product?.thumbnailUrl || Placeholder.NOTE,
                 }}
                 className="w-full aspect-video"
                 resizeMode="cover"
@@ -223,54 +224,12 @@ const ProductDetails = () => {
 
           <View className="px-6 py-6">
             {/* Title Section */}
-            <Text className="text-3xl font-black text-slate-800 dark:text-white leading-tight mb-5">
+            <Text className="text-3xl font-black text-slate-800 dark:text-white leading-tight mb-3">
               {product.title}
             </Text>
 
-            {/* Author Info & Rating Bar */}
-            <View className="flex-row items-center justify-between mb-8">
-              <View className="flex-row items-center flex-1">
-                <View className="w-12 h-12 rounded-full border-2 border-white dark:border-slate-800 shadow-sm overflow-hidden mr-3">
-                  <Image
-                    source={{
-                      uri:
-                        product.teacherAvatar ||
-                        `https://ui-avatars.com/api/?name=${product.teacherName}&background=FF8A50&color=fff`,
-                    }}
-                    className="w-full h-full"
-                  />
-                </View>
-                <View className="flex-1 mr-4">
-                  <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
-                    Created by
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      if (product?.teacherSlug) {
-                        router.push(`/expert/${product.teacherSlug}` as any);
-                      }
-                    }}
-                    disabled={!product?.teacherSlug}
-                    className="flex-row items-center"
-                  >
-                    <Text
-                      className="text-primary font-black text-lg leading-tight -mt-0.5"
-                      numberOfLines={1}
-                    >
-                      {product?.teacherName || "TestKart Expert"}
-                    </Text>
-                    {(product?.teacherIsVerified || product?.teacherVerified) && (
-                      <MaterialIcons
-                        name="verified"
-                        size={16}
-                        color="#22C55E"
-                        style={{ marginLeft: 4 }}
-                      />
-                    )}
-                  </TouchableOpacity>
-                </View>
-              </View>
-
+            {/* Rating Bar */}
+            <View className="flex-row items-center justify-end mb-4">
               <View className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 px-4 py-2.5 rounded-2xl border border-gray-100 dark:border-slate-700">
                 <Ionicons name="star" size={18} color="#FF8A50" />
                 <Text className="mx-1.5 text-slate-800 dark:text-white font-black">
@@ -282,7 +241,7 @@ const ProductDetails = () => {
               </View>
             </View>
 
-            <View className="h-[1px] bg-gray-50 dark:bg-slate-800 mb-8" />
+            <View className="h-[1px] bg-gray-50 dark:bg-slate-800 mb-4" />
 
             {/* Description */}
             <View className="mb-8">
@@ -332,7 +291,7 @@ const ProductDetails = () => {
                   <Image
                     source={{
                       uri:
-                        product.teacherAvatar ||
+                        product?.teacherAvatar ||
                         `https://ui-avatars.com/api/?name=${encodeURIComponent(product.teacherName)}&background=FF8A50&color=fff`,
                     }}
                     className="w-14 h-14 rounded-2xl"
@@ -342,7 +301,8 @@ const ProductDetails = () => {
                       <Text className="text-slate-800 dark:text-white font-black text-base">
                         {product.teacherName || "Author"}
                       </Text>
-                      {(product.teacherIsVerified || product.teacherVerified) && (
+                      {(product.teacherIsVerified ||
+                        product.teacherVerified) && (
                         <MaterialIcons
                           name="verified"
                           size={15}
@@ -639,7 +599,11 @@ const ProductDetails = () => {
                   contentContainerStyle={{ paddingRight: 24 }}
                 >
                   {relatedProducts.map((p, i) => (
-                    <View key={p.id || i} className="w-[320px] mr-5" style={{ height: 385 }}>
+                    <View
+                      key={p.id || i}
+                      className="w-[320px] mr-5"
+                      style={{ height: 385 }}
+                    >
                       <ProductCard product={p} className="h-full mb-0" />
                     </View>
                   ))}

@@ -109,14 +109,12 @@ interface Data {
   teacher: Teacher;
   courses: any[];
   tests: Test[];
-  liveTests: (
-    Partial<LiveTest> & {
-      id: number;
-      title: string;
-      creatorName?: string;
-      studentsEnrolled?: number;
-    }
-  )[];
+  liveTests: (Partial<LiveTest> & {
+    id: number;
+    title: string;
+    creatorName?: string;
+    studentsEnrolled?: number;
+  })[];
   products: Product[];
 }
 
@@ -137,6 +135,7 @@ const ExpertDetails = () => {
   const [data, setData] = useState<Data | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>("tests");
+  const [mainTab, setMainTab] = useState<"content" | "about">("content");
   const [liveTestsCanonicalMap, setLiveTestsCanonicalMap] = useState<
     Record<number, Partial<LiveTest>>
   >({});
@@ -170,7 +169,9 @@ const ExpertDetails = () => {
 
     const fetchCanonicalLiveTests = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/_api/live-tests/list?status=`);
+        const response = await fetch(
+          `${BASE_URL}/_api/live-tests/list?status=`,
+        );
         const json = await response.json();
         const payload = json.json || json;
         const list: LiveTest[] = payload.tests || [];
@@ -287,9 +288,7 @@ const ExpertDetails = () => {
       0,
     );
 
-  const mapToLiveCardTest = (
-    liveTest: Data["liveTests"][number],
-  ): LiveTest => {
+  const mapToLiveCardTest = (liveTest: Data["liveTests"][number]): LiveTest => {
     const canonical = liveTestsCanonicalMap[liveTest.id] || {};
     const merged = { ...liveTest, ...canonical };
 
@@ -311,7 +310,8 @@ const ExpertDetails = () => {
       thumbnailUrl: merged.thumbnailUrl || null,
       hasPrizes: merged.hasPrizes ?? false,
       mockTestId: merged.mockTestId ?? merged.id,
-      teacherName: merged.teacherName || merged.creatorName || teacher.displayName,
+      teacherName:
+        merged.teacherName || merged.creatorName || teacher.displayName,
       teacherIsVerified: merged.teacherIsVerified ?? teacher.isVerified,
       durationMinutes: Number(merged.durationMinutes ?? 0),
       language: merged.language || "English",
@@ -386,14 +386,16 @@ const ExpertDetails = () => {
               </View>
 
               {/* Current Role/Expertise */}
-              {teacher.workExperiences?.length > 0 && (() => {
-                const exp = teacher.workExperiences[0];
-                return (
-                  <Text className="text-slate-500 dark:text-slate-400 text-sm font-semibold mb-1">
-                    {exp.position}{!!exp.companyName && ` at ${exp.companyName}`}
-                  </Text>
-                );
-              })()}
+              {teacher.workExperiences?.length > 0 &&
+                (() => {
+                  const exp = teacher.workExperiences[0];
+                  return (
+                    <Text className="text-slate-500 dark:text-slate-400 text-sm font-semibold mb-1">
+                      {exp.position}
+                      {!!exp.companyName && ` at ${exp.companyName}`}
+                    </Text>
+                  );
+                })()}
 
               {!!teacher.tagline && (
                 <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-3">
@@ -466,8 +468,61 @@ const ExpertDetails = () => {
             ))}
           </View>
 
-          {/* ── About ─────────────────────────────────── */}
-          {!!teacher.bio && (
+          {/* ── Main Tabs (Content / About) ───────────── */}
+          <View
+            style={{
+              marginHorizontal: 20,
+              marginTop: 20,
+              flexDirection: "row",
+              backgroundColor:
+                colorScheme === "dark" ? "#1e293b" : "#f1f5f9",
+              borderRadius: 16,
+              padding: 4,
+            }}
+          >
+            {(["content", "about"] as const).map((key) => {
+              const isActive = mainTab === key;
+              return (
+                <TouchableOpacity
+                  key={key}
+                  onPress={() => setMainTab(key)}
+                  activeOpacity={0.85}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 12,
+                    borderRadius: 12,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: isActive
+                      ? colorScheme === "dark"
+                        ? "#334155"
+                        : "#ffffff"
+                      : "transparent",
+                    shadowColor: isActive ? "#000" : "transparent",
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: isActive ? 0.05 : 0,
+                    shadowRadius: isActive ? 1 : 0,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "900",
+                      color: isActive
+                        ? "#f97316"
+                        : colorScheme === "dark"
+                          ? "#94a3b8"
+                          : "#64748b",
+                    }}
+                  >
+                    {key === "content" ? "Content" : "About"}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {mainTab === "about" && !!teacher.bio && (
             <View className="mx-5 mt-6">
               <Text className="text-xl font-black text-slate-800 dark:text-white mb-3">
                 About
@@ -479,7 +534,7 @@ const ExpertDetails = () => {
           )}
 
           {/* ── Social Links ──────────────────────────── */}
-          {activeSocialLinks.length > 0 && (
+          {mainTab === "about" && activeSocialLinks.length > 0 && (
             <View className="mx-5 mt-6">
               <Text className="text-xl font-black text-slate-800 dark:text-white mb-3">
                 Connect
@@ -507,7 +562,7 @@ const ExpertDetails = () => {
           )}
 
           {/* ── Expertise Areas ───────────────────────── */}
-          {teacher.expertiseAreas?.length > 0 && (
+          {mainTab === "about" && teacher.expertiseAreas?.length > 0 && (
             <View className="mx-5 mt-6">
               <Text className="text-xl font-black text-slate-800 dark:text-white mb-3">
                 Expertise
@@ -528,7 +583,7 @@ const ExpertDetails = () => {
           )}
 
           {/* ── Languages ─────────────────────────────── */}
-          {teacher.languages?.length > 0 && (
+          {mainTab === "about" && teacher.languages?.length > 0 && (
             <View className="mx-5 mt-6">
               <Text className="text-xl font-black text-slate-800 dark:text-white mb-3">
                 Languages
@@ -549,7 +604,7 @@ const ExpertDetails = () => {
           )}
 
           {/* ── Work Experience ───────────────────────── */}
-          {teacher.workExperiences?.length > 0 && (
+          {mainTab === "about" && teacher.workExperiences?.length > 0 && (
             <View className="mx-5 mt-6">
               <View className="flex-row items-center mb-4">
                 <View className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/20 items-center justify-center mr-3">
@@ -597,7 +652,8 @@ const ExpertDetails = () => {
                             {title}
                           </Text>
                           <Text className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-0.5">
-                            {org}{!!loc && ` • ${loc}`}
+                            {org}
+                            {!!loc && ` • ${loc}`}
                           </Text>
                         </View>
                         <View className="px-3 py-1 rounded-full bg-white dark:bg-slate-700 border border-gray-100 dark:border-slate-600">
@@ -622,7 +678,7 @@ const ExpertDetails = () => {
           )}
 
           {/* ── Awards & Certificates ─────────────────── */}
-          {teacher.awardsCertificates?.length > 0 && (
+          {mainTab === "about" && teacher.awardsCertificates?.length > 0 && (
             <View className="mx-5 mt-6">
               <Text className="text-xl font-black text-slate-800 dark:text-white mb-4">
                 Awards & Certificates
@@ -653,12 +709,8 @@ const ExpertDetails = () => {
           )}
 
           {/* ── Content Tabs ──────────────────────────── */}
-          <View className="mt-8">
-            <View className="h-[1px] bg-gray-100 dark:bg-slate-800 mb-5" />
-            <Text className="text-xl font-black text-slate-800 dark:text-white mb-4 px-5">
-              Content by {teacher.displayName}
-            </Text>
-
+          {mainTab === "content" && (
+          <View className="mt-4">
             {/* Tab Bar */}
             <ScrollView
               horizontal
@@ -740,7 +792,11 @@ const ExpertDetails = () => {
               <View>
                 {products?.length > 0 ? (
                   products.map((product) => (
-                    <ProductCard key={product.id} product={product as any} className="mx-5 mb-5" />
+                    <ProductCard
+                      key={product.id}
+                      product={product as any}
+                      className="mx-5 mb-5"
+                    />
                   ))
                 ) : (
                   <EmptyState label="No study notes yet" />
@@ -760,6 +816,7 @@ const ExpertDetails = () => {
               </View>
             )}
           </View>
+          )}
         </ScrollView>
       </SafeAreaView>
     </View>
