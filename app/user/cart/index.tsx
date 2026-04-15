@@ -22,6 +22,7 @@ import BottomTabs from "@/components/BottomTabs";
 import { useAuth } from "@/context/AuthContext";
 import { useCartContext, CartItem } from "@/context/CartContext";
 import Placeholder from "@/constants/placeholder";
+import { useWallet } from "@/app/user/_hooks/useWallet";
 
 const Cart = () => {
   const { colorScheme } = useColorScheme();
@@ -37,7 +38,9 @@ const Cart = () => {
     eligibleItemIds,
     initiatePayment,
     verifyPayment,
+    walletPurchase,
   } = useCartContext();
+  const { balance: walletBalance, refetch: refetchWallet } = useWallet(token);
 
   const [promoExpanded, setPromoExpanded] = useState(false);
   const [promoCode, setPromoCode] = useState("");
@@ -49,10 +52,20 @@ const Cart = () => {
   const [removingId, setRemovingId] = useState<number | null>(null);
   const [itemToDelete, setItemToDelete] = useState<CartItem | null>(null);
   const [orderLoading, setOrderLoading] = useState(false);
+  const [walletLoading, setWalletLoading] = useState(false);
+  const [walletSuccess, setWalletSuccess] = useState<{
+    orderId?: number;
+    amountDeducted: number;
+    walletBalanceAfter?: number;
+  } | null>(null);
   const [payuData, setPayuData] = useState<Awaited<
     ReturnType<typeof initiatePayment>
   > | null>(null);
   const [webViewVisible, setWebViewVisible] = useState(false);
+
+  const availableWalletBalance = walletBalance?.availableBalance ?? 0;
+  const hasWallet = availableWalletBalance > 0;
+  const canPayWithWallet = hasWallet && availableWalletBalance >= cart.total;
 
   const handleRemoveItem = (item: CartItem) => {
     setItemToDelete(item);
@@ -99,6 +112,39 @@ const Cart = () => {
 
     setPayuData(result);
     setWebViewVisible(true);
+  };
+
+  const handleWalletPurchase = async () => {
+    if (!canPayWithWallet || walletLoading) return;
+    setWalletLoading(true);
+    const result = await walletPurchase();
+    setWalletLoading(false);
+
+    if (!result.success) {
+      Alert.alert(
+        "Payment Failed",
+        result.error || "Failed to complete wallet purchase",
+      );
+      return;
+    }
+
+    await refetchWallet();
+
+    setWalletSuccess({
+      orderId: result.orderId,
+      amountDeducted: result.amountDeducted ?? 0,
+      walletBalanceAfter: result.walletBalanceAfter,
+    });
+  };
+
+  const dismissWalletSuccess = () => {
+    const orderId = walletSuccess?.orderId;
+    setWalletSuccess(null);
+    if (orderId) {
+      router.replace(`/user/orders/${orderId}` as any);
+    } else {
+      router.replace("/user");
+    }
   };
 
   const handleDeepLinkResult = async (params: {
@@ -166,6 +212,75 @@ const Cart = () => {
   const itemDiscount = cart.discount - cart.promoDiscount;
   const discountPercent =
     cart.subtotal > 0 ? Math.round((itemDiscount / cart.subtotal) * 100) : 0;
+
+  if (walletSuccess) {
+    return (
+      <View className="flex-1 bg-white dark:bg-slate-900">
+        <StatusBar
+          barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+        />
+        <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
+          <Header />
+        </SafeAreaView>
+        <Modal
+          visible
+          transparent
+          animationType="fade"
+          onRequestClose={dismissWalletSuccess}
+        >
+          <View className="flex-1 bg-black/50 items-center justify-center px-6">
+            <View className="bg-white dark:bg-slate-800 rounded-3xl p-6 w-full max-w-sm shadow-2xl overflow-hidden">
+              <View className="absolute top-0 right-0 w-24 h-24 bg-green-50 dark:bg-green-900/10 rounded-bl-full opacity-50" />
+
+              <View className="items-center mt-2">
+                <View className="w-16 h-16 rounded-full bg-green-50 dark:bg-green-900/20 items-center justify-center mb-5">
+                  <Feather name="check-circle" size={30} color="#16a34a" />
+                </View>
+
+                <Text className="text-xl font-black text-slate-800 dark:text-white mb-2 text-center">
+                  Payment Successful
+                </Text>
+
+                <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold text-center mb-5 leading-5 px-2">
+                  Your order has been placed successfully.
+                </Text>
+
+                <View className="w-full bg-gray-50 dark:bg-slate-700/50 rounded-2xl p-4 mb-6">
+                  <View className="flex-row items-center justify-between mb-2">
+                    <Text className="text-sm text-slate-500 dark:text-slate-400 font-bold">
+                      Amount Deducted
+                    </Text>
+                    <Text className="text-base text-slate-800 dark:text-white font-black">
+                      ₹{walletSuccess.amountDeducted.toFixed(2)}
+                    </Text>
+                  </View>
+                  {walletSuccess.walletBalanceAfter != null && (
+                    <View className="flex-row items-center justify-between">
+                      <Text className="text-sm text-slate-500 dark:text-slate-400 font-bold">
+                        Wallet Balance
+                      </Text>
+                      <Text className="text-base text-slate-800 dark:text-white font-black">
+                        ₹{walletSuccess.walletBalanceAfter.toFixed(2)}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                <TouchableOpacity
+                  className="w-full h-12 rounded-xl items-center justify-center bg-primary shadow-lg shadow-orange-500/30"
+                  onPress={dismissWalletSuccess}
+                >
+                  <Text className="text-white font-black">
+                    {walletSuccess.orderId ? "View Order" : "Continue"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    );
+  }
 
   if (loading) {
     return (
@@ -393,11 +508,81 @@ const Cart = () => {
                 </>
               )}
 
+              {/* Wallet Section — only render when balance > 0 */}
+              {hasWallet && (
+                <View className="mb-3 rounded-2xl border border-primary/30 bg-orange-50/60 dark:bg-orange-900/10 p-4">
+                  <View className="flex-row items-center justify-between mb-3">
+                    <View className="flex-row items-center">
+                      <View className="w-9 h-9 rounded-full bg-primary/10 items-center justify-center">
+                        <Feather name="credit-card" size={18} color="#FF8A50" />
+                      </View>
+                      <View className="ml-3">
+                        <Text className="text-sm font-bold text-slate-500 dark:text-slate-400">
+                          Wallet Balance
+                        </Text>
+                        <Text className="text-lg font-black text-slate-800 dark:text-white">
+                          ₹{availableWalletBalance.toFixed(2)}
+                        </Text>
+                      </View>
+                    </View>
+                    {canPayWithWallet && (
+                      <View className="bg-green-100 dark:bg-green-900/30 px-2.5 py-1 rounded-md">
+                        <Text className="text-xs font-black text-green-700 dark:text-green-400">
+                          Sufficient
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {canPayWithWallet ? (
+                    <TouchableOpacity
+                      className="bg-primary h-12 rounded-xl flex-row items-center justify-center shadow-md shadow-orange-500/20"
+                      onPress={handleWalletPurchase}
+                      disabled={walletLoading}
+                    >
+                      {walletLoading ? (
+                        <ActivityIndicator size="small" color="white" />
+                      ) : (
+                        <>
+                          <Feather name="credit-card" size={16} color="white" />
+                          <Text className="text-white font-black text-base ml-2">
+                            Pay ₹{cart.total.toFixed(2)} with Wallet
+                          </Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  ) : (
+                    <View className="flex-row items-start rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-2.5">
+                      <Feather
+                        name="alert-circle"
+                        size={16}
+                        color="#d97706"
+                        style={{ marginTop: 2 }}
+                      />
+                      <Text className="ml-2 flex-1 text-sm text-amber-700 dark:text-amber-400 font-bold">
+                        Insufficient balance for full payment
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
+
+              {/* OR divider — only when wallet is usable */}
+              {canPayWithWallet && (
+                <View className="flex-row items-center my-2">
+                  <View className="flex-1 h-[1px] bg-gray-100 dark:bg-slate-700" />
+                  <Text className="mx-3 text-xs font-black text-slate-400 dark:text-slate-500">
+                    OR
+                  </Text>
+                  <View className="flex-1 h-[1px] bg-gray-100 dark:bg-slate-700" />
+                </View>
+              )}
+
               {/* Proceed to Payment */}
               <TouchableOpacity
                 className="bg-primary h-14 rounded-2xl flex-row items-center justify-center mt-2 shadow-md shadow-orange-500/20"
                 onPress={handleProceedToPayment}
-                disabled={orderLoading}
+                disabled={orderLoading || walletLoading}
               >
                 {orderLoading ? (
                   <ActivityIndicator size="small" color="white" />
@@ -515,16 +700,16 @@ const Cart = () => {
           <View className="bg-white dark:bg-slate-800 rounded-3xl p-6 w-full max-w-sm shadow-2xl overflow-hidden">
             {/* Design Element */}
             <View className="absolute top-0 right-0 w-24 h-24 bg-orange-50 dark:bg-orange-900/10 rounded-bl-full opacity-50" />
-            
+
             <View className="items-center mt-2">
               <View className="w-16 h-16 rounded-full bg-red-50 dark:bg-red-900/20 items-center justify-center mb-5">
                 <Feather name="trash-2" size={28} color="#EF4444" />
               </View>
-              
+
               <Text className="text-xl font-black text-slate-800 dark:text-white mb-2 text-center">
                 Remove from Cart?
               </Text>
-              
+
               <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold text-center mb-8 leading-5 px-2">
                 Are you sure you want to remove{"\n"}
                 <Text className="text-slate-800 dark:text-slate-200">
@@ -532,7 +717,7 @@ const Cart = () => {
                 </Text>
                 {"\n"}from your shopping cart?
               </Text>
-              
+
               <View className="flex-row gap-x-3 w-full">
                 <TouchableOpacity
                   className="flex-1 h-12 rounded-xl items-center justify-center bg-gray-100 dark:bg-slate-700"
@@ -542,14 +727,12 @@ const Cart = () => {
                     Cancel
                   </Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                   className="flex-1 h-12 rounded-xl items-center justify-center bg-red-500 shadow-lg shadow-red-500/30"
                   onPress={confirmRemove}
                 >
-                  <Text className="text-white font-black">
-                    Remove
-                  </Text>
+                  <Text className="text-white font-black">Remove</Text>
                 </TouchableOpacity>
               </View>
             </View>

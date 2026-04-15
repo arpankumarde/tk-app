@@ -217,10 +217,14 @@ export interface LatestAttemptResultItem {
 }
 
 // Orders
+export type OrderItemType = "test" | "course" | "product" | "bundle";
+
+export type OrderStatus = "pending" | "completed" | "cancelled" | "failed";
+
 export interface OrderItem {
   orderItemId: number;
   title: string;
-  itemType: string;
+  itemType: OrderItemType;
   priceAtPurchase: number;
   thumbnailUrl: string | null;
   mockTestId?: number | null;
@@ -231,7 +235,7 @@ export interface OrderItem {
 
 export interface OrderSummary {
   id: number;
-  status: string;
+  status: OrderStatus;
   totalAmount: number | string;
   createdAt: string;
   itemCount: number;
@@ -239,7 +243,7 @@ export interface OrderSummary {
 
 export interface Order {
   id: number;
-  status: string;
+  status: OrderStatus;
   totalAmount: number | string;
   createdAt: string;
   items: OrderItem[];
