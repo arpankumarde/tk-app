@@ -18,6 +18,7 @@ import BottomTabs from "@/components/BottomTabs";
 import { useAuth } from "@/context/AuthContext";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import Placeholder from "@/constants/placeholder";
+import { useBuildShareUrl } from "@/hooks/useBuildShareUrl";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -130,6 +131,7 @@ const TestDetails = () => {
     message?: string;
   }>({ visible: false, success: false });
   const { addToCart, adding: addingToCart } = useAddToCart();
+  const buildShareUrl = useBuildShareUrl();
 
   useEffect(() => {
     const fetchTestDetails = async () => {
@@ -160,7 +162,7 @@ const TestDetails = () => {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Check out this test series: ${test?.title}\n${BASE_URL}/tests/${test?.slug}`,
+        message: `Check out this test series: ${test?.title}\n${buildShareUrl(`${BASE_URL}/mock-test/${test?.slug}`)}`,
       });
     } catch (error: any) {
       console.error(error.message);
@@ -420,8 +422,7 @@ const TestDetails = () => {
           <View className="aspect-video w-full rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 relative shadow-2xl">
             <Image
               source={{
-                uri:
-                  test.thumbnailUrl || Placeholder.TEST,
+                uri: test.thumbnailUrl || Placeholder.TEST,
               }}
               className="w-full h-full"
               resizeMode="cover"
@@ -781,7 +782,11 @@ const TestDetails = () => {
             <ActivityIndicator color="white" />
           ) : (
             <Text className="text-white text-lg font-black">
-              {isFree ? (!user || !token ? "Login to Start" : "Start Test") : "Buy Now"}
+              {isFree
+                ? !user || !token
+                  ? "Login to Start"
+                  : "Start Test"
+                : "Buy Now"}
             </Text>
           )}
         </TouchableOpacity>

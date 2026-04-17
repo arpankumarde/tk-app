@@ -20,6 +20,7 @@ import PDFPreview from "@/components/PDFPreview";
 import { useAuth } from "@/context/AuthContext";
 import Placeholder from "@/constants/placeholder";
 import { useAddToCart } from "@/hooks/useAddToCart";
+import { useBuildShareUrl } from "@/hooks/useBuildShareUrl";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -77,6 +78,7 @@ const ProductDetails = () => {
   }>({ visible: false, success: false });
   const { token } = useAuth();
   const { addToCart, adding: addingToCart } = useAddToCart();
+  const buildShareUrl = useBuildShareUrl();
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -154,7 +156,7 @@ const ProductDetails = () => {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Check out this study note: ${product?.title}\n${BASE_URL}/shop/${product?.slug}`,
+        message: `Check out this study note: ${product?.title}\n${buildShareUrl(`${BASE_URL}/study-notes/${product?.slug}`)}`,
       });
     } catch (error: any) {
       console.error(error.message);

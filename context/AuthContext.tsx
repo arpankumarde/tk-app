@@ -8,7 +8,7 @@ import {
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
 
-type User = {
+export type User = {
   academyName: string | null;
   avatarFileId: string | null;
   avatarUrl: string;
@@ -27,7 +27,7 @@ type User = {
   publicEmail: string | null;
   publicPhone: string | null;
   responseTime: string | null;
-  role: string;
+  role: "student" | "teacher" | "admin";
   socialLinks: Record<string, string>;
   tagline: string | null;
   websiteUrl: string | null;
@@ -83,7 +83,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     await SecureStore.deleteItemAsync("auth_token");
     await SecureStore.deleteItemAsync("auth_user");
-    await fetch(`${BASE_URL}/_api/auth/logout`, { method: "POST", credentials: "omit" });
+    await fetch(`${BASE_URL}/_api/auth/logout`, {
+      method: "POST",
+      credentials: "omit",
+    });
     await WebBrowser.coolDownAsync();
   };
 

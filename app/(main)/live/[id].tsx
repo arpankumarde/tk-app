@@ -22,6 +22,7 @@ import Placeholder from "@/constants/placeholder";
 import { useCountdown } from "@/hooks/useCountdown";
 import Header from "@/components/Header";
 import BlinkingDot from "@/components/BlinkingDot";
+import { useBuildShareUrl } from "@/hooks/useBuildShareUrl";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -212,6 +213,7 @@ const LiveTestDetails = () => {
   const [payuData, setPayuData] = useState<any>(null);
   const [webViewVisible, setWebViewVisible] = useState(false);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
+  const buildShareUrl = useBuildShareUrl();
 
   const isLive =
     liveTest &&
@@ -440,7 +442,7 @@ const LiveTestDetails = () => {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Check out this live test: ${liveTest?.title}\n${BASE_URL}/live/${liveTest?.slug}`,
+        message: `Check out this live test: ${liveTest?.title}\n${buildShareUrl(`${BASE_URL}/mock-test/live/${id}`)}`,
       });
     } catch (error: any) {
       console.error(error.message);
@@ -471,7 +473,10 @@ const LiveTestDetails = () => {
         <StatusBar
           barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
         />
-        <SafeAreaView edges={["top", "left", "right", "bottom"]} className="flex-1">
+        <SafeAreaView
+          edges={["top", "left", "right", "bottom"]}
+          className="flex-1"
+        >
           <Header />
           <View className="flex-1 items-center justify-center px-10">
             {loading ? (
@@ -520,7 +525,10 @@ const LiveTestDetails = () => {
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
-      <SafeAreaView edges={["top", "left", "right", "bottom"]} className="flex-1">
+      <SafeAreaView
+        edges={["top", "left", "right", "bottom"]}
+        className="flex-1"
+      >
         <Header />
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -531,8 +539,7 @@ const LiveTestDetails = () => {
             <View className="relative w-full aspect-video rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-800">
               <Image
                 source={{
-                  uri:
-                    liveTest.thumbnailUrl || Placeholder.LIVE,
+                  uri: liveTest.thumbnailUrl || Placeholder.LIVE,
                 }}
                 className="w-full h-full"
                 resizeMode="cover"
@@ -616,7 +623,9 @@ const LiveTestDetails = () => {
                     router.push(`/expert/${expertSlug}` as any);
                   }
                 }}
-                disabled={!(liveTest.teacherSlug || liveTest.teacherProfile?.slug)}
+                disabled={
+                  !(liveTest.teacherSlug || liveTest.teacherProfile?.slug)
+                }
                 className="flex-row items-center"
               >
                 <Image
@@ -770,7 +779,6 @@ const LiveTestDetails = () => {
               />
             </View>
           </View>
-
 
           {/* ── Tabs ── */}
           <View className="px-5 mb-6">

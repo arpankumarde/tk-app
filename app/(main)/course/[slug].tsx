@@ -9,6 +9,7 @@ import {
   StatusBar,
   Modal,
   Linking,
+  Share,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
@@ -22,6 +23,7 @@ import Placeholder from "@/constants/placeholder";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useAuth } from "@/context/AuthContext";
 import { useAddToCart } from "@/hooks/useAddToCart";
+import { useBuildShareUrl } from "@/hooks/useBuildShareUrl";
 
 export type CourseStatus = "published" | "draft" | "archived";
 export type CourseLevel = "beginner" | "intermediate" | "advanced";
@@ -109,6 +111,7 @@ const CourseDetails = () => {
     message?: string;
   }>({ visible: false, success: false });
   const { addToCart, adding: addingToCart } = useAddToCart();
+  const buildShareUrl = useBuildShareUrl();
 
   const introPlayer = useVideoPlayer(
     course?.introVideoUrl ?? null,
@@ -116,6 +119,16 @@ const CourseDetails = () => {
       player.loop = false;
     },
   );
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Check out this course: ${course?.title}\n${buildShareUrl(`${process.env.EXPO_PUBLIC_BASE_URL}/course/${course?.slug}`)}`,
+      });
+    } catch (error: any) {
+      console.error(error.message);
+    }
+  };
 
   const handleFreeEnroll = async () => {
     if (!user || !token) {
@@ -306,7 +319,10 @@ const CourseDetails = () => {
               {/* Category Badge */}
               <View className="bg-orange-50 dark:bg-orange-500/10 px-3 py-1.5 rounded-full border border-orange-100 dark:border-orange-500/20 flex-row items-center">
                 <Feather name="layers" size={10} color="#FF8A50" />
-                <Text className="text-primary text-[10px] font-black uppercase tracking-widest ml-1.5" numberOfLines={1}>
+                <Text
+                  className="text-primary text-[10px] font-black uppercase tracking-widest ml-1.5"
+                  numberOfLines={1}
+                >
                   {course.category}
                 </Text>
               </View>
@@ -314,14 +330,20 @@ const CourseDetails = () => {
               {/* Level Badge */}
               <View className="bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-100 dark:border-emerald-500/20 flex-row items-center">
                 <Feather name="bar-chart" size={10} color="#10B981" />
-                <Text className="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest ml-1.5" numberOfLines={1}>
+                <Text
+                  className="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest ml-1.5"
+                  numberOfLines={1}
+                >
                   {course.level}
                 </Text>
               </View>
             </View>
           </View>
 
-          <TouchableOpacity className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center">
+          <TouchableOpacity
+            onPress={handleShare}
+            className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center"
+          >
             <Feather name="share-2" size={18} color="#FF8A50" />
           </TouchableOpacity>
         </View>
@@ -374,8 +396,7 @@ const CourseDetails = () => {
               <>
                 <Image
                   source={{
-                    uri:
-                      course?.thumbnailImageUrl || Placeholder.COURSE,
+                    uri: course?.thumbnailImageUrl || Placeholder.COURSE,
                   }}
                   className="w-full h-full"
                   resizeMode="cover"
@@ -543,7 +564,15 @@ const CourseDetails = () => {
           </Text>
           <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-6">
             {course.description
-              ? course.description.replace(/<[^>]*>?/gm, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;/g, " ").replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim()
+              ? course.description
+                  .replace(/<[^>]*>?/gm, "")
+                  .replace(/&amp;/g, "&")
+                  .replace(/&lt;/g, "<")
+                  .replace(/&gt;/g, ">")
+                  .replace(/&nbsp;/g, " ")
+                  .replace(/&#39;/g, "'")
+                  .replace(/&quot;/g, '"')
+                  .trim()
               : "No detailed description provided."}
           </Text>
         </View>
@@ -555,7 +584,9 @@ const CourseDetails = () => {
           </Text>
           <View className="bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-xl p-5">
             <TouchableOpacity
-              onPress={() => router.push(`/expert/${course.teacher.slug}` as any)}
+              onPress={() =>
+                router.push(`/expert/${course.teacher.slug}` as any)
+              }
               className="flex-row items-center"
             >
               <Image
