@@ -12,6 +12,7 @@ import { router } from "expo-router";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useAuth } from "@/context/AuthContext";
+import Placeholder from "@/constants/placeholder";
 
 interface DigitalDownloadCardProps {
   product: {
@@ -45,7 +46,7 @@ const DigitalDownloadCard = ({
     message?: string;
   }>({ visible: false, success: false });
 
-  const displayImage = product.thumbnailUrl || undefined;
+  const displayImage = product.thumbnailUrl || Placeholder.NOTE;
   const displayAuthor = product.teacherName || "TestKart Expert";
   const displayCategory = product.category || "Study Material";
   const displaySales = product.totalPurchases || 0;

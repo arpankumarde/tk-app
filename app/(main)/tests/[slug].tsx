@@ -215,63 +215,27 @@ const TestDetails = () => {
     }
   };
 
-  const startTestItemAttempt = async (testItemId: number) => {
-    if (!user || !token) {
-      router.push("/login");
-      return;
-    }
-
-    try {
-      setEnrolling(true);
-
-      const startResponse = await fetch(
-        `${BASE_URL}/_api/student/test-item/start-attempt`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ json: { testItemId } }),
-        },
-      );
-
-      const startData: StartAttemptResponse = await startResponse.json();
-      const payload = startData.json || startData;
-
-      if (!startResponse.ok || !payload?.attemptId || !payload?.startedAt) {
-        throw new Error(
-          payload?.message || payload?.error || "Could not start free test.",
-        );
-      }
-
-      router.push({
-        pathname: "/user/portal/test/[attemptId]",
-        params: {
-          attemptId: String(payload.attemptId),
-          testItemId: String(testItemId),
-          startedAt: encodeURIComponent(payload.startedAt),
-        },
-      });
-    } catch (err: any) {
-      setEnrollResult({
-        visible: true,
-        success: false,
-        message: err?.message || "Could not start free test.",
-      });
-    } finally {
-      setStartingAttempt(false);
-    }
-  };
-
-  const handleStartFreeTest = async () => {
+  const handleStartFreeTest = () => {
     const targetItem = items.find((item) => item.isFree) || items[0];
     if (!targetItem) {
       handleFreeEnroll();
       return;
     }
 
-    await startTestItemAttempt(targetItem.id);
+    if (!user || !token) {
+      router.push("/login");
+      return;
+    }
+
+    router.push({
+      pathname: "/user/portal/[slug]",
+      params: {
+        slug: String(targetItem.id),
+        title: targetItem.title,
+        duration: String(targetItem.durationMinutes),
+        questions: String(targetItem.totalQuestions),
+      },
+    });
   };
 
   const toggleItem = (index: number) => {
@@ -612,7 +576,21 @@ const TestDetails = () => {
 
                       {item.isFree && (
                         <TouchableOpacity
-                          onPress={() => startTestItemAttempt(item.id)}
+                          onPress={() => {
+                            if (!user || !token) {
+                              router.push("/login");
+                              return;
+                            }
+                            router.push({
+                              pathname: "/user/portal/[slug]",
+                              params: {
+                                slug: String(item.id),
+                                title: item.title,
+                                duration: String(item.durationMinutes),
+                                questions: String(item.totalQuestions),
+                              },
+                            });
+                          }}
                           disabled={startingAttempt}
                           className="mt-4 bg-emerald-500 h-11 rounded-2xl flex-row items-center justify-center shadow-lg shadow-emerald-500/20"
                         >

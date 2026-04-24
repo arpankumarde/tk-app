@@ -20,6 +20,7 @@ import Header from "@/components/Header";
 import { EnrolledTest } from "../types";
 import Placeholder from "@/constants/placeholder";
 import * as SecureStore from "expo-secure-store";
+import { formatScore, calculateAverageScore } from "@/utils/scoreFormatter";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -227,35 +228,7 @@ const EnrolledTestDetails = () => {
   const displayThumbnail =
     test.thumbnailUrl || test.thumbnailImageUrl || Placeholder.TEST;
 
-  const parseScore = (value: number | string | null | undefined) => {
-    if (value === null || value === undefined || value === "") return null;
-    if (typeof value === "number") return Number.isFinite(value) ? value : null;
-
-    const normalized = String(value).replace(/%/g, "").trim();
-    const parsed = Number(normalized);
-    return Number.isFinite(parsed) ? parsed : null;
-  };
-
-  const formatScore = (value: number | string | null | undefined) => {
-    const numeric = parseScore(value);
-    if (numeric === null) return "N/A";
-    return `${numeric % 1 === 0 ? numeric.toFixed(0) : numeric.toFixed(1)}%`;
-  };
-
-  const itemBestScores = (test.testItems || [])
-    .map((item) => parseScore(item.bestScore))
-    .filter((score): score is number => score !== null);
-
-  const computedAverageScore =
-    itemBestScores.length > 0
-      ? itemBestScores.reduce((sum, score) => sum + score, 0) /
-        itemBestScores.length
-      : null;
-
-  const packageAverageScore =
-    computedAverageScore !== null
-      ? computedAverageScore
-      : parseScore(test.averageScore);
+  const packageAverageScore = calculateAverageScore(test);
 
   const totalItemsCount = Number(test.totalItems || 0);
   const completedItemsCount = Number(test.completedItems || 0);

@@ -16,7 +16,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import { WebView } from "react-native-webview";
 import { useAuth } from "@/context/AuthContext";
@@ -29,13 +29,16 @@ import {
   SubmitAttemptRequest,
   SubmitAttemptResponse,
 } from "../../types";
+import ScientificCalculator from "@/components/ScientificCalculator";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
-const DEFAULT_DURATION_MINUTES = 60;
+const DEFAULT_DURATION_MINUTES = 30;
 
 type QuestionsApiPayload = {
   questions: Question[];
   calculatorEnabled: boolean;
+  subjectWiseTiming: boolean;
+  questionWiseTiming: boolean;
 };
 
 type QuestionCategory =
@@ -48,7 +51,30 @@ type QuestionCategory =
 
 type NormalizedQuestion = Question & {
   category: QuestionCategory;
+  subjectId: number;
+  sectionId: number | null;
+  subjectOrderIndex: number;
+  subjectDurationMinutes: number;
+  sectionName: string | null;
+  sectionOrderIndex: number | null;
+  sectionMaxAttemptsAllowed: number | null;
 };
+
+interface SectionData {
+  sectionName: string | null;
+  sectionId: number | null;
+  orderIndex: number;
+  questions: NormalizedQuestion[];
+  maxAttemptsAllowed?: number | null;
+}
+
+interface SubjectData {
+  subjectName: string;
+  subjectId: number;
+  orderIndex: number;
+  durationMinutes: number;
+  sections: SectionData[];
+}
 
 type SelectedAnswer = number | number[] | string | null;
 
@@ -185,13 +211,24 @@ const TestAttemptScreen = () => {
   const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(true);
-  const [questions, setQuestions] = useState<NormalizedQuestion[]>([]);
+  const [subjectWiseTiming, setSubjectWiseTiming] = useState(false);
+  const [testDurationMinutes, setTestDurationMinutes] = useState(() => {
+    const raw = Array.isArray(durationMinutes)
+      ? durationMinutes[0]
+      : durationMinutes;
+    const parsed = Number(raw);
+    return parsed > 0 ? parsed : DEFAULT_DURATION_MINUTES;
+  });
+  const [subjects, setSubjects] = useState<SubjectData[]>([]);
   const [calculatorEnabled, setCalculatorEnabled] = useState(false);
+  const [currentSubjectIndex, setCurrentSubjectIndex] = useState(0);
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [completedSubjectIds, setCompletedSubjectIds] = useState<number[]>([]);
+
   const [selectedAnswers, setSelectedAnswers] = useState<
     Record<number, SelectedAnswer>
   >({});
-  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [isSubjectFilterCollapsed, setIsSubjectFilterCollapsed] =
@@ -199,6 +236,8 @@ const TestAttemptScreen = () => {
   const [isQuestionNavigatorCollapsed, setIsQuestionNavigatorCollapsed] =
     useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [isCalculatorVisible, setIsCalculatorVisible] = useState(false);
+  const lastTimedSubjectIndex = useRef<number | null>(null);
 
   const attemptNumericId = useMemo(() => {
     const raw = Array.isArray(attemptId) ? attemptId[0] : attemptId;
@@ -235,14 +274,6 @@ const TestAttemptScreen = () => {
       hour12: true,
     });
   }, [startedAtRaw]);
-
-  const testDurationMinutes = useMemo(() => {
-    const raw = Array.isArray(durationMinutes)
-      ? durationMinutes[0]
-      : durationMinutes;
-    const parsed = Number(raw);
-    return parsed > 0 ? parsed : DEFAULT_DURATION_MINUTES;
-  }, [durationMinutes]);
 
   const attemptStartTime = useMemo(() => {
     if (!startedAtRaw) {
@@ -298,11 +329,74 @@ const TestAttemptScreen = () => {
             ? parseFloat(String(q.negativeMarks))
             : 0,
           category: mapQuestionCategory(q.questionType),
+          subjectId: q.subjectId,
+          sectionId: q.sectionId,
+          subjectOrderIndex: q.subjectOrderIndex ?? 0,
+          subjectDurationMinutes: q.subjectDurationMinutes ?? 0,
+          sectionName: q.sectionName,
+          sectionOrderIndex: q.sectionOrderIndex ?? 0,
+          sectionMaxAttemptsAllowed: q.sectionMaxAttemptsAllowed,
         };
       });
 
-      setQuestions(transformedQuestions);
+      // Group into subjects and sections
+      const subjectMap = new Map<number, SubjectData>();
+
+      transformedQuestions.forEach((q) => {
+        if (!subjectMap.has(q.subjectId)) {
+          subjectMap.set(q.subjectId, {
+            subjectName: q.subjectName || "General",
+            subjectId: q.subjectId,
+            orderIndex: q.subjectOrderIndex,
+            durationMinutes: q.subjectDurationMinutes,
+            sections: [],
+          });
+        }
+
+        const subject = subjectMap.get(q.subjectId)!;
+        let section = subject.sections.find((s) => s.sectionId === q.sectionId);
+
+        if (!section) {
+          section = {
+            sectionName: q.sectionName,
+            sectionId: q.sectionId,
+            orderIndex: q.sectionOrderIndex || 0,
+            questions: [],
+            maxAttemptsAllowed: q.sectionMaxAttemptsAllowed,
+          };
+          subject.sections.push(section);
+        }
+
+        section.questions.push(q);
+      });
+
+      // Sort subjects and sections by order index
+      const sortedSubjects = Array.from(subjectMap.values()).sort(
+        (a, b) => a.orderIndex - b.orderIndex,
+      );
+
+      sortedSubjects.forEach((s) => {
+        s.sections.sort((a, b) => a.orderIndex - b.orderIndex);
+      });
+
+      setSubjects(sortedSubjects);
+      setSubjectWiseTiming(Boolean(payload.subjectWiseTiming));
+      
+      // Calculate total duration if not explicitly provided
+      const apiDuration = (payload as any).testDurationMinutes;
+      if (apiDuration) {
+        setTestDurationMinutes(apiDuration);
+      } else {
+        const totalSubjectDuration = sortedSubjects.reduce(
+          (sum, s) => sum + (s.durationMinutes || 0),
+          0,
+        );
+        setTestDurationMinutes(totalSubjectDuration || DEFAULT_DURATION_MINUTES);
+      }
+
       setCalculatorEnabled(Boolean(payload.calculatorEnabled));
+      setCurrentSubjectIndex(0);
+      setCurrentSectionIndex(0);
       setCurrentQuestionIndex(0);
       setSelectedAnswers({});
     } catch (err: any) {
@@ -318,24 +412,31 @@ const TestAttemptScreen = () => {
   }, [fetchQuestions]);
 
   useEffect(() => {
-    const initialRemaining =
-      testDurationMinutes * 60 -
-      Math.floor((Date.now() - attemptStartTime) / 1000);
-    setRemainingSeconds(Math.max(0, initialRemaining));
+    if (subjects.length === 0) return;
 
-    const interval = setInterval(() => {
-      setRemainingSeconds((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
+    if (!subjectWiseTiming) {
+      if (lastTimedSubjectIndex.current === null) {
+        const totalElapsed = Math.floor((Date.now() - attemptStartTime) / 1000);
+        const initialRemaining = testDurationMinutes * 60 - totalElapsed;
+        setRemainingSeconds(Math.max(0, initialRemaining));
+        lastTimedSubjectIndex.current = -1;
+      }
+    } else {
+      if (lastTimedSubjectIndex.current !== currentSubjectIndex) {
+        const currentSubjectDuration =
+          (subjects[currentSubjectIndex]?.durationMinutes || 0) * 60;
+        setRemainingSeconds(currentSubjectDuration);
+        lastTimedSubjectIndex.current = currentSubjectIndex;
+      }
+    }
+  }, [
+    subjects,
+    subjectWiseTiming,
+    currentSubjectIndex,
+    attemptStartTime,
+    testDurationMinutes,
+  ]);
 
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [attemptStartTime, testDurationMinutes]);
 
   const timerLabel = useMemo(() => {
     const minutes = Math.floor(remainingSeconds / 60)
@@ -346,23 +447,115 @@ const TestAttemptScreen = () => {
   }, [remainingSeconds]);
 
   const uniqueSubjects = useMemo(() => {
-    const subjects = new Map<string, string>();
-    questions.forEach((q) => {
-      if (q.subjectName) {
-        subjects.set(q.subjectName, q.subjectName);
+    return subjects.map((s) => s.subjectName);
+  }, [subjects]);
+
+  const currentSubject = subjects[currentSubjectIndex] || null;
+  const currentSection = currentSubject?.sections[currentSectionIndex] || null;
+  const currentQuestion =
+    currentSection?.questions[currentQuestionIndex] || null;
+
+  const allSubjectQuestions = useMemo(() => {
+    if (!currentSubject) return [];
+    return currentSubject.sections.flatMap((s) => s.questions);
+  }, [currentSubject]);
+
+  const currentGlobalIndex = useMemo(() => {
+    if (!currentSubject) return 0;
+    let count = 0;
+    for (let i = 0; i < currentSectionIndex; i++) {
+      count += currentSubject.sections[i].questions.length;
+    }
+    return count + currentQuestionIndex;
+  }, [currentSubject, currentSectionIndex, currentQuestionIndex]);
+
+  const navigatorData = useMemo(() => {
+    if (!currentSubject) return [];
+    const data: any[] = [];
+    let qGlobalIndex = 0;
+    currentSubject.sections.forEach((section, sIdx) => {
+      if (section.sectionName) {
+        data.push({
+          type: "section",
+          title: section.sectionName,
+          isFirst: data.length === 0,
+        });
       }
+      section.questions.forEach((q, qIdx) => {
+        data.push({
+          type: "question",
+          question: q,
+          sIdx,
+          qIdx,
+          globalIndex: qGlobalIndex++,
+        });
+      });
     });
-    return Array.from(subjects.values());
-  }, [questions]);
+    return data;
+  }, [currentSubject]);
 
-  const filteredQuestions = useMemo(() => {
-    if (!selectedSubject) return questions;
-    return questions.filter((q) => q.subjectName === selectedSubject);
-  }, [questions, selectedSubject]);
+  const isQuestionAnswered = useCallback(
+    (question: NormalizedQuestion | null | undefined) => {
+      if (!question) return false;
+      const value = selectedAnswers[question.id];
 
-  const displayedQuestions =
-    filteredQuestions.length > 0 ? filteredQuestions : questions;
-  const currentQuestion = displayedQuestions[currentQuestionIndex] || null;
+      if (value === undefined || value === null) return false;
+
+      if (question.category === "multi") {
+        return Array.isArray(value) && value.length > 0;
+      }
+
+      if (question.category === "numeric") {
+        return typeof value === "string" && value.trim().length > 0;
+      }
+
+      return typeof value === "number";
+    },
+    [selectedAnswers],
+  );
+
+  const allQuestions = useMemo(() => {
+    const qs: NormalizedQuestion[] = [];
+    subjects.forEach((s) => {
+      s.sections.forEach((sec) => {
+        qs.push(...sec.questions);
+      });
+    });
+    return qs;
+  }, [subjects]);
+
+  const sectionAttemptCounts = useMemo(() => {
+    if (!currentSubject) return {};
+    const counts: Record<number, number> = {};
+    currentSubject.sections.forEach((section) => {
+      const answeredCount = section.questions.filter((q) =>
+        isQuestionAnswered(q),
+      ).length;
+      counts[section.sectionId || 0] = answeredCount;
+    });
+    return counts;
+  }, [currentSubject, isQuestionAnswered]);
+
+  const currentSectionAttemptCount =
+    sectionAttemptCounts[currentSection?.sectionId || 0] || 0;
+  const isSectionLimitReached =
+    currentSection?.maxAttemptsAllowed != null &&
+    currentSectionAttemptCount >= currentSection.maxAttemptsAllowed;
+
+  const isCurrentQuestionAnswered = currentQuestion
+    ? isQuestionAnswered(currentQuestion)
+    : false;
+
+  const showAttemptLimitWarning =
+    currentQuestion && isSectionLimitReached && !isCurrentQuestionAnswered;
+
+  const handleClearResponse = (questionId: number) => {
+    setSelectedAnswers((prev) => {
+      const next = { ...prev };
+      delete next[questionId];
+      return next;
+    });
+  };
 
   const handleSelectSingleOption = (
     questionId: number,
@@ -416,50 +609,39 @@ const TestAttemptScreen = () => {
     return typeof value === "string" ? value : "";
   };
 
-  const isQuestionAnswered = useCallback(
-    (question: NormalizedQuestion) => {
-      const value = selectedAnswers[question.id];
-
-      if (question.category === "multi") {
-        return Array.isArray(value) && value.length > 0;
-      }
-
-      if (question.category === "numeric") {
-        return typeof value === "string" && value.trim().length > 0;
-      }
-
-      return typeof value === "number";
-    },
-    [selectedAnswers],
-  );
-
   const overallAnsweredCount = useMemo(() => {
-    return questions.filter((question) => isQuestionAnswered(question)).length;
-  }, [isQuestionAnswered, questions]);
+    return allQuestions.filter((question) => isQuestionAnswered(question)).length;
+  }, [isQuestionAnswered, allQuestions]);
 
   const subjectProgressRows = useMemo(() => {
-    const grouped = new Map<string, NormalizedQuestion[]>();
+    return subjects.map((subject) => {
+      let answeredCount = 0;
+      let totalCount = 0;
 
-    questions.forEach((question) => {
-      const key = question.subjectName || "General";
-      const existing = grouped.get(key) || [];
-      grouped.set(key, [...existing, question]);
+      subject.sections.forEach((section) => {
+        totalCount += section.questions.length;
+        answeredCount += section.questions.filter((q) => isQuestionAnswered(q))
+          .length;
+      });
+
+      return {
+        subjectName: subject.subjectName,
+        answeredCount,
+        totalCount,
+      };
     });
+  }, [isQuestionAnswered, subjects]);
 
-    return Array.from(grouped.entries()).map(
-      ([subjectName, subjectQuestions]) => {
-        const answeredCount = subjectQuestions.filter((question) =>
-          isQuestionAnswered(question),
-        ).length;
-
-        return {
-          subjectName,
-          answeredCount,
-          totalCount: subjectQuestions.length,
-        };
-      },
-    );
-  }, [isQuestionAnswered, questions]);
+  const currentSubjectProgress = useMemo(() => {
+    if (!currentSubject) return { total: 0, answered: 0 };
+    let total = 0;
+    let answered = 0;
+    currentSubject.sections.forEach((sec) => {
+      total += sec.questions.length;
+      answered += sec.questions.filter((q) => isQuestionAnswered(q)).length;
+    });
+    return { total, answered };
+  }, [currentSubject, isQuestionAnswered]);
 
   const handleOpenSubmitConfirm = () => {
     setShowSubmitConfirm(true);
@@ -473,7 +655,7 @@ const TestAttemptScreen = () => {
   const buildSubmitAnswers = useCallback((): StudentAnswer[] => {
     const answers: StudentAnswer[] = [];
 
-    questions.forEach((question) => {
+    allQuestions.forEach((question) => {
       const value = selectedAnswers[question.id];
 
       if (question.category === "multi") {
@@ -525,7 +707,7 @@ const TestAttemptScreen = () => {
     });
 
     return answers;
-  }, [questions, selectedAnswers]);
+  }, [allQuestions, selectedAnswers]);
 
   const fetchLatestResults = useCallback(async () => {
     if (!token || !testItemNumericId || Number.isNaN(testItemNumericId)) {
@@ -664,43 +846,74 @@ const TestAttemptScreen = () => {
     token,
   ]);
 
-  const handleQuestionJump = (index: number) => {
-    setCurrentQuestionIndex(index);
+  const handleSubmitSubject = useCallback(async () => {
+    if (currentSubjectIndex < subjects.length - 1) {
+      const nextIdx = currentSubjectIndex + 1;
+      setCompletedSubjectIds((prev) => [...prev, subjects[currentSubjectIndex].subjectId]);
+      setCurrentSubjectIndex(nextIdx);
+      setCurrentSectionIndex(0);
+      setCurrentQuestionIndex(0);
+      
+      // Reset timer for the next subject
+      const nextSubjectDuration = (subjects[nextIdx]?.durationMinutes || 0) * 60;
+      setRemainingSeconds(nextSubjectDuration);
+      
+      setShowSubmitConfirm(false);
+    } else {
+      await handleSubmitTest();
+    }
+  }, [currentSubjectIndex, subjects, handleSubmitTest]);
+
+  useEffect(() => {
+    if (subjects.length === 0) return;
+
+    const interval = setInterval(() => {
+      setRemainingSeconds((prev) => {
+        if (prev <= 1) {
+          if (subjectWiseTiming) {
+            handleSubmitSubject();
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [subjects, subjectWiseTiming, handleSubmitSubject]);
+
+  const handleQuestionJump = (sIdx: number, qIdx: number) => {
+    setCurrentSectionIndex(sIdx);
+    setCurrentQuestionIndex(qIdx);
   };
 
   const handleNextFromFooter = () => {
-    const isLastQuestionInCurrentView =
-      currentQuestionIndex >= displayedQuestions.length - 1;
-
-    if (!isLastQuestionInCurrentView) {
-      setCurrentQuestionIndex((prev) =>
-        Math.min(displayedQuestions.length - 1, prev + 1),
-      );
+    // 1. Next question in current section
+    if (
+      currentSection &&
+      currentQuestionIndex < currentSection.questions.length - 1
+    ) {
+      setCurrentQuestionIndex((prev) => prev + 1);
       return;
     }
 
-    if (!selectedSubject) {
-      handleOpenSubmitConfirm();
-      return;
-    }
-
-    const currentSubjectIndex = uniqueSubjects.findIndex(
-      (subject) => subject === selectedSubject,
-    );
-    const nextSubject =
-      currentSubjectIndex >= 0
-        ? uniqueSubjects[currentSubjectIndex + 1]
-        : undefined;
-
-    if (nextSubject) {
-      setSelectedSubject(nextSubject);
+    // 2. Next section in current subject
+    if (currentSubject && currentSectionIndex < currentSubject.sections.length - 1) {
+      setCurrentSectionIndex((prev) => prev + 1);
       setCurrentQuestionIndex(0);
       return;
     }
 
-    // No next subject exists, so switch back to all questions.
-    setSelectedSubject(null);
-    setCurrentQuestionIndex(0);
+    // 3. Next subject (only if NOT subject-wise timing)
+    if (!subjectWiseTiming && currentSubjectIndex < subjects.length - 1) {
+      setCurrentSubjectIndex((prev) => prev + 1);
+      setCurrentSectionIndex(0);
+      setCurrentQuestionIndex(0);
+      return;
+    }
+
+    // 4. End of test / End of subject
+    handleOpenSubmitConfirm();
   };
 
   if (loading) {
@@ -760,7 +973,7 @@ const TestAttemptScreen = () => {
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 60 }}
       >
         <View className="pt-4">
           <View className="px-6 pb-4 border-b border-gray-100 dark:border-slate-800">
@@ -774,107 +987,145 @@ const TestAttemptScreen = () => {
                   size={18}
                   color={colorScheme === "dark" ? "#e2e8f0" : "#334155"}
                 />
-                <Text className="ml-2 text-slate-900 dark:text-white text-2xl font-black tracking-wider">
-                  {timerLabel}
-                </Text>
+                <View className="ml-2 flex-row items-center">
+                  {subjectWiseTiming && (
+                    <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase mr-1.5 mt-1">
+                      Subject:
+                    </Text>
+                  )}
+                  <Text className="text-slate-900 dark:text-white text-2xl font-black tracking-wider">
+                    {timerLabel}
+                  </Text>
+                </View>
               </View>
 
-              <TouchableOpacity
-                onPress={handleOpenSubmitConfirm}
-                disabled={submitting}
-                className="h-12 bg-red-500 rounded-xl items-center justify-center px-5"
-              >
-                <Text className="text-white text-base font-black">
-                  {submitting ? "Submitting..." : "Submit Test"}
-                </Text>
-              </TouchableOpacity>
+              <View className="flex-row items-center" style={{ gap: 8 }}>
+                {calculatorEnabled && (
+                  <TouchableOpacity
+                    onPress={() => setIsCalculatorVisible(true)}
+                    className="h-12 w-12 bg-orange-500 rounded-full items-center justify-center shadow-lg shadow-orange-500/30"
+                  >
+                    <MaterialCommunityIcons
+                      name="calculator"
+                      size={24}
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                )}
+
+                <TouchableOpacity
+                  onPress={handleOpenSubmitConfirm}
+                  disabled={submitting}
+                  className="h-12 bg-red-500 rounded-xl items-center justify-center px-5"
+                >
+                  <Text className="text-white text-base font-black">
+                    {submitting
+                      ? "..."
+                      : subjectWiseTiming
+                      ? `Submit ${currentSubject?.subjectName}`
+                      : "Submit Test"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
             <View className="mt-3 h-1 rounded-full bg-gray-100 dark:bg-slate-800 overflow-hidden">
               <View
                 className="h-full bg-primary"
                 style={{
-                  width: `${((currentQuestionIndex + 1) / displayedQuestions.length) * 100}%`,
+                  width: `${
+                    ((currentGlobalIndex + 1) / allSubjectQuestions.length) *
+                    100
+                  }%`,
                 }}
               />
             </View>
+
           </View>
 
           {/* Subject Selector */}
-          {uniqueSubjects.length > 1 && (
-            <View className="px-6 pt-5 pb-4 border-b border-gray-100 dark:border-slate-800">
-              <TouchableOpacity
-                onPress={() => setIsSubjectFilterCollapsed((prev) => !prev)}
-                className="flex-row items-center justify-between"
+          <View className="px-6 pt-2">
+            <TouchableOpacity
+              onPress={() =>
+                setIsSubjectFilterCollapsed(!isSubjectFilterCollapsed)
+              }
+              className="flex-row items-center justify-between"
+            >
+              <Text className="text-slate-800 dark:text-slate-100 font-black text-xs tracking-wider uppercase">
+                Subjects
+              </Text>
+              <Feather
+                name={isSubjectFilterCollapsed ? "chevron-down" : "chevron-up"}
+                size={18}
+                color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
+              />
+            </TouchableOpacity>
+
+            {!isSubjectFilterCollapsed && (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                className="flex-row"
+                contentContainerStyle={{ gap: 8, paddingBottom: 4 }}
               >
-                <Text className="text-slate-500 dark:text-slate-400 font-black text-xs tracking-wider uppercase">
-                  Filter by Subject
-                </Text>
-                <Feather
-                  name={
-                    isSubjectFilterCollapsed ? "chevron-down" : "chevron-up"
-                  }
-                  size={18}
-                  color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
-                />
-              </TouchableOpacity>
+                {subjects.map((subj, idx) => {
+                  const isCompleted = completedSubjectIds.includes(subj.subjectId);
+                  const isActive = currentSubjectIndex === idx;
+                  // If subjectWiseTiming is true, ONLY the active subject is clickable.
+                  // Completed or future subjects are locked.
+                  const isLocked = subjectWiseTiming ? !isActive : false;
 
-              {!isSubjectFilterCollapsed ? (
-                <View className="mt-3">
-                  <FlatList
-                    horizontal
-                    scrollEnabled
-                    data={[
-                      { name: "All" },
-                      ...uniqueSubjects.map((s) => ({ name: s })),
-                    ]}
-                    keyExtractor={(item) => item.name}
-                    showsHorizontalScrollIndicator={false}
-                    ItemSeparatorComponent={() => <View className="w-2" />}
-                    renderItem={({ item }) => {
-                      const isSelected =
-                        selectedSubject === item.name ||
-                        (item.name === "All" && selectedSubject === null);
-
-                      return (
-                        <TouchableOpacity
-                          onPress={() => {
-                            setSelectedSubject(
-                              item.name === "All" ? null : item.name,
-                            );
-                            setCurrentQuestionIndex(0);
-                          }}
-                          className={`px-4 py-2 rounded-full border ${
-                            isSelected
-                              ? "bg-primary border-primary"
-                              : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700"
-                          }`}
-                        >
-                          <Text
-                            className={`font-semibold text-sm ${
-                              isSelected
-                                ? "text-white"
-                                : "text-slate-600 dark:text-slate-300"
-                            }`}
-                          >
-                            {item.name}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    }}
-                  />
-                </View>
-              ) : null}
-            </View>
-          )}
+                  return (
+                    <TouchableOpacity
+                      key={subj.subjectId}
+                      onPress={() => {
+                        if (!isLocked) {
+                          setCurrentSubjectIndex(idx);
+                          setCurrentSectionIndex(0);
+                          setCurrentQuestionIndex(0);
+                        }
+                      }}
+                      disabled={isLocked}
+                      className={`px-5 py-3 rounded-2xl border-2 flex-row items-center ${
+                        isActive
+                          ? "bg-primary/10 border-primary"
+                          : isCompleted
+                          ? "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/20"
+                          : isLocked
+                          ? "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 opacity-50"
+                          : "bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700"
+                      }`}
+                    >
+                      {isCompleted && (
+                        <View className="mr-2 w-5 h-5 rounded-full bg-emerald-500 items-center justify-center">
+                          <Feather name="check" size={12} color="white" />
+                        </View>
+                      )}
+                      <Text
+                        className={`text-sm font-black ${
+                          isActive
+                            ? "text-primary"
+                            : isCompleted
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-slate-600 dark:text-slate-400"
+                        }`}
+                      >
+                        {subj.subjectName}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            )}
+          </View>
 
           {/* Question Navigator */}
-          <View className="px-6 pt-5 pb-4">
+          <View className="px-6 pt-3 pb-2">
             <TouchableOpacity
               onPress={() => setIsQuestionNavigatorCollapsed((prev) => !prev)}
               className="flex-row items-center justify-between"
             >
-              <Text className="text-slate-500 dark:text-slate-400 font-black text-xs tracking-wider uppercase">
+              <Text className="text-slate-800 dark:text-slate-100 font-black text-xs tracking-wider uppercase">
                 Question Navigator
               </Text>
               <Feather
@@ -891,23 +1142,38 @@ const TestAttemptScreen = () => {
                 <FlatList
                   horizontal
                   scrollEnabled
-                  data={displayedQuestions}
-                  keyExtractor={(item) => String(item.id)}
+                  data={navigatorData}
+                  keyExtractor={(_, index) => String(index)}
                   showsHorizontalScrollIndicator={false}
                   ItemSeparatorComponent={() => <View className="w-2" />}
-                  renderItem={({ index, item }) => {
-                    const isCurrent = index === currentQuestionIndex;
-                    const isAnswered = isQuestionAnswered(item);
+                  renderItem={({ item }) => {
+                    if (item.type === "section") {
+                      return (
+                        <View className="flex-row items-center px-1">
+                          {!item.isFirst && (
+                            <View className="h-6 w-[1px] bg-gray-200 dark:bg-slate-700 mx-3" />
+                          )}
+                          <Text className="text-slate-400 dark:text-slate-500 font-black text-[10px] tracking-widest uppercase">
+                            {item.title}
+                          </Text>
+                        </View>
+                      );
+                    }
+
+                    const isCurrent =
+                      item.sIdx === currentSectionIndex &&
+                      item.qIdx === currentQuestionIndex;
+                    const isAnswered = isQuestionAnswered(item.question);
 
                     return (
                       <TouchableOpacity
-                        onPress={() => handleQuestionJump(index)}
+                        onPress={() => handleQuestionJump(item.sIdx, item.qIdx)}
                         className={`w-12 h-12 rounded-xl border items-center justify-center ${
                           isCurrent
                             ? "border-primary bg-orange-50 dark:bg-orange-900/20"
                             : isAnswered
-                              ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20"
-                              : "border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800"
+                            ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20"
+                            : "border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800"
                         }`}
                       >
                         <Text
@@ -915,11 +1181,11 @@ const TestAttemptScreen = () => {
                             isCurrent
                               ? "text-primary"
                               : isAnswered
-                                ? "text-green-700 dark:text-green-300"
-                                : "text-slate-600 dark:text-slate-300"
+                              ? "text-green-700 dark:text-green-300"
+                              : "text-slate-600 dark:text-slate-300"
                           }`}
                         >
-                          {index + 1}
+                          {item.globalIndex + 1}
                         </Text>
                       </TouchableOpacity>
                     );
@@ -929,8 +1195,8 @@ const TestAttemptScreen = () => {
             ) : null}
           </View>
 
-          <View className="px-6 pt-6 pb-4">
-            <View className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-3xl p-6 shadow-sm mb-6">
+          <View className="px-6 pt-4 pb-2">
+            <View className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-3xl p-5 shadow-sm mb-4">
               <View
                 className="flex-row items-center justify-between mb-3"
                 style={{ gap: 12 }}
@@ -940,14 +1206,14 @@ const TestAttemptScreen = () => {
                     QUESTION
                   </Text>
                   <Text className="text-primary text-sm font-black tracking-wider ml-1">
-                    {currentQuestionIndex + 1}
+                    {currentGlobalIndex + 1}
                   </Text>
                 </View>
                 <Text
-                  className="text-slate-500 dark:text-slate-400 text-xs font-semibold"
+                  className="text-slate-500 dark:text-slate-400 text-[10px] font-bold"
                   numberOfLines={1}
                 >
-                  {currentQuestionIndex + 1}/{displayedQuestions.length}
+                  {currentGlobalIndex + 1}/{allSubjectQuestions.length}
                 </Text>
               </View>
               {currentQuestion.paragraphText
@@ -964,17 +1230,20 @@ const TestAttemptScreen = () => {
                 `q-${currentQuestion.id}`,
               )}
 
-              {currentQuestion.subjectName && (
-                <Text className="text-slate-500 dark:text-slate-400 text-sm font-semibold mt-4">
-                  Subject: {currentQuestion.subjectName}
-                </Text>
-              )}
-              <Text className="text-slate-400 dark:text-slate-500 text-xs font-semibold mt-2 uppercase tracking-wider">
-                Type: {currentQuestion.questionType || "unknown"}
-              </Text>
             </View>
 
-            <View className="mb-6">
+            <View className="mb-4">
+              {showAttemptLimitWarning && (
+                <View className="flex-row items-center bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 p-4 rounded-2xl mb-4">
+                  <Feather name="lock" size={16} color="#f97316" />
+                  <Text className="ml-2 text-orange-700 dark:text-orange-300 text-xs font-bold leading-5 flex-1">
+                    You have reached the maximum attempts for this section (
+                    {currentSection?.maxAttemptsAllowed}/
+                    {currentSection?.maxAttemptsAllowed}).
+                  </Text>
+                </View>
+              )}
+
               {currentQuestion.category === "numeric" ? (
                 <>
                   <Text className="text-slate-500 dark:text-slate-400 font-black text-xs tracking-wider uppercase mb-3">
@@ -987,7 +1256,12 @@ const TestAttemptScreen = () => {
                     }
                     placeholder="Type numeric answer"
                     keyboardType="decimal-pad"
-                    className="rounded-2xl border px-4 py-4 text-base font-semibold bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-slate-800 dark:text-slate-100"
+                    editable={!showAttemptLimitWarning}
+                    className={`rounded-2xl border px-4 py-4 text-base font-semibold ${
+                      showAttemptLimitWarning
+                        ? "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 opacity-50"
+                        : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700"
+                    } text-slate-800 dark:text-slate-100`}
                     placeholderTextColor={isDark ? "#94a3b8" : "#64748b"}
                   />
                 </>
@@ -1020,9 +1294,12 @@ const TestAttemptScreen = () => {
                                 optionIndex,
                               )
                         }
+                        disabled={showAttemptLimitWarning}
                         className={`rounded-2xl border px-4 py-4 mb-3 flex-row items-center ${
                           isSelected
                             ? "bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700"
+                            : showAttemptLimitWarning
+                            ? "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 opacity-50"
                             : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700"
                         }`}
                       >
@@ -1085,43 +1362,91 @@ const TestAttemptScreen = () => {
       >
         <View className="flex-row items-center justify-between">
           <TouchableOpacity
-            onPress={() =>
-              setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))
+            onPress={() => {
+              if (currentQuestionIndex > 0) {
+                setCurrentQuestionIndex((prev) => prev - 1);
+              } else if (currentSectionIndex > 0) {
+                const prevSection =
+                  currentSubject!.sections[currentSectionIndex - 1];
+                setCurrentSectionIndex(currentSectionIndex - 1);
+                setCurrentQuestionIndex(prevSection.questions.length - 1);
+              } else if (!subjectWiseTiming && currentSubjectIndex > 0) {
+                const prevSubject = subjects[currentSubjectIndex - 1];
+                const prevSubjectLastSectionIdx =
+                  prevSubject.sections.length - 1;
+                const prevSubjectLastSection =
+                  prevSubject.sections[prevSubjectLastSectionIdx];
+                setCurrentSubjectIndex(currentSubjectIndex - 1);
+                setCurrentSectionIndex(prevSubjectLastSectionIdx);
+                setCurrentQuestionIndex(
+                  prevSubjectLastSection.questions.length - 1,
+                );
+              }
+            }}
+            disabled={
+              currentQuestionIndex === 0 &&
+              currentSectionIndex === 0 &&
+              (subjectWiseTiming || currentSubjectIndex === 0)
             }
-            disabled={currentQuestionIndex === 0}
-            className={`px-8 py-3.5 rounded-2xl border ${
-              currentQuestionIndex === 0
+            className={`px-6 py-3.5 rounded-2xl border ${
+              currentQuestionIndex === 0 &&
+              currentSectionIndex === 0 &&
+              (subjectWiseTiming || currentSubjectIndex === 0)
                 ? "border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/20"
                 : "border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800"
             }`}
           >
             <Text
-              className={`font-black text-base ${
-                currentQuestionIndex === 0
+              className={`font-black text-sm ${
+                currentQuestionIndex === 0 &&
+                currentSectionIndex === 0 &&
+                (subjectWiseTiming || currentSubjectIndex === 0)
                   ? "text-slate-400 dark:text-slate-600"
                   : "text-slate-700 dark:text-slate-200"
               }`}
             >
-              Previous
+              Prev
             </Text>
           </TouchableOpacity>
 
-          {currentQuestionIndex < displayedQuestions.length - 1 ||
-          selectedSubject ? (
+          {isCurrentQuestionAnswered && (
+            <TouchableOpacity
+              onPress={() => handleClearResponse(currentQuestion.id)}
+              className="flex-row items-center px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+            >
+              <Feather
+                name="rotate-ccw"
+                size={14}
+                color={isDark ? "#94a3b8" : "#64748b"}
+              />
+              <Text className="ml-2 text-slate-600 dark:text-slate-400 font-bold text-xs">
+                Clear
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {!(
+            currentGlobalIndex >= allSubjectQuestions.length - 1 &&
+            (subjectWiseTiming || currentSubjectIndex >= subjects.length - 1)
+          ) ? (
             <TouchableOpacity
               onPress={handleNextFromFooter}
-              className="bg-primary px-12 py-3.5 rounded-2xl shadow-sm shadow-primary/20"
+              className="bg-primary px-10 py-3.5 rounded-2xl shadow-sm shadow-primary/20"
             >
-              <Text className="text-white font-black text-lg">Next</Text>
+              <Text className="text-white font-black text-base">Next</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
               onPress={handleOpenSubmitConfirm}
               disabled={submitting}
-              className="bg-green-600 px-10 py-3.5 rounded-2xl shadow-sm shadow-green-500/20"
+              className="bg-green-600 px-8 py-3.5 rounded-2xl shadow-sm shadow-green-500/20"
             >
-              <Text className="text-white font-black text-lg">
-                {submitting ? "Submitting..." : "Submit Test"}
+              <Text className="text-white font-black text-base">
+                {submitting
+                  ? "..."
+                  : subjectWiseTiming
+                  ? "Submit Subject"
+                  : "Submit Test"}
               </Text>
             </TouchableOpacity>
           )}
@@ -1139,95 +1464,108 @@ const TestAttemptScreen = () => {
         }}
       >
         <View className="flex-1 bg-black/50 px-6 items-center justify-center">
-          <View className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-[32px] p-6 shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-800">
-            {/* Design Element */}
-            <View className="absolute top-0 right-0 w-24 h-24 bg-orange-50 dark:bg-orange-900/10 rounded-bl-full opacity-50" />
-
-            <View className="flex-row items-center justify-between mb-4 mt-2">
-              <Text className="text-slate-900 dark:text-white text-xl font-black">
-                Confirm Submission
-              </Text>
-              <TouchableOpacity
-                onPress={() => setShowSubmitConfirm(false)}
-                disabled={submitting}
-                className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-800 items-center justify-center"
-              >
-                <Feather
-                  name="x"
-                  size={16}
-                  color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
-                />
-              </TouchableOpacity>
-            </View>
-
-            <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold mb-6 leading-5">
-              Great effort! Are you certainly ready to submit your test for
-              final evaluation?
-            </Text>
-
-            <View className="rounded-2xl bg-orange-50/50 dark:bg-orange-900/10 border border-orange-100/50 dark:border-orange-900/20 px-4 py-4 mb-4 flex-row items-center justify-between">
-              <View>
-                <Text className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-widest mb-1">
-                  Overall Progress
+          <View className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800">
+            <View className="p-6 border-b border-gray-100 dark:border-slate-800">
+              <View className="flex-row items-center justify-between mb-2">
+                <Text className="text-xl font-black text-slate-900 dark:text-white">
+                  {subjectWiseTiming ? `Submit ${currentSubject?.subjectName}` : "Submit Test"}
                 </Text>
-                <Text className="text-slate-800 dark:text-white font-black text-lg">
-                  {overallAnsweredCount} / {questions.length} Answered
-                </Text>
-              </View>
-              <View className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 items-center justify-center">
-                <Feather name="bar-chart-2" size={18} color="#FF8A50" />
-              </View>
-            </View>
-
-            <View className="mb-8" style={{ gap: 8 }}>
-              {subjectProgressRows.map((row) => (
-                <View
-                  key={row.subjectName}
-                  className="rounded-xl border border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-800/50 px-4 py-3 flex-row items-center justify-between"
+                <TouchableOpacity
+                  onPress={() => setShowSubmitConfirm(false)}
+                  disabled={submitting}
+                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-800 items-center justify-center"
                 >
-                  <Text
-                    className="text-slate-600 dark:text-slate-300 font-bold text-sm flex-1 pr-3"
-                    numberOfLines={1}
-                  >
-                    {row.subjectName}
+                  <Feather
+                    name="x"
+                    size={16}
+                    color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
+                  />
+                </TouchableOpacity>
+              </View>
+              <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold leading-5">
+                {subjectWiseTiming
+                  ? "Are you sure you want to complete this subject? You cannot return to it once submitted."
+                  : "Are you sure you want to submit the entire test?"}
+              </Text>
+            </View>
+
+            <ScrollView className="p-6 max-h-96" showsVerticalScrollIndicator={false}>
+              <View className="flex-row flex-wrap justify-between mb-6">
+                <View className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl w-[48%] mb-4 border border-slate-100 dark:border-slate-700">
+                  <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
+                    Questions
                   </Text>
-                  <Text className="text-slate-800 dark:text-white font-black text-base">
-                    {row.answeredCount}/{row.totalCount}
+                  <Text className="text-slate-900 dark:text-white text-xl font-black">
+                    {subjectWiseTiming
+                      ? currentSubjectProgress.total
+                      : allQuestions.length}
                   </Text>
                 </View>
-              ))}
-            </View>
+                <View className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl w-[48%] mb-4 border border-slate-100 dark:border-slate-700">
+                  <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
+                    Answered
+                  </Text>
+                  <Text className="text-emerald-500 text-xl font-black">
+                    {subjectWiseTiming
+                      ? currentSubjectProgress.answered
+                      : overallAnsweredCount}
+                  </Text>
+                </View>
+              </View>
 
-            <View className="flex-row items-center gap-x-3">
+              <Text className="text-slate-900 dark:text-white font-bold mb-3">
+                {subjectWiseTiming ? "Current Subject Progress" : "Subject Progress"}
+              </Text>
+              {subjectProgressRows
+                .filter((row) =>
+                  subjectWiseTiming
+                    ? row.subjectName === currentSubject?.subjectName
+                    : true,
+                )
+                .map((row) => (
+                  <View
+                    key={row.subjectName}
+                    className="flex-row items-center justify-between py-3 border-b border-gray-50 dark:border-slate-800"
+                  >
+                    <Text className="text-slate-700 dark:text-slate-300 font-medium">
+                      {row.subjectName}
+                    </Text>
+                    <Text className="text-slate-900 dark:text-white font-bold">
+                      {row.answeredCount}/{row.totalCount}
+                    </Text>
+                  </View>
+                ))}
+            </ScrollView>
+
+            <View className="p-6 flex-row gap-3">
               <TouchableOpacity
                 onPress={() => setShowSubmitConfirm(false)}
-                disabled={submitting}
-                className="flex-1 h-12 rounded-xl items-center justify-center bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700"
+                className="flex-1 h-12 rounded-xl items-center justify-center border border-slate-200 dark:border-slate-700"
               >
-                <Text className="text-slate-600 dark:text-slate-400 font-bold text-base">
-                  Go Back
+                <Text className="text-slate-600 dark:text-slate-400 font-bold">
+                  Cancel
                 </Text>
               </TouchableOpacity>
-
               <TouchableOpacity
-                onPress={handleSubmitTest}
+                onPress={subjectWiseTiming ? handleSubmitSubject : handleSubmitTest}
                 disabled={submitting}
-                className="flex-1 h-12 bg-red-500 rounded-xl items-center justify-center shadow-lg shadow-red-500/20"
+                className="flex-1 h-12 bg-primary rounded-xl items-center justify-center"
               >
-                {submitting ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
-                ) : (
-                  <Text className="text-white text-base font-black">
-                    Submit Test
-                  </Text>
-                )}
+                <Text className="text-white font-black">
+                  {submitting ? "..." : "Yes, Submit"}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
+      <ScientificCalculator
+        visible={isCalculatorVisible}
+        onClose={() => setIsCalculatorVisible(false)}
+        isDark={colorScheme === "dark"}
+      />
     </SafeAreaView>
   );
-};
+}
 
 export default TestAttemptScreen;

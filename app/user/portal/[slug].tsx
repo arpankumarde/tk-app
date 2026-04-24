@@ -34,7 +34,8 @@ type ApiErrorPayload = {
 };
 
 const Portal = () => {
-  const { slug } = useLocalSearchParams();
+  const params = useLocalSearchParams();
+  const { slug, title, duration, questions } = params;
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const { token } = useAuth();
@@ -95,8 +96,20 @@ const Portal = () => {
   }, [itemId, token]);
 
   useEffect(() => {
-    fetchInstructionsDetails();
-  }, [fetchInstructionsDetails]);
+    if (title && duration && questions) {
+      setDetails({
+        id: itemId,
+        title: title as string,
+        durationMinutes: Number(duration),
+        totalQuestions: Number(questions),
+        attemptsCount: 0,
+        isCompleted: false,
+      });
+      setLoading(false);
+    } else {
+      fetchInstructionsDetails();
+    }
+  }, [itemId, title, duration, questions, fetchInstructionsDetails]);
 
   const handleStartTest = useCallback(async () => {
     if (!token || !details?.id) {

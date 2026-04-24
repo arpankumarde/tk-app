@@ -3,15 +3,13 @@ import {
   View,
   Text,
   Image,
-  TouchableOpacity,
-  Modal,
-  Pressable,
-  FlatList,
+  TouchableOpacity
 } from "react-native";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather} from "@expo/vector-icons";
 import { router } from "expo-router";
 import { EnrolledTest } from "../types";
 import Placeholder from "@/constants/placeholder";
+import { formatScore, calculateAverageScore } from "@/utils/scoreFormatter";
 
 interface EnrolledTestCardProps {
   test: EnrolledTest;
@@ -54,13 +52,6 @@ const EnrolledTestCard = ({ test }: EnrolledTestCardProps) => {
             className="w-full h-full"
             resizeMode="cover"
           />
-          <View className="absolute inset-0 items-center justify-center bg-black/5">
-            <Ionicons
-              name={test.pdfUrl ? "document" : "document-text"}
-              size={14}
-              color="white"
-            />
-          </View>
         </View>
 
         {/* Title and Date */}
@@ -126,7 +117,7 @@ const EnrolledTestCard = ({ test }: EnrolledTestCardProps) => {
           <View className="w-[1px] h-6 bg-gray-100 dark:bg-slate-800" />
           <View className="items-center flex-1">
             <Text className="text-slate-800 dark:text-white font-black text-sm">
-              {test.averageScore || "N/A"}
+              {formatScore(calculateAverageScore(test))}
             </Text>
             <Text className="text-slate-400 font-bold text-[9px] uppercase tracking-wider">
               Avg Score

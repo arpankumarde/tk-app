@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, router } from "expo-router";
 import { useColorScheme } from "nativewind";
+import Placeholder from "@/constants/placeholder";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 const SEARCH_LIMIT = 5;
@@ -76,6 +77,7 @@ interface SearchResults {
 
 const ResultCard = ({
   thumbnail,
+  fallback,
   title,
   subtitle,
   badge,
@@ -84,6 +86,7 @@ const ResultCard = ({
   onPress,
 }: {
   thumbnail: string | null;
+  fallback: string;
   title: string;
   subtitle: string;
   badge?: string;
@@ -93,7 +96,6 @@ const ResultCard = ({
 }) => {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
-  const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(title)}&background=FF8A50&color=fff`;
 
   return (
     <TouchableOpacity
@@ -102,7 +104,7 @@ const ResultCard = ({
       className="flex-row bg-white dark:bg-slate-800 rounded-2xl p-4 mb-3 border border-gray-100 dark:border-slate-700 shadow-sm"
     >
       <Image
-        source={{ uri: thumbnail || avatarUrl }}
+        source={{ uri: thumbnail || fallback }}
         className="w-16 h-16 rounded-xl"
         resizeMode="cover"
       />
@@ -340,6 +342,7 @@ const SearchScreen = () => {
                 <ResultCard
                   key={`course-${c.id}`}
                   thumbnail={c.thumbnailUrl || c.thumbnailImageUrl}
+                  fallback={Placeholder.COURSE}
                   title={c.title}
                   subtitle={c.teacherName || c.teacherDisplayName || "TestKart Expert"}
                   badge={c.level}
@@ -359,6 +362,7 @@ const SearchScreen = () => {
                 <ResultCard
                   key={`test-${t.id}`}
                   thumbnail={t.thumbnailUrl}
+                  fallback={Placeholder.TEST}
                   title={t.title}
                   subtitle={t.teacherName}
                   badge={t.questionsCount ? `${t.questionsCount} Qs` : undefined}
@@ -378,6 +382,7 @@ const SearchScreen = () => {
                 <ResultCard
                   key={`product-${p.id}`}
                   thumbnail={p.thumbnailUrl}
+                  fallback={Placeholder.NOTE}
                   title={p.title}
                   subtitle={p.teacherName}
                   badge={p.pageCount ? `${p.pageCount} pages` : undefined}
@@ -397,6 +402,7 @@ const SearchScreen = () => {
                 <ResultCard
                   key={`live-${l.id}`}
                   thumbnail={l.thumbnailUrl}
+                  fallback={Placeholder.LIVE}
                   title={l.title}
                   subtitle={l.teacherName}
                   badge="LIVE"
