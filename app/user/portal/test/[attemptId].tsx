@@ -212,6 +212,7 @@ const TestAttemptScreen = () => {
 
   const [loading, setLoading] = useState(true);
   const [subjectWiseTiming, setSubjectWiseTiming] = useState(false);
+  const [questionWiseTiming, setQuestionWiseTiming] = useState(false);
   const [testDurationMinutes, setTestDurationMinutes] = useState(() => {
     const raw = Array.isArray(durationMinutes)
       ? durationMinutes[0]
@@ -236,8 +237,11 @@ const TestAttemptScreen = () => {
   const [isQuestionNavigatorCollapsed, setIsQuestionNavigatorCollapsed] =
     useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [questionRemainingSeconds, setQuestionRemainingSeconds] = useState(0);
   const [isCalculatorVisible, setIsCalculatorVisible] = useState(false);
   const lastTimedSubjectIndex = useRef<number | null>(null);
+  // Tracks question IDs already locked-in in QWT mode (once answered, answer is locked)
+  const [lockedAnswers, setLockedAnswers] = useState<Set<number>>(new Set());
 
   const attemptNumericId = useMemo(() => {
     const raw = Array.isArray(attemptId) ? attemptId[0] : attemptId;
@@ -381,6 +385,7 @@ const TestAttemptScreen = () => {
 
       setSubjects(sortedSubjects);
       setSubjectWiseTiming(Boolean(payload.subjectWiseTiming));
+      setQuestionWiseTiming(Boolean(payload.questionWiseTiming));
       
       // Calculate total duration if not explicitly provided
       const apiDuration = (payload as any).testDurationMinutes;
@@ -399,6 +404,7 @@ const TestAttemptScreen = () => {
       setCurrentSectionIndex(0);
       setCurrentQuestionIndex(0);
       setSelectedAnswers({});
+      setLockedAnswers(new Set());
     } catch (err: any) {
       Alert.alert("Error", err.message || "Unable to load test questions.");
       router.back();
@@ -445,6 +451,14 @@ const TestAttemptScreen = () => {
     const seconds = (remainingSeconds % 60).toString().padStart(2, "0");
     return `${minutes}:${seconds}`;
   }, [remainingSeconds]);
+
+  const questionTimerLabel = useMemo(() => {
+    const minutes = Math.floor(questionRemainingSeconds / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = (questionRemainingSeconds % 60).toString().padStart(2, "0");
+    return `${minutes}:${seconds}`;
+  }, [questionRemainingSeconds]);
 
   const uniqueSubjects = useMemo(() => {
     return subjects.map((s) => s.subjectName);
@@ -550,6 +564,8 @@ const TestAttemptScreen = () => {
     currentQuestion && isSectionLimitReached && !isCurrentQuestionAnswered;
 
   const handleClearResponse = (questionId: number) => {
+    // In question-wise timing mode, answers are locked once submitted
+    if (questionWiseTiming && lockedAnswers.has(questionId)) return;
     setSelectedAnswers((prev) => {
       const next = { ...prev };
       delete next[questionId];
@@ -561,6 +577,8 @@ const TestAttemptScreen = () => {
     questionId: number,
     optionIndex: number,
   ) => {
+    // In QWT mode, answer is locked after first selection
+    if (questionWiseTiming && lockedAnswers.has(questionId)) return;
     setSelectedAnswers((prev) => ({
       ...prev,
       [questionId]: optionIndex,
@@ -883,6 +901,8 @@ const TestAttemptScreen = () => {
   }, [subjects, subjectWiseTiming, handleSubmitSubject]);
 
   const handleQuestionJump = (sIdx: number, qIdx: number) => {
+    // Jumping is disabled in question-wise timing mode
+    if (questionWiseTiming) return;
     setCurrentSectionIndex(sIdx);
     setCurrentQuestionIndex(qIdx);
   };
@@ -906,6 +926,9 @@ const TestAttemptScreen = () => {
 
     // 3. Next subject (only if NOT subject-wise timing)
     if (!subjectWiseTiming && currentSubjectIndex < subjects.length - 1) {
+      if (questionWiseTiming) {
+        setCompletedSubjectIds((prev) => [...prev, subjects[currentSubjectIndex].subjectId]);
+      }
       setCurrentSubjectIndex((prev) => prev + 1);
       setCurrentSectionIndex(0);
       setCurrentQuestionIndex(0);
@@ -915,6 +938,30 @@ const TestAttemptScreen = () => {
     // 4. End of test / End of subject
     handleOpenSubmitConfirm();
   };
+
+  // Per-question countdown timer (only active in question-wise timing mode)
+  useEffect(() => {
+    if (!questionWiseTiming || !currentQuestion) return;
+    const durationSecs = (currentQuestion as any).durationSeconds || 60;
+    setQuestionRemainingSeconds(durationSecs);
+  }, [questionWiseTiming, currentQuestion?.id]);
+
+  useEffect(() => {
+    if (!questionWiseTiming || questionRemainingSeconds <= 0) return;
+
+    const interval = setInterval(() => {
+      setQuestionRemainingSeconds((prev) => {
+        if (prev <= 1) {
+          // Time's up — auto advance to next question
+          handleNextFromFooter();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [questionWiseTiming, questionRemainingSeconds, handleNextFromFooter]);
 
   if (loading) {
     return (
@@ -993,8 +1040,17 @@ const TestAttemptScreen = () => {
                       Subject:
                     </Text>
                   )}
-                  <Text className="text-slate-900 dark:text-white text-2xl font-black tracking-wider">
-                    {timerLabel}
+                  {questionWiseTiming && (
+                    <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase mr-1.5 mt-1">
+                      Q:
+                    </Text>
+                  )}
+                  <Text className={`text-2xl font-black tracking-wider ${
+                    questionWiseTiming && questionRemainingSeconds <= 10
+                      ? "text-red-500"
+                      : "text-slate-900 dark:text-white"
+                  }`}>
+                    {questionWiseTiming ? questionTimerLabel : timerLabel}
                   </Text>
                 </View>
               </View>
@@ -1071,9 +1127,9 @@ const TestAttemptScreen = () => {
                 {subjects.map((subj, idx) => {
                   const isCompleted = completedSubjectIds.includes(subj.subjectId);
                   const isActive = currentSubjectIndex === idx;
-                  // If subjectWiseTiming is true, ONLY the active subject is clickable.
+                  // If subjectWiseTiming or questionWiseTiming is true, ONLY the active subject is clickable.
                   // Completed or future subjects are locked.
-                  const isLocked = subjectWiseTiming ? !isActive : false;
+                  const isLocked = (subjectWiseTiming || questionWiseTiming) ? !isActive : false;
 
                   return (
                     <TouchableOpacity
@@ -1209,12 +1265,26 @@ const TestAttemptScreen = () => {
                     {currentGlobalIndex + 1}
                   </Text>
                 </View>
-                <Text
-                  className="text-slate-500 dark:text-slate-400 text-[10px] font-bold"
-                  numberOfLines={1}
-                >
-                  {currentGlobalIndex + 1}/{allSubjectQuestions.length}
-                </Text>
+
+                <View className="flex-row items-center" style={{ gap: 12 }}>
+                  {isCurrentQuestionAnswered && (
+                    <TouchableOpacity
+                      onPress={() => handleClearResponse(currentQuestion.id)}
+                      className="flex-row items-center"
+                    >
+                      <Feather name="rotate-ccw" size={14} color="#FF8A50" />
+                      <Text className="ml-1.5 text-primary font-black text-[10px] uppercase tracking-wider">
+                        Clear
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  <Text
+                    className="text-slate-500 dark:text-slate-400 text-[10px] font-bold"
+                    numberOfLines={1}
+                  >
+                    {currentGlobalIndex + 1}/{allSubjectQuestions.length}
+                  </Text>
+                </View>
               </View>
               {currentQuestion.paragraphText
                 ? renderHtmlOrText(
@@ -1360,67 +1430,54 @@ const TestAttemptScreen = () => {
         className="px-6 py-4 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 shadow-lg"
         style={{ paddingBottom: Math.max(insets.bottom, 16) }}
       >
-        <View className="flex-row items-center justify-between">
-          <TouchableOpacity
-            onPress={() => {
-              if (currentQuestionIndex > 0) {
-                setCurrentQuestionIndex((prev) => prev - 1);
-              } else if (currentSectionIndex > 0) {
-                const prevSection =
-                  currentSubject!.sections[currentSectionIndex - 1];
-                setCurrentSectionIndex(currentSectionIndex - 1);
-                setCurrentQuestionIndex(prevSection.questions.length - 1);
-              } else if (!subjectWiseTiming && currentSubjectIndex > 0) {
-                const prevSubject = subjects[currentSubjectIndex - 1];
-                const prevSubjectLastSectionIdx =
-                  prevSubject.sections.length - 1;
-                const prevSubjectLastSection =
-                  prevSubject.sections[prevSubjectLastSectionIdx];
-                setCurrentSubjectIndex(currentSubjectIndex - 1);
-                setCurrentSectionIndex(prevSubjectLastSectionIdx);
-                setCurrentQuestionIndex(
-                  prevSubjectLastSection.questions.length - 1,
-                );
-              }
-            }}
-            disabled={
-              currentQuestionIndex === 0 &&
-              currentSectionIndex === 0 &&
-              (subjectWiseTiming || currentSubjectIndex === 0)
-            }
-            className={`px-6 py-3.5 rounded-2xl border ${
-              currentQuestionIndex === 0 &&
-              currentSectionIndex === 0 &&
-              (subjectWiseTiming || currentSubjectIndex === 0)
-                ? "border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/20"
-                : "border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800"
-            }`}
-          >
-            <Text
-              className={`font-black text-sm ${
+        <View className="flex-row items-center" style={{ gap: 12 }}>
+          {/* Prev button — hidden entirely in question-wise timing mode */}
+          {!questionWiseTiming && (
+            <TouchableOpacity
+              onPress={() => {
+                if (currentQuestionIndex > 0) {
+                  setCurrentQuestionIndex((prev) => prev - 1);
+                } else if (currentSectionIndex > 0) {
+                  const prevSection =
+                    currentSubject!.sections[currentSectionIndex - 1];
+                  setCurrentSectionIndex(currentSectionIndex - 1);
+                  setCurrentQuestionIndex(prevSection.questions.length - 1);
+                } else if (!subjectWiseTiming && currentSubjectIndex > 0) {
+                  const prevSubject = subjects[currentSubjectIndex - 1];
+                  const prevSubjectLastSectionIdx =
+                    prevSubject.sections.length - 1;
+                  const prevSubjectLastSection =
+                    prevSubject.sections[prevSubjectLastSectionIdx];
+                  setCurrentSubjectIndex(currentSubjectIndex - 1);
+                  setCurrentSectionIndex(prevSubjectLastSectionIdx);
+                  setCurrentQuestionIndex(
+                    prevSubjectLastSection.questions.length - 1,
+                  );
+                }
+              }}
+              disabled={
                 currentQuestionIndex === 0 &&
                 currentSectionIndex === 0 &&
                 (subjectWiseTiming || currentSubjectIndex === 0)
-                  ? "text-slate-400 dark:text-slate-600"
-                  : "text-slate-700 dark:text-slate-200"
+              }
+              className={`flex-1 py-3.5 rounded-2xl border items-center justify-center ${
+                currentQuestionIndex === 0 &&
+                currentSectionIndex === 0 &&
+                (subjectWiseTiming || currentSubjectIndex === 0)
+                  ? "border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/20"
+                  : "border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800"
               }`}
             >
-              Prev
-            </Text>
-          </TouchableOpacity>
-
-          {isCurrentQuestionAnswered && (
-            <TouchableOpacity
-              onPress={() => handleClearResponse(currentQuestion.id)}
-              className="flex-row items-center px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
-            >
-              <Feather
-                name="rotate-ccw"
-                size={14}
-                color={isDark ? "#94a3b8" : "#64748b"}
-              />
-              <Text className="ml-2 text-slate-600 dark:text-slate-400 font-bold text-xs">
-                Clear
+              <Text
+                className={`font-black text-sm ${
+                  currentQuestionIndex === 0 &&
+                  currentSectionIndex === 0 &&
+                  (subjectWiseTiming || currentSubjectIndex === 0)
+                    ? "text-slate-400 dark:text-slate-600"
+                    : "text-slate-700 dark:text-slate-200"
+                }`}
+              >
+                Prev
               </Text>
             </TouchableOpacity>
           )}
@@ -1431,15 +1488,28 @@ const TestAttemptScreen = () => {
           ) ? (
             <TouchableOpacity
               onPress={handleNextFromFooter}
-              className="bg-primary px-10 py-3.5 rounded-2xl shadow-sm shadow-primary/20"
+              disabled={questionWiseTiming && !isCurrentQuestionAnswered}
+              className={`flex-1 py-3.5 rounded-2xl shadow-sm items-center justify-center ${
+                questionWiseTiming && !isCurrentQuestionAnswered
+                  ? "bg-slate-300 dark:bg-slate-700 shadow-none"
+                  : "bg-primary shadow-primary/20"
+              }`}
             >
-              <Text className="text-white font-black text-base">Next</Text>
+              <Text className={`font-black text-base ${
+                questionWiseTiming && !isCurrentQuestionAnswered
+                  ? "text-slate-500 dark:text-slate-400"
+                  : "text-white"
+              }`}>
+                {questionWiseTiming && !isCurrentQuestionAnswered
+                  ? "Answer to continue"
+                  : "Next"}
+              </Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
               onPress={handleOpenSubmitConfirm}
               disabled={submitting}
-              className="bg-green-600 px-8 py-3.5 rounded-2xl shadow-sm shadow-green-500/20"
+              className="flex-1 bg-green-600 py-3.5 rounded-2xl shadow-sm shadow-green-500/20 items-center justify-center"
             >
               <Text className="text-white font-black text-base">
                 {submitting

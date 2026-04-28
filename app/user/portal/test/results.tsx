@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
@@ -167,6 +167,7 @@ const ResultsScreen = () => {
   const { colorScheme } = useColorScheme();
   const { token } = useAuth();
   const { testItemId } = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -376,7 +377,7 @@ const ResultsScreen = () => {
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 32 }}
+        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 40) }}
       >
         <View className="px-4 pt-3">
           <View className="flex-row items-center justify-between mb-2">
