@@ -206,7 +206,12 @@ const LiveTestCard = ({
           {timeLeft && (
             <View className="bg-orange-50 dark:bg-orange-950/30 px-4 py-3.5 rounded-xl border border-orange-100 dark:border-orange-900/30 flex-row items-center justify-between">
               <View className="flex-row items-center">
-                <View className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-2" />
+                <Feather
+                  name="clock"
+                  size={14}
+                  color="#F97316"
+                  style={{ marginRight: 6 }}
+                />
                 <Text className="text-orange-600 dark:text-orange-400 font-bold text-sm">
                   {countdownLabel}:
                 </Text>

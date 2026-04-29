@@ -242,7 +242,7 @@ const Portal = () => {
           </Text>
 
           <View className="flex-row mt-6 mb-8" style={{ gap: 10 }}>
-            <View className="flex-1 bg-orange-50/50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/30 rounded-2xl px-4 py-3">
+            <View className="flex-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl px-4 py-3">
               <View className="flex-row items-center mb-1">
                 <Feather name="clock" size={16} color="#FF8A50" />
                 <Text className="text-primary font-black text-xs uppercase tracking-wider ml-2">

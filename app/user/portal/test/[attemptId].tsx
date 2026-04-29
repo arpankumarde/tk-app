@@ -148,7 +148,7 @@ const getHtmlDocument = (html: string, isDark: boolean) => {
       ol, ul { padding-left: 20px; margin-bottom: 8px; }
       li { margin-bottom: 4px; color: ${textColor}; }
       img { max-width: 100%; height: auto; border-radius: 8px; display: block; }
-      span, strong, em { color: ${textColor}; }
+      span, strong, em, b { color: ${textColor}; font-weight: normal; }
       .muted { color: ${mutedColor}; }
       table { width: 100%; border-collapse: collapse; }
       td, th { border: 1px solid #475569; padding: 6px; color: ${textColor}; }
@@ -1028,7 +1028,7 @@ const TestAttemptScreen = () => {
               className="flex-row items-center justify-between mb-2"
               style={{ gap: 12 }}
             >
-              <View className="h-12 flex-row items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-xl px-4 border border-slate-200 dark:border-slate-700">
+              <View className="h-12 flex-row items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-xl px-4 border border-slate-200 dark:border-slate-700 shrink-0">
                 <Feather
                   name="clock"
                   size={18}
@@ -1055,7 +1055,7 @@ const TestAttemptScreen = () => {
                 </View>
               </View>
 
-              <View className="flex-row items-center" style={{ gap: 8 }}>
+              <View className="flex-row items-center flex-1 justify-end" style={{ gap: 8 }}>
                 {calculatorEnabled && (
                   <TouchableOpacity
                     onPress={() => setIsCalculatorVisible(true)}
@@ -1072,15 +1072,17 @@ const TestAttemptScreen = () => {
                 <TouchableOpacity
                   onPress={handleOpenSubmitConfirm}
                   disabled={submitting}
-                  className="h-12 bg-red-500 rounded-xl items-center justify-center px-5"
+                  className="h-12 bg-red-500 rounded-xl items-center justify-center px-4 flex-shrink"
                 >
-                  <Text className="text-white text-base font-black">
-                    {submitting
-                      ? "..."
-                      : subjectWiseTiming
-                      ? `Submit ${currentSubject?.subjectName}`
-                      : "Submit Test"}
-                  </Text>
+                  {submitting ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text className="text-white text-base font-black" numberOfLines={1} ellipsizeMode="tail">
+                      {subjectWiseTiming
+                        ? `Submit ${currentSubject?.subjectName}`
+                        : "Submit Test"}
+                    </Text>
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
@@ -1267,17 +1269,6 @@ const TestAttemptScreen = () => {
                 </View>
 
                 <View className="flex-row items-center" style={{ gap: 12 }}>
-                  {isCurrentQuestionAnswered && (
-                    <TouchableOpacity
-                      onPress={() => handleClearResponse(currentQuestion.id)}
-                      className="flex-row items-center"
-                    >
-                      <Feather name="rotate-ccw" size={14} color="#FF8A50" />
-                      <Text className="ml-1.5 text-primary font-black text-[10px] uppercase tracking-wider">
-                        Clear
-                      </Text>
-                    </TouchableOpacity>
-                  )}
                   <Text
                     className="text-slate-500 dark:text-slate-400 text-[10px] font-bold"
                     numberOfLines={1}
@@ -1296,7 +1287,7 @@ const TestAttemptScreen = () => {
 
               {renderHtmlOrText(
                 currentQuestion.questionText,
-                "text-slate-800 dark:text-white text-2xl font-black leading-9",
+                "text-slate-800 dark:text-white text-xl font-semibold leading-8",
                 `q-${currentQuestion.id}`,
               )}
 
@@ -1316,9 +1307,22 @@ const TestAttemptScreen = () => {
 
               {currentQuestion.category === "numeric" ? (
                 <>
-                  <Text className="text-slate-500 dark:text-slate-400 font-black text-xs tracking-wider uppercase mb-3">
-                    Enter Answer
-                  </Text>
+                  <View className="flex-row items-center justify-between mb-3">
+                    <Text className="text-slate-500 dark:text-slate-400 font-black text-xs tracking-wider uppercase">
+                      Enter Answer
+                    </Text>
+                    {isCurrentQuestionAnswered && (
+                      <TouchableOpacity
+                        onPress={() => handleClearResponse(currentQuestion.id)}
+                        className="flex-row items-center bg-orange-50 dark:bg-orange-900/20 px-2.5 py-1 rounded-md border border-orange-100 dark:border-orange-800/40"
+                      >
+                        <Feather name="rotate-ccw" size={12} color="#FF8A50" />
+                        <Text className="ml-1.5 text-primary font-black text-[10px] uppercase tracking-wider">
+                          Clear
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
                   <TextInput
                     value={numericAnswer}
                     onChangeText={(value) =>
@@ -1337,11 +1341,24 @@ const TestAttemptScreen = () => {
                 </>
               ) : (
                 <>
-                  <Text className="text-slate-500 dark:text-slate-400 font-black text-xs tracking-wider uppercase mb-3">
-                    {currentQuestion.category === "multi"
-                      ? "Select One or More Options"
-                      : "Select One Option"}
-                  </Text>
+                  <View className="flex-row items-center justify-between mb-3">
+                    <Text className="text-slate-500 dark:text-slate-400 font-black text-xs tracking-wider uppercase">
+                      {currentQuestion.category === "multi"
+                        ? "Select One or More Options"
+                        : "Select One Option"}
+                    </Text>
+                    {isCurrentQuestionAnswered && (
+                      <TouchableOpacity
+                        onPress={() => handleClearResponse(currentQuestion.id)}
+                        className="flex-row items-center bg-orange-50 dark:bg-orange-900/20 px-2.5 py-1 rounded-md border border-orange-100 dark:border-orange-800/40"
+                      >
+                        <Feather name="rotate-ccw" size={12} color="#FF8A50" />
+                        <Text className="ml-1.5 text-primary font-black text-[10px] uppercase tracking-wider">
+                          Clear
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
                   {currentQuestion.options?.map((option, optionIndex) => {
                     const isSelected =
                       currentQuestion.category === "multi"
@@ -1511,13 +1528,15 @@ const TestAttemptScreen = () => {
               disabled={submitting}
               className="flex-1 bg-green-600 py-3.5 rounded-2xl shadow-sm shadow-green-500/20 items-center justify-center"
             >
-              <Text className="text-white font-black text-base">
-                {submitting
-                  ? "..."
-                  : subjectWiseTiming
-                  ? "Submit Subject"
-                  : "Submit Test"}
-              </Text>
+              {submitting ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text className="text-white font-black text-base">
+                  {subjectWiseTiming
+                    ? "Submit Subject"
+                    : "Submit Test"}
+                </Text>
+              )}
             </TouchableOpacity>
           )}
         </View>
@@ -1536,14 +1555,14 @@ const TestAttemptScreen = () => {
         <View className="flex-1 bg-black/50 px-6 items-center justify-center">
           <View className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800">
             <View className="p-6 border-b border-gray-100 dark:border-slate-800">
-              <View className="flex-row items-center justify-between mb-2">
-                <Text className="text-xl font-black text-slate-900 dark:text-white">
+              <View className="flex-row items-start justify-between mb-2">
+                <Text className="flex-1 text-xl font-black text-slate-900 dark:text-white mr-4">
                   {subjectWiseTiming ? `Submit ${currentSubject?.subjectName}` : "Submit Test"}
                 </Text>
                 <TouchableOpacity
                   onPress={() => setShowSubmitConfirm(false)}
                   disabled={submitting}
-                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-800 items-center justify-center"
+                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-800 items-center justify-center shrink-0"
                 >
                   <Feather
                     name="x"
@@ -1597,10 +1616,10 @@ const TestAttemptScreen = () => {
                     key={row.subjectName}
                     className="flex-row items-center justify-between py-3 border-b border-gray-50 dark:border-slate-800"
                   >
-                    <Text className="text-slate-700 dark:text-slate-300 font-medium">
+                    <Text className="flex-1 text-slate-700 dark:text-slate-300 font-medium mr-4">
                       {row.subjectName}
                     </Text>
-                    <Text className="text-slate-900 dark:text-white font-bold">
+                    <Text className="text-slate-900 dark:text-white font-bold shrink-0">
                       {row.answeredCount}/{row.totalCount}
                     </Text>
                   </View>
@@ -1621,9 +1640,13 @@ const TestAttemptScreen = () => {
                 disabled={submitting}
                 className="flex-1 h-12 bg-primary rounded-xl items-center justify-center"
               >
-                <Text className="text-white font-black">
-                  {submitting ? "..." : "Yes, Submit"}
-                </Text>
+                {submitting ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text className="text-white font-black">
+                    Yes, Submit
+                  </Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
