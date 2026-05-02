@@ -16,7 +16,7 @@ import { useColorScheme } from "nativewind";
 import Placeholder from "@/constants/placeholder";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
-const SEARCH_LIMIT = 5;
+const SEARCH_LIMIT = 8;
 
 // ─── Type helpers ───────────────────────────────────────────────────────────
 

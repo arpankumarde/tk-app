@@ -91,6 +91,7 @@ export interface Course {
   teacher: Teacher;
   sections: Section[];
   isEnrolled: boolean;
+  disclaimer: string | null;
 }
 
 const CourseDetails = () => {
@@ -575,6 +576,25 @@ const CourseDetails = () => {
                   .trim()
               : "No detailed description provided."}
           </Text>
+
+          {course.disclaimer ? (
+            <View className="mt-6 rounded-2xl overflow-hidden border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/5">
+              <View className="flex-row items-center px-4 py-3 bg-amber-100/60 dark:bg-amber-500/10 border-b border-amber-200 dark:border-amber-500/20">
+                <View className="w-8 h-8 rounded-full bg-amber-500 items-center justify-center mr-3">
+                  <Feather name="alert-triangle" size={16} color="white" />
+                </View>
+                <Text className="text-amber-900 dark:text-amber-300 font-black text-sm uppercase tracking-wider">
+                  Disclaimer
+                </Text>
+              </View>
+              <Text className="px-4 py-4 text-amber-900/80 dark:text-amber-200/80 text-[13px] leading-6 font-medium">
+                {course.disclaimer
+                  .replace(/^\s*disclaimer\s*:\s*/i, "")
+                  .replace(/<[^>]*>?/gm, "")
+                  .trim()}
+              </Text>
+            </View>
+          ) : null}
         </View>
 
         {/* Meet your instructor */}

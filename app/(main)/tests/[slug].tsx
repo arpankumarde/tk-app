@@ -84,6 +84,7 @@ interface Package {
   whatYouLearn: string[];
   requirements: string[];
   longDescription: string;
+  disclaimer: string | null;
 }
 
 interface PackageResponse {
@@ -145,6 +146,10 @@ const TestDetails = () => {
         );
         const data = await response.json();
         const payload: PackageResponse = data.json || data;
+        // console.log(
+        //   "Test details API response:",
+        //   JSON.stringify(payload, null, 2),
+        // );
         setTest(payload.package);
         setItems(
           payload.items && payload.items.length > 0 ? payload.items : [],
@@ -645,14 +650,37 @@ const TestDetails = () => {
         )}
 
         {/* Long Description */}
-        {test.longDescription && (
+        {(test.longDescription || test.disclaimer) && (
           <View className="px-6 mb-8">
-            <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
-              Description
-            </Text>
-            <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-6">
-              {test.longDescription.replace(/<[^>]*>?/gm, "")}
-            </Text>
+            {test.longDescription ? (
+              <>
+                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+                  Description
+                </Text>
+                <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-6">
+                  {test.longDescription.replace(/<[^>]*>?/gm, "")}
+                </Text>
+              </>
+            ) : null}
+
+            {test.disclaimer ? (
+              <View className={`${test.longDescription ? "mt-6" : ""} rounded-2xl overflow-hidden border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/5`}>
+                <View className="flex-row items-center px-4 py-3 bg-amber-100/60 dark:bg-amber-500/10 border-b border-amber-200 dark:border-amber-500/20">
+                  <View className="w-8 h-8 rounded-full bg-amber-500 items-center justify-center mr-3">
+                    <Feather name="alert-triangle" size={16} color="white" />
+                  </View>
+                  <Text className="text-amber-900 dark:text-amber-300 font-black text-sm uppercase tracking-wider">
+                    Disclaimer
+                  </Text>
+                </View>
+                <Text className="px-4 py-4 text-amber-900/80 dark:text-amber-200/80 text-[13px] leading-6 font-medium">
+                  {test.disclaimer
+                    .replace(/^\s*disclaimer\s*:\s*/i, "")
+                    .replace(/<[^>]*>?/gm, "")
+                    .trim()}
+                </Text>
+              </View>
+            ) : null}
           </View>
         )}
 
