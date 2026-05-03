@@ -16,6 +16,7 @@ import { useColorScheme } from "nativewind";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import BottomTabs from "@/components/BottomTabs";
 import { useAuth } from "@/context/AuthContext";
+import { useEnrollmentContext } from "@/context/EnrollmentContext";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import Placeholder from "@/constants/placeholder";
 import { useBuildShareUrl } from "@/hooks/useBuildShareUrl";
@@ -100,31 +101,18 @@ interface FreeEnrollResponse {
   };
 }
 
-interface StartAttemptResponse {
-  json?: {
-    attemptId: number;
-    startedAt: string;
-    message?: string;
-    error?: string;
-  };
-  attemptId?: number;
-  startedAt?: string;
-  message?: string;
-  error?: string;
-}
-
 const TestDetails = () => {
   const { slug } = useLocalSearchParams();
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const { user, token } = useAuth();
+  const { enrolledTestIds, markTestEnrolled } = useEnrollmentContext();
 
   const [test, setTest] = useState<Package | null>(null);
   const [items, setItems] = useState<TestItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedItems, setExpandedItems] = useState<number[]>([]);
   const [enrolling, setEnrolling] = useState(false);
-  const [startingAttempt, setStartingAttempt] = useState(false);
   const [enrollResult, setEnrollResult] = useState<{
     visible: boolean;
     success: boolean;
@@ -180,7 +168,7 @@ const TestDetails = () => {
       return;
     }
     try {
-      setStartingAttempt(true);
+      setEnrolling(true);
       const res = await fetch(`${BASE_URL}/_api/tests/enroll-free`, {
         method: "POST",
         headers: {
@@ -193,6 +181,7 @@ const TestDetails = () => {
       console.log("Enroll response:", data);
       if (data.json?.orderId) {
         setTest((prev) => (prev ? { ...prev, isEnrolled: true } : prev));
+        if (test?.id) markTestEnrolled(test.id);
         setEnrollResult({
           visible: true,
           success: true,
@@ -218,29 +207,6 @@ const TestDetails = () => {
     } finally {
       setEnrolling(false);
     }
-  };
-
-  const handleStartFreeTest = () => {
-    const targetItem = items.find((item) => item.isFree) || items[0];
-    if (!targetItem) {
-      handleFreeEnroll();
-      return;
-    }
-
-    if (!user || !token) {
-      router.push("/login");
-      return;
-    }
-
-    router.push({
-      pathname: "/user/portal/[slug]",
-      params: {
-        slug: String(targetItem.id),
-        title: targetItem.title,
-        duration: String(targetItem.durationMinutes),
-        questions: String(targetItem.totalQuestions),
-      },
-    });
   };
 
   const toggleItem = (index: number) => {
@@ -277,6 +243,7 @@ const TestDetails = () => {
 
   const actualPrice = test.discountPrice ?? test.price;
   const isFree = actualPrice === 0;
+  const isEnrolled = test.isEnrolled || enrolledTestIds.has(test.id);
   const hasDiscount =
     typeof test.discountPrice === "number" && test.discountPrice < test.price;
   const originalPrice = hasDiscount ? test.price : null;
@@ -596,7 +563,6 @@ const TestDetails = () => {
                               },
                             });
                           }}
-                          disabled={startingAttempt}
                           className="mt-4 bg-emerald-500 h-11 rounded-2xl flex-row items-center justify-center shadow-lg shadow-emerald-500/20"
                         >
                           <Feather name="play" size={16} color="white" />
@@ -767,7 +733,15 @@ const TestDetails = () => {
         <TouchableOpacity
           onPress={
             isFree
-              ? handleStartFreeTest
+              ? !user || !token
+                ? () => router.push("/login")
+                : isEnrolled
+                  ? () =>
+                      router.push({
+                        pathname: "/user/tests/[slug]",
+                        params: { slug: test.slug },
+                      })
+                  : handleFreeEnroll
               : async () => {
                   const result = await addToCart(test.id, "test");
                   if (result.success) {
@@ -781,17 +755,19 @@ const TestDetails = () => {
                   }
                 }
           }
-          disabled={addingToCart || (isFree && (startingAttempt || enrolling))}
+          disabled={addingToCart || (isFree && enrolling)}
           className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} h-14 w-44 rounded-xl items-center justify-center shadow-lg disabled:opacity-60`}
         >
-          {addingToCart || (isFree && (startingAttempt || enrolling)) ? (
+          {addingToCart || (isFree && enrolling) ? (
             <ActivityIndicator color="white" />
           ) : (
             <Text className="text-white text-lg font-black">
               {isFree
                 ? !user || !token
                   ? "Login to Start"
-                  : "Start Test"
+                  : isEnrolled
+                    ? "Start Test"
+                    : "Enroll Free"
                 : "Buy Now"}
             </Text>
           )}

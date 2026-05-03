@@ -12,6 +12,7 @@ import { router } from "expo-router";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useAuth } from "@/context/AuthContext";
 import { useCartContext } from "@/context/CartContext";
+import { useEnrollmentContext } from "@/context/EnrollmentContext";
 import Placeholder from "@/constants/placeholder";
 
 interface MockTestCardProps {
@@ -43,7 +44,9 @@ interface MockTestCardProps {
 const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
   const { user, token } = useAuth();
   const { cart } = useCartContext();
+  const { enrolledTestIds, markTestEnrolled } = useEnrollmentContext();
   const [test, setTest] = useState(initialTest);
+  const isEnrolled = test.isEnrolled || enrolledTestIds.has(test.id);
   const isFree = (test.discountPrice ?? test.price) === 0;
   const { addToCart, adding: addingToCart } = useAddToCart();
   const [enrolling, setEnrolling] = useState(false);
@@ -85,6 +88,7 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
 
       if (payload.orderId || payload.success) {
         setTest((prev) => ({ ...prev, isEnrolled: true }));
+        markTestEnrolled(test.id);
         setEnrollResult({
           visible: true,
           success: true,
@@ -285,7 +289,7 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
               <TouchableOpacity
                 onPress={async () => {
                   if (isFree) {
-                    if (test.isEnrolled) {
+                    if (isEnrolled) {
                       router.push({ pathname: "/user/tests/[slug]", params: { slug: test.slug } });
                     } else {
                       handleFreeEnroll();
@@ -311,7 +315,7 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
                     <Feather
                       name={
                         isFree
-                          ? test.isEnrolled
+                          ? isEnrolled
                             ? "play-circle"
                             : "book"
                           : isInCart
@@ -323,7 +327,7 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
                     />
                     <Text className="text-white font-black ml-3 text-sm">
                       {isFree
-                        ? test.isEnrolled
+                        ? isEnrolled
                           ? "Go to Test"
                           : "Enroll Free"
                         : isInCart

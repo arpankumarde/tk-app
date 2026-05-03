@@ -66,11 +66,23 @@ interface LiveTestResult {
   teacherName: string;
 }
 
+interface TeacherResult {
+  id: number;
+  displayName: string;
+  avatarUrl: string | null;
+  slug: string;
+  isVerified: boolean;
+  testCount: number;
+  courseCount: number;
+  studentCount: number;
+}
+
 interface SearchResults {
   courses: CourseResult[];
   tests: TestResult[];
   products: ProductResult[];
   liveTests: LiveTestResult[];
+  teachers: TeacherResult[];
 }
 
 // ─── Result Card Components ──────────────────────────────────────────────────
@@ -151,6 +163,89 @@ const ResultCard = ({
   );
 };
 
+const TeacherCard = ({
+  avatar,
+  name,
+  verified,
+  testCount,
+  courseCount,
+  studentCount,
+  onPress,
+}: {
+  avatar: string | null;
+  name: string;
+  verified: boolean;
+  testCount: number;
+  courseCount: number;
+  studentCount: number;
+  onPress: () => void;
+}) => {
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === "dark";
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
+      className="flex-row items-center bg-white dark:bg-slate-800 rounded-2xl p-4 mb-3 border border-gray-100 dark:border-slate-700 shadow-sm"
+    >
+      <Image
+        source={{
+          uri:
+            avatar ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=FF8A50&color=fff`,
+        }}
+        className="w-16 h-16 rounded-full"
+        resizeMode="cover"
+      />
+      <View className="flex-1 ml-3 justify-center">
+        <View className="flex-row items-center">
+          <Text
+            className="text-slate-800 dark:text-white font-black text-sm leading-tight flex-shrink"
+            numberOfLines={1}
+          >
+            {name}
+          </Text>
+          {verified && (
+            <MaterialIcons
+              name="verified"
+              size={13}
+              color="#22C55E"
+              style={{ marginLeft: 4 }}
+            />
+          )}
+        </View>
+        <View className="flex-row items-center mt-1.5 flex-wrap">
+          <View className="flex-row items-center mr-3">
+            <Feather name="users" size={11} color="#94a3b8" />
+            <Text className="ml-1 text-slate-500 dark:text-slate-400 text-[11px] font-bold">
+              {studentCount} {studentCount === 1 ? "Student" : "Students"}
+            </Text>
+          </View>
+          <View className="flex-row items-center mr-3">
+            <Feather name="file-text" size={11} color="#94a3b8" />
+            <Text className="ml-1 text-slate-500 dark:text-slate-400 text-[11px] font-bold">
+              {testCount} {testCount === 1 ? "Test" : "Tests"}
+            </Text>
+          </View>
+          <View className="flex-row items-center">
+            <Feather name="book-open" size={11} color="#94a3b8" />
+            <Text className="ml-1 text-slate-500 dark:text-slate-400 text-[11px] font-bold">
+              {courseCount} {courseCount === 1 ? "Course" : "Courses"}
+            </Text>
+          </View>
+        </View>
+      </View>
+      <Feather
+        name="chevron-right"
+        size={18}
+        color={isDark ? "#475569" : "#cbd5e1"}
+        style={{ alignSelf: "center" }}
+      />
+    </TouchableOpacity>
+  );
+};
+
 const SectionHeader = ({ title, count }: { title: string; count: number }) => (
   <View className="flex-row items-center mb-3 mt-6">
     <Text className="text-lg font-black text-slate-800 dark:text-white flex-1">
@@ -179,7 +274,8 @@ const SearchScreen = () => {
     ? (results.courses?.length || 0) +
       (results.tests?.length || 0) +
       (results.products?.length || 0) +
-      (results.liveTests?.length || 0)
+      (results.liveTests?.length || 0) +
+      (results.teachers?.length || 0)
     : 0;
 
   const hasResults = totalResults > 0;
@@ -196,12 +292,14 @@ const SearchScreen = () => {
       const url = `${BASE_URL}/_api/homepage/search?q=${encodeURIComponent(trimmed)}&limit=${SEARCH_LIMIT}`;
       const res = await fetch(url);
       const data = await res.json();
+      console.log("[Search] response", url, JSON.stringify(data, null, 2));
       const payload = data.json || data;
       setResults({
         courses: payload.courses || [],
         tests: payload.tests || [],
         products: payload.products || payload.notes || [],
         liveTests: payload.liveTests || payload.live || [],
+        teachers: payload.teachers || [],
       });
     } catch (err) {
       console.error("Search error:", err);
@@ -333,6 +431,25 @@ const SearchScreen = () => {
               <Text className="text-primary font-black">{`"${query}"`}</Text>
             </Text>
           </View>
+
+          {/* Teachers */}
+          {results.teachers.length > 0 && (
+            <View>
+              <SectionHeader title="Teachers" count={results.teachers.length} />
+              {results.teachers.map((tch) => (
+                <TeacherCard
+                  key={`teacher-${tch.id}`}
+                  avatar={tch.avatarUrl}
+                  name={tch.displayName}
+                  verified={tch.isVerified}
+                  testCount={tch.testCount}
+                  courseCount={tch.courseCount}
+                  studentCount={tch.studentCount}
+                  onPress={() => router.push(`/expert/${tch.slug}` as any)}
+                />
+              ))}
+            </View>
+          )}
 
           {/* Courses */}
           {results.courses.length > 0 && (

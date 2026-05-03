@@ -3,6 +3,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
+import { EnrollmentProvider } from "@/context/EnrollmentContext";
 import ForceUpdate from "@/components/ForceUpdate";
 import { useForceUpdate } from "@/hooks/useForceUpdate";
 import * as Clarity from "@microsoft/react-native-clarity";
@@ -33,9 +34,11 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        <CartProvider>
-          <Stack screenOptions={{ headerShown: false }} />
-        </CartProvider>
+        <EnrollmentProvider>
+          <CartProvider>
+            <Stack screenOptions={{ headerShown: false }} />
+          </CartProvider>
+        </EnrollmentProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );
