@@ -124,8 +124,8 @@ const shouldUseWebView = (html: string) => {
   );
 };
 
-// Pure CSS-only HTML template — NO scripts, NO event listeners.
 // Height measurement is done via onLoadEnd + injectJavaScript (see HtmlContent).
+// KaTeX is loaded from CDN to render data-type="mathematics" spans.
 const getHtmlDocument = (html: string, isDark: boolean) => {
   const textColor = isDark ? "#e2e8f0" : "#1e293b";
   const mutedColor = isDark ? "#94a3b8" : "#475569";
@@ -135,6 +135,7 @@ const getHtmlDocument = (html: string, isDark: boolean) => {
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/katex.min.css" crossorigin="anonymous" />
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
@@ -152,9 +153,22 @@ const getHtmlDocument = (html: string, isDark: boolean) => {
       .muted { color: ${mutedColor}; }
       table { width: 100%; border-collapse: collapse; }
       td, th { border: 1px solid #475569; padding: 6px; color: ${textColor}; }
+      .katex { color: ${textColor}; }
     </style>
   </head>
-  <body>${cleanedHtml}</body>
+  <body>${cleanedHtml}
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script>
+      document.querySelectorAll('span[data-type="mathematics"]').forEach(function(el) {
+        var math = el.getAttribute('data-math');
+        if (math) {
+          try {
+            katex.render(math, el, { throwOnError: false, displayMode: false });
+          } catch(e) {}
+        }
+      });
+    </script>
+  </body>
 </html>`;
 };
 
@@ -386,7 +400,7 @@ const TestAttemptScreen = () => {
       setSubjects(sortedSubjects);
       setSubjectWiseTiming(Boolean(payload.subjectWiseTiming));
       setQuestionWiseTiming(Boolean(payload.questionWiseTiming));
-      
+
       // Calculate total duration if not explicitly provided
       const apiDuration = (payload as any).testDurationMinutes;
       if (apiDuration) {
@@ -396,7 +410,9 @@ const TestAttemptScreen = () => {
           (sum, s) => sum + (s.durationMinutes || 0),
           0,
         );
-        setTestDurationMinutes(totalSubjectDuration || DEFAULT_DURATION_MINUTES);
+        setTestDurationMinutes(
+          totalSubjectDuration || DEFAULT_DURATION_MINUTES,
+        );
       }
 
       setCalculatorEnabled(Boolean(payload.calculatorEnabled));
@@ -442,7 +458,6 @@ const TestAttemptScreen = () => {
     attemptStartTime,
     testDurationMinutes,
   ]);
-
 
   const timerLabel = useMemo(() => {
     const minutes = Math.floor(remainingSeconds / 60)
@@ -628,7 +643,8 @@ const TestAttemptScreen = () => {
   };
 
   const overallAnsweredCount = useMemo(() => {
-    return allQuestions.filter((question) => isQuestionAnswered(question)).length;
+    return allQuestions.filter((question) => isQuestionAnswered(question))
+      .length;
   }, [isQuestionAnswered, allQuestions]);
 
   const subjectProgressRows = useMemo(() => {
@@ -638,8 +654,9 @@ const TestAttemptScreen = () => {
 
       subject.sections.forEach((section) => {
         totalCount += section.questions.length;
-        answeredCount += section.questions.filter((q) => isQuestionAnswered(q))
-          .length;
+        answeredCount += section.questions.filter((q) =>
+          isQuestionAnswered(q),
+        ).length;
       });
 
       return {
@@ -867,15 +884,19 @@ const TestAttemptScreen = () => {
   const handleSubmitSubject = useCallback(async () => {
     if (currentSubjectIndex < subjects.length - 1) {
       const nextIdx = currentSubjectIndex + 1;
-      setCompletedSubjectIds((prev) => [...prev, subjects[currentSubjectIndex].subjectId]);
+      setCompletedSubjectIds((prev) => [
+        ...prev,
+        subjects[currentSubjectIndex].subjectId,
+      ]);
       setCurrentSubjectIndex(nextIdx);
       setCurrentSectionIndex(0);
       setCurrentQuestionIndex(0);
-      
+
       // Reset timer for the next subject
-      const nextSubjectDuration = (subjects[nextIdx]?.durationMinutes || 0) * 60;
+      const nextSubjectDuration =
+        (subjects[nextIdx]?.durationMinutes || 0) * 60;
       setRemainingSeconds(nextSubjectDuration);
-      
+
       setShowSubmitConfirm(false);
     } else {
       await handleSubmitTest();
@@ -918,7 +939,10 @@ const TestAttemptScreen = () => {
     }
 
     // 2. Next section in current subject
-    if (currentSubject && currentSectionIndex < currentSubject.sections.length - 1) {
+    if (
+      currentSubject &&
+      currentSectionIndex < currentSubject.sections.length - 1
+    ) {
       setCurrentSectionIndex((prev) => prev + 1);
       setCurrentQuestionIndex(0);
       return;
@@ -927,7 +951,10 @@ const TestAttemptScreen = () => {
     // 3. Next subject (only if NOT subject-wise timing)
     if (!subjectWiseTiming && currentSubjectIndex < subjects.length - 1) {
       if (questionWiseTiming) {
-        setCompletedSubjectIds((prev) => [...prev, subjects[currentSubjectIndex].subjectId]);
+        setCompletedSubjectIds((prev) => [
+          ...prev,
+          subjects[currentSubjectIndex].subjectId,
+        ]);
       }
       setCurrentSubjectIndex((prev) => prev + 1);
       setCurrentSectionIndex(0);
@@ -945,6 +972,19 @@ const TestAttemptScreen = () => {
     const durationSecs = (currentQuestion as any).durationSeconds || 60;
     setQuestionRemainingSeconds(durationSecs);
   }, [questionWiseTiming, currentQuestion?.id]);
+
+  // Log curret question details
+  // useEffect(() => {
+  //   if (!currentQuestion) return;
+  //   console.log("[TestPortal] Question in view:");
+  //   console.log("  id:", currentQuestion.id);
+  //   console.log("  questionText:", currentQuestion.questionText);
+  //   if (currentQuestion.paragraphText)
+  //     console.log("  paragraphText:", currentQuestion.paragraphText);
+  //   currentQuestion.options?.forEach((opt, i) =>
+  //     console.log(`  option[${i}]:`, opt),
+  //   );
+  // }, [currentQuestion?.id]);
 
   useEffect(() => {
     if (!questionWiseTiming || questionRemainingSeconds <= 0) return;
@@ -1045,17 +1085,22 @@ const TestAttemptScreen = () => {
                       Q:
                     </Text>
                   )}
-                  <Text className={`text-2xl font-black tracking-wider ${
-                    questionWiseTiming && questionRemainingSeconds <= 10
-                      ? "text-red-500"
-                      : "text-slate-900 dark:text-white"
-                  }`}>
+                  <Text
+                    className={`text-2xl font-black tracking-wider ${
+                      questionWiseTiming && questionRemainingSeconds <= 10
+                        ? "text-red-500"
+                        : "text-slate-900 dark:text-white"
+                    }`}
+                  >
                     {questionWiseTiming ? questionTimerLabel : timerLabel}
                   </Text>
                 </View>
               </View>
 
-              <View className="flex-row items-center flex-1 justify-end" style={{ gap: 8 }}>
+              <View
+                className="flex-row items-center flex-1 justify-end"
+                style={{ gap: 8 }}
+              >
                 {calculatorEnabled && (
                   <TouchableOpacity
                     onPress={() => setIsCalculatorVisible(true)}
@@ -1077,7 +1122,11 @@ const TestAttemptScreen = () => {
                   {submitting ? (
                     <ActivityIndicator color="#FFFFFF" />
                   ) : (
-                    <Text className="text-white text-base font-black" numberOfLines={1} ellipsizeMode="tail">
+                    <Text
+                      className="text-white text-base font-black"
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
                       {subjectWiseTiming
                         ? `Submit ${currentSubject?.subjectName}`
                         : "Submit Test"}
@@ -1098,7 +1147,6 @@ const TestAttemptScreen = () => {
                 }}
               />
             </View>
-
           </View>
 
           {/* Subject Selector */}
@@ -1127,11 +1175,14 @@ const TestAttemptScreen = () => {
                 contentContainerStyle={{ gap: 8, paddingBottom: 4 }}
               >
                 {subjects.map((subj, idx) => {
-                  const isCompleted = completedSubjectIds.includes(subj.subjectId);
+                  const isCompleted = completedSubjectIds.includes(
+                    subj.subjectId,
+                  );
                   const isActive = currentSubjectIndex === idx;
                   // If subjectWiseTiming or questionWiseTiming is true, ONLY the active subject is clickable.
                   // Completed or future subjects are locked.
-                  const isLocked = (subjectWiseTiming || questionWiseTiming) ? !isActive : false;
+                  const isLocked =
+                    subjectWiseTiming || questionWiseTiming ? !isActive : false;
 
                   return (
                     <TouchableOpacity
@@ -1148,10 +1199,10 @@ const TestAttemptScreen = () => {
                         isActive
                           ? "bg-primary/10 border-primary"
                           : isCompleted
-                          ? "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/20"
-                          : isLocked
-                          ? "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 opacity-50"
-                          : "bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700"
+                            ? "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/20"
+                            : isLocked
+                              ? "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 opacity-50"
+                              : "bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700"
                       }`}
                     >
                       {isCompleted && (
@@ -1164,8 +1215,8 @@ const TestAttemptScreen = () => {
                           isActive
                             ? "text-primary"
                             : isCompleted
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-slate-600 dark:text-slate-400"
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-slate-600 dark:text-slate-400"
                         }`}
                       >
                         {subj.subjectName}
@@ -1230,8 +1281,8 @@ const TestAttemptScreen = () => {
                           isCurrent
                             ? "border-primary bg-orange-50 dark:bg-orange-900/20"
                             : isAnswered
-                            ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20"
-                            : "border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800"
+                              ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20"
+                              : "border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800"
                         }`}
                       >
                         <Text
@@ -1239,8 +1290,8 @@ const TestAttemptScreen = () => {
                             isCurrent
                               ? "text-primary"
                               : isAnswered
-                              ? "text-green-700 dark:text-green-300"
-                              : "text-slate-600 dark:text-slate-300"
+                                ? "text-green-700 dark:text-green-300"
+                                : "text-slate-600 dark:text-slate-300"
                           }`}
                         >
                           {item.globalIndex + 1}
@@ -1290,7 +1341,6 @@ const TestAttemptScreen = () => {
                 "text-slate-800 dark:text-white text-xl font-semibold leading-8",
                 `q-${currentQuestion.id}`,
               )}
-
             </View>
 
             <View className="mb-4">
@@ -1386,8 +1436,8 @@ const TestAttemptScreen = () => {
                           isSelected
                             ? "bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700"
                             : showAttemptLimitWarning
-                            ? "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 opacity-50"
-                            : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700"
+                              ? "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 opacity-50"
+                              : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700"
                         }`}
                       >
                         <View
@@ -1512,11 +1562,13 @@ const TestAttemptScreen = () => {
                   : "bg-primary shadow-primary/20"
               }`}
             >
-              <Text className={`font-black text-base ${
-                questionWiseTiming && !isCurrentQuestionAnswered
-                  ? "text-slate-500 dark:text-slate-400"
-                  : "text-white"
-              }`}>
+              <Text
+                className={`font-black text-base ${
+                  questionWiseTiming && !isCurrentQuestionAnswered
+                    ? "text-slate-500 dark:text-slate-400"
+                    : "text-white"
+                }`}
+              >
                 {questionWiseTiming && !isCurrentQuestionAnswered
                   ? "Answer to continue"
                   : "Next"}
@@ -1532,9 +1584,7 @@ const TestAttemptScreen = () => {
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
                 <Text className="text-white font-black text-base">
-                  {subjectWiseTiming
-                    ? "Submit Subject"
-                    : "Submit Test"}
+                  {subjectWiseTiming ? "Submit Subject" : "Submit Test"}
                 </Text>
               )}
             </TouchableOpacity>
@@ -1557,7 +1607,9 @@ const TestAttemptScreen = () => {
             <View className="p-6 border-b border-gray-100 dark:border-slate-800">
               <View className="flex-row items-start justify-between mb-2">
                 <Text className="flex-1 text-xl font-black text-slate-900 dark:text-white mr-4">
-                  {subjectWiseTiming ? `Submit ${currentSubject?.subjectName}` : "Submit Test"}
+                  {subjectWiseTiming
+                    ? `Submit ${currentSubject?.subjectName}`
+                    : "Submit Test"}
                 </Text>
                 <TouchableOpacity
                   onPress={() => setShowSubmitConfirm(false)}
@@ -1578,7 +1630,10 @@ const TestAttemptScreen = () => {
               </Text>
             </View>
 
-            <ScrollView className="p-6 max-h-96" showsVerticalScrollIndicator={false}>
+            <ScrollView
+              className="p-6 max-h-96"
+              showsVerticalScrollIndicator={false}
+            >
               <View className="flex-row flex-wrap justify-between mb-6">
                 <View className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl w-[48%] mb-4 border border-slate-100 dark:border-slate-700">
                   <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
@@ -1603,7 +1658,9 @@ const TestAttemptScreen = () => {
               </View>
 
               <Text className="text-slate-900 dark:text-white font-bold mb-3">
-                {subjectWiseTiming ? "Current Subject Progress" : "Subject Progress"}
+                {subjectWiseTiming
+                  ? "Current Subject Progress"
+                  : "Subject Progress"}
               </Text>
               {subjectProgressRows
                 .filter((row) =>
@@ -1636,16 +1693,16 @@ const TestAttemptScreen = () => {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={subjectWiseTiming ? handleSubmitSubject : handleSubmitTest}
+                onPress={
+                  subjectWiseTiming ? handleSubmitSubject : handleSubmitTest
+                }
                 disabled={submitting}
                 className="flex-1 h-12 bg-primary rounded-xl items-center justify-center"
               >
                 {submitting ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text className="text-white font-black">
-                    Yes, Submit
-                  </Text>
+                  <Text className="text-white font-black">Yes, Submit</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -1659,6 +1716,6 @@ const TestAttemptScreen = () => {
       />
     </SafeAreaView>
   );
-}
+};
 
 export default TestAttemptScreen;

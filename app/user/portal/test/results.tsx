@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -7,7 +7,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
@@ -58,104 +61,82 @@ const shouldUseWebView = (html: string) => {
 
 const getHtmlDocument = (html: string, isDark: boolean) => {
   const textColor = isDark ? "#e2e8f0" : "#1e293b";
-  const bg = "transparent";
-
   const cleanedHtml = sanitizeHtml(html);
 
-  return `
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <style>
-          body {
-            margin: 0;
-            padding: 0;
-            color: ${textColor};
-            background: ${bg};
-            font-family: -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;
-            font-size: 14px;
-            line-height: 1.45;
-            overflow-x: hidden;
-          }
-          * { max-width: 100%; box-sizing: border-box; }
-          p { margin: 0 0 8px 0; color: ${textColor}; }
-          img {
-            display: block;
-            max-width: 100%;
-            width: 100%;
-            height: auto;
-            object-fit: contain;
-            border-radius: 8px;
-            margin: 4px 0;
-          }
-        </style>
-      </head>
-      <body>
-        ${cleanedHtml}
-        <script>
-          function sendHeight() {
-            var body = document.body;
-            var html = document.documentElement;
-            var height = Math.max(
-              body ? body.scrollHeight : 0,
-              body ? body.offsetHeight : 0,
-              html ? html.clientHeight : 0,
-              html ? html.scrollHeight : 0,
-              html ? html.offsetHeight : 0
-            );
-
-            window.ReactNativeWebView.postMessage(String(height));
-          }
-
-          function watchImages() {
-            var images = document.querySelectorAll('img');
-            images.forEach(function (img) {
-              if (!img.complete) {
-                img.addEventListener('load', sendHeight);
-                img.addEventListener('error', sendHeight);
-              }
-            });
-          }
-
-          document.addEventListener('DOMContentLoaded', function () {
-            sendHeight();
-            watchImages();
-          });
-
-          window.addEventListener('load', function () {
-            sendHeight();
-            setTimeout(sendHeight, 120);
-            setTimeout(sendHeight, 300);
-            setTimeout(sendHeight, 700);
-          });
-
-          var observer = new MutationObserver(function () {
-            sendHeight();
-          });
-
-          observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-
-          sendHeight();
-        </script>
-      </body>
-    </html>
-  `;
+  return `<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/katex.min.css" crossorigin="anonymous" />
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        background: transparent;
+        color: ${textColor};
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 14px;
+        line-height: 1.45;
+        overflow-x: hidden;
+      }
+      p { margin-bottom: 8px; color: ${textColor}; }
+      ol, ul { padding-left: 20px; margin-bottom: 8px; }
+      li { margin-bottom: 4px; color: ${textColor}; }
+      img { display: block; max-width: 100%; width: 100%; height: auto; object-fit: contain; border-radius: 8px; margin: 4px 0; }
+      span, strong, em, b { color: ${textColor}; font-weight: normal; }
+      table { width: 100%; border-collapse: collapse; }
+      td, th { border: 1px solid #475569; padding: 6px; color: ${textColor}; }
+      .katex { color: ${textColor}; }
+    </style>
+  </head>
+  <body>${cleanedHtml}
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script>
+      document.querySelectorAll('span[data-type="mathematics"]').forEach(function(el) {
+        var math = el.getAttribute('data-math');
+        if (math) {
+          try {
+            katex.render(math, el, { throwOnError: false, displayMode: false });
+          } catch(e) {}
+        }
+      });
+    </script>
+  </body>
+</html>`;
 };
+
+const MEASURE_SCRIPT = `
+(function() {
+  var h = document.body.scrollHeight;
+  if (h > 0) { window.ReactNativeWebView.postMessage(String(h)); }
+})(); true;`;
 
 const HtmlContent = ({ html, isDark }: { html: string; isDark: boolean }) => {
   const [contentHeight, setContentHeight] = useState(24);
+  const webViewRef = useRef<any>(null);
+  const lockedRef = useRef(false);
+
+  useEffect(() => {
+    setContentHeight(24);
+    lockedRef.current = false;
+  }, [html]);
 
   return (
     <WebView
+      ref={webViewRef}
       originWhitelist={["*"]}
       source={{ html: getHtmlDocument(html, isDark) }}
       style={{ height: contentHeight, backgroundColor: "transparent" }}
       scrollEnabled={false}
       showsVerticalScrollIndicator={false}
+      onLoadEnd={() => {
+        webViewRef.current?.injectJavaScript(MEASURE_SCRIPT);
+      }}
       onMessage={(event) => {
-        const nextHeight = Number(event.nativeEvent.data);
-        if (!Number.isNaN(nextHeight) && nextHeight > 0) {
-          setContentHeight(Math.max(24, nextHeight + 4));
+        if (lockedRef.current) return;
+        const reported = Number(event.nativeEvent.data);
+        if (!Number.isNaN(reported) && reported > 0) {
+          setContentHeight(reported + 4);
+          lockedRef.current = true;
         }
       }}
     />
@@ -241,6 +222,19 @@ const ResultsScreen = () => {
       const payload = normalizePayload(data.json || data);
 
       setResultData(payload);
+
+      // TODO: remove — temporary first-question results logger
+      const first = payload.results?.[0];
+      if (first) {
+        console.log("[Results] First question:");
+        console.log("  questionId:", first.questionId);
+        console.log("  questionText:", first.questionText);
+        console.log("  optionA:", first.optionA);
+        console.log("  optionB:", first.optionB);
+        console.log("  optionC:", first.optionC);
+        console.log("  optionD:", first.optionD);
+        console.log("  explanation:", first.explanation);
+      }
     } catch (err: any) {
       setError(err.message || "Unable to load test results.");
     } finally {
