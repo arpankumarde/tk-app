@@ -113,6 +113,54 @@ export interface GetTestQuestionsResponse {
   calculatorEnabled: boolean;
 }
 
+export interface TestItemInstructionsResponse {
+  testItem: {
+    id: number;
+    title: string;
+    description?: string | null;
+    durationMinutes: number;
+    totalQuestions: number;
+    totalMarks: number;
+    positiveMarks: number;
+    negativeMarks: number;
+    isFree: boolean;
+    calculatorEnabled: boolean;
+    subjectWiseTiming: boolean;
+    questionWiseTiming: boolean;
+    scheduledDate: string | null;
+  };
+  package: {
+    id: number;
+    title: string;
+    teacherName: string;
+    thumbnailUrl: string | null;
+  };
+  subjects: Array<{
+    id: number;
+    subjectName: string;
+    durationMinutes: number;
+    questionCount: number;
+    maxAttemptsAllowed: number | null;
+    sections: Array<{
+      id: number;
+      sectionName: string;
+      maxAttemptsAllowed: number | null;
+      questionCount: number;
+    }>;
+  }>;
+  access: { hasAccess: boolean; isFree: boolean };
+  previousAttempt: {
+    hasAttempted: boolean;
+    attemptCount: number;
+    lastAttempt: {
+      score: number;
+      totalQuestions: number;
+      startedAt: string;
+      completedAt: string;
+    } | null;
+  };
+}
+
 export interface StartAttemptRequest {
   testItemId: number;
 }

@@ -33,6 +33,8 @@ import ScientificCalculator from "@/components/ScientificCalculator";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 const DEFAULT_DURATION_MINUTES = 30;
+// Hard cap for tests with no time limit — auto-submit after 3 hours.
+const NO_LIMIT_AUTO_SUBMIT_SECONDS = 3 * 60 * 60;
 
 type QuestionsApiPayload = {
   questions: Question[];
@@ -227,6 +229,7 @@ const TestAttemptScreen = () => {
   const [loading, setLoading] = useState(true);
   const [subjectWiseTiming, setSubjectWiseTiming] = useState(false);
   const [questionWiseTiming, setQuestionWiseTiming] = useState(false);
+  const [isNoLimit, setIsNoLimit] = useState(false);
   const [testDurationMinutes, setTestDurationMinutes] = useState(() => {
     const raw = Array.isArray(durationMinutes)
       ? durationMinutes[0]
@@ -401,19 +404,36 @@ const TestAttemptScreen = () => {
       setSubjectWiseTiming(Boolean(payload.subjectWiseTiming));
       setQuestionWiseTiming(Boolean(payload.questionWiseTiming));
 
-      // Calculate total duration if not explicitly provided
+      // Calculate total duration if not explicitly provided.
+      // The initial state already reflects the route-param duration (or DEFAULT
+      // if none was passed). Only override when this response gives us a better
+      // value — never fall back to DEFAULT here, that would clobber the param.
       const apiDuration = (payload as any).testDurationMinutes;
+      const totalSubjectDuration = sortedSubjects.reduce(
+        (sum, s) => sum + (s.durationMinutes || 0),
+        0,
+      );
+      const rawDurationParam = Array.isArray(durationMinutes)
+        ? durationMinutes[0]
+        : durationMinutes;
+      const routeDuration = Number(rawDurationParam);
+
       if (apiDuration) {
         setTestDurationMinutes(apiDuration);
-      } else {
-        const totalSubjectDuration = sortedSubjects.reduce(
-          (sum, s) => sum + (s.durationMinutes || 0),
-          0,
-        );
-        setTestDurationMinutes(
-          totalSubjectDuration || DEFAULT_DURATION_MINUTES,
-        );
+      } else if (totalSubjectDuration > 0) {
+        setTestDurationMinutes(totalSubjectDuration);
       }
+
+      // No-limit mode: not subject/question-wise, no API duration, no subject
+      // duration, and the route param is 0/missing. Timer counts up; auto-
+      // submits at NO_LIMIT_AUTO_SUBMIT_SECONDS.
+      const noLimit =
+        !payload.subjectWiseTiming &&
+        !payload.questionWiseTiming &&
+        !apiDuration &&
+        totalSubjectDuration <= 0 &&
+        !(routeDuration > 0);
+      setIsNoLimit(noLimit);
 
       setCalculatorEnabled(Boolean(payload.calculatorEnabled));
       setCurrentSubjectIndex(0);
@@ -427,7 +447,7 @@ const TestAttemptScreen = () => {
     } finally {
       setLoading(false);
     }
-  }, [router, testItemNumericId, token]);
+  }, [router, testItemNumericId, token, durationMinutes]);
 
   useEffect(() => {
     fetchQuestions();
@@ -439,8 +459,15 @@ const TestAttemptScreen = () => {
     if (!subjectWiseTiming) {
       if (lastTimedSubjectIndex.current === null) {
         const totalElapsed = Math.floor((Date.now() - attemptStartTime) / 1000);
-        const initialRemaining = testDurationMinutes * 60 - totalElapsed;
-        setRemainingSeconds(Math.max(0, initialRemaining));
+        if (isNoLimit) {
+          // Count up: seed with elapsed time so resumed attempts continue.
+          setRemainingSeconds(
+            Math.min(Math.max(0, totalElapsed), NO_LIMIT_AUTO_SUBMIT_SECONDS),
+          );
+        } else {
+          const initialRemaining = testDurationMinutes * 60 - totalElapsed;
+          setRemainingSeconds(Math.max(0, initialRemaining));
+        }
         lastTimedSubjectIndex.current = -1;
       }
     } else {
@@ -457,15 +484,24 @@ const TestAttemptScreen = () => {
     currentSubjectIndex,
     attemptStartTime,
     testDurationMinutes,
+    isNoLimit,
   ]);
 
   const timerLabel = useMemo(() => {
+    if (isNoLimit && remainingSeconds >= 3600) {
+      const hours = Math.floor(remainingSeconds / 3600).toString();
+      const minutes = Math.floor((remainingSeconds % 3600) / 60)
+        .toString()
+        .padStart(2, "0");
+      const seconds = (remainingSeconds % 60).toString().padStart(2, "0");
+      return `${hours}:${minutes}:${seconds}`;
+    }
     const minutes = Math.floor(remainingSeconds / 60)
       .toString()
       .padStart(2, "0");
     const seconds = (remainingSeconds % 60).toString().padStart(2, "0");
     return `${minutes}:${seconds}`;
-  }, [remainingSeconds]);
+  }, [remainingSeconds, isNoLimit]);
 
   const questionTimerLabel = useMemo(() => {
     const minutes = Math.floor(questionRemainingSeconds / 60)
@@ -908,6 +944,14 @@ const TestAttemptScreen = () => {
 
     const interval = setInterval(() => {
       setRemainingSeconds((prev) => {
+        if (isNoLimit) {
+          const next = prev + 1;
+          if (next >= NO_LIMIT_AUTO_SUBMIT_SECONDS) {
+            handleSubmitTest();
+            return NO_LIMIT_AUTO_SUBMIT_SECONDS;
+          }
+          return next;
+        }
         if (prev <= 1) {
           if (subjectWiseTiming) {
             handleSubmitSubject();
@@ -919,7 +963,13 @@ const TestAttemptScreen = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [subjects, subjectWiseTiming, handleSubmitSubject]);
+  }, [
+    subjects,
+    subjectWiseTiming,
+    handleSubmitSubject,
+    isNoLimit,
+    handleSubmitTest,
+  ]);
 
   const handleQuestionJump = (sIdx: number, qIdx: number) => {
     // Jumping is disabled in question-wise timing mode
@@ -1361,7 +1411,7 @@ const TestAttemptScreen = () => {
                     <Text className="text-slate-500 dark:text-slate-400 font-black text-xs tracking-wider uppercase">
                       Enter Answer
                     </Text>
-                    {isCurrentQuestionAnswered && (
+                    {isCurrentQuestionAnswered ? (
                       <TouchableOpacity
                         onPress={() => handleClearResponse(currentQuestion.id)}
                         className="flex-row items-center bg-orange-50 dark:bg-orange-900/20 px-2.5 py-1 rounded-md border border-orange-100 dark:border-orange-800/40"
@@ -1371,7 +1421,21 @@ const TestAttemptScreen = () => {
                           Clear
                         </Text>
                       </TouchableOpacity>
-                    )}
+                    ) : questionWiseTiming ? (
+                      <TouchableOpacity
+                        onPress={handleNextFromFooter}
+                        className="flex-row items-center bg-slate-50 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700"
+                      >
+                        <Feather
+                          name="skip-forward"
+                          size={12}
+                          color={isDark ? "#94a3b8" : "#64748b"}
+                        />
+                        <Text className="ml-1.5 text-slate-600 dark:text-slate-300 font-black text-[10px] uppercase tracking-wider">
+                          Skip
+                        </Text>
+                      </TouchableOpacity>
+                    ) : null}
                   </View>
                   <TextInput
                     value={numericAnswer}
@@ -1397,7 +1461,7 @@ const TestAttemptScreen = () => {
                         ? "Select One or More Options"
                         : "Select One Option"}
                     </Text>
-                    {isCurrentQuestionAnswered && (
+                    {isCurrentQuestionAnswered ? (
                       <TouchableOpacity
                         onPress={() => handleClearResponse(currentQuestion.id)}
                         className="flex-row items-center bg-orange-50 dark:bg-orange-900/20 px-2.5 py-1 rounded-md border border-orange-100 dark:border-orange-800/40"
@@ -1407,7 +1471,21 @@ const TestAttemptScreen = () => {
                           Clear
                         </Text>
                       </TouchableOpacity>
-                    )}
+                    ) : questionWiseTiming ? (
+                      <TouchableOpacity
+                        onPress={handleNextFromFooter}
+                        className="flex-row items-center bg-slate-50 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700"
+                      >
+                        <Feather
+                          name="skip-forward"
+                          size={12}
+                          color={isDark ? "#94a3b8" : "#64748b"}
+                        />
+                        <Text className="ml-1.5 text-slate-600 dark:text-slate-300 font-black text-[10px] uppercase tracking-wider">
+                          Skip
+                        </Text>
+                      </TouchableOpacity>
+                    ) : null}
                   </View>
                   {currentQuestion.options?.map((option, optionIndex) => {
                     const isSelected =
@@ -1570,7 +1648,7 @@ const TestAttemptScreen = () => {
                 }`}
               >
                 {questionWiseTiming && !isCurrentQuestionAnswered
-                  ? "Answer to continue"
+                  ? "Answer or skip"
                   : "Next"}
               </Text>
             </TouchableOpacity>

@@ -14,18 +14,20 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import { useAuth } from "@/context/AuthContext";
 import {
-  EnrolledTest,
   StartAttemptRequest,
   StartAttemptResponse,
+  TestItemInstructionsResponse,
 } from "../types";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
-type EnrolledTestItem = NonNullable<EnrolledTest["testItems"]>[number];
-
-type EnrolledTestsApiPayload = {
-  enrolledTests?: EnrolledTest[];
-  tests?: EnrolledTest[];
+type InstructionDetails = {
+  id: number;
+  title: string;
+  durationMinutes: number;
+  totalQuestions: number;
+  subjectWiseTiming: boolean;
+  questionWiseTiming: boolean;
 };
 
 type ApiErrorPayload = {
@@ -35,12 +37,12 @@ type ApiErrorPayload = {
 
 const Portal = () => {
   const params = useLocalSearchParams();
-  const { slug, title, duration, questions } = params;
+  const { slug } = params;
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const { token } = useAuth();
 
-  const [details, setDetails] = useState<EnrolledTestItem | null>(null);
+  const [details, setDetails] = useState<InstructionDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [startingAttempt, setStartingAttempt] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,7 +64,7 @@ const Portal = () => {
       setError(null);
 
       const response = await fetch(
-        `${BASE_URL}/_api/student/enrolled-tests?limit=20`,
+        `${BASE_URL}/_api/student/test-item/instructions?testItemId=${itemId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -71,23 +73,50 @@ const Portal = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch test details");
+        let fallback: string;
+        switch (response.status) {
+          case 400:
+            fallback = "Invalid test item.";
+            break;
+          case 403:
+            fallback = "You don't have access to this test.";
+            break;
+          case 404:
+            fallback = "Test not found.";
+            break;
+          case 500:
+            fallback = "Server error. Please try again.";
+            break;
+          default:
+            fallback = `Failed to load instructions (HTTP ${response.status})`;
+        }
+
+        try {
+          const errorData = (await response.json()) as ApiErrorPayload;
+          fallback = errorData.message || errorData.error || fallback;
+        } catch {
+          // Ignore parse errors and use status-based message.
+        }
+
+        throw new Error(fallback);
       }
 
       const data = await response.json();
-      const payload = (data.json || data) as EnrolledTestsApiPayload;
-      const enrolledTests = payload.enrolledTests || payload.tests || [];
-      const allItems: EnrolledTestItem[] = enrolledTests.flatMap(
-        (testPack) => testPack.testItems || [],
-      );
+      console.log("[test-item/instructions] response:", data);
+      const payload = (data.json ?? data) as TestItemInstructionsResponse;
 
-      const matchedItem = allItems.find((item) => item.id === itemId);
-
-      if (!matchedItem) {
+      if (!payload?.testItem) {
         throw new Error("Test details not found");
       }
 
-      setDetails(matchedItem);
+      setDetails({
+        id: payload.testItem.id,
+        title: payload.testItem.title,
+        durationMinutes: payload.testItem.durationMinutes,
+        totalQuestions: payload.testItem.totalQuestions,
+        subjectWiseTiming: !!payload.testItem.subjectWiseTiming,
+        questionWiseTiming: !!payload.testItem.questionWiseTiming,
+      });
     } catch (err: any) {
       setError(err.message || "Could not load test instructions");
     } finally {
@@ -96,20 +125,8 @@ const Portal = () => {
   }, [itemId, token]);
 
   useEffect(() => {
-    if (title && duration && questions) {
-      setDetails({
-        id: itemId,
-        title: title as string,
-        durationMinutes: Number(duration),
-        totalQuestions: Number(questions),
-        attemptsCount: 0,
-        isCompleted: false,
-      });
-      setLoading(false);
-    } else {
-      fetchInstructionsDetails();
-    }
-  }, [itemId, title, duration, questions, fetchInstructionsDetails]);
+    fetchInstructionsDetails();
+  }, [fetchInstructionsDetails]);
 
   const handleStartTest = useCallback(async () => {
     if (!token || !details?.id) {
@@ -161,6 +178,7 @@ const Portal = () => {
           attemptId: String(startAttempt.attemptId),
           testItemId: String(details.id),
           startedAt: startedAtParam,
+          durationMinutes: String(details.durationMinutes),
         },
       });
     } catch (err: any) {
@@ -168,7 +186,7 @@ const Portal = () => {
     } finally {
       setStartingAttempt(false);
     }
-  }, [details?.id, router, token]);
+  }, [details?.id, details?.durationMinutes, router, token]);
 
   if (loading) {
     return (
@@ -249,8 +267,17 @@ const Portal = () => {
                   Duration
                 </Text>
               </View>
-              <Text className="text-slate-800 dark:text-white text-xl font-black">
-                {details.durationMinutes || 0} Minutes
+              <Text
+                className="text-slate-800 dark:text-white text-xl font-black"
+                numberOfLines={1}
+              >
+                {details.questionWiseTiming
+                  ? "Question wise"
+                  : details.subjectWiseTiming
+                    ? "Subject wise"
+                    : details.durationMinutes > 0
+                      ? `${details.durationMinutes} Minutes`
+                      : "No limit"}
               </Text>
             </View>
 
@@ -280,14 +307,25 @@ const Portal = () => {
                 • Answer all questions to the best of your ability.
               </Text>
               <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
-                • You can navigate between questions anytime.
+                {details.questionWiseTiming
+                  ? "• Once you answer or skip a question, you cannot return to it."
+                  : "• You can navigate between questions anytime."}
               </Text>
               <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
                 • Click Submit Test after completing all answers.
               </Text>
-              <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
-                • Test auto-submits when the timer reaches zero.
-              </Text>
+              {!details.questionWiseTiming &&
+              !details.subjectWiseTiming &&
+              details.durationMinutes <= 0 ? (
+                <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
+                  • No time limit is set — the test will auto-submit after 3
+                  hours.
+                </Text>
+              ) : (
+                <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
+                  • Test auto-submits when the timer reaches zero.
+                </Text>
+              )}
             </View>
           </View>
 
@@ -295,7 +333,7 @@ const Portal = () => {
             <TouchableOpacity
               onPress={handleStartTest}
               disabled={startingAttempt}
-              className="bg-primary w-full py-4 rounded-2xl items-center shadow-sm"
+              className="bg-primary w-full h-14 rounded-2xl items-center justify-center shadow-sm"
             >
               {startingAttempt ? (
                 <ActivityIndicator color="#FFFFFF" />
