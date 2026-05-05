@@ -27,19 +27,45 @@
           "action": "VIEW",
           "autoVerify": true,
           "data": [
-            { "scheme": "https", "host": "testkart.in" },
-            { "path": "/" },
-            { "path": "/course" },
-            { "pathPrefix": "/course/" },
-            { "path": "/mock-test" },
-            { "pathPrefix": "/mock-test/" },
-            { "path": "/study-notes" },
-            { "pathPrefix": "/study-notes/" },
-            { "path": "/expert" },
-            { "pathPrefix": "/expert/" },
-            { "pathPrefix": "/student/" }
+            {
+              "scheme": "https",
+              "host": "testkart.in"
+            },
+            {
+              "path": "/"
+            },
+            {
+              "path": "/course"
+            },
+            {
+              "pathPrefix": "/course/"
+            },
+            {
+              "path": "/mock-test"
+            },
+            {
+              "pathPrefix": "/mock-test/"
+            },
+            {
+              "path": "/study-notes"
+            },
+            {
+              "pathPrefix": "/study-notes/"
+            },
+            {
+              "path": "/expert"
+            },
+            {
+              "pathPrefix": "/expert/"
+            },
+            {
+              "pathPrefix": "/student/"
+            }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -63,7 +89,8 @@
         }
       ],
       "expo-secure-store",
-      "expo-video"
+      "expo-video",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
