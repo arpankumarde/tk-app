@@ -11,12 +11,12 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { File, Directory, Paths } from "expo-file-system";
-import { getContentUriAsync } from "expo-file-system/legacy";
 import * as IntentLauncher from "expo-intent-launcher";
 import * as Sharing from "expo-sharing";
 import { useAuth } from "@/context/AuthContext";
 import { PurchasedProduct } from "../types";
 import Placeholder from "@/constants/placeholder";
+import { getMimeFromName } from "@/utils/mimeTypes";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -76,21 +76,25 @@ const PurchasedProductCard = ({ product }: PurchasedProductCardProps) => {
           console.log("File saved to:", file.uri);
         }
 
+        const { mime, uti } = getMimeFromName(fileName ?? "");
+
         if (Platform.OS === "android") {
-          const contentUri = await getContentUriAsync(file.uri);
-          await IntentLauncher.startActivityAsync(
-            "android.intent.action.VIEW",
-            {
-              data: contentUri,
-              type: "application/pdf",
-              flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
-            },
-          );
+          try {
+            await IntentLauncher.startActivityAsync(
+              "android.intent.action.VIEW",
+              {
+                data: file.contentUri,
+                type: mime,
+                flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
+              },
+            );
+          } catch {
+            // No viewer registered for this MIME — fall back to the share sheet
+            // so the user can pick an app (e.g. Drive, browser) to open it.
+            await Sharing.shareAsync(file.uri, { mimeType: mime, UTI: uti });
+          }
         } else {
-          await Sharing.shareAsync(file.uri, {
-            mimeType: "application/pdf",
-            UTI: "com.adobe.pdf",
-          });
+          await Sharing.shareAsync(file.uri, { mimeType: mime, UTI: uti });
         }
       } else {
         Alert.alert("Error", "Download link not available");
@@ -111,8 +115,7 @@ const PurchasedProductCard = ({ product }: PurchasedProductCardProps) => {
       <View className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-slate-800 mr-4 overflow-hidden">
         <Image
           source={{
-            uri:
-              product.thumbnailUrl || Placeholder.NOTE,
+            uri: product.thumbnailUrl || Placeholder.NOTE,
           }}
           className="w-full h-full"
           resizeMode="cover"

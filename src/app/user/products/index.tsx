@@ -148,7 +148,7 @@ export default function PurchasedProductsScreen() {
               <>
                 <Feather name="trash-2" size={14} color="#DC2626" />
                 <Text className="text-red-600 dark:text-red-400 font-bold text-xs ml-2">
-                  Clear All Downloaded Files (Temp)
+                  Clear All Downloaded Files
                 </Text>
               </>
             )}
