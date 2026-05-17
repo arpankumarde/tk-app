@@ -32,7 +32,8 @@ yarn-error.*
 
 # local env files
 .env*.local
-.env
+*.env
+*.local
 *.keystore
 
 # typescript
@@ -40,6 +41,7 @@ yarn-error.*
 
 app-example
 archive
+docs
 
 # generated native folders
 /ios
@@ -48,3 +50,4 @@ archive
 # editors
 .vscode/
 .cursor/
+.claude/

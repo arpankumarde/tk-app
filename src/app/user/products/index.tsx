@@ -6,11 +6,13 @@ import {
   ScrollView,
   StatusBar,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useColorScheme } from "nativewind";
 import { useAuth } from "@/context/AuthContext";
 import { Feather } from "@expo/vector-icons";
+import { Directory, Paths } from "expo-file-system";
 import Header from "@/components/Header";
 import BottomTabs from "@/components/BottomTabs";
 import PurchasedProductCard from "../_components/PurchasedProductCard";
@@ -28,6 +30,39 @@ export default function PurchasedProductsScreen() {
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [clearing, setClearing] = useState(false);
+
+  const handleClearDownloads = () => {
+    Alert.alert(
+      "Clear Downloads",
+      "Delete all downloaded files from this device? You can re-download them anytime.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            try {
+              setClearing(true);
+              const downloads = new Directory(Paths.cache, "downloads");
+              if (downloads.exists) {
+                downloads.delete();
+              }
+              Alert.alert("Done", "All downloaded files have been cleared.");
+            } catch (error: any) {
+              console.error("Clear downloads error:", error);
+              Alert.alert(
+                "Error",
+                `Could not clear downloads: ${error?.message}`,
+              );
+            } finally {
+              setClearing(false);
+            }
+          },
+        },
+      ],
+    );
+  };
 
   const fetchProducts = useCallback(
     async (pageNum: number, append: boolean) => {
@@ -97,9 +132,27 @@ export default function PurchasedProductsScreen() {
           <Text className="text-2xl font-black text-slate-800 dark:text-white mb-1">
             My Purchases
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm mb-6">
+          <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm mb-4">
             All your purchased digital products
           </Text>
+
+          {/* TEMP: Dev tool to clear cached downloads. Remove before release. */}
+          <TouchableOpacity
+            onPress={handleClearDownloads}
+            disabled={clearing}
+            className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/40 px-4 py-3 rounded-2xl flex-row items-center justify-center mb-6"
+          >
+            {clearing ? (
+              <ActivityIndicator size="small" color="#DC2626" />
+            ) : (
+              <>
+                <Feather name="trash-2" size={14} color="#DC2626" />
+                <Text className="text-red-600 dark:text-red-400 font-bold text-xs ml-2">
+                  Clear All Downloaded Files (Temp)
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
         </View>
 
         <View className="px-6">

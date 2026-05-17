@@ -1,13 +1,13 @@
-import { Stack } from "expo-router";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import "../global.css";
+import ForceUpdate from "@/components/ForceUpdate";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { EnrollmentProvider } from "@/context/EnrollmentContext";
-import ForceUpdate from "@/components/ForceUpdate";
 import { useForceUpdate } from "@/hooks/useForceUpdate";
 import * as Clarity from "@microsoft/react-native-clarity";
 import Constants, { ExecutionEnvironment } from "expo-constants";
+import { Stack } from "expo-router";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import "../../global.css";
 
 if (Constants.executionEnvironment !== ExecutionEnvironment.StoreClient) {
   try {
