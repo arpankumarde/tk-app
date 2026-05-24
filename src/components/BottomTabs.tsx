@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
 import { Link, usePathname, useSegments, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

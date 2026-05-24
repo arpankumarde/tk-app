@@ -11,7 +11,7 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from "expo-image";
 import { useBankDetails, BankDetailsInput } from "../../_hooks/useBankDetails";

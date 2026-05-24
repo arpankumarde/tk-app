@@ -8,7 +8,7 @@ import {
   Alert,
   Platform,
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
 import { router } from "expo-router";
 import { File, Directory, Paths } from "expo-file-system";
 import * as IntentLauncher from "expo-intent-launcher";

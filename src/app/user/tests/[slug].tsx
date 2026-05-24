@@ -12,7 +12,10 @@ import {
   TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { AntDesign, Feather, Ionicons, FontAwesome } from "@expo/vector-icons";
+import AntDesign from "@react-native-vector-icons/ant-design";
+import Feather from "@react-native-vector-icons/feather";
+import Ionicons from "@react-native-vector-icons/ionicons";
+import FontAwesome from "@react-native-vector-icons/fontawesome";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useAuth } from "@/context/AuthContext";

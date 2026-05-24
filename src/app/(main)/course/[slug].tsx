@@ -13,7 +13,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
-import { Feather, MaterialIcons } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
+import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { useColorScheme } from "nativewind";
 import BottomTabs from "@/components/BottomTabs";
 import { WebView } from "react-native-webview";
@@ -304,7 +305,6 @@ const CourseDetails = () => {
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
-
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Custom Navigation Header */}
         <View className="px-6 py-4 flex-row items-center justify-between">
@@ -650,7 +650,6 @@ const CourseDetails = () => {
 
         <View className="h-20" />
       </ScrollView>
-
       {/* Sticky Bottom Bar */}
       <View className="bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 p-6 flex-row items-center">
         <View className="flex-1">
@@ -695,7 +694,6 @@ const CourseDetails = () => {
         </TouchableOpacity>
       </View>
       <BottomTabs />
-
       {/* Enrollment Result Modal */}
       <Modal
         visible={enrollResult.visible}
@@ -770,7 +768,6 @@ const CourseDetails = () => {
           </View>
         </View>
       </Modal>
-
       <Modal
         visible={!!selectedLesson}
         animationType="slide"

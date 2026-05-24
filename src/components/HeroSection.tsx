@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
 import { router } from "expo-router";
 

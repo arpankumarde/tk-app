@@ -13,7 +13,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
+import Ionicons from "@react-native-vector-icons/ionicons";
 import { useColorScheme } from "nativewind";
 import { WebView } from "react-native-webview";
 import { useVideoPlayer, VideoView } from "expo-video";

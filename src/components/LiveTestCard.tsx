@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
-import { Feather, MaterialIcons } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
+import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { router } from "expo-router";
 import { useCountdown } from "@/hooks/useCountdown";
 import BlinkingDot from "@/components/BlinkingDot";

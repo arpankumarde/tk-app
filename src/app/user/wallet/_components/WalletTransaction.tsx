@@ -1,5 +1,5 @@
 import { View, Text, ActivityIndicator } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
 import { WalletTransaction as WalletTransactionData } from "../../types";
 
 function formatCurrency(amount: number) {

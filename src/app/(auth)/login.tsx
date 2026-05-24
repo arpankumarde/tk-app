@@ -12,7 +12,7 @@ import {
   Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { AntDesign } from "@expo/vector-icons";
+import AntDesign from "@react-native-vector-icons/ant-design";
 import Header from "@/components/Header";
 import { useColorScheme } from "nativewind";
 import { Link, router } from "expo-router";

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
 import { useRouter, Link } from "expo-router";
 import { useAuth } from "@/context/AuthContext";

@@ -12,7 +12,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Feather } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
 import { WebView } from "react-native-webview";
 import { useAuth } from "@/context/AuthContext";

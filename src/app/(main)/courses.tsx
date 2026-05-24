@@ -20,7 +20,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
 import Header from "@/components/Header";
 import CourseCard from "@/components/CourseCard";

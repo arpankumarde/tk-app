@@ -11,7 +11,9 @@ import {
   Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
+import Ionicons from "@react-native-vector-icons/ionicons";
+import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { useColorScheme } from "nativewind";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import BottomTabs from "@/components/BottomTabs";
@@ -261,7 +263,6 @@ const TestDetails = () => {
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
-
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Navigation Header */}
         <View className="px-6 py-4 flex-row items-center justify-between">
@@ -701,7 +702,6 @@ const TestDetails = () => {
 
         <View className="h-20" />
       </ScrollView>
-
       {/* Sticky Bottom Bar */}
       <View className="bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 p-6 flex-row items-center">
         <View className="flex-1">
@@ -855,7 +855,6 @@ const TestDetails = () => {
           </View>
         </View>
       </Modal>
-
       <BottomTabs />
     </SafeAreaView>
   );

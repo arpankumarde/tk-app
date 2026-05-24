@@ -15,7 +15,7 @@ import MockTestCard from "@/components/MockTestCard";
 import DigitalDownloadsSection from "@/components/DigitalDownloadsSection";
 import BottomTabs from "@/components/BottomTabs";
 import { router } from "expo-router";
-import { Feather } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;

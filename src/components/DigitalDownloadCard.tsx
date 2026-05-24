@@ -9,7 +9,8 @@ import {
 } from "react-native";
 import { useColorScheme } from "nativewind";
 import { router } from "expo-router";
-import { Feather, MaterialIcons } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
+import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useAuth } from "@/context/AuthContext";
 import Placeholder from "@/constants/placeholder";

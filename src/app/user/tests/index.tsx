@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useColorScheme } from "nativewind";
 import { useAuth } from "@/context/AuthContext";
-import { Feather } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
 import Header from "@/components/Header";
 import BottomTabs from "@/components/BottomTabs";
 import EnrolledTestCard from "../_components/EnrolledTestCard";

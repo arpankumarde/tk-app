@@ -1,5 +1,6 @@
 import { View, Text, Image, TouchableOpacity } from "react-native";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
+import Ionicons from "@react-native-vector-icons/ionicons";
 import { router } from "expo-router";
 import { EnrolledCourse } from "../types";
 import Placeholder from "@/constants/placeholder";

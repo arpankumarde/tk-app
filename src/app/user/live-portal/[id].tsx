@@ -10,7 +10,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
+import Ionicons from "@react-native-vector-icons/ionicons";
 import { useColorScheme } from "nativewind";
 import { useAuth } from "@/context/AuthContext";
 import BlinkingDot from "@/components/BlinkingDot";

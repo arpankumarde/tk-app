@@ -10,7 +10,8 @@ import {
   StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather, MaterialIcons } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
+import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { useLocalSearchParams, router } from "expo-router";
 import { useColorScheme } from "nativewind";
 import Placeholder from "@/constants/placeholder";
@@ -324,7 +325,6 @@ const SearchScreen = () => {
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor={isDark ? "#0f172a" : "#ffffff"}
       />
-
       {/* Search Header */}
       <View className="flex-row items-center px-4 py-3 border-b border-gray-100 dark:border-slate-800 gap-3">
         <TouchableOpacity
@@ -365,7 +365,6 @@ const SearchScreen = () => {
           <Feather name="search" size={18} color="white" />
         </TouchableOpacity>
       </View>
-
       {/* Content */}
       {loading ? (
         <View className="flex-1 items-center justify-center">
@@ -392,7 +391,7 @@ const SearchScreen = () => {
         </View>
       ) : results === null ? (
         /* Empty / initial state */
-        <View className="flex-1 items-center justify-center px-8">
+        (<View className="flex-1 items-center justify-center px-8">
           <View className="w-24 h-24 rounded-full bg-orange-50 dark:bg-orange-900/20 items-center justify-center mb-6">
             <Feather name="search" size={40} color="#FF8A50" />
           </View>
@@ -402,10 +401,10 @@ const SearchScreen = () => {
           <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-6">
             Find courses, mock tests, study notes, and live exams all in one place.
           </Text>
-        </View>
+        </View>)
       ) : !hasResults ? (
         /* No results */
-        <View className="flex-1 items-center justify-center px-8">
+        (<View className="flex-1 items-center justify-center px-8">
           <View className="w-24 h-24 rounded-full bg-gray-50 dark:bg-slate-800 items-center justify-center mb-6">
             <Feather name="inbox" size={40} color={isDark ? "#334155" : "#cbd5e1"} />
           </View>
@@ -415,10 +414,10 @@ const SearchScreen = () => {
           <Text className="text-slate-500 dark:text-slate-400 text-center text-sm">
             Try different keywords or check your spelling.
           </Text>
-        </View>
+        </View>)
       ) : (
         /* Results */
-        <ScrollView
+        (<ScrollView
           className="flex-1 px-5"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -431,7 +430,6 @@ const SearchScreen = () => {
               <Text className="text-primary font-black">{`"${query}"`}</Text>
             </Text>
           </View>
-
           {/* Teachers */}
           {results.teachers.length > 0 && (
             <View>
@@ -450,7 +448,6 @@ const SearchScreen = () => {
               ))}
             </View>
           )}
-
           {/* Courses */}
           {results.courses.length > 0 && (
             <View>
@@ -470,7 +467,6 @@ const SearchScreen = () => {
               ))}
             </View>
           )}
-
           {/* Mock Tests */}
           {results.tests.length > 0 && (
             <View>
@@ -490,7 +486,6 @@ const SearchScreen = () => {
               ))}
             </View>
           )}
-
           {/* Notes / Digital Products */}
           {results.products.length > 0 && (
             <View>
@@ -510,7 +505,6 @@ const SearchScreen = () => {
               ))}
             </View>
           )}
-
           {/* Live Tests */}
           {results.liveTests.length > 0 && (
             <View>
@@ -529,9 +523,8 @@ const SearchScreen = () => {
               ))}
             </View>
           )}
-
           <View className="h-20" />
-        </ScrollView>
+        </ScrollView>)
       )}
     </SafeAreaView>
   );

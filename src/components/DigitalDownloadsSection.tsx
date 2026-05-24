@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
 import { router } from "expo-router";
 import ProductCard from "./ProductCard";
 

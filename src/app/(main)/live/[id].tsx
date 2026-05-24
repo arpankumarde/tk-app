@@ -13,7 +13,9 @@ import {
   Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import Feather from "@react-native-vector-icons/feather";
+import Ionicons from "@react-native-vector-icons/ionicons";
+import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { useColorScheme } from "nativewind";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { WebView } from "react-native-webview";
