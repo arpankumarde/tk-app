@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import Feather from "@react-native-vector-icons/feather";
 import Ionicons from "@react-native-vector-icons/ionicons";
+
 import { useColorScheme } from "nativewind";
 import { WebView } from "react-native-webview";
 import { useVideoPlayer, VideoView } from "expo-video";
@@ -728,7 +729,7 @@ const CourseLessons = () => {
             </View>
             {isCurrentLessonCompleted && (
               <View className="flex-row items-center bg-emerald-50 dark:bg-emerald-900/20 px-2.5 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800 mr-2">
-                <Ionicons name="checkmark-circle" size={14} color="#10b981" />
+                <Feather name="check-circle" size={14} color="#10b981" />
                 <Text className="text-emerald-600 dark:text-emerald-400 text-[10px] font-black ml-1 uppercase">
                   Done
                 </Text>

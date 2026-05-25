@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import Feather from "@react-native-vector-icons/feather";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
+
 import { router } from "expo-router";
 import { useCountdown } from "@/hooks/useCountdown";
 import BlinkingDot from "@/components/BlinkingDot";
@@ -143,7 +144,7 @@ const LiveTestCard = ({
             </View>
 
             <View className="flex-row items-center bg-orange-50 dark:bg-slate-700/40 px-2.5 py-1 rounded-lg border border-orange-100 dark:border-slate-600/60">
-              <MaterialIcons name="star" size={12} color="#F97316" />
+              <Feather name="star" size={12} color="#F97316" />
               <Text className="ml-1 text-orange-500 font-black text-xs">
                 {test.rating || "5.0"}
               </Text>

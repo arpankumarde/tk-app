@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import MaterialIcons from "@react-native-vector-icons/material-icons";
 import {
   View,
   Text,
@@ -11,7 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@react-native-vector-icons/feather";
-import MaterialIcons from "@react-native-vector-icons/material-icons";
+
 import { useLocalSearchParams, router } from "expo-router";
 import { useColorScheme } from "nativewind";
 import Placeholder from "@/constants/placeholder";

@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@react-native-vector-icons/feather";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
+
 import { useColorScheme } from "nativewind";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Header from "@/components/Header";
@@ -692,7 +693,7 @@ const ExpertDetails = () => {
                     className="bg-white dark:bg-slate-800 rounded-[24px] p-5 border border-gray-100 dark:border-slate-700 shadow-sm flex-row items-start"
                   >
                     <View className="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-900/20 items-center justify-center mr-4 mt-0.5 shrink-0">
-                      <Ionicons name="trophy" size={18} color="#f59e0b" />
+                      <Feather name="award" size={18} color="#f59e0b" />
                     </View>
                     <View className="flex-1">
                       <Text className="text-base font-black text-slate-800 dark:text-white leading-tight">

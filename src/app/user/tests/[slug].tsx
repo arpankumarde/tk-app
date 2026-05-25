@@ -12,10 +12,10 @@ import {
   TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AntDesign from "@react-native-vector-icons/ant-design";
+
 import Feather from "@react-native-vector-icons/feather";
 import Ionicons from "@react-native-vector-icons/ionicons";
-import FontAwesome from "@react-native-vector-icons/fontawesome";
+
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useAuth } from "@/context/AuthContext";
@@ -306,7 +306,7 @@ const EnrolledTestDetails = () => {
                   className="mt-2 flex-row items-center self-start"
                 >
                   <View className="bg-orange-500/10 dark:bg-orange-500/20 px-3 py-1.5 rounded-full flex-row items-center border border-orange-500/20">
-                    <AntDesign name="star" size={12} color="#FF8A50" />
+                    <Feather name="star" size={12} color="#FF8A50" />
                     <Text className="text-primary font-black ml-1.5 text-[10px] uppercase tracking-wider">
                       Write Review
                     </Text>
@@ -434,7 +434,7 @@ const EnrolledTestDetails = () => {
 
                 <View className="flex-row items-center justify-between pt-3 border-t border-gray-50 dark:border-slate-800/50">
                   <View className="flex-row items-center">
-                    <Ionicons name="repeat" size={14} color="#94A3B8" />
+                    <Feather name="repeat" size={14} color="#94A3B8" />
                     <Text className="text-slate-500 font-bold text-xs ml-1.5">
                       {item.attemptsCount || 0} Attempts
                     </Text>
@@ -484,7 +484,7 @@ const EnrolledTestDetails = () => {
             ))
           ) : (
             <View className="items-center justify-center py-16 bg-gray-50 dark:bg-slate-900 rounded-[32px] border border-dashed border-gray-200 dark:border-slate-800">
-              <Ionicons name="document-text" size={32} color="#cbd5e1" />
+              <Feather name="file-text" size={32} color="#cbd5e1" />
               <Text className="text-slate-450 font-bold mt-3 text-center px-10 text-xs">
                 No tests available in this package currently
               </Text>
@@ -507,7 +507,7 @@ const EnrolledTestDetails = () => {
 
             <View className="items-center mb-4 mt-2">
               <View className="w-14 h-14 bg-orange-500/10 dark:bg-orange-500/20 rounded-full items-center justify-center mb-5">
-                <AntDesign name="star" size={28} color="#FF8A50" />
+                <Feather name="star" size={28} color="#FF8A50" />
               </View>
               <Text className="text-xl font-black text-slate-800 dark:text-white text-center">
                 Rate this Package
@@ -525,8 +525,8 @@ const EnrolledTestDetails = () => {
                   onPress={() => setRating(s)}
                   className="mx-1"
                 >
-                  <FontAwesome
-                    name={s <= rating ? "star" : "star-o"}
+                  <Ionicons
+                    name={s <= rating ? "star" : "star-outline"}
                     size={36}
                     color="#FF8A50"
                   />

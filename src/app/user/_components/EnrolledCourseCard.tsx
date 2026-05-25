@@ -1,6 +1,5 @@
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import Feather from "@react-native-vector-icons/feather";
-import Ionicons from "@react-native-vector-icons/ionicons";
 import { router } from "expo-router";
 import { EnrolledCourse } from "../types";
 import Placeholder from "@/constants/placeholder";
@@ -30,7 +29,7 @@ const EnrolledCourseCard = ({ course }: EnrolledCourseCardProps) => {
           resizeMode="cover"
         />
         <View className="absolute inset-0 items-center justify-center bg-black/10">
-          <Ionicons name="play" size={16} color="white" />
+          <Feather name="play" size={16} color="white" />
         </View>
       </View>
 

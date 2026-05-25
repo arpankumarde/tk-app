@@ -10,6 +10,7 @@ import {
 import { useRouter } from "expo-router";
 import Feather from "@react-native-vector-icons/feather";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
+
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useAuth } from "@/context/AuthContext";
 import Placeholder from "@/constants/placeholder";
@@ -208,7 +209,7 @@ const ProductCard = ({
                 <>
                   <View className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-1" />
                   <View className="flex-row items-center">
-                    <MaterialIcons name="star" size={13} color="#F59E0B" />
+                    <Feather name="star" size={13} color="#F59E0B" />
                     <Text className="text-amber-600 dark:text-amber-500 text-[11px] font-black ml-1">
                       {reviewCount > 0 ? `${ratingDisplay} (${reviewCount})` : ratingDisplay}
                     </Text>

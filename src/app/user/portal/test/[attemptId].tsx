@@ -17,7 +17,8 @@ import {
 } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Feather from "@react-native-vector-icons/feather";
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
+import Ionicons from "@react-native-vector-icons/ionicons";
+
 import { useColorScheme } from "nativewind";
 import { WebView } from "react-native-webview";
 import { useAuth } from "@/context/AuthContext";
@@ -1157,7 +1158,7 @@ const TestAttemptScreen = () => {
                     onPress={() => setIsCalculatorVisible(true)}
                     className="h-12 w-12 bg-orange-500 rounded-full items-center justify-center shadow-lg shadow-orange-500/30"
                   >
-                    <MaterialCommunityIcons
+                    <Ionicons
                       name="calculator"
                       size={24}
                       color="white"

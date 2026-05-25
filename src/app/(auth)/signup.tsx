@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Ionicons from "@react-native-vector-icons/ionicons";
 import {
   View,
   Text,
@@ -12,7 +13,7 @@ import {
   Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AntDesign from "@react-native-vector-icons/ant-design";
+
 import Header from "@/components/Header";
 import { useColorScheme } from "nativewind";
 import { Link, router } from "expo-router";
@@ -163,8 +164,8 @@ const Signup = () => {
               <ActivityIndicator color={colorScheme === "dark" ? "#fff" : "#000"} />
             ) : (
               <>
-                <AntDesign
-                  name="google"
+                <Ionicons
+                  name="logo-google"
                   size={24}
                   color={colorScheme === "dark" ? "#fff" : "#000"}
                 />

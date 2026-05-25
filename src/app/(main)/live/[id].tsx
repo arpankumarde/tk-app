@@ -14,8 +14,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@react-native-vector-icons/feather";
-import Ionicons from "@react-native-vector-icons/ionicons";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
+
 import { useColorScheme } from "nativewind";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { WebView } from "react-native-webview";
@@ -765,7 +765,7 @@ const LiveTestDetails = () => {
           <View className="px-5 mb-5">
             <View className="flex-row justify-between mb-2">
               <View className="flex-row items-center">
-                <Ionicons name="people-outline" size={14} color="#64748b" />
+                <Feather name="users" size={14} color="#64748b" />
                 <Text className="text-slate-600 dark:text-slate-400 text-sm font-bold ml-1.5">
                   {liveTest.enrolledCount} / {liveTest.maxSeats} seats filled
                 </Text>
