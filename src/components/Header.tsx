@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
-import Feather from "@react-native-vector-icons/feather";
-import { useColorScheme } from "nativewind";
-import { useRouter, Link } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import { useCartContext } from "@/context/CartContext";
+import Feather from "@react-native-vector-icons/feather";
+import { Link, useRouter } from "expo-router";
+import { useColorScheme } from "nativewind";
+import { useEffect, useState } from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 const Header = () => {
   const { colorScheme, toggleColorScheme } = useColorScheme();
@@ -29,8 +29,8 @@ const Header = () => {
               source={{
                 uri:
                   colorScheme === "dark"
-                    ? "https://ik.imagekit.io/testkart/brand/testkart-new-white.png"
-                    : "https://ik.imagekit.io/testkart/brand/testkart-new-black.png",
+                    ? "https://cdn.testkart.in/brand/testkart-new-white.png"
+                    : "https://cdn.testkart.in/brand/testkart-new-black.png",
               }}
               className="w-[140px] h-[40px]"
               resizeMode="contain"

@@ -1,8 +1,8 @@
 const Placeholder = {
-  COURSE: "https://ik.imagekit.io/testkart/placeholders/course.jpg",
-  TEST: "https://ik.imagekit.io/testkart/placeholders/test.jpg",
-  LIVE: "https://ik.imagekit.io/testkart/placeholders/live.png",
-  NOTE: "https://ik.imagekit.io/testkart/placeholders/notes.png",
+  COURSE: "https://cdn.testkart.in/placeholders/course.jpg",
+  TEST: "https://cdn.testkart.in/placeholders/test.jpg",
+  LIVE: "https://cdn.testkart.in/placeholders/live.png",
+  NOTE: "https://cdn.testkart.in/placeholders/notes.png",
 };
 
 export default Placeholder;
