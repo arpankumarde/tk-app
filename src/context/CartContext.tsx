@@ -6,6 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { useAuth } from "./AuthContext";
+import { isAuthError } from "@/utils/authError";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -75,7 +76,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { token } = useAuth();
+  const { token, invalidateSession } = useAuth();
   const [cart, setCart] = useState<CartData>({
     items: [],
     subtotal: 0,
@@ -112,11 +113,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
           headers: { Authorization: `Bearer ${token}` },
         });
 
+        const data = await response.json().catch(() => null);
+        const payload = data?.json || data;
+
+        // Expired token can surface as a non-401 "Not authenticated" body.
+        if (isAuthError(response.status, payload)) {
+          await invalidateSession();
+          return;
+        }
+
         if (!response.ok) throw new Error("Failed to fetch cart");
 
-        const data = await response.json();
-        const payload = data.json || data;
-        const items: CartItem[] = (payload.items || []).map((item: any) => {
+        const items: CartItem[] = (payload?.items || []).map((item: any) => {
           const originalPrice = item.price ?? 0;
           const finalPrice = item.discountPrice ?? originalPrice;
           return {
@@ -141,7 +149,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         if (!silent) setLoading(false);
       }
     },
-    [token, appliedPromoDiscount],
+    [token, appliedPromoDiscount, invalidateSession],
   );
 
   const removeItem = useCallback(

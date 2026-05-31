@@ -3,10 +3,14 @@ import {
   useContext,
   useState,
   useEffect,
+  useCallback,
   ReactNode,
 } from "react";
+import { AppState } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
+import { router } from "expo-router";
+import { isAuthError } from "@/utils/authError";
 
 export type User = {
   academyName: string | null;
@@ -40,15 +44,58 @@ type AuthContextType = {
   loading: boolean;
   setAuth: (user: User, token: string) => void;
   logout: () => void;
+  // Clears stored auth and redirects to login. Call when an authed API signals
+  // "not authenticated".
+  invalidateSession: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+const SESSION_CHECK_URL = `${BASE_URL}/_api/auth/session`;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const clearStoredAuth = useCallback(async () => {
+    setUser(null);
+    setToken(null);
+    await SecureStore.deleteItemAsync("auth_token");
+    await SecureStore.deleteItemAsync("auth_user");
+  }, []);
+
+  const invalidateSession = useCallback(async () => {
+    await clearStoredAuth();
+    router.replace("/login");
+  }, [clearStoredAuth]);
+
+  const validateSession = useCallback(
+    async (authToken: string) => {
+      try {
+        const res = await fetch(SESSION_CHECK_URL, {
+          headers: { Authorization: `Bearer ${authToken}` },
+          credentials: "omit",
+        });
+
+        let payload: any;
+        try {
+          const data = await res.json();
+          payload = data?.json ?? data;
+        } catch {
+          payload = undefined;
+        }
+
+        const sessionRejected = res.ok && payload != null && !payload.user;
+        if (isAuthError(res.status, payload) || sessionRejected) {
+          await invalidateSession();
+        }
+      } catch (e) {
+        console.warn("Session validation skipped (network error):", e);
+      }
+    },
+    [invalidateSession],
+  );
 
   useEffect(() => {
     const loadAuth = async () => {
@@ -58,6 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (savedToken && savedUser) {
           setToken(savedToken);
           setUser(JSON.parse(savedUser));
+          validateSession(savedToken);
         }
       } catch (e) {
         console.error("Failed to load auth", e);
@@ -66,7 +114,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
     loadAuth();
-  }, []);
+  }, [validateSession]);
+
+  // Re-validate when the app returns to the foreground.
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active" && token) {
+        validateSession(token);
+      }
+    });
+    return () => sub.remove();
+  }, [token, validateSession]);
 
   const setAuth = async (user: User, token: string) => {
     if (user.avatarUrl?.includes("/svg?")) {
@@ -78,20 +136,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await SecureStore.setItemAsync("auth_user", JSON.stringify(user));
   };
 
-  const logout = async () => {
-    setUser(null);
-    setToken(null);
-    await SecureStore.deleteItemAsync("auth_token");
-    await SecureStore.deleteItemAsync("auth_user");
+  const logout = useCallback(async () => {
+    await clearStoredAuth();
     await fetch(`${BASE_URL}/_api/auth/logout`, {
       method: "POST",
       credentials: "omit",
     });
     await WebBrowser.coolDownAsync();
-  };
+  }, [clearStoredAuth]);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, setAuth, logout }}>
+    <AuthContext.Provider
+      value={{ user, token, loading, setAuth, logout, invalidateSession }}
+    >
       {children}
     </AuthContext.Provider>
   );
