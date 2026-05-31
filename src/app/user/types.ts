@@ -74,6 +74,17 @@ export interface PurchasedProduct {
   category: string;
   teacherName: string;
   pdfUrl?: string;
+  fileCount?: number;
+}
+
+// Public (purchase-verified) file metadata — no fileUrl/fileId exposed.
+// Returned by GET /_api/student/shop/files?productId=
+export interface PurchasedProductFile {
+  id: number;
+  title: string;
+  fileSizeBytes: number | null;
+  pageCount: number | null;
+  orderIndex: number;
 }
 
 // Individual question (without sensitive fields)
