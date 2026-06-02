@@ -1,32 +1,46 @@
-import { useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StatusBar,
-  Image,
-  Alert,
-  Linking,
-  ActivityIndicator,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import BottomTabs from "@/components/BottomTabs";
+import Header from "@/components/Header";
 import { useAuth } from "@/context/AuthContext";
 import Feather from "@react-native-vector-icons/feather";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
+import * as Application from "expo-application";
+import Constants from "expo-constants";
+import { router } from "expo-router";
 import { useColorScheme } from "nativewind";
-import Header from "@/components/Header";
-import BottomTabs from "@/components/BottomTabs";
+import { useEffect } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Linking,
+  Platform,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useEnrolledCourses } from "./_hooks/useEnrolledCourses";
-import { useEnrolledTests } from "./_hooks/useEnrolledTests";
 import EnrolledCourseCard from "./_components/EnrolledCourseCard";
 import EnrolledTestCard from "./_components/EnrolledTestCard";
 import PurchasedProductCard from "./_components/PurchasedProductCard";
+import { useEnrolledCourses } from "./_hooks/useEnrolledCourses";
+import { useEnrolledTests } from "./_hooks/useEnrolledTests";
 
 import { usePurchasedProducts } from "./_hooks/usePurchasedProducts";
+
+const version =
+  Constants.expoConfig?.version ??
+  Application.nativeApplicationVersion ??
+  "0.0.0";
+const buildNumber =
+  (Platform.OS === "android"
+    ? Constants.expoConfig?.android?.versionCode
+    : Constants.expoConfig?.ios?.buildNumber) ??
+  Application.nativeBuildVersion ??
+  "—";
 
 export default function ProfileScreen() {
   const { user, token, logout } = useAuth();
@@ -148,7 +162,7 @@ export default function ProfileScreen() {
 
           {/* Stats Cards */}
           <View className="flex-row justify-between mb-2">
-            <TouchableOpacity 
+            <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => router.push("/user/tests")}
               className="flex-1 bg-white dark:bg-slate-800 rounded-2xl py-3 px-2 items-center mr-3 border border-slate-100 dark:border-slate-700/50 shadow-sm shadow-slate-200/50 dark:shadow-none"
@@ -164,7 +178,7 @@ export default function ProfileScreen() {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => router.push("/user/courses")}
               className="flex-1 bg-white dark:bg-slate-800 rounded-2xl py-3 px-2 items-center mr-3 border border-slate-100 dark:border-slate-700/50 shadow-sm shadow-slate-200/50 dark:shadow-none"
@@ -180,7 +194,7 @@ export default function ProfileScreen() {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => router.push("/user/products")}
               className="flex-1 bg-white dark:bg-slate-800 rounded-2xl py-3 px-2 items-center border border-slate-100 dark:border-slate-700/50 shadow-sm shadow-slate-200/50 dark:shadow-none"
@@ -368,6 +382,19 @@ export default function ProfileScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
+              onPress={() => router.push("/about" as any)}
+              className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800"
+            >
+              <View className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-900/20 items-center justify-center mr-4">
+                <Feather name="info" size={22} color="#FF8A50" />
+              </View>
+              <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
+                About the App
+              </Text>
+              <Feather name="chevron-right" size={20} color="#CBD5E1" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
               onPress={() => {
                 let message = `Hello, I need help. I'm ${user?.displayName || "a user"}.`;
                 if (user?.email) message += ` Email: ${user.email}`;
@@ -398,6 +425,19 @@ export default function ProfileScreen() {
               Sign Out
             </Text>
           </TouchableOpacity>
+
+          {/* App Version & Copyright */}
+          <View className="items-center pt-8">
+            <Text className="text-slate-500 dark:text-slate-400 font-bold text-xs">
+              Version {version} (Build {buildNumber})
+            </Text>
+            <Text className="text-slate-400 dark:text-slate-500 font-bold text-xs mt-2">
+              © {new Date().getFullYear()} Testkart. All rights reserved.
+            </Text>
+            <Text className="text-slate-300 dark:text-slate-600 font-medium text-[11px] mt-1">
+              Made with care for learners across India.
+            </Text>
+          </View>
         </View>
 
         <View className="h-10" />
