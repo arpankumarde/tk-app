@@ -1,16 +1,16 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  ReactNode,
-} from "react";
-import { AppState } from "react-native";
+import { isAuthError } from "@/utils/authError";
+import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
-import { router } from "expo-router";
-import { isAuthError } from "@/utils/authError";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { AppState } from "react-native";
 
 export type User = {
   academyName: string | null;
@@ -47,6 +47,9 @@ type AuthContextType = {
   // Clears stored auth and redirects to login. Call when an authed API signals
   // "not authenticated".
   invalidateSession: () => Promise<void>;
+  // Re-fetches the session and updates the stored user with fresh server data.
+  // Returns the refreshed user, or null if it could not be refreshed.
+  refreshSession: () => Promise<User | null>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -136,6 +139,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await SecureStore.setItemAsync("auth_user", JSON.stringify(user));
   };
 
+  const refreshSession = useCallback(async (): Promise<User | null> => {
+    const authToken = await SecureStore.getItemAsync("auth_token");
+    if (!authToken) return null;
+    try {
+      const res = await fetch(SESSION_CHECK_URL, {
+        headers: { Authorization: `Bearer ${authToken}` },
+        credentials: "omit",
+      });
+
+      let payload: any;
+      try {
+        const data = await res.json();
+        payload = data?.json ?? data;
+      } catch {
+        payload = undefined;
+      }
+
+      if (
+        isAuthError(res.status, payload) ||
+        (res.ok && payload && !payload.user)
+      ) {
+        await invalidateSession();
+        return null;
+      }
+      if (res.ok && payload?.user) {
+        await setAuth(payload.user, authToken);
+        return payload.user as User;
+      }
+    } catch (e) {
+      console.warn("Session refresh skipped (network error):", e);
+    }
+    return null;
+  }, [invalidateSession]);
+
   const logout = useCallback(async () => {
     await clearStoredAuth();
     await fetch(`${BASE_URL}/_api/auth/logout`, {
@@ -147,7 +184,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, loading, setAuth, logout, invalidateSession }}
+      value={{
+        user,
+        token,
+        loading,
+        setAuth,
+        logout,
+        invalidateSession,
+        refreshSession,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -1,29 +1,29 @@
-import { useState, useEffect } from "react";
+import Header from "@/components/Header";
+import { useAuth } from "@/context/AuthContext";
+import Feather from "@react-native-vector-icons/feather";
+import { router } from "expo-router";
+import { useColorScheme } from "nativewind";
+import { useEffect, useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  StatusBar,
-  Image,
-  Alert,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { useAuth } from "@/context/AuthContext";
-import Feather from "@react-native-vector-icons/feather";
-import MaterialIcons from "@react-native-vector-icons/material-icons";
-import { useColorScheme } from "nativewind";
-import Header from "@/components/Header";
+import MobileVerification from "./_components/MobileVerification";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
 export default function ProfileEditScreen() {
-  const { user, token, setAuth } = useAuth();
+  const { user, token, setAuth, refreshSession } = useAuth();
   const { colorScheme } = useColorScheme();
 
   const [displayName, setDisplayName] = useState(user?.displayName || "");
@@ -35,6 +35,17 @@ export default function ProfileEditScreen() {
       router.push("/login");
     }
   }, [user]);
+
+  // Pull fresh account data from the server whenever the screen is opened.
+  useEffect(() => {
+    refreshSession();
+  }, [refreshSession]);
+
+  // Keep the editable fields in sync when the user record is refreshed.
+  useEffect(() => {
+    setDisplayName(user?.displayName || "");
+    setBio(user?.bio || "");
+  }, [user?.displayName, user?.bio]);
 
   if (!user) return null;
 
@@ -253,34 +264,7 @@ export default function ProfileEditScreen() {
                 </View>
               )}
 
-              {user.mobileNumber && (
-                <View className="flex-row items-center p-5 border-b border-gray-50 dark:border-slate-800">
-                  <View className="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-900/20 items-center justify-center mr-4">
-                    <Feather name="phone" size={18} color="#22C55E" />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">
-                      Mobile
-                    </Text>
-                    <View className="flex-row items-center">
-                      <Text className="text-slate-700 dark:text-slate-200 font-bold text-[15px]">
-                        {user.mobileNumber}
-                      </Text>
-                      {user.mobileVerified && (
-                        <MaterialIcons
-                          name="verified"
-                          size={16}
-                          color="#22C55E"
-                          style={{ marginLeft: 6 }}
-                        />
-                      )}
-                    </View>
-                    <Text className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                      Your mobile number cannot be changed.
-                    </Text>
-                  </View>
-                </View>
-              )}
+              <MobileVerification />
 
               {user.location && (
                 <View className="flex-row items-center p-5">
