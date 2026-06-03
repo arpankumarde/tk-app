@@ -1,19 +1,18 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  ActivityIndicator,
-  Modal,
-} from "react-native";
-import { useRouter } from "expo-router";
+import Placeholder from "@/constants/placeholder";
+import { useAuth } from "@/context/AuthContext";
+import { useAddToCart } from "@/hooks/useAddToCart";
 import Feather from "@react-native-vector-icons/feather";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
-
-import { useAddToCart } from "@/hooks/useAddToCart";
-import { useAuth } from "@/context/AuthContext";
-import Placeholder from "@/constants/placeholder";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface ProductCardProps {
   product: {
@@ -31,6 +30,7 @@ interface ProductCardProps {
     thumbnailUrl: string;
     totalPurchases: number;
     category: string;
+    fileCount: number;
     isPurchased?: boolean;
     views?: number;
     ratingsCount?: number;
@@ -69,12 +69,13 @@ const ProductCard = ({
         ? String(product.rating)
         : product.rating.toFixed(1)
       : "0";
-  const teacherInitials = displayAuthor
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() || "")
-    .join("") || "TE";
+  const teacherInitials =
+    displayAuthor
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() || "")
+      .join("") || "TE";
   const hasTeacherAvatar = !!product.teacherAvatar?.trim();
 
   const handleFreeEnroll = async () => {
@@ -204,6 +205,13 @@ const ProductCard = ({
                   {product.totalPurchases || 0} Purchases
                 </Text>
               </View>
+              <View className="flex-row items-center">
+                <Feather name="shopping-bag" size={13} color="#94a3b8" />
+                <Text className="text-slate-400 dark:text-slate-500 text-[11px] font-bold ml-1.5">
+                  {product.fileCount || 1}{" "}
+                  {product.fileCount === 1 ? "File" : "Files"}
+                </Text>
+              </View>
               {/* Dot Separator & Reviews */}
               {showReviewMeta && (
                 <>
@@ -211,7 +219,9 @@ const ProductCard = ({
                   <View className="flex-row items-center">
                     <Feather name="star" size={13} color="#F59E0B" />
                     <Text className="text-amber-600 dark:text-amber-500 text-[11px] font-black ml-1">
-                      {reviewCount > 0 ? `${ratingDisplay} (${reviewCount})` : ratingDisplay}
+                      {reviewCount > 0
+                        ? `${ratingDisplay} (${reviewCount})`
+                        : ratingDisplay}
                     </Text>
                   </View>
                 </>
@@ -253,7 +263,10 @@ const ProductCard = ({
                     size={18}
                     color="white"
                   />
-                  <Text className="text-white font-black ml-3 text-sm" numberOfLines={1}>
+                  <Text
+                    className="text-white font-black ml-3 text-sm"
+                    numberOfLines={1}
+                  >
                     {isFree
                       ? product.isPurchased
                         ? "GO TO LIBRARY"
@@ -272,7 +285,6 @@ const ProductCard = ({
           </View>
         </View>
       </TouchableOpacity>
-
 
       {/* Result Modal */}
       <Modal

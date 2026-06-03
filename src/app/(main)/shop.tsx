@@ -1,30 +1,30 @@
-import { useState, useEffect, useCallback } from "react";
+import BottomTabs from "@/components/BottomTabs";
+import Header from "@/components/Header";
+import ProductCard from "@/components/ProductCard";
+import Feather from "@react-native-vector-icons/feather";
+import { useColorScheme } from "nativewind";
+import { useCallback, useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
-  StatusBar,
-  Pressable,
-  TextInput,
-  Modal,
   Dimensions,
+  Modal,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
-  useSharedValue,
   useAnimatedStyle,
+  useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { scheduleOnRN } from "react-native-worklets";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Feather from "@react-native-vector-icons/feather";
-import { useColorScheme } from "nativewind";
-import Header from "@/components/Header";
-import BottomTabs from "@/components/BottomTabs";
-import ProductCard from "@/components/ProductCard";
+import { scheduleOnRN } from "react-native-worklets";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 const PAGE_LIMIT = 20;
@@ -35,6 +35,26 @@ const SORT_OPTIONS = [
   { label: "Price High to Low", value: "price_desc" },
   { label: "Price Low to High", value: "price_asc" },
 ];
+
+type Product = {
+  id: number;
+  title: string;
+  price: number;
+  publishedAt: string;
+  rating: number | null;
+  slug: string;
+  teacherAvatar: string;
+  teacherIsVerified: boolean;
+  teacherName: string;
+  teacherSlug: string;
+  thumbnailUrl: string;
+  totalPurchases: number;
+  category: string;
+  fileCount: number;
+  isPurchased?: boolean;
+  views?: number;
+  ratingsCount?: number;
+};
 
 // ── Separate component so filter interactions don't re-render ShopScreen ──
 function FilterSidebarContent({
@@ -332,7 +352,7 @@ function FilterSidebarContent({
 
 const ShopScreen = () => {
   const { colorScheme } = useColorScheme();
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -414,6 +434,7 @@ const ShopScreen = () => {
         const data = await response.json();
         const payload = data.json || data;
         const productList = payload.products || payload.data?.products || [];
+        // console.log("Fetched products:", productList);
         const count =
           payload.totalCount || payload.data?.totalCount || productList.length;
 
