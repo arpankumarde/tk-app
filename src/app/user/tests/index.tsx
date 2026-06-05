@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StatusBar,
-  ActivityIndicator,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useColorScheme } from "nativewind";
+import BottomTabs from "@/components/BottomTabs";
+import Header from "@/components/Header";
 import { useAuth } from "@/context/AuthContext";
 import Feather from "@react-native-vector-icons/feather";
-import Header from "@/components/Header";
-import BottomTabs from "@/components/BottomTabs";
+import { useColorScheme } from "nativewind";
+import { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import EnrolledTestCard from "../_components/EnrolledTestCard";
 import { EnrolledTest } from "../types";
 
@@ -68,13 +68,17 @@ export default function EnrolledTestsScreen() {
           setTests(pageTests);
         }
 
-        const nextTotal = payload.total || (append ? total : pageTests.length);
-        setTotal(nextTotal);
+        setTotal((prevTotal) => {
+          const nextTotal =
+            payload.total || (append ? prevTotal : pageTests.length);
 
-        const hasNextByTotal = nextTotal
-          ? pageNum * PAGE_LIMIT < nextTotal
-          : pageTests.length === PAGE_LIMIT;
-        setHasMore(hasNextByTotal);
+          const hasNextByTotal = nextTotal
+            ? pageNum * PAGE_LIMIT < nextTotal
+            : pageTests.length === PAGE_LIMIT;
+          setHasMore(hasNextByTotal);
+
+          return nextTotal;
+        });
       } catch (error) {
         console.error("Error fetching enrolled tests:", error);
       } finally {
@@ -82,7 +86,7 @@ export default function EnrolledTestsScreen() {
         setLoadingMore(false);
       }
     },
-    [token, total],
+    [token],
   );
 
   useEffect(() => {
