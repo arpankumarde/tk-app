@@ -1,46 +1,30 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  ScrollView,
-  View,
-  StatusBar,
-  ActivityIndicator,
-  Text,
-  TouchableOpacity,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import BottomTabs from "@/components/BottomTabs";
+import FeaturedBannerCard from "@/components/FeaturedBannerCard";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
-import PopularMockTests from "@/components/PopularMockTests";
-import MockTestCard from "@/components/MockTestCard";
-import DigitalDownloadsSection from "@/components/DigitalDownloadsSection";
-import BottomTabs from "@/components/BottomTabs";
-import { router } from "expo-router";
-import Feather from "@react-native-vector-icons/feather";
+import HomeCarouselSection from "@/components/HomeCarouselSection";
+import NewOnCollection from "@/components/NewOnCollection";
 import { useColorScheme } from "nativewind";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
-
-interface Product {
-  category: string;
-  id: number;
-  pdfUrl: string;
-  price: number;
-  publishedAt: string;
-  rating: number | null;
-  slug: string;
-  teacherAvatar: string;
-  teacherIsVerified: boolean;
-  teacherName: string;
-  teacherSlug: string;
-  thumbnailUrl: string | null;
-  title: string;
-  totalPurchases: number;
-}
 
 const App = () => {
   const { colorScheme } = useColorScheme();
   const [tests, setTests] = useState<any[]>([]);
-  const [shopProducts, setShopProducts] = useState<Product[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [liveTests, setLiveTests] = useState<any[]>([]);
+  const [shopProducts, setShopProducts] = useState<any[]>([]);
+  const [newestMixed, setNewestMixed] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,9 +37,24 @@ const App = () => {
       const data = await response.json();
 
       const payload = data.json || data;
-      // console.log(payload.shopProducts);
+
       setTests(payload.tests || []);
-      setShopProducts(payload.shopProducts || []);
+      setCourses(payload.courses || []);
+      setLiveTests(
+        (payload.liveTests || []).map((liveTest: any) => ({
+          ...liveTest,
+          actualQuestionCount: liveTest.totalQuestions,
+        })),
+      );
+      setShopProducts(
+        (payload.shopProducts || []).map((product: any) => ({
+          ...product,
+          teacherAvatar: product.teacherAvatarUrl,
+          fileCount: product.pageCount,
+          ratingsCount: product.reviewsCount,
+        })),
+      );
+      setNewestMixed(payload.newestMixed || []);
     } catch (err: any) {
       console.error("Home fetch error:", err);
       setError(err.message);
@@ -67,6 +66,52 @@ const App = () => {
   useEffect(() => {
     fetchHomeData();
   }, [fetchHomeData]);
+
+  const featuredSlides = useMemo(() => {
+    type Slide =
+      | { kind: "test"; data: any }
+      | { kind: "course"; data: any }
+      | { kind: "liveTest"; data: any }
+      | { kind: "product"; data: any };
+
+    const groups: Slide[][] = [
+      tests.map((data) => ({ kind: "test" as const, data })),
+      courses.map((data) => ({ kind: "course" as const, data })),
+      liveTests.map((data) => ({ kind: "liveTest" as const, data })),
+      shopProducts.map((data) => ({ kind: "product" as const, data })),
+    ];
+
+    const maxLength = Math.max(0, ...groups.map((group) => group.length));
+    const combined: Slide[] = [];
+    for (let i = 0; i < maxLength; i++) {
+      for (const group of groups) {
+        if (group[i]) combined.push(group[i]);
+      }
+    }
+    return combined;
+  }, [tests, courses, liveTests, shopProducts]);
+
+  const newestByType = useMemo(() => {
+    const groups: Record<"test" | "course" | "liveTest", any[]> = {
+      test: [],
+      course: [],
+      liveTest: [],
+    };
+
+    for (const item of newestMixed) {
+      const type = item.type as "test" | "course" | "liveTest";
+      if (type === "test" || type === "course" || type === "liveTest") {
+        groups[type].push(item);
+      }
+    }
+
+    return groups;
+  }, [newestMixed]);
+
+  const hasNewOnTestkart =
+    newestByType.test.length > 0 ||
+    newestByType.course.length > 0 ||
+    newestByType.liveTest.length > 0;
 
   return (
     <SafeAreaView
@@ -104,35 +149,41 @@ const App = () => {
           </View>
         ) : (
           <>
-            <PopularMockTests />
-            <View className="pb-4">
-              {tests.length > 0 ? (
-                tests.map((test, index) => (
-                  <MockTestCard key={test.id || index} test={test} />
-                ))
-              ) : (
-                <View className="py-10 items-center">
-                  <Text className="text-slate-500">
-                    No mock tests available.
-                  </Text>
-                </View>
+            <HomeCarouselSection
+              data={featuredSlides}
+              keyExtractor={(slide, index) =>
+                `${slide.kind}-${slide.data.id ?? index}`
+              }
+              renderItem={(slide) => (
+                <FeaturedBannerCard kind={slide.kind} item={slide.data} />
               )}
+            />
 
-              <TouchableOpacity
-                className="mx-12 mb-10 bg-orange-100/50 dark:bg-orange-900/20 py-3 rounded-2xl items-center border border-orange-200 dark:border-orange-800/30 shadow-sm"
-                onPress={() => router.push("/tests")}
-              >
-                <View className="flex-row items-center">
-                  <Text className="text-primary font-black text-lg mr-2">
-                    Explore All Tests
-                  </Text>
-                  <Feather name="arrow-right" size={20} color="#FF8A50" />
+            {hasNewOnTestkart && (
+              <>
+                <View className="h-[1px] bg-gray-100 dark:bg-slate-800" />
+                <View className="bg-white dark:bg-slate-900 pb-4">
+                  <View className="px-6 pt-10 pb-5 items-center">
+                    <Text className="text-4xl font-black text-slate-800 dark:text-white mb-3 text-center">
+                      New on TestKart
+                    </Text>
+                    <Text className="text-base text-slate-500 dark:text-slate-400 leading-6 text-center">
+                      Freshly published tests, courses, and resources from our
+                      creators.
+                    </Text>
+                  </View>
+                  <NewOnCollection type="test" items={newestByType.test} />
+                  <NewOnCollection
+                    type="course"
+                    items={newestByType.course}
+                  />
+                  <NewOnCollection
+                    type="liveTest"
+                    items={newestByType.liveTest}
+                  />
                 </View>
-              </TouchableOpacity>
-            </View>
-
-            <View className="h-[1px] bg-gray-100 dark:bg-slate-800" />
-            <DigitalDownloadsSection products={shopProducts} />
+              </>
+            )}
           </>
         )}
         <View className="h-10" />
