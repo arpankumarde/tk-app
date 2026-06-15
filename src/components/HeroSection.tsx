@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import Feather from "@react-native-vector-icons/feather";
-import { useColorScheme } from "nativewind";
 import { router } from "expo-router";
+import { useColorScheme } from "nativewind";
+import { useState } from "react";
+import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
 const HeroSection = () => {
   const { colorScheme } = useColorScheme();
@@ -15,22 +15,18 @@ const HeroSection = () => {
   };
 
   return (
-    <View className="px-5 py-10 items-center bg-white dark:bg-slate-900">
-      <Text className="text-3xl font-extrabold text-[#333] dark:text-gray-100 text-center mb-4 leading-tight">
-        Find the Best Learning Materials
+    <View className="px-6 pt-6 pb-4 bg-white dark:bg-slate-900">
+      <Text className="text-4xl font-black text-slate-800 dark:text-white leading-[48px] mb-4">
+        Find the Best Materials
       </Text>
-      <Text className="text-base text-gray-500 dark:text-gray-400 text-center mb-8 leading-6 px-2">
+      <Text className="text-slate-500 dark:text-slate-400 text-lg font-medium mb-8 leading-6">
         Search for mock tests, courses, and study notes for your exam
         preparation.
       </Text>
 
-      <View className="w-full">
+      <View>
         <View className="flex-row items-center bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-full px-4 h-14 mb-4">
-          <Feather
-            name="search"
-            size={20}
-            color="#999"
-          />
+          <Feather name="search" size={20} color="#999" />
           <TextInput
             value={query}
             onChangeText={setQuery}
