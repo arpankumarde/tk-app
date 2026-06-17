@@ -1,11 +1,13 @@
+import AutoSlider from "@/components/AutoSlider";
 import BottomTabs from "@/components/BottomTabs";
-import FeaturedBannerCard from "@/components/FeaturedBannerCard";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
-import HomeCarouselSection from "@/components/HomeCarouselSection";
-import NewOnCollection from "@/components/NewOnCollection";
+import HomeContentCard from "@/components/HomeContentCard";
+import HomeRail from "@/components/HomeRail";
+import LiveSpotlightCard from "@/components/LiveSpotlightCard";
+import TeacherRailCard from "@/components/TeacherRailCard";
 import { useColorScheme } from "nativewind";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -20,11 +22,11 @@ const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
 const App = () => {
   const { colorScheme } = useColorScheme();
-  const [tests, setTests] = useState<any[]>([]);
-  const [courses, setCourses] = useState<any[]>([]);
-  const [liveTests, setLiveTests] = useState<any[]>([]);
-  const [shopProducts, setShopProducts] = useState<any[]>([]);
-  const [newestMixed, setNewestMixed] = useState<any[]>([]);
+  const [liveSpotlight, setLiveSpotlight] = useState<any[]>([]);
+  const [topMockTests, setTopMockTests] = useState<any[]>([]);
+  const [popularCourses, setPopularCourses] = useState<any[]>([]);
+  const [popularNotes, setPopularNotes] = useState<any[]>([]);
+  const [popularTeachers, setPopularTeachers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,23 +40,11 @@ const App = () => {
 
       const payload = data.json || data;
 
-      setTests(payload.tests || []);
-      setCourses(payload.courses || []);
-      setLiveTests(
-        (payload.liveTests || []).map((liveTest: any) => ({
-          ...liveTest,
-          actualQuestionCount: liveTest.totalQuestions,
-        })),
-      );
-      setShopProducts(
-        (payload.shopProducts || []).map((product: any) => ({
-          ...product,
-          teacherAvatar: product.teacherAvatarUrl,
-          fileCount: product.pageCount,
-          ratingsCount: product.reviewsCount,
-        })),
-      );
-      setNewestMixed(payload.newestMixed || []);
+      setLiveSpotlight(payload.liveTestSpotlight || []);
+      setTopMockTests(payload.topMockTests || []);
+      setPopularCourses(payload.popularCourses || []);
+      setPopularNotes(payload.popularNotes || []);
+      setPopularTeachers(payload.popularTeachers || []);
     } catch (err: any) {
       console.error("Home fetch error:", err);
       setError(err.message);
@@ -67,51 +57,12 @@ const App = () => {
     fetchHomeData();
   }, [fetchHomeData]);
 
-  const featuredSlides = useMemo(() => {
-    type Slide =
-      | { kind: "test"; data: any }
-      | { kind: "course"; data: any }
-      | { kind: "liveTest"; data: any }
-      | { kind: "product"; data: any };
-
-    const groups: Slide[][] = [
-      tests.map((data) => ({ kind: "test" as const, data })),
-      courses.map((data) => ({ kind: "course" as const, data })),
-      liveTests.map((data) => ({ kind: "liveTest" as const, data })),
-      shopProducts.map((data) => ({ kind: "product" as const, data })),
-    ];
-
-    const maxLength = Math.max(0, ...groups.map((group) => group.length));
-    const combined: Slide[] = [];
-    for (let i = 0; i < maxLength; i++) {
-      for (const group of groups) {
-        if (group[i]) combined.push(group[i]);
-      }
-    }
-    return combined;
-  }, [tests, courses, liveTests, shopProducts]);
-
-  const newestByType = useMemo(() => {
-    const groups: Record<"test" | "course" | "liveTest", any[]> = {
-      test: [],
-      course: [],
-      liveTest: [],
-    };
-
-    for (const item of newestMixed) {
-      const type = item.type as "test" | "course" | "liveTest";
-      if (type === "test" || type === "course" || type === "liveTest") {
-        groups[type].push(item);
-      }
-    }
-
-    return groups;
-  }, [newestMixed]);
-
-  const hasNewOnTestkart =
-    newestByType.test.length > 0 ||
-    newestByType.course.length > 0 ||
-    newestByType.liveTest.length > 0;
+  const hasContent =
+    liveSpotlight.length > 0 ||
+    topMockTests.length > 0 ||
+    popularCourses.length > 0 ||
+    popularNotes.length > 0 ||
+    popularTeachers.length > 0;
 
   return (
     <SafeAreaView
@@ -147,43 +98,70 @@ const App = () => {
               <Text className="text-white font-bold">Retry</Text>
             </TouchableOpacity>
           </View>
+        ) : !hasContent ? (
+          <View className="px-6 py-20 items-center">
+            <Text className="text-slate-400 dark:text-slate-500 font-medium text-center">
+              Nothing to show right now. Check back soon.
+            </Text>
+          </View>
         ) : (
           <>
-            <HomeCarouselSection
-              data={featuredSlides}
-              keyExtractor={(slide, index) =>
-                `${slide.kind}-${slide.data.id ?? index}`
-              }
-              renderItem={(slide) => (
-                <FeaturedBannerCard kind={slide.kind} item={slide.data} />
+            {liveSpotlight.length > 0 && (
+              <View className="bg-white dark:bg-slate-900 pt-6 pb-2">
+                <View className="flex-row items-center px-6 mb-4">
+                  <View className="w-2 h-2 rounded-full bg-red-500 mr-2" />
+                  <Text className="text-2xl font-black text-slate-800 dark:text-white">
+                    Live Test Spotlight
+                  </Text>
+                </View>
+                <AutoSlider
+                  data={liveSpotlight}
+                  keyExtractor={(item) => `live-${item.id}`}
+                  renderItem={(item) => <LiveSpotlightCard item={item} />}
+                />
+              </View>
+            )}
+
+            <View className="h-[1px] bg-gray-100 dark:bg-slate-800" />
+
+            <HomeRail
+              title="Top Mock Tests"
+              viewAllHref="/tests"
+              data={topMockTests}
+              keyExtractor={(item) => `test-${item.id}`}
+              renderItem={(item) => <HomeContentCard kind="test" item={item} />}
+            />
+
+            <View className="h-[1px] bg-gray-100 dark:bg-slate-800" />
+
+            <HomeRail
+              title="Popular Courses"
+              viewAllHref="/courses"
+              data={popularCourses}
+              keyExtractor={(item) => `course-${item.id}`}
+              renderItem={(item) => (
+                <HomeContentCard kind="course" item={item} />
               )}
             />
 
-            {hasNewOnTestkart && (
-              <>
-                <View className="h-[1px] bg-gray-100 dark:bg-slate-800" />
-                <View className="bg-white dark:bg-slate-900 pb-4">
-                  <View className="px-6 pt-10 pb-5 items-center">
-                    <Text className="text-4xl font-black text-slate-800 dark:text-white mb-3 text-center">
-                      New on TestKart
-                    </Text>
-                    <Text className="text-base text-slate-500 dark:text-slate-400 leading-6 text-center">
-                      Freshly published tests, courses, and resources from our
-                      creators.
-                    </Text>
-                  </View>
-                  <NewOnCollection type="test" items={newestByType.test} />
-                  <NewOnCollection
-                    type="course"
-                    items={newestByType.course}
-                  />
-                  <NewOnCollection
-                    type="liveTest"
-                    items={newestByType.liveTest}
-                  />
-                </View>
-              </>
-            )}
+            <View className="h-[1px] bg-gray-100 dark:bg-slate-800" />
+
+            <HomeRail
+              title="Popular Notes"
+              viewAllHref="/shop"
+              data={popularNotes}
+              keyExtractor={(item) => `note-${item.id}`}
+              renderItem={(item) => <HomeContentCard kind="note" item={item} />}
+            />
+
+            <View className="h-[1px] bg-gray-100 dark:bg-slate-800" />
+
+            <HomeRail
+              title="Popular Teachers"
+              data={popularTeachers}
+              keyExtractor={(item) => `teacher-${item.id}`}
+              renderItem={(item) => <TeacherRailCard teacher={item} />}
+            />
           </>
         )}
         <View className="h-10" />
