@@ -1,27 +1,29 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import Feather, {
+  type FeatherIconName,
+} from "@react-native-vector-icons/feather";
+import Ionicons from "@react-native-vector-icons/ionicons";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
-  StatusBar,
-  Modal,
   Alert,
   Animated,
   Dimensions,
+  Modal,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, router } from "expo-router";
-import Feather from "@react-native-vector-icons/feather";
-import Ionicons from "@react-native-vector-icons/ionicons";
 
+import PDFPreview from "@/components/PDFPreview";
+import { useAuth } from "@/context/AuthContext";
+import * as ScreenOrientation from "expo-screen-orientation";
+import { useVideoPlayer, VideoView } from "expo-video";
 import { useColorScheme } from "nativewind";
 import { WebView } from "react-native-webview";
-import { useVideoPlayer, VideoView } from "expo-video";
-import * as ScreenOrientation from "expo-screen-orientation";
-import { useAuth } from "@/context/AuthContext";
-import PDFPreview from "@/components/PDFPreview";
 
 interface CourseLesson {
   id: number;
@@ -181,6 +183,23 @@ const CourseLessons = () => {
         if (lessonsPayload.course) setCourse(lessonsPayload.course);
         if (lessonsPayload.sections) setSections(lessonsPayload.sections);
         if (progressPayload) setProgress(progressPayload);
+
+        // DEBUG: log every lesson's content URL returned by the lessons API
+        // console.log(
+        //   "[CourseContent] lessons loaded:",
+        //   JSON.stringify(
+        //     (lessonsPayload.sections || []).flatMap((s: CourseSection) =>
+        //       s.lessons.map((l) => ({
+        //         id: l.id,
+        //         title: l.title,
+        //         contentType: l.contentType,
+        //         contentUrl: l.contentUrl,
+        //       })),
+        //     ),
+        //     null,
+        //     2,
+        //   ),
+        // );
       } catch (err: any) {
         setError(err.message || "Failed to load course");
       } finally {
@@ -222,6 +241,16 @@ const CourseLessons = () => {
       );
       const data = await res.json();
       const payload = data.json || data;
+      // DEBUG: log the input video URL and the signed URL returned by the API
+      // console.log("[CourseContent] signed-video-url request:", {
+      //   lessonId,
+      //   courseId,
+      //   inputVideoUrl: videoUrl,
+      // });
+      // console.log(
+      //   "[CourseContent] signed-video-url returned:",
+      //   payload.signedUrl || null,
+      // );
       return payload.signedUrl || null;
     } catch (err) {
       console.error("Failed to fetch signed video URL:", err);
@@ -238,8 +267,24 @@ const CourseLessons = () => {
     setShowQuizResults(false);
     setSelectedLesson(lesson);
 
+    // DEBUG: log the lesson that was clicked and its raw content URL
+    // console.log("[CourseContent] lesson clicked:", {
+    //   id: lesson.id,
+    //   title: lesson.title,
+    //   contentType: lesson.contentType,
+    //   contentUrl: lesson.contentUrl,
+    // });
+
     if (lesson.contentType === "video") {
       if (lesson.contentUrl && isYouTubeUrl(lesson.contentUrl)) {
+        // console.log(
+        //   "[CourseContent] YouTube video URL (used directly):",
+        //   lesson.contentUrl,
+        // );
+        // console.log(
+        //   "[CourseContent] YouTube iframe embed URL:",
+        //   getYouTubeEmbedUrl(lesson.contentUrl),
+        // );
         setVideoUrl(lesson.contentUrl);
         return;
       }
@@ -415,7 +460,7 @@ const CourseLessons = () => {
   const getLessonIcon = (
     contentType: string,
     completed: boolean,
-  ): { name: keyof typeof Feather.glyphMap; color: string } => {
+  ): { name: FeatherIconName; color: string } => {
     if (completed) return { name: "check-circle", color: "#10b981" };
     switch (contentType) {
       case "video":
@@ -512,7 +557,9 @@ const CourseLessons = () => {
               </Text>
             </View>
             <View className="items-end">
-              <Text className={`font-black text-2xl ${(progress?.completionPercentage ?? 0) >= 100 ? "text-emerald-500" : "text-primary"}`}>
+              <Text
+                className={`font-black text-2xl ${(progress?.completionPercentage ?? 0) >= 100 ? "text-emerald-500" : "text-primary"}`}
+              >
                 {Math.round(progress?.completionPercentage ?? 0)}%
               </Text>
             </View>
