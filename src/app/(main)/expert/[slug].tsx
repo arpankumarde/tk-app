@@ -1,28 +1,27 @@
-import { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-  StatusBar,
-  Share,
-  Linking,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import type { LiveTest } from "@/app/(main)/live/index";
+import CourseCard from "@/components/CourseCard";
+import Header from "@/components/Header";
+import LiveTestCard from "@/components/LiveTestCard";
+import MockTestCard from "@/components/MockTestCard";
+import ProductCard from "@/components/ProductCard";
 import Feather from "@react-native-vector-icons/feather";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
-
-import { useColorScheme } from "nativewind";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import Header from "@/components/Header";
-import MockTestCard from "@/components/MockTestCard";
-import ProductCard from "@/components/ProductCard";
-import CourseCard from "@/components/CourseCard";
-import LiveTestCard from "@/components/LiveTestCard";
-import type { LiveTest } from "@/app/(main)/live/index";
+import { useColorScheme } from "nativewind";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Linking,
+  ScrollView,
+  Share,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -142,6 +141,7 @@ const ExpertDetails = () => {
   const [liveTestsCanonicalMap, setLiveTestsCanonicalMap] = useState<
     Record<number, Partial<LiveTest>>
   >({});
+  const [now] = useState(() => Date.now());
 
   useEffect(() => {
     const fetchExpertDetails = async () => {
@@ -296,9 +296,9 @@ const ExpertDetails = () => {
     const merged = { ...liveTest, ...canonical };
 
     const startTime =
-      merged.startTime || new Date(Date.now() + 60 * 60 * 1000).toISOString();
+      merged.startTime || new Date(now + 60 * 60 * 1000).toISOString();
     const endTime =
-      merged.endTime || new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+      merged.endTime || new Date(now + 2 * 60 * 60 * 1000).toISOString();
 
     return {
       id: merged.id,
@@ -477,8 +477,7 @@ const ExpertDetails = () => {
               marginHorizontal: 20,
               marginTop: 20,
               flexDirection: "row",
-              backgroundColor:
-                colorScheme === "dark" ? "#1e293b" : "#f1f5f9",
+              backgroundColor: colorScheme === "dark" ? "#1e293b" : "#f1f5f9",
               borderRadius: 16,
               padding: 4,
             }}
@@ -713,112 +712,112 @@ const ExpertDetails = () => {
 
           {/* ── Content Tabs ──────────────────────────── */}
           {mainTab === "content" && (
-          <View className="mt-4">
-            {/* Tab Bar */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}
-              className="mb-5"
-            >
-              {TABS.map((tab) => {
-                const isActive = activeTab === tab.key;
-                return (
-                  <TouchableOpacity
-                    key={tab.key}
-                    onPress={() => setActiveTab(tab.key)}
-                    className={`px-5 py-2.5 rounded-2xl border flex-row items-center ${
-                      isActive
-                        ? "bg-primary border-primary"
-                        : "bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700"
-                    }`}
-                  >
-                    <Text
-                      className={`font-black text-sm ${
+            <View className="mt-4">
+              {/* Tab Bar */}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}
+                className="mb-5"
+              >
+                {TABS.map((tab) => {
+                  const isActive = activeTab === tab.key;
+                  return (
+                    <TouchableOpacity
+                      key={tab.key}
+                      onPress={() => setActiveTab(tab.key)}
+                      className={`px-5 py-2.5 rounded-2xl border flex-row items-center ${
                         isActive
-                          ? "text-white"
-                          : "text-slate-600 dark:text-slate-300"
-                      }`}
-                    >
-                      {tab.label}
-                    </Text>
-                    <View
-                      className={`ml-2 px-1.5 py-0.5 rounded-lg ${
-                        isActive
-                          ? "bg-white/20"
-                          : "bg-orange-50 dark:bg-orange-900/20"
+                          ? "bg-primary border-primary"
+                          : "bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700"
                       }`}
                     >
                       <Text
-                        className={`text-[10px] font-black ${isActive ? "text-white" : "text-primary"}`}
+                        className={`font-black text-sm ${
+                          isActive
+                            ? "text-white"
+                            : "text-slate-600 dark:text-slate-300"
+                        }`}
                       >
-                        {tabCounts[tab.key]}
+                        {tab.label}
                       </Text>
+                      <View
+                        className={`ml-2 px-1.5 py-0.5 rounded-lg ${
+                          isActive
+                            ? "bg-white/20"
+                            : "bg-orange-50 dark:bg-orange-900/20"
+                        }`}
+                      >
+                        <Text
+                          className={`text-[10px] font-black ${isActive ? "text-white" : "text-primary"}`}
+                        >
+                          {tabCounts[tab.key]}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+
+              {/* Tab Content */}
+              {activeTab === "tests" && (
+                <View>
+                  {tests?.length > 0 ? (
+                    tests.map((test) => (
+                      <MockTestCard key={test.id} test={test as any} />
+                    ))
+                  ) : (
+                    <EmptyState label="No mock tests yet" />
+                  )}
+                </View>
+              )}
+
+              {activeTab === "liveTests" && (
+                <View>
+                  {liveTests?.length > 0 ? (
+                    <View className="px-5">
+                      {liveTests.map((test) => (
+                        <LiveTestCard
+                          key={test.id}
+                          test={mapToLiveCardTest(test)}
+                          colorScheme={colorScheme}
+                        />
+                      ))}
                     </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
+                  ) : (
+                    <EmptyState label="No live tests yet" />
+                  )}
+                </View>
+              )}
 
-            {/* Tab Content */}
-            {activeTab === "tests" && (
-              <View>
-                {tests?.length > 0 ? (
-                  tests.map((test) => (
-                    <MockTestCard key={test.id} test={test as any} />
-                  ))
-                ) : (
-                  <EmptyState label="No mock tests yet" />
-                )}
-              </View>
-            )}
-
-            {activeTab === "liveTests" && (
-              <View>
-                {liveTests?.length > 0 ? (
-                  <View className="px-5">
-                    {liveTests.map((test) => (
-                      <LiveTestCard
-                        key={test.id}
-                        test={mapToLiveCardTest(test)}
-                        colorScheme={colorScheme}
+              {activeTab === "products" && (
+                <View>
+                  {products?.length > 0 ? (
+                    products.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product as any}
+                        className="mx-5 mb-5"
                       />
-                    ))}
-                  </View>
-                ) : (
-                  <EmptyState label="No live tests yet" />
-                )}
-              </View>
-            )}
+                    ))
+                  ) : (
+                    <EmptyState label="No study notes yet" />
+                  )}
+                </View>
+              )}
 
-            {activeTab === "products" && (
-              <View>
-                {products?.length > 0 ? (
-                  products.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product as any}
-                      className="mx-5 mb-5"
-                    />
-                  ))
-                ) : (
-                  <EmptyState label="No study notes yet" />
-                )}
-              </View>
-            )}
-
-            {activeTab === "courses" && (
-              <View className="px-5">
-                {courses?.length > 0 ? (
-                  courses.map((course) => (
-                    <CourseCard key={course.id} course={course} />
-                  ))
-                ) : (
-                  <EmptyState label="No courses yet" />
-                )}
-              </View>
-            )}
-          </View>
+              {activeTab === "courses" && (
+                <View className="px-5">
+                  {courses?.length > 0 ? (
+                    courses.map((course) => (
+                      <CourseCard key={course.id} course={course} />
+                    ))
+                  ) : (
+                    <EmptyState label="No courses yet" />
+                  )}
+                </View>
+              )}
+            </View>
           )}
         </ScrollView>
       </SafeAreaView>
