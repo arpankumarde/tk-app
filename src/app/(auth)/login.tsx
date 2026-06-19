@@ -1,24 +1,22 @@
-import { useEffect, useState } from "react";
+import Header from "@/components/Header";
+import { useAuth } from "@/context/AuthContext";
+import { useGoogleAuth } from "@/hooks/useGoogleAuth";
 import Ionicons from "@react-native-vector-icons/ionicons";
+import { Link, router } from "expo-router";
+import { useColorScheme } from "nativewind";
+import { useEffect, useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  Alert,
-  ActivityIndicator,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import Header from "@/components/Header";
-import { useColorScheme } from "nativewind";
-import { Link, router } from "expo-router";
-import { useGoogleAuth } from "@/hooks/useGoogleAuth";
-import { useAuth } from "@/context/AuthContext";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -54,7 +52,10 @@ const Login = () => {
   const handleSendOtp = async () => {
     const trimmed = mobileNumber.trim();
     if (trimmed.length !== 10) {
-      Alert.alert("Invalid number", "Please enter a valid 10-digit mobile number.");
+      Alert.alert(
+        "Invalid number",
+        "Please enter a valid 10-digit mobile number.",
+      );
       return;
     }
     setOtpLoading(true);
@@ -67,7 +68,9 @@ const Login = () => {
       const data = await res.json();
       const result = data.json || data;
       if (result.error) {
-        const msg = Array.isArray(result.error) ? result.error.map((e: any) => e.message ?? e).join("\n") : String(result.error);
+        const msg = Array.isArray(result.error)
+          ? result.error.map((e: any) => e.message ?? e).join("\n")
+          : String(result.error);
         Alert.alert("Error", msg);
       } else {
         setOtpSent(true);
@@ -90,19 +93,26 @@ const Login = () => {
       const res = await fetch(`${BASE_URL}/_api/auth/mobile-login/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ json: {
-          mobileNumber: mobileNumber.trim(),
-          otpCode: otp.trim(),
-          role: "user",
-        } }),
+        body: JSON.stringify({
+          json: {
+            mobileNumber: mobileNumber.trim(),
+            otpCode: otp.trim(),
+            role: "user",
+          },
+        }),
       });
       const data = await res.json();
       const result = data.json || data;
       if (result.error) {
-        const msg = Array.isArray(result.error) ? result.error.map((e: any) => e.message ?? e).join("\n") : String(result.error);
+        const msg = Array.isArray(result.error)
+          ? result.error.map((e: any) => e.message ?? e).join("\n")
+          : String(result.error);
         Alert.alert("Verification failed", msg);
       } else if (result.user) {
-        const token = result.token || res.headers.get("x-auth-token") || res.headers.get("authorization");
+        const token =
+          result.token ||
+          res.headers.get("x-auth-token") ||
+          res.headers.get("authorization");
         if (token) {
           await setAuth(result.user, token);
           router.push("/user");
@@ -135,15 +145,15 @@ const Login = () => {
           className="px-6 py-10"
           showsVerticalScrollIndicator={false}
         >
-        <View className="items-center mb-10">
-          <View className="w-12 h-1 bg-orange-500 rounded-full mb-4" />
-          <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2 text-center uppercase tracking-tight">
-            Student Login
-          </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold text-center px-10">
-            Log in with Google or mobile OTP to access your account
-          </Text>
-        </View>
+          <View className="items-center mb-10">
+            <View className="w-12 h-1 bg-orange-500 rounded-full mb-4" />
+            <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2 text-center uppercase tracking-tight">
+              Student Login
+            </Text>
+            <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold text-center px-10">
+              Log in with Google or mobile OTP to access your account
+            </Text>
+          </View>
 
           {/* Google Login */}
           <TouchableOpacity
@@ -152,7 +162,9 @@ const Login = () => {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color={colorScheme === "dark" ? "#fff" : "#000"} />
+              <ActivityIndicator
+                color={colorScheme === "dark" ? "#fff" : "#000"}
+              />
             ) : (
               <>
                 <Ionicons
@@ -170,7 +182,9 @@ const Login = () => {
           {/* Divider */}
           <View className="flex-row items-center mb-8">
             <View className="flex-1 h-[1px] bg-gray-100 dark:bg-slate-800" />
-            <Text className="px-4 text-gray-400 font-bold uppercase tracking-widest text-[10px]">OR</Text>
+            <Text className="px-4 text-gray-400 font-bold uppercase tracking-widest text-[10px]">
+              OR
+            </Text>
             <View className="flex-1 h-[1px] bg-gray-100 dark:bg-slate-800" />
           </View>
 
@@ -231,7 +245,7 @@ const Login = () => {
               </Text>
             )}
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             onPress={() => router.push("/(main)" as any)}
             className="h-10 items-center justify-center mb-6"
