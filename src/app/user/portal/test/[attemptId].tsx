@@ -1,3 +1,9 @@
+import ScientificCalculator from "@/components/ScientificCalculator";
+import { useAuth } from "@/context/AuthContext";
+import Feather from "@react-native-vector-icons/feather";
+import Ionicons from "@react-native-vector-icons/ionicons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useColorScheme } from "nativewind";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -15,23 +21,16 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import Feather from "@react-native-vector-icons/feather";
-import Ionicons from "@react-native-vector-icons/ionicons";
-
-import { useColorScheme } from "nativewind";
 import { WebView } from "react-native-webview";
-import { useAuth } from "@/context/AuthContext";
 import {
-  LatestAttemptResultsResponse,
   LatestAttemptResultsPayload,
+  LatestAttemptResultsResponse,
   OptionLetter,
   Question,
   StudentAnswer,
   SubmitAttemptRequest,
   SubmitAttemptResponse,
 } from "../../types";
-import ScientificCalculator from "@/components/ScientificCalculator";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 const DEFAULT_DURATION_MINUTES = 30;
@@ -298,14 +297,18 @@ const TestAttemptScreen = () => {
     });
   }, [startedAtRaw]);
 
+  // Fallback for attempts the API did not stamp with a start time: the attempt
+  // effectively began when this screen opened.
+  const [portalOpenedAt] = useState(() => Date.now());
+
   const attemptStartTime = useMemo(() => {
     if (!startedAtRaw) {
-      return Date.now();
+      return portalOpenedAt;
     }
 
     const parsed = new Date(startedAtRaw).getTime();
-    return Number.isNaN(parsed) ? Date.now() : parsed;
-  }, [startedAtRaw]);
+    return Number.isNaN(parsed) ? portalOpenedAt : parsed;
+  }, [startedAtRaw, portalOpenedAt]);
 
   const fetchQuestions = useCallback(async () => {
     if (!token || !testItemNumericId || Number.isNaN(testItemNumericId)) {
@@ -1158,11 +1161,7 @@ const TestAttemptScreen = () => {
                     onPress={() => setIsCalculatorVisible(true)}
                     className="h-12 w-12 bg-orange-500 rounded-full items-center justify-center shadow-lg shadow-orange-500/30"
                   >
-                    <Ionicons
-                      name="calculator"
-                      size={24}
-                      color="white"
-                    />
+                    <Ionicons name="calculator" size={24} color="white" />
                   </TouchableOpacity>
                 )}
 
