@@ -1,30 +1,30 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  Alert,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-  StatusBar,
-  Share,
-  Modal,
-  Linking,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import BlinkingDot from "@/components/BlinkingDot";
+import Header from "@/components/Header";
+import Placeholder from "@/constants/placeholder";
+import { useAuth } from "@/context/AuthContext";
+import { useBuildShareUrl } from "@/hooks/useBuildShareUrl";
+import { useCountdown } from "@/hooks/useCountdown";
+import { useNow } from "@/hooks/useNow";
 import Feather from "@react-native-vector-icons/feather";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
-
-import { useColorScheme } from "nativewind";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useColorScheme } from "nativewind";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Linking,
+  Modal,
+  ScrollView,
+  Share,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
-import { useAuth } from "@/context/AuthContext";
-import Placeholder from "@/constants/placeholder";
-import { useCountdown } from "@/hooks/useCountdown";
-import Header from "@/components/Header";
-import BlinkingDot from "@/components/BlinkingDot";
-import { useBuildShareUrl } from "@/hooks/useBuildShareUrl";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -217,12 +217,13 @@ const LiveTestDetails = () => {
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const buildShareUrl = useBuildShareUrl();
 
+  const now = useNow();
+
   const isLive =
     liveTest &&
-    new Date(liveTest.startTime) <= new Date() &&
-    new Date(liveTest.endTime) >= new Date();
+    new Date(liveTest.startTime).getTime() <= now &&
+    new Date(liveTest.endTime).getTime() >= now;
 
-  const now = Date.now();
   const hasDeadline =
     liveTest?.registrationDeadline &&
     new Date(liveTest.registrationDeadline).getTime() > now;
@@ -502,7 +503,7 @@ const LiveTestDetails = () => {
     );
   }
 
-  const isTestEnded = new Date(liveTest.endTime) < new Date();
+  const isTestEnded = new Date(liveTest.endTime).getTime() < now;
 
   const seatsPercentage =
     liveTest.maxSeats > 0
@@ -1210,7 +1211,7 @@ const LiveTestDetails = () => {
             </TouchableOpacity>
           ) : liveTest.isEnrolled &&
             (!liveTest.startTime ||
-              new Date(liveTest.startTime) <= new Date()) &&
+              new Date(liveTest.startTime).getTime() <= now) &&
             !isTestEnded ? (
             <TouchableOpacity
               onPress={() =>
@@ -1310,7 +1311,7 @@ const LiveTestDetails = () => {
                   </Text>
                   {!liveTest.hasAttempted &&
                   (!liveTest.startTime ||
-                    new Date(liveTest.startTime) <= new Date()) &&
+                    new Date(liveTest.startTime).getTime() <= now) &&
                   !isTestEnded ? (
                     <>
                       <TouchableOpacity
