@@ -1,13 +1,12 @@
-import React from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import type { LiveTest } from "@/app/(main)/live/index";
+import BlinkingDot from "@/components/BlinkingDot";
+import Placeholder from "@/constants/placeholder";
+import { useCountdown } from "@/hooks/useCountdown";
+import { useNow } from "@/hooks/useNow";
 import Feather from "@react-native-vector-icons/feather";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
-
 import { router } from "expo-router";
-import { useCountdown } from "@/hooks/useCountdown";
-import BlinkingDot from "@/components/BlinkingDot";
-import type { LiveTest } from "@/app/(main)/live/index";
-import Placeholder from "@/constants/placeholder";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 const LiveTestCard = ({
   test,
@@ -17,7 +16,7 @@ const LiveTestCard = ({
   colorScheme: "light" | "dark" | undefined;
 }) => {
   const normalizedStatus = test.status?.trim().toLowerCase() || "";
-  const now = Date.now();
+  const now = useNow();
   const startTimeMs = new Date(test.startTime).getTime();
   const endTimeMs = new Date(test.endTime).getTime();
 
@@ -33,7 +32,7 @@ const LiveTestCard = ({
 
   const isDeadlineActive =
     test.registrationDeadline &&
-    new Date(test.registrationDeadline).getTime() > Date.now();
+    new Date(test.registrationDeadline).getTime() > now;
 
   const countdownTarget = isDeadlineActive
     ? test.registrationDeadline
