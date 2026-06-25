@@ -22,13 +22,11 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 import EnrolledCourseCard from "./_components/EnrolledCourseCard";
 import EnrolledTestCard from "./_components/EnrolledTestCard";
 import PurchasedProductCard from "./_components/PurchasedProductCard";
 import { useEnrolledCourses } from "./_hooks/useEnrolledCourses";
 import { useEnrolledTests } from "./_hooks/useEnrolledTests";
-
 import { usePurchasedProducts } from "./_hooks/usePurchasedProducts";
 
 const version =
@@ -43,7 +41,7 @@ const buildNumber =
   "—";
 
 export default function ProfileScreen() {
-  const { user, token, logout } = useAuth();
+  const { user, token, loading: authLoading, logout } = useAuth();
   const { colorScheme } = useColorScheme();
 
   const {
@@ -65,10 +63,10 @@ export default function ProfileScreen() {
   } = usePurchasedProducts(token, { limit: 5 });
 
   useEffect(() => {
-    if (!user) {
-      router.push("/login");
+    if (!authLoading && !user) {
+      router.replace("/login");
     }
-  }, [user]);
+  }, [authLoading, user]);
 
   if (!user) return null;
 
@@ -87,7 +85,6 @@ export default function ProfileScreen() {
           onPress: async () => {
             try {
               await logout();
-              router.push("/login");
             } catch (error) {
               console.error("Logout error:", error);
               Alert.alert("Error", "Failed to logout. Please try again.");

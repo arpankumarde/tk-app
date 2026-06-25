@@ -33,7 +33,7 @@ const Signup = () => {
 
   useEffect(() => {
     if (user) {
-      router.push("/user");
+      router.replace("/user");
     }
   }, [user]);
 
@@ -41,7 +41,6 @@ const Signup = () => {
     setLoading(true);
     try {
       await signInWithGoogle();
-      router.push("/user");
     } catch (err) {
       console.error("[SignupScreen] signInWithGoogle threw:", err);
       Alert.alert("Sign-up failed", "Please try again.");
@@ -126,7 +125,6 @@ const Signup = () => {
           res.headers.get("authorization");
         if (token) {
           await setAuth(result.user, token);
-          router.push("/user");
         } else {
           Alert.alert(
             "Error",

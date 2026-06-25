@@ -23,7 +23,13 @@ import MobileVerification from "./_components/MobileVerification";
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
 export default function ProfileEditScreen() {
-  const { user, token, setAuth, refreshSession } = useAuth();
+  const {
+    user,
+    token,
+    loading: authLoading,
+    setAuth,
+    refreshSession,
+  } = useAuth();
   const { colorScheme } = useColorScheme();
 
   const [displayName, setDisplayName] = useState(user?.displayName || "");
@@ -31,10 +37,10 @@ export default function ProfileEditScreen() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      router.push("/login");
+    if (!authLoading && !user) {
+      router.replace("/login");
     }
-  }, [user]);
+  }, [authLoading, user]);
 
   // Pull fresh account data from the server whenever the screen is opened.
   useEffect(() => {
