@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import { useAuth } from "@/context/AuthContext";
 import Feather from "@react-native-vector-icons/feather";
+import * as Application from "expo-application";
 import { router } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useEffect, useState } from "react";
@@ -9,6 +10,7 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   ScrollView,
   StatusBar,
@@ -20,7 +22,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import MobileVerification from "./_components/MobileVerification";
 
-const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL ?? "https://testkart.in";
+const CLOSE_ACCOUNT_URL = `${BASE_URL}/close-account`;
 
 export default function ProfileEditScreen() {
   const {
@@ -115,6 +118,40 @@ export default function ProfileEditScreen() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleCloseAccount = () => {
+    const source = Application.applicationId ?? "testkart";
+    const params = [
+      `utm_source=${encodeURIComponent(source)}`,
+      "utm_medium=app",
+      "utm_campaign=close_account",
+      "utm_content=profile_settings",
+    ];
+    if (token) params.push(`token=${encodeURIComponent(token)}`);
+    const url = `${CLOSE_ACCOUNT_URL}?${params.join("&")}`;
+
+    Alert.alert(
+      "Close Account",
+      "You'll be taken to the Testkart website to permanently close your account. This cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Continue",
+          style: "destructive",
+          onPress: () => {
+            Linking.openURL(url).catch(() => {
+              Alert.alert(
+                "Error",
+                "Couldn't open the browser. Please visit " +
+                  CLOSE_ACCOUNT_URL +
+                  " manually.",
+              );
+            });
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -288,6 +325,28 @@ export default function ProfileEditScreen() {
                 </View>
               )}
             </View>
+
+            {/* Close Account */}
+            <Text className="text-lg font-black text-slate-800 dark:text-white mb-4">
+              Danger Zone
+            </Text>
+
+            <TouchableOpacity
+              onPress={handleCloseAccount}
+              className="flex-row items-center bg-red-50 dark:bg-red-950/10 rounded-2xl border border-red-100 dark:border-red-900/20 p-5"
+            >
+              <View className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/20 items-center justify-center mr-4">
+                <Feather name="user-x" size={18} color="#EF4444" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-red-500 font-black text-[15px]">
+                  Close Account
+                </Text>
+                <Text className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Permanently delete your account and data on the web.
+                </Text>
+              </View>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
