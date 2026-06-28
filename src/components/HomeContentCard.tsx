@@ -60,6 +60,7 @@ const HomeContentCard = ({
   item: HomeContentItem;
 }) => {
   const meta = KIND_META[kind];
+  const showThumbnail = kind !== "note";
   const hasDiscount =
     typeof item.discountPrice === "number" && item.discountPrice < item.price;
   const actualPrice = hasDiscount ? (item.discountPrice as number) : item.price;
@@ -77,35 +78,59 @@ const HomeContentCard = ({
       activeOpacity={0.9}
       className="w-[172px] bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-700/50 shadow-sm shadow-slate-200/60 dark:shadow-none"
     >
-      <View className="w-full aspect-[4/3] bg-slate-100 dark:bg-slate-900 relative">
-        <Image
-          source={{ uri: item.thumbnailUrl || meta.placeholder }}
-          className="w-full h-full"
-          resizeMode="cover"
-        />
+      {showThumbnail && (
+        <View className="w-full aspect-[4/3] bg-slate-100 dark:bg-slate-900 relative">
+          <Image
+            source={{ uri: item.thumbnailUrl || meta.placeholder }}
+            className="w-full h-full"
+            resizeMode="cover"
+          />
 
-        {discountPercent !== null && (
-          <View className="absolute top-2 left-2 bg-emerald-500 px-2 py-0.5 rounded-full">
-            <Text className="text-white text-[9px] font-black">
-              {discountPercent}% OFF
-            </Text>
-          </View>
-        )}
-
-        <View className="absolute top-2 right-2 bg-white/95 dark:bg-slate-900/90 px-2 py-1 rounded-full">
-          {isFree ? (
-            <Text className="text-emerald-500 text-[10px] font-black">
-              FREE
-            </Text>
-          ) : (
-            <Text className="text-slate-800 dark:text-white text-[10px] font-black">
-              ₹{formatInr(actualPrice)}
-            </Text>
+          {discountPercent !== null && (
+            <View className="absolute top-2 left-2 bg-emerald-500 px-2 py-0.5 rounded-full">
+              <Text className="text-white text-[9px] font-black">
+                {discountPercent}% OFF
+              </Text>
+            </View>
           )}
+
+          <View className="absolute top-2 right-2 bg-white/95 dark:bg-slate-900/90 px-2 py-1 rounded-full">
+            {isFree ? (
+              <Text className="text-emerald-500 text-[10px] font-black">
+                FREE
+              </Text>
+            ) : (
+              <Text className="text-slate-800 dark:text-white text-[10px] font-black">
+                ₹{formatInr(actualPrice)}
+              </Text>
+            )}
+          </View>
         </View>
-      </View>
+      )}
 
       <View className="p-3">
+        {!showThumbnail && (
+          <View className="flex-row items-center justify-between mb-2">
+            {discountPercent !== null ? (
+              <View className="bg-emerald-500 px-2 py-0.5 rounded-full">
+                <Text className="text-white text-[9px] font-black">
+                  {discountPercent}% OFF
+                </Text>
+              </View>
+            ) : (
+              <View />
+            )}
+            {isFree ? (
+              <Text className="text-emerald-500 text-[10px] font-black">
+                FREE
+              </Text>
+            ) : (
+              <Text className="text-slate-800 dark:text-white text-[10px] font-black">
+                ₹{formatInr(actualPrice)}
+              </Text>
+            )}
+          </View>
+        )}
         {showExam && (
           <Text
             className="text-primary text-[9px] font-black uppercase tracking-widest mb-1"

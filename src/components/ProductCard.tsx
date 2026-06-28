@@ -37,12 +37,14 @@ interface ProductCardProps {
   };
   className?: string;
   style?: any;
+  showThumbnail?: boolean;
 }
 
 const ProductCard = ({
   product: initialProduct,
   className = "",
   style = {},
+  showThumbnail = true,
 }: ProductCardProps) => {
   const { user, token } = useAuth();
   const router = useRouter();
@@ -135,24 +137,35 @@ const ProductCard = ({
         activeOpacity={0.9}
         className={`bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700 ${className}`}
       >
-        {/* Category Badge */}
-        <View className="absolute top-3 left-3 z-10 px-3 py-1.5 bg-slate-900/90 rounded-full shadow-sm">
-          <Text className="text-white text-[10px] font-black uppercase tracking-widest">
-            {displayCategory}
-          </Text>
-        </View>
+        {showThumbnail && (
+          <>
+            {/* Category Badge */}
+            <View className="absolute top-3 left-3 z-10 px-3 py-1.5 bg-slate-900/90 rounded-full shadow-sm">
+              <Text className="text-white text-[10px] font-black uppercase tracking-widest">
+                {displayCategory}
+              </Text>
+            </View>
 
-        {/* Product Image */}
-        <View className="w-full bg-slate-50 dark:bg-slate-900/5 border-b border-slate-100 dark:border-slate-800">
-          <Image
-            source={{ uri: displayImage }}
-            className="w-full aspect-video"
-            resizeMode="cover"
-          />
-        </View>
+            {/* Product Image */}
+            <View className="w-full bg-slate-50 dark:bg-slate-900/5 border-b border-slate-100 dark:border-slate-800">
+              <Image
+                source={{ uri: displayImage }}
+                className="w-full aspect-video"
+                resizeMode="cover"
+              />
+            </View>
+          </>
+        )}
 
         <View className="p-5 flex-1">
           <View className="flex-1">
+            {!showThumbnail && (
+              <View className="self-start px-3 py-1.5 bg-slate-900/90 dark:bg-slate-700 rounded-full mb-3">
+                <Text className="text-white text-[10px] font-black uppercase tracking-widest">
+                  {displayCategory}
+                </Text>
+              </View>
+            )}
             <Text
               className="text-xl font-bold text-slate-800 dark:text-white mb-1.5 leading-tight"
               numberOfLines={2}

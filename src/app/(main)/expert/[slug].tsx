@@ -798,6 +798,7 @@ const ExpertDetails = () => {
                         key={product.id}
                         product={product as any}
                         className="mx-5 mb-5"
+                        showThumbnail={false}
                       />
                     ))
                   ) : (

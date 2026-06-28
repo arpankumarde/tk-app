@@ -584,6 +584,7 @@ const ShopScreen = () => {
                   key={product.slug || index}
                   product={product}
                   className="mb-8"
+                  showThumbnail={false}
                 />
               ))
             ) : (
