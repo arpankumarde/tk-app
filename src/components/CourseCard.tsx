@@ -102,7 +102,6 @@ const CourseCard = ({ course: initialCourse }: CourseCardProps) => {
 
   const displayLevel =
     course.level || (course as any).difficulty || "All Levels";
-  const displayStudents = course.enrollmentCount ?? course.totalEnrolled ?? 0;
 
   return (
     <View>
@@ -169,23 +168,11 @@ const CourseCard = ({ course: initialCourse }: CourseCardProps) => {
           </View>
 
           {/* Stats Linear */}
-          <View className="flex-row items-center justify-between mb-6 pb-5 border-b border-gray-50 dark:border-slate-700/50">
-            <View className="flex-row items-center">
-              <Feather name="users" size={12} color="#FF8A50" />
-              <Text className="ml-1.5 text-[11px] font-bold text-slate-600 dark:text-slate-300">
-                {displayStudents} {displayStudents <= 1 ? "Student" : "Students"}
-              </Text>
-            </View>
+          <View className="flex-row items-center mb-6 pb-5 border-b border-gray-50 dark:border-slate-700/50">
             <View className="flex-row items-center">
               <Feather name="eye" size={12} color="#FF8A50" />
               <Text className="ml-1.5 text-[11px] font-bold text-slate-600 dark:text-slate-300">
                 {course.views || 0} Views
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Feather name="globe" size={12} color="#FF8A50" />
-              <Text className="ml-1.5 text-[11px] font-bold text-slate-600 dark:text-slate-300">
-                {course.language || "English"}
               </Text>
             </View>
           </View>

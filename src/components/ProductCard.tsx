@@ -215,12 +215,6 @@ const ProductCard = ({
               <View className="flex-row items-center">
                 <Feather name="shopping-bag" size={13} color="#94a3b8" />
                 <Text className="text-slate-400 dark:text-slate-500 text-[11px] font-bold ml-1.5">
-                  {product.totalPurchases || 0} Purchases
-                </Text>
-              </View>
-              <View className="flex-row items-center">
-                <Feather name="shopping-bag" size={13} color="#94a3b8" />
-                <Text className="text-slate-400 dark:text-slate-500 text-[11px] font-bold ml-1.5">
                   {product.fileCount || 1}{" "}
                   {product.fileCount === 1 ? "File" : "Files"}
                 </Text>

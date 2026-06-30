@@ -435,20 +435,6 @@ const TestDetails = () => {
 
               <View className="w-1/2 flex-row items-center">
                 <View className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900/50 items-center justify-center mr-3">
-                  <Feather name="users" size={16} color="#FF8A50" />
-                </View>
-                <View>
-                  <Text className="text-slate-800 dark:text-white font-black text-sm">
-                    {test.studentsEnrolled || 0}
-                  </Text>
-                  <Text className="text-slate-400 text-[10px] font-bold">
-                    Students
-                  </Text>
-                </View>
-              </View>
-
-              <View className="w-1/2 flex-row items-center">
-                <View className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900/50 items-center justify-center mr-3">
                   <Feather name="globe" size={16} color="#FF8A50" />
                 </View>
                 <View>

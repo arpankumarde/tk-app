@@ -194,11 +194,6 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
                     {displaySubject}
                   </Text>
                 </View>
-                <View className="bg-cyan-50 dark:bg-cyan-950/20 px-3 py-1.5 rounded-full border border-cyan-100/50 dark:border-cyan-800/40 mr-2 mb-1">
-                  <Text className="text-cyan-600 dark:text-cyan-400 font-black text-[10px] uppercase tracking-widest">
-                    {test.language?.trim() || "ENGLISH"}
-                  </Text>
-                </View>
               </View>
               <View className="flex-row items-center mb-1">
                 <Feather name="eye" size={12} color="#94a3b8" />
@@ -259,13 +254,6 @@ const MockTestCard = ({ test: initialTest }: MockTestCardProps) => {
                 <Feather name="clock" size={14} color="#F97316" />
                 <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">
                   {test.durationMinutes || 0} Minutes
-                </Text>
-              </View>
-
-              <View className="w-1/2 flex-row items-center">
-                <Feather name="users" size={14} color="#F97316" />
-                <Text className="ml-2 text-xs font-bold text-slate-600 dark:text-slate-300">
-                  {test.studentsEnrolled || 0} Enrolled
                 </Text>
               </View>
 
