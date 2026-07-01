@@ -13,12 +13,14 @@ interface HomeContentItem {
   price: number;
   discountPrice?: number | null;
   rating?: number | null;
+  ratingsCount?: number;
   thumbnailUrl?: string | null;
   teacherName?: string;
   teacherIsVerified?: boolean;
   examName?: string | null;
   studentsEnrolled?: number;
   totalPurchases?: number;
+  views?: number;
 }
 
 const KIND_META: Record<
@@ -33,8 +35,11 @@ const KIND_META: Record<
   course: {
     placeholder: Placeholder.COURSE,
     href: (item) => `/course/${item.slug}`,
-    statIcon: "users",
-    stat: (item) => `${item.studentsEnrolled ?? 0} enrolled`,
+    statIcon: "eye",
+    stat: (item) => {
+      const views = item.views ?? 0;
+      return `${views} ${views === 1 ? "View" : "Views"}`;
+    },
   },
   test: {
     placeholder: Placeholder.TEST,
@@ -61,6 +66,7 @@ const HomeContentCard = ({
 }) => {
   const meta = KIND_META[kind];
   const showThumbnail = kind !== "note";
+  const isCourse = kind === "course";
   const hasDiscount =
     typeof item.discountPrice === "number" && item.discountPrice < item.price;
   const actualPrice = hasDiscount ? (item.discountPrice as number) : item.price;
@@ -71,6 +77,13 @@ const HomeContentCard = ({
       : null;
   const showExam =
     kind === "test" && !!item.examName && item.examName !== "Unspecified";
+  const hasRatings = (item.ratingsCount ?? 0) > 0;
+  const ratingDisplay =
+    typeof item.rating === "number"
+      ? Number.isInteger(item.rating)
+        ? String(item.rating)
+        : item.rating.toFixed(1)
+      : null;
 
   return (
     <TouchableOpacity
@@ -94,17 +107,19 @@ const HomeContentCard = ({
             </View>
           )}
 
-          <View className="absolute top-2 right-2 bg-white/95 dark:bg-slate-900/90 px-2 py-1 rounded-full">
-            {isFree ? (
-              <Text className="text-emerald-500 text-[10px] font-black">
-                FREE
-              </Text>
-            ) : (
-              <Text className="text-slate-800 dark:text-white text-[10px] font-black">
-                ₹{formatInr(actualPrice)}
-              </Text>
-            )}
-          </View>
+          {!isCourse && (
+            <View className="absolute top-2 right-2 bg-white/95 dark:bg-slate-900/90 px-2 py-1 rounded-full">
+              {isFree ? (
+                <Text className="text-emerald-500 text-[10px] font-black">
+                  FREE
+                </Text>
+              ) : (
+                <Text className="text-slate-800 dark:text-white text-[10px] font-black">
+                  ₹{formatInr(actualPrice)}
+                </Text>
+              )}
+            </View>
+          )}
         </View>
       )}
 
@@ -165,7 +180,7 @@ const HomeContentCard = ({
         </View>
 
         <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center">
+          <View className="flex-row items-center flex-shrink">
             <Feather name={meta.statIcon as any} size={11} color="#94a3b8" />
             <Text
               className="ml-1 text-slate-400 dark:text-slate-500 text-[10px] font-bold"
@@ -173,14 +188,31 @@ const HomeContentCard = ({
             >
               {meta.stat(item)}
             </Text>
+            {isCourse && hasRatings && (
+              <View className="flex-row items-center ml-2">
+                <Feather name="star" size={11} color="#F97316" />
+                <Text className="ml-1 text-orange-500 text-[10px] font-black">
+                  {ratingDisplay}
+                </Text>
+              </View>
+            )}
           </View>
-          {typeof item.rating === "number" && item.rating > 0 && (
-            <View className="flex-row items-center">
-              <Feather name="star" size={11} color="#F97316" />
-              <Text className="ml-1 text-orange-500 text-[10px] font-black">
-                {item.rating}
-              </Text>
-            </View>
+          {isCourse ? (
+            <Text
+              className={`${isFree ? "text-emerald-500" : "text-slate-800 dark:text-white"} text-[11px] font-black flex-shrink-0`}
+            >
+              {isFree ? "FREE" : `₹${formatInr(actualPrice)}`}
+            </Text>
+          ) : (
+            typeof item.rating === "number" &&
+            item.rating > 0 && (
+              <View className="flex-row items-center">
+                <Feather name="star" size={11} color="#F97316" />
+                <Text className="ml-1 text-orange-500 text-[10px] font-black">
+                  {item.rating}
+                </Text>
+              </View>
+            )
           )}
         </View>
       </View>
