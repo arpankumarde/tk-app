@@ -80,13 +80,14 @@ interface Test {
   creatorName: string;
   studentsEnrolled: number;
   reviewsCount: number;
-  examName: string;
+  examName: string | null;
   language: string | null;
   teacherName: string;
   teacherIsVerified: boolean;
   actualQuestionCount: number;
   isEnrolled: boolean;
   examSlug: string;
+  views: number;
 }
 
 interface Product {
@@ -764,7 +765,7 @@ const ExpertDetails = () => {
                 <View>
                   {tests?.length > 0 ? (
                     tests.map((test) => (
-                      <MockTestCard key={test.id} test={test as any} />
+                      <MockTestCard key={test.id} test={test} />
                     ))
                   ) : (
                     <EmptyState label="No mock tests yet" />

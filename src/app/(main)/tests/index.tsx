@@ -1,31 +1,31 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import BottomTabs from "@/components/BottomTabs";
+import Header from "@/components/Header";
+import MockTestCard from "@/components/MockTestCard";
+import { useAuth } from "@/context/AuthContext";
+import Feather from "@react-native-vector-icons/feather";
+import { useColorScheme } from "nativewind";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
-  StatusBar,
-  Pressable,
-  TextInput,
-  Modal,
   Dimensions,
+  Modal,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
-  useSharedValue,
   useAnimatedStyle,
+  useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { scheduleOnRN } from "react-native-worklets";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Feather from "@react-native-vector-icons/feather";
-import { useColorScheme } from "nativewind";
-import Header from "@/components/Header";
-import BottomTabs from "@/components/BottomTabs";
-import MockTestCard from "@/components/MockTestCard";
-import { useAuth } from "@/context/AuthContext";
+import { scheduleOnRN } from "react-native-worklets";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 const PAGE_LIMIT = 10;
@@ -69,11 +69,13 @@ type ExamTest = {
   examName: string;
   language: string;
   teacherName: string;
+  teacherAvatarUrl: string | null;
   teacherIsVerified: boolean;
   examSlug: string;
   durationMinutes: string;
   actualQuestionCount: string;
   isEnrolled: boolean;
+  views: number;
 };
 
 // ── Separate component so filter interactions don't re-render ShopScreen ──
@@ -491,7 +493,7 @@ const ShopScreen = () => {
   const testCards = useMemo(
     () =>
       tests.map((test, index) => (
-        <MockTestCard key={`${test.id}-${index}`} test={test as any} />
+        <MockTestCard key={`${test.id}-${index}`} test={test} />
       )),
     [tests],
   );
