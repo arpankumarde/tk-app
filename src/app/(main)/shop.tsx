@@ -580,12 +580,7 @@ const ShopScreen = () => {
           <View className="pb-10 px-6">
             {products.length > 0 ? (
               products.map((product, index) => (
-                <ProductCard
-                  key={product.slug || index}
-                  product={product}
-                  className="mb-8"
-                  showThumbnail={false}
-                />
+                <ProductCard key={product.slug || index} product={product} />
               ))
             ) : (
               <View className="items-center justify-center py-20 px-8">

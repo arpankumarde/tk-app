@@ -95,13 +95,14 @@ interface Product {
   title: string;
   slug: string;
   thumbnailUrl: string | null;
-  pdfUrl: string;
   category: string;
   price: number;
   rating: number | null;
+  ratingsCount: number;
   totalPurchases: number;
   publishedAt: string;
   language: string;
+  views: number;
   teacherName: string;
   teacherAvatar: string;
   teacherSlug: string;
@@ -794,14 +795,11 @@ const ExpertDetails = () => {
               {activeTab === "products" && (
                 <View>
                   {products?.length > 0 ? (
-                    products.map((product) => (
-                      <ProductCard
-                        key={product.id}
-                        product={product as any}
-                        className="mx-5 mb-5"
-                        showThumbnail={false}
-                      />
-                    ))
+                    <View className="px-5">
+                      {products.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </View>
                   ) : (
                     <EmptyState label="No study notes yet" />
                   )}

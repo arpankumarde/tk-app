@@ -25,7 +25,7 @@ const DigitalDownloadsSection = ({
 
       <View className="pb-8 px-6">
         {products.map((product, index) => (
-          <ProductCard key={product.slug || index} product={product} className="mb-8" />
+          <ProductCard key={product.slug || index} product={product} />
         ))}
       </View>
 
