@@ -10,7 +10,6 @@ interface ProductCardProps {
     title: string;
     slug: string;
     price: number;
-    category?: string;
     teacherName?: string;
     teacherAvatar?: string | null;
     teacherIsVerified?: boolean;
@@ -82,14 +81,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
           )}
         </View>
       </View>
-
-      {!!product.category && (
-        <View className="self-start ml-5 mb-2 px-3 py-1 bg-orange-50 dark:bg-slate-700/50 rounded-full">
-          <Text className="text-primary text-[10px] font-black uppercase tracking-widest">
-            {product.category}
-          </Text>
-        </View>
-      )}
 
       {/* Title */}
       <Text
