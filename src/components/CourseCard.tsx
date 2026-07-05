@@ -14,7 +14,6 @@ interface CourseCardProps {
     discountPrice?: number | null;
     thumbnailUrl: string | null;
     thumbnailImageUrl?: string | null;
-    category: string;
     teacherName: string;
     teacherAvatarUrl?: string | null;
     teacherIsVerified?: boolean;
@@ -110,12 +109,6 @@ const CourseCard = ({ course }: CourseCardProps) => {
           className="w-full h-full"
           resizeMode="cover"
         />
-
-        <View className="absolute top-3 left-3 px-3 py-1.5 bg-white/90 dark:bg-slate-900/90 rounded-full border border-gray-100 dark:border-slate-700/50 shadow-sm">
-          <Text className="text-primary text-[10px] font-black uppercase tracking-widest">
-            {course.category || "General"}
-          </Text>
-        </View>
       </View>
 
       {/* Footer: views / rating (left) — price (right) */}
