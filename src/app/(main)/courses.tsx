@@ -1,30 +1,30 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import BottomTabs from "@/components/BottomTabs";
+import CourseCard from "@/components/CourseCard";
+import Header from "@/components/Header";
+import Feather from "@react-native-vector-icons/feather";
+import { useColorScheme } from "nativewind";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
-  StatusBar,
+  Dimensions,
   Modal,
   Pressable,
+  ScrollView,
+  StatusBar,
+  Text,
   TextInput,
-  Dimensions,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
-  useSharedValue,
   useAnimatedStyle,
+  useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { scheduleOnRN } from "react-native-worklets";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Feather from "@react-native-vector-icons/feather";
-import { useColorScheme } from "nativewind";
-import Header from "@/components/Header";
-import CourseCard from "@/components/CourseCard";
-import BottomTabs from "@/components/BottomTabs";
+import { scheduleOnRN } from "react-native-worklets";
 
 const SORT_OPTIONS = [
   { label: "Newest", value: "newest" },
@@ -34,6 +34,45 @@ const SORT_OPTIONS = [
 ];
 
 const PAGE_SIZE = 6;
+
+// Windows large page counts down to a fixed-width strip: first, last,
+// and a couple of neighbors around the current page, with "…" gaps.
+function getPaginationRange(
+  current: number,
+  total: number,
+  siblingCount = 1,
+): (number | "dots")[] {
+  const totalNumbers = siblingCount * 2 + 5;
+  if (totalNumbers >= total) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const leftSiblingIndex = Math.max(current - siblingCount, 1);
+  const rightSiblingIndex = Math.min(current + siblingCount, total);
+  const shouldShowLeftDots = leftSiblingIndex > 2;
+  const shouldShowRightDots = rightSiblingIndex < total - 1;
+
+  if (!shouldShowLeftDots && shouldShowRightDots) {
+    const leftItemCount = 3 + siblingCount * 2;
+    const leftRange = Array.from({ length: leftItemCount }, (_, i) => i + 1);
+    return [...leftRange, "dots", total];
+  }
+
+  if (shouldShowLeftDots && !shouldShowRightDots) {
+    const rightItemCount = 3 + siblingCount * 2;
+    const rightRange = Array.from(
+      { length: rightItemCount },
+      (_, i) => total - rightItemCount + i + 1,
+    );
+    return [1, "dots", ...rightRange];
+  }
+
+  const middleRange = Array.from(
+    { length: rightSiblingIndex - leftSiblingIndex + 1 },
+    (_, i) => leftSiblingIndex + i,
+  );
+  return [1, "dots", ...middleRange, "dots", total];
+}
 
 const LEVELS = ["All Levels", "beginner", "intermediate", "advanced"];
 
@@ -470,6 +509,11 @@ const CourseScreen = () => {
     fetchCourses();
   }, [fetchCourses]);
 
+  const paginationRange = useMemo(
+    () => getPaginationRange(page, totalPages),
+    [page, totalPages],
+  );
+
   const courseCards = useMemo(
     () =>
       courses.map((course, index) => (
@@ -583,8 +627,17 @@ const CourseScreen = () => {
                     </TouchableOpacity>
 
                     <View className="flex-row items-center gap-1">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                        (p) => (
+                      {paginationRange.map((p, i) =>
+                        p === "dots" ? (
+                          <View
+                            key={`dots-${i}`}
+                            className="w-6 h-10 items-center justify-center"
+                          >
+                            <Text className="text-sm font-bold text-slate-400 dark:text-slate-500">
+                              …
+                            </Text>
+                          </View>
+                        ) : (
                           <TouchableOpacity
                             key={p}
                             onPress={() => setPage(p)}
