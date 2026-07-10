@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Modal, Text, TouchableOpacity, View } from "react-native";
 import Feather from "@react-native-vector-icons/feather";
+import { useState } from "react";
+import { Modal, Text, TouchableOpacity, View } from "react-native";
 
 interface ScientificCalculatorProps {
   visible: boolean;
@@ -76,7 +76,7 @@ const ScientificCalculator = ({
         processed += ")";
       }
 
-      // eslint-disable-next-line no-eval
+       
       const result = eval(processed);
       const finalResult = Number.isInteger(result)
         ? result.toString()
@@ -85,6 +85,7 @@ const ScientificCalculator = ({
       setDisplay(finalResult);
       setExpression(finalResult);
     } catch (e) {
+      console.error("Calculation error:", e);
       setDisplay("Error");
     }
   };
@@ -197,7 +198,8 @@ const ScientificCalculator = ({
                           handleFunc(btn);
                         else if (btn === "x²") handlePress("^2");
                         else if (btn === "xʸ") handlePress("^");
-                        else if (btn === "n!") handlePress("!"); // simplified
+                        else if (btn === "n!")
+                          handlePress("!"); // simplified
                         else if (btn === "π") handlePress("π");
                         else if (btn === "e") handlePress("e");
                         else handlePress(btn);
