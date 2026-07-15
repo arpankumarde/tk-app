@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Modal,
 } from "react-native";
-import { useColorScheme } from "nativewind";
 import { router } from "expo-router";
 import Feather from "@react-native-vector-icons/feather";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
@@ -34,7 +33,6 @@ interface DigitalDownloadCardProps {
 const DigitalDownloadCard = ({
   product: initialProduct,
 }: DigitalDownloadCardProps) => {
-  const { colorScheme } = useColorScheme();
   const { user, token } = useAuth();
   const [product, setProduct] = useState(initialProduct);
   const isFree = (product.price ?? 0) === 0;
@@ -50,7 +48,6 @@ const DigitalDownloadCard = ({
   const displayImage = product.thumbnailUrl || Placeholder.NOTE;
   const displayAuthor = product.teacherName || "TestKart Expert";
   const displayCategory = product.category || "Study Material";
-  const displaySales = product.totalPurchases || 0;
 
   const handleFreeEnroll = async () => {
     if (!user || !token) {
