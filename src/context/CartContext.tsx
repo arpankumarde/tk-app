@@ -234,6 +234,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
             `Promo applied! You saved ₹${discount.toFixed(2)}`,
         };
       } catch (error) {
+        console.error("Error applying promo code:", error);
         return { success: false, message: "Failed to apply promo code" };
       }
     },
@@ -294,6 +295,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         udf1: payload.udf1 as string | undefined,
       };
     } catch (error) {
+      console.error("Error initiating payment:", error);
       return { success: false, error: "Something went wrong" };
     }
   }, [token, appliedPromoCodeId]);
