@@ -1,11 +1,9 @@
 import Feather from "@react-native-vector-icons/feather";
 import { router } from "expo-router";
-import { useColorScheme } from "nativewind";
 import { useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
 const HeroSection = () => {
-  const { colorScheme } = useColorScheme();
   const [query, setQuery] = useState("");
 
   const handleSearch = () => {
