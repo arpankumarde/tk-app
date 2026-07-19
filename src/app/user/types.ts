@@ -146,19 +146,19 @@ export interface TestItemInstructionsResponse {
     teacherName: string;
     thumbnailUrl: string | null;
   };
-  subjects: Array<{
+  subjects: {
     id: number;
     subjectName: string;
     durationMinutes: number;
     questionCount: number;
     maxAttemptsAllowed: number | null;
-    sections: Array<{
+    sections: {
       id: number;
       sectionName: string;
       maxAttemptsAllowed: number | null;
       questionCount: number;
-    }>;
-  }>;
+    }[];
+  }[];
   access: { hasAccess: boolean; isFree: boolean };
   previousAttempt: {
     hasAttempted: boolean;
