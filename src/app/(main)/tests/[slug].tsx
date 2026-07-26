@@ -1,27 +1,28 @@
-import { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-  StatusBar,
-  Share,
-  Modal,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Feather from "@react-native-vector-icons/feather";
-import Ionicons from "@react-native-vector-icons/ionicons";
-import MaterialIcons from "@react-native-vector-icons/material-icons";
-import { useColorScheme } from "nativewind";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import BottomTabs from "@/components/BottomTabs";
+import BundleCrossSell from "@/components/BundleCrossSell";
+import Placeholder from "@/constants/placeholder";
 import { useAuth } from "@/context/AuthContext";
 import { useEnrollmentContext } from "@/context/EnrollmentContext";
 import { useAddToCart } from "@/hooks/useAddToCart";
-import Placeholder from "@/constants/placeholder";
 import { useBuildShareUrl } from "@/hooks/useBuildShareUrl";
+import Feather from "@react-native-vector-icons/feather";
+import Ionicons from "@react-native-vector-icons/ionicons";
+import MaterialIcons from "@react-native-vector-icons/material-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useColorScheme } from "nativewind";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  ScrollView,
+  Share,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -617,7 +618,9 @@ const TestDetails = () => {
             ) : null}
 
             {test.disclaimer ? (
-              <View className={`${test.longDescription ? "mt-6" : ""} rounded-2xl overflow-hidden border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/5`}>
+              <View
+                className={`${test.longDescription ? "mt-6" : ""} rounded-2xl overflow-hidden border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/5`}
+              >
                 <View className="flex-row items-center px-4 py-3 bg-amber-100/60 dark:bg-amber-500/10 border-b border-amber-200 dark:border-amber-500/20">
                   <View className="w-8 h-8 rounded-full bg-amber-500 items-center justify-center mr-3">
                     <Feather name="alert-triangle" size={16} color="white" />
@@ -634,6 +637,17 @@ const TestDetails = () => {
                 </Text>
               </View>
             ) : null}
+          </View>
+        )}
+
+        {/* Bundles that include this test series */}
+        {!isEnrolled && (
+          <View className="px-6">
+            <BundleCrossSell
+              itemType="test"
+              itemId={test.id}
+              teacherId={test.teacherId}
+            />
           </View>
         )}
 

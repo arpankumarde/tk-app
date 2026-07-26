@@ -1,11 +1,13 @@
 import AutoSlider from "@/components/AutoSlider";
 import BottomTabs from "@/components/BottomTabs";
+import BundleCard from "@/components/BundleCard";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import HomeContentCard from "@/components/HomeContentCard";
 import HomeRail from "@/components/HomeRail";
 import LiveSpotlightCard from "@/components/LiveSpotlightCard";
 import TeacherRailCard from "@/components/TeacherRailCard";
+import type { BundleListItem } from "@/types/bundle";
 import { useColorScheme } from "nativewind";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -27,6 +29,7 @@ const App = () => {
   const [popularCourses, setPopularCourses] = useState<any[]>([]);
   const [popularNotes, setPopularNotes] = useState<any[]>([]);
   const [popularTeachers, setPopularTeachers] = useState<any[]>([]);
+  const [bundles, setBundles] = useState<BundleListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,16 +56,34 @@ const App = () => {
     }
   }, []);
 
+  // Bundles aren't part of /homepage/data, so they load on their own and never
+  // block (or fail) the rest of the home screen.
+  const fetchBundles = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/_api/bundles/list?limit=6&sort=popular`,
+      );
+      if (!response.ok) return;
+      const data = await response.json();
+      const payload = data.json || data;
+      setBundles(payload.bundles || []);
+    } catch (err) {
+      console.error("Bundles fetch error:", err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchHomeData();
-  }, [fetchHomeData]);
+    fetchBundles();
+  }, [fetchHomeData, fetchBundles]);
 
   const hasContent =
     liveSpotlight.length > 0 ||
     topMockTests.length > 0 ||
     popularCourses.length > 0 ||
     popularNotes.length > 0 ||
-    popularTeachers.length > 0;
+    popularTeachers.length > 0 ||
+    bundles.length > 0;
 
   return (
     <SafeAreaView
@@ -133,6 +154,18 @@ const App = () => {
             />
 
             <View className="h-[1px] bg-gray-100 dark:bg-slate-800" />
+
+            <HomeRail
+              title="Save More with Bundles"
+              viewAllHref="/bundles"
+              data={bundles}
+              keyExtractor={(item) => `bundle-${item.id}`}
+              renderItem={(item) => <BundleCard bundle={item} variant="rail" />}
+            />
+
+            {bundles.length > 0 && (
+              <View className="h-[1px] bg-gray-100 dark:bg-slate-800" />
+            )}
 
             <HomeRail
               title="Popular Courses"

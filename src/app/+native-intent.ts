@@ -19,6 +19,11 @@ export function redirectSystemPath({
       return out(`/tests/${second}`);
     }
 
+    if (first === "bundle" || first === "bundles") {
+      if (!second) return out("/bundles");
+      return out(`/bundles/${second}`);
+    }
+
     if (first === "study-notes") {
       if (!second) return out("/shop");
       return out(`/product/${second}`);

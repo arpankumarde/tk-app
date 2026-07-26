@@ -22,9 +22,11 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import EnrolledBundleCard from "./_components/EnrolledBundleCard";
 import EnrolledCourseCard from "./_components/EnrolledCourseCard";
 import EnrolledTestCard from "./_components/EnrolledTestCard";
 import PurchasedProductCard from "./_components/PurchasedProductCard";
+import { useEnrolledBundles } from "./_hooks/useEnrolledBundles";
 import { useEnrolledCourses } from "./_hooks/useEnrolledCourses";
 import { useEnrolledTests } from "./_hooks/useEnrolledTests";
 import { usePurchasedProducts } from "./_hooks/usePurchasedProducts";
@@ -61,6 +63,12 @@ export default function ProfileScreen() {
     loading: loadingProducts,
     total: totalProducts,
   } = usePurchasedProducts(token, { limit: 5 });
+
+  const {
+    bundles: enrolledBundles,
+    loading: loadingBundles,
+    total: totalBundles,
+  } = useEnrolledBundles(token);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -210,6 +218,48 @@ export default function ProfileScreen() {
         </View>
 
         <View className="px-6">
+          {/* My Bundles — only surfaced once the student owns one */}
+          {(loadingBundles || totalBundles > 0) && (
+            <>
+              <View className="flex-row items-center justify-between mb-4">
+                <Text className="text-xl font-black text-slate-800 dark:text-white">
+                  My Bundles ({totalBundles})
+                </Text>
+                {totalBundles > 0 && (
+                  <TouchableOpacity
+                    onPress={() => router.push("/user/bundles" as any)}
+                  >
+                    <View className="flex-row items-center">
+                      <Text className="text-primary font-black text-sm">
+                        View All
+                      </Text>
+                      <Feather
+                        name="chevron-right"
+                        size={16}
+                        color="#FF8A50"
+                        className="ml-1"
+                      />
+                    </View>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {loadingBundles ? (
+                <View className="py-10 items-center justify-center">
+                  <ActivityIndicator color="#FF8A50" />
+                </View>
+              ) : (
+                enrolledBundles
+                  .slice(0, 2)
+                  .map((bundle) => (
+                    <EnrolledBundleCard key={bundle.id} bundle={bundle} />
+                  ))
+              )}
+
+              <View className="h-4" />
+            </>
+          )}
+
           {/* Ongoing Courses Header */}
           <View className="flex-row items-center justify-between mb-4">
             <Text className="text-xl font-black text-slate-800 dark:text-white">
@@ -348,6 +398,19 @@ export default function ProfileScreen() {
               </View>
               <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
                 My Orders
+              </Text>
+              <Feather name="chevron-right" size={20} color="#CBD5E1" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => router.push("/user/bundles" as any)}
+              className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800"
+            >
+              <View className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-900/20 items-center justify-center mr-4">
+                <Feather name="package" size={22} color="#FF8A50" />
+              </View>
+              <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
+                My Bundles
               </Text>
               <Feather name="chevron-right" size={20} color="#CBD5E1" />
             </TouchableOpacity>

@@ -1,30 +1,31 @@
-import { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-  StatusBar,
-  Modal,
-  Linking,
-  Share,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, router } from "expo-router";
-import Feather from "@react-native-vector-icons/feather";
-import MaterialIcons from "@react-native-vector-icons/material-icons";
-import { useColorScheme } from "nativewind";
 import BottomTabs from "@/components/BottomTabs";
-import { WebView } from "react-native-webview";
+import BundleCrossSell from "@/components/BundleCrossSell";
 import PDFPreview from "@/components/PDFPreview";
-import { useVideoPlayer, VideoView } from "expo-video";
 import Placeholder from "@/constants/placeholder";
-import * as ScreenOrientation from "expo-screen-orientation";
 import { useAuth } from "@/context/AuthContext";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useBuildShareUrl } from "@/hooks/useBuildShareUrl";
+import Feather from "@react-native-vector-icons/feather";
+import MaterialIcons from "@react-native-vector-icons/material-icons";
+import { router, useLocalSearchParams } from "expo-router";
+import * as ScreenOrientation from "expo-screen-orientation";
+import { useVideoPlayer, VideoView } from "expo-video";
+import { useColorScheme } from "nativewind";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Linking,
+  Modal,
+  ScrollView,
+  Share,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { WebView } from "react-native-webview";
 
 export type CourseStatus = "published" | "draft" | "archived";
 export type CourseLevel = "beginner" | "intermediate" | "advanced";
@@ -596,6 +597,17 @@ const CourseDetails = () => {
             </View>
           ) : null}
         </View>
+
+        {/* Bundles that include this course */}
+        {!course.isEnrolled && (
+          <View className="px-6">
+            <BundleCrossSell
+              itemType="course"
+              itemId={course.id}
+              teacherId={course.teacherId}
+            />
+          </View>
+        )}
 
         {/* Meet your instructor */}
         <View className="px-6">

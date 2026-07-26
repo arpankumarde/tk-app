@@ -42,7 +42,7 @@ type AuthContextType = {
   user: User | null;
   token: string | null;
   loading: boolean;
-  setAuth: (user: User, token: string) => void;
+  setAuth: (user: User, token: string) => Promise<void>;
   logout: () => void;
   // Clears stored auth and redirects to login. Call when an authed API signals
   // "not authenticated".
