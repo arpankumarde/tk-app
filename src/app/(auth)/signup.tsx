@@ -1,10 +1,14 @@
 import Header from "@/components/Header";
+import TurnstileGate, {
+  TurnstileGateHandle,
+  TurnstileStatus,
+} from "@/components/TurnstileGate";
 import { useAuth } from "@/context/AuthContext";
 import { useGoogleAuth } from "@/hooks/useGoogleAuth";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { Link, router } from "expo-router";
 import { useColorScheme } from "nativewind";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -36,6 +40,14 @@ const Signup = () => {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileStatus, setTurnstileStatus] =
+    useState<TurnstileStatus>("pending");
+  const turnstileRef = useRef<TurnstileGateHandle>(null);
+
+  // Only holds the send button back while a token is on its way; the server
+  // is what enforces Turnstile.
+  const awaitingTurnstile = !turnstileToken && turnstileStatus === "pending";
 
   useEffect(() => {
     if (user) {
@@ -90,8 +102,16 @@ const Signup = () => {
           : `${BASE_URL}/_api/auth/email-signup/send-otp`;
       const payload =
         authMethod === "mobile"
-          ? { mobileNumber: mobileNumber.trim(), role: "student" }
-          : { email: email.trim(), role: "student" };
+          ? {
+              mobileNumber: mobileNumber.trim(),
+              role: "student",
+              turnstileToken: turnstileToken ?? undefined,
+            }
+          : {
+              email: email.trim(),
+              role: "student",
+              turnstileToken: turnstileToken ?? undefined,
+            };
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -112,6 +132,9 @@ const Signup = () => {
       Alert.alert("Error", "Failed to send OTP. Please try again.");
     } finally {
       setOtpLoading(false);
+      // Turnstile tokens are single-use - mint a fresh one for the next attempt.
+      setTurnstileToken(null);
+      turnstileRef.current?.reset();
     }
   };
 
@@ -342,7 +365,7 @@ const Signup = () => {
               />
               <TouchableOpacity
                 onPress={handleSendOtp}
-                disabled={otpLoading}
+                disabled={otpLoading || awaitingTurnstile}
                 className="mt-2"
               >
                 <Text className="text-primary font-bold text-sm text-right">
@@ -352,11 +375,26 @@ const Signup = () => {
             </View>
           )}
 
+          {/* Bot check for the SMS OTP flow. Invisible unless Cloudflare
+              demands an interactive challenge. */}
+          <TurnstileGate
+            ref={turnstileRef}
+            onVerify={setTurnstileToken}
+            onExpire={() => setTurnstileToken(null)}
+            onStatusChange={setTurnstileStatus}
+          />
+
+          {awaitingTurnstile && (
+            <Text className="text-slate-400 dark:text-slate-500 text-xs font-bold text-center mb-4">
+              Verifying your device...
+            </Text>
+          )}
+
           {/* Submit Button */}
           <TouchableOpacity
             className="bg-primary rounded-2xl h-16 items-center justify-center shadow-lg shadow-primary/30 mb-6"
             onPress={otpSent ? handleVerifyOtp : handleSendOtp}
-            disabled={otpLoading}
+            disabled={otpLoading || (!otpSent && awaitingTurnstile)}
           >
             {otpLoading ? (
               <ActivityIndicator color="#fff" />
