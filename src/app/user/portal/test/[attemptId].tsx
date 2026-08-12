@@ -61,6 +61,7 @@ type NormalizedQuestion = Question & {
   sectionName: string | null;
   sectionOrderIndex: number | null;
   sectionMaxAttemptsAllowed: number | null;
+  subjectMaxAttemptsAllowed: number | null;
 };
 
 interface SectionData {
@@ -76,6 +77,7 @@ interface SubjectData {
   subjectId: number;
   orderIndex: number;
   durationMinutes: number;
+  maxAttemptsAllowed?: number | null;
   sections: SectionData[];
 }
 
@@ -361,7 +363,8 @@ const TestAttemptScreen = () => {
           subjectDurationMinutes: q.subjectDurationMinutes ?? 0,
           sectionName: q.sectionName,
           sectionOrderIndex: q.sectionOrderIndex ?? 0,
-          sectionMaxAttemptsAllowed: q.sectionMaxAttemptsAllowed,
+          sectionMaxAttemptsAllowed: q.sectionMaxAttemptsAllowed ?? null,
+          subjectMaxAttemptsAllowed: q.subjectMaxAttemptsAllowed ?? null,
         };
       });
 
@@ -375,6 +378,7 @@ const TestAttemptScreen = () => {
             subjectId: q.subjectId,
             orderIndex: q.subjectOrderIndex,
             durationMinutes: q.subjectDurationMinutes,
+            maxAttemptsAllowed: q.subjectMaxAttemptsAllowed ?? null,
             sections: [],
           });
         }
@@ -608,16 +612,90 @@ const TestAttemptScreen = () => {
 
   const currentSectionAttemptCount =
     sectionAttemptCounts[currentSection?.sectionId || 0] || 0;
-  const isSectionLimitReached =
-    currentSection?.maxAttemptsAllowed != null &&
-    currentSectionAttemptCount >= currentSection.maxAttemptsAllowed;
+
+  const currentSubjectAttemptCount = useMemo(() => {
+    if (!currentSubject) return 0;
+    return currentSubject.sections.reduce(
+      (sum, section) =>
+        sum + section.questions.filter((q) => isQuestionAnswered(q)).length,
+      0,
+    );
+  }, [currentSubject, isQuestionAnswered]);
+
+  /**
+   * Which limit governs the current question, mirroring the web client's
+   * `isQuestionLocked` in testkart-web-floot `helpers/testingInterfaceTypes.tsx`.
+   *
+   * A section limit wins when the current section declares one. The subject
+   * limit is only a fallback, and only when NO section in the subject declares
+   * a limit - otherwise a subject whose sections are individually capped would
+   * be double-counted.
+   *
+   * Without this fallback a subject with no sections enforced nothing on
+   * mobile: every question landed in a synthetic section carrying a null
+   * limit, so the student could answer past the cap and only found out when
+   * the server rejected the whole submission.
+   */
+  const activeAttemptLimit = useMemo((): {
+    scope: "section" | "subject";
+    label: string;
+    limit: number;
+    answered: number;
+    total: number;
+  } | null => {
+    if (!currentSubject) return null;
+
+    if (currentSection?.maxAttemptsAllowed != null) {
+      return {
+        scope: "section",
+        label: currentSection.sectionName || "this section",
+        limit: currentSection.maxAttemptsAllowed,
+        answered: currentSectionAttemptCount,
+        total: currentSection.questions.length,
+      };
+    }
+
+    const subjectHasSectionLimits = currentSubject.sections.some(
+      (s) => s.maxAttemptsAllowed != null,
+    );
+    if (!subjectHasSectionLimits && currentSubject.maxAttemptsAllowed != null) {
+      return {
+        scope: "subject",
+        label: currentSubject.subjectName,
+        limit: currentSubject.maxAttemptsAllowed,
+        answered: currentSubjectAttemptCount,
+        total: currentSubject.sections.reduce(
+          (sum, s) => sum + s.questions.length,
+          0,
+        ),
+      };
+    }
+
+    return null;
+  }, [
+    currentSubject,
+    currentSection,
+    currentSectionAttemptCount,
+    currentSubjectAttemptCount,
+  ]);
+
+  const isAttemptLimitReached =
+    activeAttemptLimit != null &&
+    activeAttemptLimit.answered >= activeAttemptLimit.limit;
 
   const isCurrentQuestionAnswered = currentQuestion
     ? isQuestionAnswered(currentQuestion)
     : false;
 
-  const showAttemptLimitWarning =
-    currentQuestion && isSectionLimitReached && !isCurrentQuestionAnswered;
+  // An already-answered question stays editable so the student can clear it
+  // and spend the attempt on a different question.
+  const showAttemptLimitWarning = Boolean(
+    currentQuestion && isAttemptLimitReached && !isCurrentQuestionAnswered,
+  );
+
+  // Shown before the cap is hit, so the limit is never a surprise at submit.
+  const attemptLimitInfo =
+    activeAttemptLimit && !isAttemptLimitReached ? activeAttemptLimit : null;
 
   const handleClearResponse = (questionId: number) => {
     // In question-wise timing mode, answers are locked once submitted
@@ -1395,13 +1473,26 @@ const TestAttemptScreen = () => {
             </View>
 
             <View className="mb-4">
-              {showAttemptLimitWarning && (
+              {attemptLimitInfo && (
+                <View className="flex-row items-center bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-2xl mb-4">
+                  <Feather name="info" size={16} color="#3b82f6" />
+                  <Text className="ml-2 text-blue-700 dark:text-blue-300 text-xs font-bold leading-5 flex-1">
+                    You can attempt {attemptLimitInfo.limit} out of{" "}
+                    {attemptLimitInfo.total} questions in{" "}
+                    {attemptLimitInfo.label}. ({attemptLimitInfo.answered}{" "}
+                    answered so far)
+                  </Text>
+                </View>
+              )}
+
+              {showAttemptLimitWarning && activeAttemptLimit && (
                 <View className="flex-row items-center bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 p-4 rounded-2xl mb-4">
                   <Feather name="lock" size={16} color="#f97316" />
                   <Text className="ml-2 text-orange-700 dark:text-orange-300 text-xs font-bold leading-5 flex-1">
-                    You have reached the maximum attempts for this section (
-                    {currentSection?.maxAttemptsAllowed}/
-                    {currentSection?.maxAttemptsAllowed}).
+                    You have reached the maximum attempts for this{" "}
+                    {activeAttemptLimit.scope} ({activeAttemptLimit.answered}/
+                    {activeAttemptLimit.limit}). Clear another answer to attempt
+                    this question.
                   </Text>
                 </View>
               )}

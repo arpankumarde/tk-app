@@ -22,6 +22,15 @@ import {
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
+type AttemptLimit = {
+  key: string;
+  scope: "subject" | "section";
+  label: string;
+  caption: string;
+  limit: number;
+  total: number;
+};
+
 type InstructionDetails = {
   id: number;
   title: string;
@@ -29,6 +38,70 @@ type InstructionDetails = {
   totalQuestions: number;
   subjectWiseTiming: boolean;
   questionWiseTiming: boolean;
+  attemptLimits: AttemptLimit[];
+};
+
+/**
+ * The attempt caps that actually bind, mirroring `activeAttemptLimit` in
+ * `portal/test/[attemptId].tsx` so the instructions never promise an allowance
+ * the player then enforces differently.
+ *
+ * A section cap wins wherever a section declares one. The subject cap is only a
+ * fallback, and only when no section in that subject declares one, otherwise an
+ * individually-capped section would be counted twice.
+ *
+ * Caps that are not restrictive (at or above the question count) are dropped:
+ * stating them tells the student nothing and would fire on the many tests whose
+ * limit was set equal to their question count.
+ */
+const deriveAttemptLimits = (
+  subjects: TestItemInstructionsResponse["subjects"] | undefined,
+): AttemptLimit[] => {
+  const rows: AttemptLimit[] = [];
+
+  (subjects || []).forEach((subject) => {
+    const sections = subject.sections || [];
+    const hasSectionCap = sections.some(
+      (section) => section.maxAttemptsAllowed != null,
+    );
+
+    if (hasSectionCap) {
+      sections.forEach((section) => {
+        const limit = section.maxAttemptsAllowed;
+        if (limit == null) return;
+
+        rows.push({
+          key: `section-${section.id}`,
+          scope: "section",
+          label: section.sectionName || subject.subjectName,
+          caption: subject.subjectName,
+          limit,
+          total: section.questionCount,
+        });
+      });
+      return;
+    }
+
+    const limit = subject.maxAttemptsAllowed;
+    if (limit == null) return;
+
+    rows.push({
+      key: `subject-${subject.id}`,
+      scope: "subject",
+      label: subject.subjectName,
+      caption: "Subject",
+      limit,
+      // The player counts against the questions it actually loaded, so sum the
+      // sections rather than trusting the separately-computed subject total.
+      // A subject with no sections has all of its questions at the top level.
+      total:
+        sections.length > 0
+          ? sections.reduce((sum, section) => sum + section.questionCount, 0)
+          : subject.questionCount,
+    });
+  });
+
+  return rows.filter((row) => row.limit < row.total);
 };
 
 type ApiErrorPayload = {
@@ -117,6 +190,7 @@ const Portal = () => {
         totalQuestions: payload.testItem.totalQuestions,
         subjectWiseTiming: !!payload.testItem.subjectWiseTiming,
         questionWiseTiming: !!payload.testItem.questionWiseTiming,
+        attemptLimits: deriveAttemptLimits(payload.subjects),
       });
     } catch (err: any) {
       setError(err.message || "Could not load test instructions");
@@ -217,6 +291,15 @@ const Portal = () => {
     );
   }
 
+  const attemptLimits = details.attemptLimits;
+  const hasAttemptLimits = attemptLimits.length > 0;
+  // "part" covers a test that mixes section-capped and subject-capped areas.
+  const limitScopeWord = attemptLimits.every((row) => row.scope === "section")
+    ? "section"
+    : attemptLimits.every((row) => row.scope === "subject")
+      ? "subject"
+      : "part";
+
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
@@ -299,21 +382,79 @@ const Portal = () => {
             </View>
           </View>
 
+          {hasAttemptLimits && (
+            <View className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-3xl p-5 mb-8">
+              <View className="flex-row items-center mb-2">
+                <Feather name="alert-triangle" size={16} color="#f59e0b" />
+                <Text className="text-amber-800 dark:text-amber-200 font-black text-xs uppercase tracking-wider ml-2">
+                  Attempt Limits
+                </Text>
+              </View>
+              <Text className="text-amber-700 dark:text-amber-300 text-sm font-semibold leading-6 mb-4">
+                This test does not let you answer every question. Only the
+                counts below are accepted, so choose which questions to spend
+                your attempts on.
+              </Text>
+
+              {attemptLimits.map((row, index) => (
+                <View
+                  key={row.key}
+                  className={`flex-row items-center justify-between bg-white dark:bg-slate-800 border border-amber-100 dark:border-amber-900/40 rounded-2xl px-4 py-3 ${
+                    index < attemptLimits.length - 1 ? "mb-2" : ""
+                  }`}
+                >
+                  <View className="flex-1 pr-3">
+                    <Text
+                      className="text-slate-800 dark:text-white text-base font-black"
+                      numberOfLines={1}
+                    >
+                      {row.label}
+                    </Text>
+                    <Text
+                      className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-wider mt-0.5"
+                      numberOfLines={1}
+                    >
+                      {row.caption}
+                    </Text>
+                  </View>
+                  <Text className="text-amber-700 dark:text-amber-300 text-base font-black">
+                    {row.limit} of {row.total}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
+
           <View className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-3xl p-5 shadow-sm">
             <Text className="text-slate-900 dark:text-white text-3xl font-black mb-4">
               Instructions
             </Text>
             <View className="mb-2">
               <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
-                • Answer all questions to the best of your ability.
+                {hasAttemptLimits
+                  ? "• Answer only as many questions as the attempt limits above allow."
+                  : "• Answer all questions to the best of your ability."}
               </Text>
+              {hasAttemptLimits ? (
+                <>
+                  <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
+                    {`• Once a limit is reached, the remaining questions in that ${limitScopeWord} are locked.`}
+                  </Text>
+                  <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
+                    • Changed your mind? Clear an answer to free up an attempt
+                    and use it on another question.
+                  </Text>
+                </>
+              ) : null}
               <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
                 {details.questionWiseTiming
                   ? "• Once you answer or skip a question, you cannot return to it."
                   : "• You can navigate between questions anytime."}
               </Text>
               <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
-                • Click Submit Test after completing all answers.
+                {hasAttemptLimits
+                  ? "• Click Submit Test once you have spent the attempts you want."
+                  : "• Click Submit Test after completing all answers."}
               </Text>
               {!details.questionWiseTiming &&
               !details.subjectWiseTiming &&
