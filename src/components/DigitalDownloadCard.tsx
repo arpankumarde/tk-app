@@ -46,7 +46,7 @@ const DigitalDownloadCard = ({
   }>({ visible: false, success: false });
 
   const displayImage = product.thumbnailUrl || Placeholder.NOTE;
-  const displayAuthor = product.teacherName || "TestKart Expert";
+  const displayAuthor = product.teacherName || "Testkart Expert";
   const displayCategory = product.category || "Study Material";
 
   const handleFreeEnroll = async () => {

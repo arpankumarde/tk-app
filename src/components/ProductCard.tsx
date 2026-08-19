@@ -30,7 +30,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         ? String(product.rating)
         : product.rating.toFixed(1)
       : null;
-  const displayAuthor = product.teacherName || "TestKart Expert";
+  const displayAuthor = product.teacherName || "Testkart Expert";
   const teacherInitials =
     displayAuthor
       .split(" ")

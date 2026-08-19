@@ -900,7 +900,7 @@ const LiveTestDetails = () => {
                   <BulletItem
                     text={`1st Prize: ₹${liveTest.firstPrize} | 2nd Prize: ₹${liveTest.secondPrize} | 3rd Prize: ₹${liveTest.thirdPrize}`}
                   />
-                  <BulletItem text="Prize money will be credited to the winner's TestKart wallet after the test ends." />
+                  <BulletItem text="Prize money will be credited to the winner's Testkart wallet after the test ends." />
                   <BulletItem text="Winners can withdraw prize money to their bank account." />
                 </RuleSection>
               )}
@@ -924,7 +924,7 @@ const LiveTestDetails = () => {
 
               {/* Disclaimer */}
               <RuleSection title="Disclaimer">
-                <BulletItem text="TestKart does not proctor the test or verify student identity." />
+                <BulletItem text="Testkart does not proctor the test or verify student identity." />
                 <BulletItem text="Accuracy and correctness of questions depends solely upon the teacher who created the test." />
                 <BulletItem>
                   By enrolling, you agree to the above rules and{" "}
@@ -932,7 +932,7 @@ const LiveTestDetails = () => {
                     className="text-orange-500 font-bold"
                     onPress={() => Linking.openURL("https://testkart.in/terms")}
                   >
-                    TestKart&apos;s Terms of Service
+                    Testkart&apos;s Terms of Service
                   </Text>
                   .
                 </BulletItem>

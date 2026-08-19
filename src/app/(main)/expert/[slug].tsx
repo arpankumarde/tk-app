@@ -203,7 +203,7 @@ const ExpertDetails = () => {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Check out ${data?.teacher?.displayName} on TestKart!\n${BASE_URL}/expert/${slug}`,
+        message: `Check out ${data?.teacher?.displayName} on Testkart!\n${BASE_URL}/expert/${slug}`,
       });
     } catch (error: any) {
       console.error(error.message);

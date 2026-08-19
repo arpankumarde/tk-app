@@ -57,7 +57,7 @@ const EnrolledBundleCard = ({ bundle, expanded }: EnrolledBundleCardProps) => {
             {bundle.title}
           </Text>
           <Text className="text-slate-500 dark:text-slate-400 font-bold text-xs mb-2">
-            By: {bundle.teacherName || "TestKart Expert"}
+            By: {bundle.teacherName || "Testkart Expert"}
             {enrolledOn ? ` · ${enrolledOn}` : ""}
           </Text>
 

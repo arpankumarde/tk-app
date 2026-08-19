@@ -44,7 +44,7 @@ const MockTestCard = ({ test }: MockTestCardProps) => {
         : test.rating.toFixed(1)
       : null;
   const displayAuthor =
-    test.teacherName || test.creatorName || "TestKart Expert";
+    test.teacherName || test.creatorName || "Testkart Expert";
   const teacherInitials =
     displayAuthor
       .split(" ")

@@ -459,7 +459,7 @@ const SearchScreen = () => {
                   thumbnail={c.thumbnailUrl || c.thumbnailImageUrl}
                   fallback={Placeholder.COURSE}
                   title={c.title}
-                  subtitle={c.teacherName || c.teacherDisplayName || "TestKart Expert"}
+                  subtitle={c.teacherName || c.teacherDisplayName || "Testkart Expert"}
                   badge={c.level}
                   price={c.price}
                   verified={c.teacherIsVerified}

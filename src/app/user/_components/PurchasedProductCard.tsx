@@ -185,7 +185,7 @@ const PurchasedProductCard = ({ product }: PurchasedProductCardProps) => {
           {product.title}
         </Text>
         <Text className="text-slate-500 dark:text-slate-400 font-bold text-xs mb-1">
-          By: {product.teacherName || "TestKart Expert"}
+          By: {product.teacherName || "Testkart Expert"}
         </Text>
         <View className="flex-row items-center self-start">
           <View className="bg-purple-50 dark:bg-purple-900/20 px-2.5 py-0.5 rounded-full">

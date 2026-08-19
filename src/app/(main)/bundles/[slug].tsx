@@ -455,7 +455,7 @@ const BundleDetailsScreen = () => {
               </Text>
               <View className="flex-row items-center">
                 <Text className="text-primary font-bold text-sm">
-                  {bundle.teacher?.displayName || "TestKart Expert"}
+                  {bundle.teacher?.displayName || "Testkart Expert"}
                 </Text>
                 <MaterialIcons
                   name="verified"

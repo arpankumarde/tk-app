@@ -42,7 +42,7 @@ const LiveSpotlightCard = ({ item }: { item: LiveSpotlightItem }) => {
         ? "Live now"
         : "";
 
-  const teacherName = item.teacherName || "TestKart Expert";
+  const teacherName = item.teacherName || "Testkart Expert";
   const avatarUri =
     item.teacherAvatarUrl ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(teacherName)}&background=FF8A50&color=fff`;

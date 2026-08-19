@@ -42,7 +42,7 @@ const CourseCard = ({ course }: CourseCardProps) => {
         ? String(displayRating)
         : displayRating.toFixed(1)
       : null;
-  const displayAuthor = course.teacherName || "TestKart Expert";
+  const displayAuthor = course.teacherName || "Testkart Expert";
   const teacherInitials =
     displayAuthor
       .split(" ")

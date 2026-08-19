@@ -34,7 +34,7 @@ const BundleCard = ({ bundle, variant = "list" }: BundleCardProps) => {
   const itemCount = bundle.itemCount ?? 0;
   const itemLabel = `${itemCount} ${itemCount === 1 ? "item" : "items"}`;
 
-  const displayAuthor = bundle.teacherName || "TestKart Expert";
+  const displayAuthor = bundle.teacherName || "Testkart Expert";
   const teacherInitials =
     displayAuthor
       .split(" ")

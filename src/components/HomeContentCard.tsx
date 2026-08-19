@@ -167,7 +167,7 @@ const HomeContentCard = ({
             className="text-slate-500 dark:text-slate-400 text-[11px] font-semibold flex-shrink"
             numberOfLines={1}
           >
-            {item.teacherName || "TestKart Expert"}
+            {item.teacherName || "Testkart Expert"}
           </Text>
           {item.teacherIsVerified && (
             <MaterialIcons

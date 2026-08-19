@@ -42,7 +42,7 @@ const EnrolledCourseCard = ({ course }: EnrolledCourseCardProps) => {
           {course.title}
         </Text>
         <Text className="text-slate-500 dark:text-slate-400 font-bold text-xs mb-2">
-          By: {course.teacherName || "TestKart Expert"}
+          By: {course.teacherName || "Testkart Expert"}
         </Text>
         {/* Progress Bar */}
         <View className="flex-row items-center">
