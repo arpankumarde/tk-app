@@ -16,7 +16,7 @@ const DigitalDownloadsSection = ({
     <View className="bg-white dark:bg-slate-900">
       <View className="px-6 pt-10 pb-5 items-center bg-white dark:bg-slate-900">
         <Text className="text-4xl font-black text-slate-800 dark:text-white mb-3 text-center">
-          Digital Downloads
+          Study Notes
         </Text>
         <Text className="text-base text-slate-500 dark:text-slate-400 leading-6 text-center">
           Premium notes, eBooks, and practice resources curated for faster exam prep.

@@ -33,9 +33,15 @@ export const MIME_TYPES: Record<string, { mime: string; uti?: string }> = {
   epub: { mime: "application/epub+zip", uti: "org.idpf.epub-container" },
 };
 
+const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "webp"];
+
+const extensionOf = (name: string) => name.split(".").pop()?.toLowerCase() ?? "";
+
 export const getMimeFromName = (
   name: string,
-): { mime: string; uti?: string } => {
-  const ext = name.split(".").pop()?.toLowerCase() ?? "";
-  return MIME_TYPES[ext] ?? { mime: "*/*" };
-};
+): { mime: string; uti?: string } => MIME_TYPES[extensionOf(name)] ?? { mime: "*/*" };
+
+export const isPdfName = (name: string): boolean => extensionOf(name) === "pdf";
+
+export const isImageName = (name: string): boolean =>
+  IMAGE_EXTENSIONS.includes(extensionOf(name));

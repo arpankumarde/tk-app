@@ -1,6 +1,11 @@
 import BottomTabs from "@/components/BottomTabs";
 import BundleCrossSell from "@/components/BundleCrossSell";
 import PDFPreview from "@/components/PDFPreview";
+import {
+  getYouTubeEmbedUrl,
+  getYouTubePlayerHTML,
+  isYouTubeUrl,
+} from "@/utils/video";
 import Placeholder from "@/constants/placeholder";
 import { useAuth } from "@/context/AuthContext";
 import { useAddToCart } from "@/hooks/useAddToCart";
@@ -15,7 +20,6 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
-  Linking,
   Modal,
   ScrollView,
   Share,
@@ -251,9 +255,6 @@ const CourseDetails = () => {
 
     if (slug) fetchCourseDetails();
   }, [slug]);
-
-  const isYouTubeUrl = (url: string) =>
-    url.includes("youtube.com/") || url.includes("youtu.be/");
 
   const getVideoPlayerHTML = (url: string) => `<!DOCTYPE html>
 <html><head>
@@ -493,15 +494,7 @@ const CourseDetails = () => {
                       disabled={!lesson.isPreview}
                       onPress={() => {
                         if (!lesson.isPreview) return;
-                        if (
-                          lesson.contentType === "video" &&
-                          lesson.contentUrl &&
-                          isYouTubeUrl(lesson.contentUrl)
-                        ) {
-                          Linking.openURL(lesson.contentUrl);
-                        } else {
-                          setSelectedLesson(lesson);
-                        }
+                        setSelectedLesson(lesson);
                       }}
                       className="flex-row items-center py-2.5 border-t border-gray-100 dark:border-slate-700/30"
                     >
@@ -808,7 +801,13 @@ const CourseDetails = () => {
           ) : selectedLesson?.contentType === "video" &&
             selectedLesson.contentUrl ? (
             <WebView
-              source={{ html: getVideoPlayerHTML(selectedLesson.contentUrl) }}
+              source={{
+                html: isYouTubeUrl(selectedLesson.contentUrl)
+                  ? getYouTubePlayerHTML(
+                      getYouTubeEmbedUrl(selectedLesson.contentUrl),
+                    )
+                  : getVideoPlayerHTML(selectedLesson.contentUrl),
+              }}
               style={{ flex: 1, backgroundColor: "#000" }}
               allowsInlineMediaPlayback
               mediaPlaybackRequiresUserAction={false}

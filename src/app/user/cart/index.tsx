@@ -793,7 +793,7 @@ const CartItemCard = ({
         {item.type === "digitalProduct" && (
           <View className="mt-1.5 self-start rounded bg-gray-100 dark:bg-slate-700 px-2 py-0.5">
             <Text className="text-xs font-bold text-slate-500 dark:text-slate-400">
-              Digital Download
+              Study Notes
             </Text>
           </View>
         )}
