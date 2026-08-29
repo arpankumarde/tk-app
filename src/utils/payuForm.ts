@@ -28,7 +28,7 @@ const field = (name: string, value: string | undefined) =>
 
 /**
  * Auto-submitting PayU checkout form. PayU has no native SDK wired into this
- * app, so every payment (cart + bundles) posts this form from a WebView.
+ * app, so every payment (cart, bundles, live tests) posts this form from a WebView.
  */
 export const buildPayuForm = (data: PayuFormData) => `
 <!DOCTYPE html>

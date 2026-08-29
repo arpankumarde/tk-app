@@ -11,6 +11,7 @@ import {
 } from "@/hooks/useBundleCheckout";
 import type { BundleDetails, BundleItem, BundleItemType } from "@/types/bundle";
 import { buildPayuForm } from "@/utils/payuForm";
+import { paymentFailureMessage } from "@/utils/paymentFailure";
 import Feather from "@react-native-vector-icons/feather";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -179,6 +180,7 @@ const BundleDetailsScreen = () => {
     orderId: string | null;
     txnid: string | null;
     token: string | null;
+    reason: string | null;
   }) => {
     if (finishingRef.current) return;
     finishingRef.current = true;
@@ -196,10 +198,7 @@ const BundleDetailsScreen = () => {
     } else if (params.status === "cancelled") {
       Alert.alert("Payment Cancelled", "Your payment was cancelled.");
     } else {
-      Alert.alert(
-        "Payment Failed",
-        "Your payment could not be completed. Please try again.",
-      );
+      Alert.alert("Payment Failed", paymentFailureMessage(params.reason));
     }
   };
 
@@ -817,6 +816,7 @@ const BundleDetailsScreen = () => {
                     orderId: params.get("order_id"),
                     txnid: params.get("txnid"),
                     token: params.get("token"),
+                    reason: params.get("reason"),
                   });
                   return false;
                 }

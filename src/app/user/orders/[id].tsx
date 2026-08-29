@@ -213,6 +213,24 @@ export default function OrderDetailsScreen() {
           </Text>
 
           <View className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 p-5">
+            {order.paymentFailure?.message && (
+              <View className="flex-row items-start mb-3 pb-3 border-b border-gray-100 dark:border-slate-800">
+                <Feather
+                  name="alert-circle"
+                  size={16}
+                  color={colorScheme === "dark" ? "#F87171" : "#DC2626"}
+                  style={{ marginTop: 2 }}
+                />
+                <View className="flex-1 ml-2">
+                  <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+                    Reason
+                  </Text>
+                  <Text className="text-slate-700 dark:text-slate-200 font-bold text-sm mt-0.5">
+                    {order.paymentFailure.message}
+                  </Text>
+                </View>
+              </View>
+            )}
             {order.paymentTransactionId && (
               <View className="flex-row items-center justify-between mb-3">
                 <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm">

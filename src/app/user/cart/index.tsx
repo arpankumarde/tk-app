@@ -24,6 +24,7 @@ import { useCartContext, CartItem } from "@/context/CartContext";
 import Placeholder from "@/constants/placeholder";
 import { useWallet } from "@/app/user/_hooks/useWallet";
 import { buildPayuForm } from "@/utils/payuForm";
+import { paymentFailureMessage } from "@/utils/paymentFailure";
 
 const Cart = () => {
   const { colorScheme } = useColorScheme();
@@ -153,6 +154,7 @@ const Cart = () => {
     orderId: string | null;
     txnid: string | null;
     token: string | null;
+    reason: string | null;
   }) => {
     setWebViewVisible(false);
     setPayuData(null);
@@ -171,10 +173,7 @@ const Cart = () => {
         "Your payment was cancelled. Your cart is still saved.",
       );
     } else {
-      Alert.alert(
-        "Payment Failed",
-        "Your payment could not be completed. Please try again.",
-      );
+      Alert.alert("Payment Failed", paymentFailureMessage(params.reason));
     }
   };
 
@@ -648,6 +647,7 @@ const Cart = () => {
                     orderId: params.get("order_id"),
                     txnid: params.get("txnid"),
                     token: params.get("token"),
+                    reason: params.get("reason"),
                   });
                   return false;
                 }

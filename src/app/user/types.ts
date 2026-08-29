@@ -307,6 +307,8 @@ export interface Order {
   createdAt: string;
   items: OrderItem[];
   paymentTransactionId?: string | null;
+  // Sent by orders/details for failed and cancelled orders with a PayU reason on record
+  paymentFailure?: { reason: string; message: string } | null;
 }
 
 export interface OrdersListResponse {

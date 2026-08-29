@@ -5,6 +5,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useBuildShareUrl } from "@/hooks/useBuildShareUrl";
 import { useCountdown } from "@/hooks/useCountdown";
 import { useNow } from "@/hooks/useNow";
+import { paymentFailureMessage } from "@/utils/paymentFailure";
+import { buildPayuForm } from "@/utils/payuForm";
 import Feather from "@react-native-vector-icons/feather";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -406,6 +408,7 @@ const LiveTestDetails = () => {
     orderId: string | null;
     txnid: string | null;
     token: string | null;
+    reason: string | null;
   }) => {
     setWebViewVisible(false);
     setPayuData(null);
@@ -426,10 +429,7 @@ const LiveTestDetails = () => {
         "Your payment was cancelled. You can try again.",
       );
     } else {
-      Alert.alert(
-        "Payment Failed",
-        "Your payment could not be completed. Please try again.",
-      );
+      Alert.alert("Payment Failed", paymentFailureMessage(params.reason));
     }
   };
 
@@ -1427,6 +1427,7 @@ const LiveTestDetails = () => {
                       orderId: params.get("order_id"),
                       txnid: params.get("txnid"),
                       token: params.get("token"),
+                      reason: params.get("reason"),
                     });
                     return false;
                   }
@@ -1471,39 +1472,5 @@ const LiveTestDetails = () => {
     </View>
   );
 };
-
-const buildPayuForm = (data: {
-  key: string;
-  txnid: string;
-  amount: string;
-  productinfo: string;
-  firstname: string;
-  email: string;
-  phone: string;
-  surl: string;
-  furl: string;
-  hash: string;
-  payuUrl: string;
-  udf1?: string;
-}) => `
-<!DOCTYPE html>
-<html>
-<body onload="document.forms[0].submit()">
-  <form method="POST" action="${data.payuUrl}">
-    <input type="hidden" name="key" value="${data.key}" />
-    <input type="hidden" name="txnid" value="${data.txnid}" />
-    <input type="hidden" name="amount" value="${data.amount}" />
-    <input type="hidden" name="productinfo" value="${data.productinfo}" />
-    <input type="hidden" name="firstname" value="${data.firstname}" />
-    <input type="hidden" name="email" value="${data.email}" />
-    <input type="hidden" name="phone" value="${data.phone}" />
-    <input type="hidden" name="surl" value="${data.surl}" />
-    <input type="hidden" name="furl" value="${data.furl}" />
-    <input type="hidden" name="hash" value="${data.hash}" />
-    ${data.udf1 ? `<input type="hidden" name="udf1" value="${data.udf1}" />` : ""}
-  </form>
-</body>
-</html>
-`;
 
 export default LiveTestDetails;

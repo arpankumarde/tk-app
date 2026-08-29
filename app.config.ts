@@ -12,7 +12,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Testkart",
   slug: "testkart",
-  version: "4.7.3",
+  version: "4.7.4",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: "testkart",
@@ -20,7 +20,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {},
   android: {
     package: "com.testkart.mocktest.courses.studynotes",
-    versionCode: 55,
+    versionCode: 56,
     adaptiveIcon: {
       backgroundColor: "#FF8A50",
       foregroundImage: "./assets/images/android-icon-foreground.png",
