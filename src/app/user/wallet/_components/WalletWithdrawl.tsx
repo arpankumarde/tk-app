@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useImperativeHandle, useState, type Ref } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import Feather from "@react-native-vector-icons/feather";
 import { useWithdrawals, Withdrawal } from "../../_hooks/useWithdrawals";
+import type { WalletTabHandle } from "../../types";
 
 function formatCurrency(amount: number) {
   return `₹${amount.toLocaleString("en-IN")}`;
@@ -131,17 +132,23 @@ export default function WalletWithdrawl({
   availableBalance,
   colorScheme,
   onWithdrawalCreated,
+  ref,
 }: {
   token: string | null;
   availableBalance: number;
   colorScheme?: "light" | "dark";
   onWithdrawalCreated?: () => void;
+  ref?: Ref<WalletTabHandle>;
 }) {
   const {
     withdrawals,
     loading,
     refetch: refetchWithdrawals,
   } = useWithdrawals(token);
+
+  useImperativeHandle(ref, () => ({ refresh: refetchWithdrawals }), [
+    refetchWithdrawals,
+  ]);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [amount, setAmount] = useState("");

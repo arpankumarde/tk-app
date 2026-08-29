@@ -9,7 +9,7 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
 } from "react-native";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
 import Feather from "@react-native-vector-icons/feather";
@@ -17,6 +17,7 @@ import { useColorScheme } from "nativewind";
 import Header from "@/components/Header";
 import BottomTabs from "@/components/BottomTabs";
 import { useWallet } from "../_hooks/useWallet";
+import type { WalletTabHandle } from "../types";
 import WalletTransaction from "./_components/WalletTransaction";
 import WalletBank from "./_components/WalletBank";
 import WalletWithdrawl from "./_components/WalletWithdrawl";
@@ -50,8 +51,16 @@ export default function WalletScreen() {
     loadMore,
   } = useWallet(token);
   const [activeTab, setActiveTab] = useState<WalletTab>("transactions");
+  const [refreshing, setRefreshing] = useState(false);
+  const tabRef = useRef<WalletTabHandle>(null);
 
   const availableBalance = balance?.availableBalance ?? 0;
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([refetch(), tabRef.current?.refresh()]);
+    setRefreshing(false);
+  };
 
   const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (activeTab !== "transactions" || !hasMore || loadingMore) return;
@@ -76,7 +85,7 @@ export default function WalletScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
         refreshControl={
-          <RefreshControl refreshing={false} onRefresh={refetch} />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
         onScroll={handleScroll}
         scrollEventThrottle={100}
@@ -202,11 +211,16 @@ export default function WalletScreen() {
               )}
 
               {activeTab === "bank" && (
-                <WalletBank token={token} colorScheme={colorScheme} />
+                <WalletBank
+                  ref={tabRef}
+                  token={token}
+                  colorScheme={colorScheme}
+                />
               )}
 
               {activeTab === "withdrawal" && (
                 <WalletWithdrawl
+                  ref={tabRef}
                   token={token}
                   availableBalance={availableBalance}
                   colorScheme={colorScheme}

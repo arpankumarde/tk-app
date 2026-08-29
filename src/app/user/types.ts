@@ -360,6 +360,10 @@ export interface WalletTransactionsResponse {
   limit: number;
 }
 
+export interface WalletTabHandle {
+  refresh: () => Promise<void>;
+}
+
 export interface LatestAttemptResultsPayload {
   attemptId: number;
   completedAt?: string;

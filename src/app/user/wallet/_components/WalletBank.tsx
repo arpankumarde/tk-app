@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useImperativeHandle, useState, type Ref } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import Feather from "@react-native-vector-icons/feather";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from "expo-image";
 import { useBankDetails, BankDetailsInput } from "../../_hooks/useBankDetails";
+import type { WalletTabHandle } from "../../types";
 
 function maskAccount(num: string) {
   if (!num) return "";
@@ -168,12 +169,16 @@ function FormInput({
 export default function WalletBank({
   token,
   colorScheme,
+  ref,
 }: {
   token: string | null;
   colorScheme?: "light" | "dark";
+  ref?: Ref<WalletTabHandle>;
 }) {
-  const { bankDetails, loading, saving, saveBankDetails } =
+  const { bankDetails, loading, saving, refetch, saveBankDetails } =
     useBankDetails(token);
+
+  useImperativeHandle(ref, () => ({ refresh: refetch }), [refetch]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState<BankDetailsInput>({
