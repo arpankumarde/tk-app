@@ -12,7 +12,9 @@ import {
 import { useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
-import Feather from "@react-native-vector-icons/feather";
+import Feather, {
+  type FeatherIconName,
+} from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
 import Header from "@/components/Header";
 import BottomTabs from "@/components/BottomTabs";
@@ -27,7 +29,7 @@ type WalletTab = "transactions" | "bank" | "withdrawal";
 const TABS: {
   key: WalletTab;
   label: string;
-  icon: keyof typeof Feather.glyphMap;
+  icon: FeatherIconName;
 }[] = [
   { key: "transactions", label: "Transactions", icon: "list" },
   { key: "bank", label: "Bank Details", icon: "credit-card" },

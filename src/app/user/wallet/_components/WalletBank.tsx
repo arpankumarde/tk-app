@@ -11,7 +11,9 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import Feather from "@react-native-vector-icons/feather";
+import Feather, {
+  type FeatherIconName,
+} from "@react-native-vector-icons/feather";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from "expo-image";
 import { useBankDetails, BankDetailsInput } from "../../_hooks/useBankDetails";
@@ -29,7 +31,7 @@ const STATUS_STYLE: Record<
     label: string;
     bg: string;
     text: string;
-    icon: keyof typeof Feather.glyphMap;
+    icon: FeatherIconName;
   }
 > = {
   pending: {

@@ -10,7 +10,9 @@ import {
   TextInput,
   Alert,
 } from "react-native";
-import Feather from "@react-native-vector-icons/feather";
+import Feather, {
+  type FeatherIconName,
+} from "@react-native-vector-icons/feather";
 import { useWithdrawals, Withdrawal } from "../../_hooks/useWithdrawals";
 import type { WalletTabHandle } from "../../types";
 
@@ -33,7 +35,7 @@ const STATUS_STYLE: Record<
     label: string;
     bg: string;
     text: string;
-    icon: keyof typeof Feather.glyphMap;
+    icon: FeatherIconName;
   }
 > = {
   pending: { label: "Pending", bg: "#FEF3C7", text: "#B45309", icon: "clock" },

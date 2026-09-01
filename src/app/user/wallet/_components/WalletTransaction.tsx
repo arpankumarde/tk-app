@@ -1,5 +1,7 @@
 import { View, Text, ActivityIndicator } from "react-native";
-import Feather from "@react-native-vector-icons/feather";
+import Feather, {
+  type FeatherIconName,
+} from "@react-native-vector-icons/feather";
 import { WalletTransaction as WalletTransactionData } from "../../types";
 
 function formatCurrency(amount: number) {
@@ -22,7 +24,7 @@ const CREDIT_TYPES: WalletTransactionData["transactionType"][] = [
 
 const TYPE_META: Record<
   WalletTransactionData["transactionType"],
-  { label: string; icon: keyof typeof Feather.glyphMap }
+  { label: string; icon: FeatherIconName }
 > = {
   prize_credit: { label: "Prize", icon: "award" },
   prize_lock_refund: { label: "Refund", icon: "rotate-ccw" },
