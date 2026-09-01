@@ -28,7 +28,7 @@ const getPDFViewerHTML = (pdfUrl: string, maxPages: number) => `
       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs';
 
     const MAX_PAGES = ${maxPages};
-    const PDF_URL   = '${pdfUrl}';
+    const PDF_URL   = ${JSON.stringify(pdfUrl).replace(/</g, "\\u003c")};
 
     async function renderPDF() {
       const loadingEl  = document.getElementById('loading');
