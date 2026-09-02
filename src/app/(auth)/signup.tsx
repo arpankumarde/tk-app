@@ -40,14 +40,13 @@ const Signup = () => {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileStatus, setTurnstileStatus] =
     useState<TurnstileStatus>("pending");
   const turnstileRef = useRef<TurnstileGateHandle>(null);
 
   // Only holds the send button back while a token is on its way; the server
   // is what enforces Turnstile.
-  const awaitingTurnstile = !turnstileToken && turnstileStatus === "pending";
+  const awaitingTurnstile = turnstileStatus === "pending";
 
   useEffect(() => {
     if (user) {
@@ -96,6 +95,9 @@ const Signup = () => {
     }
     setOtpLoading(true);
     try {
+      // Single-use: the first send spends the token minted on mount, and only
+      // a later send (a retry or resend) runs a new check.
+      const turnstileToken = await turnstileRef.current?.getToken();
       const endpoint =
         authMethod === "mobile"
           ? `${BASE_URL}/_api/auth/mobile-signup/send-otp`
@@ -132,9 +134,6 @@ const Signup = () => {
       Alert.alert("Error", "Failed to send OTP. Please try again.");
     } finally {
       setOtpLoading(false);
-      // Turnstile tokens are single-use - mint a fresh one for the next attempt.
-      setTurnstileToken(null);
-      turnstileRef.current?.reset();
     }
   };
 
@@ -375,12 +374,10 @@ const Signup = () => {
             </View>
           )}
 
-          {/* Bot check for the SMS OTP flow. Invisible unless Cloudflare
+          {/* Bot check for both OTP flows. Invisible unless Cloudflare
               demands an interactive challenge. */}
           <TurnstileGate
             ref={turnstileRef}
-            onVerify={setTurnstileToken}
-            onExpire={() => setTurnstileToken(null)}
             onStatusChange={setTurnstileStatus}
           />
 
