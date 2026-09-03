@@ -3,13 +3,13 @@ import Feather, {
 } from "@react-native-vector-icons/feather";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Animated,
+  BackHandler,
   Dimensions,
-  Modal,
   ScrollView,
   StatusBar,
   Text,
@@ -20,6 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import PDFPreview from "@/components/PDFPreview";
 import { useAuth } from "@/context/AuthContext";
+import { usePreventScreenCapture } from "expo-screen-capture";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useVideoPlayer, VideoView } from "expo-video";
 import {
@@ -86,6 +87,7 @@ interface QuizQuestion {
 }
 
 const CourseLessons = () => {
+  usePreventScreenCapture("course-player");
   const { id } = useLocalSearchParams();
   const courseId = useMemo(
     () => (Array.isArray(id) ? Number(id[0]) : Number(id)),
@@ -285,13 +287,30 @@ const CourseLessons = () => {
     );
   };
 
-  const closeLesson = () => {
+  const closeDrawer = useCallback(() => {
+    Animated.timing(drawerAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => setDrawerOpen(false));
+  }, [drawerAnim]);
+
+  const closeLesson = useCallback(() => {
     setSelectedLesson(null);
     setVideoUrl(null);
     setQuizAnswers({});
     setShowQuizResults(false);
     closeDrawer();
-  };
+  }, [closeDrawer]);
+
+  useEffect(() => {
+    if (!selectedLesson) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      closeLesson();
+      return true;
+    });
+    return () => sub.remove();
+  }, [selectedLesson, closeLesson]);
 
   const openDrawer = () => {
     setDrawerOpen(true);
@@ -300,14 +319,6 @@ const CourseLessons = () => {
       duration: 260,
       useNativeDriver: true,
     }).start();
-  };
-
-  const closeDrawer = () => {
-    Animated.timing(drawerAnim, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => setDrawerOpen(false));
   };
 
   const handleDrawerLessonPress = (lesson: CourseLesson) => {
@@ -729,13 +740,9 @@ const CourseLessons = () => {
         <View className="h-6" />
       </ScrollView>
 
-      {/* Lesson Content Modal */}
-      <Modal
-        visible={!!selectedLesson}
-        animationType="slide"
-        onRequestClose={closeLesson}
-      >
-        <SafeAreaView className="flex-1 bg-white dark:bg-slate-900">
+      {/* Lesson content overlay: rendered in the main window (not a Modal) so FLAG_SECURE covers it */}
+      {selectedLesson ? (
+        <SafeAreaView className="absolute top-0 bottom-0 left-0 right-0 bg-white dark:bg-slate-900">
           {/* ── Navbar ── */}
           <View className="flex-row items-center px-4 py-3 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800">
             <TouchableOpacity
@@ -801,6 +808,7 @@ const CourseLessons = () => {
                   player={videoPlayer}
                   style={{ flex: 1, backgroundColor: "#000" }}
                   nativeControls
+                  fullscreenOptions={{ enable: false }}
                   contentFit="contain"
                 />
               )
@@ -1324,7 +1332,7 @@ const CourseLessons = () => {
             </View>
           )}
         </SafeAreaView>
-      </Modal>
+      ) : null}
     </SafeAreaView>
   );
 };

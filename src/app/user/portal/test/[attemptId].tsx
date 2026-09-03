@@ -2,6 +2,7 @@ import ScientificCalculator from "@/components/ScientificCalculator";
 import { useAuth } from "@/context/AuthContext";
 import Feather from "@react-native-vector-icons/feather";
 import Ionicons from "@react-native-vector-icons/ionicons";
+import { usePreventScreenCapture } from "expo-screen-capture";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -222,6 +223,7 @@ const HtmlContent = ({ html, isDark }: { html: string; isDark: boolean }) => {
 };
 
 const TestAttemptScreen = () => {
+  usePreventScreenCapture("test-attempt");
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const { token } = useAuth();

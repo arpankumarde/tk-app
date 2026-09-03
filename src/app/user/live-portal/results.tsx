@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { usePreventScreenCapture } from "expo-screen-capture";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Feather from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
@@ -27,6 +28,7 @@ interface LiveResultData {
 }
 
 const LiveResultsScreen = () => {
+  usePreventScreenCapture("live-results");
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const { token } = useAuth();

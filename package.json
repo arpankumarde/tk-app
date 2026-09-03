@@ -1,7 +1,7 @@
 {
   "name": "testkart",
   "main": "expo-router/entry",
-  "version": "4.8.1",
+  "version": "4.8.2",
   "scripts": {
     "start": "expo start --port 8085",
     "android": "expo start --android",
@@ -28,6 +28,7 @@
     "expo-intent-launcher": "^57.0.1",
     "expo-linking": "~57.0.10",
     "expo-router": "~57.0.21",
+    "expo-screen-capture": "~57.0.3",
     "expo-screen-orientation": "^57.0.2",
     "expo-secure-store": "^57.0.4",
     "expo-sharing": "^57.0.19",
