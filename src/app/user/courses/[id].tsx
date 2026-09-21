@@ -24,8 +24,10 @@ import { usePreventScreenCapture } from "expo-screen-capture";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useVideoPlayer, VideoView } from "expo-video";
 import {
+  getGumletPlayerHTML,
   getYouTubeEmbedUrl,
   getYouTubePlayerHTML,
+  isGumletPlayerPageAllowed,
   isYouTubeUrl,
 } from "@/utils/video";
 import { useColorScheme } from "nativewind";
@@ -75,6 +77,14 @@ interface CourseProgress {
   completedLessonIds: number[];
 }
 
+type VideoPlayerKind = "r2" | "youtube" | "gumlet";
+
+interface SignedVideo {
+  url: string;
+  player: VideoPlayerKind;
+  gumletProcessing: boolean;
+}
+
 interface QuizQuestion {
   id: string;
   questionText: string;
@@ -106,6 +116,9 @@ const CourseLessons = () => {
     null,
   );
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoPlayerKind, setVideoPlayerKind] =
+    useState<VideoPlayerKind | null>(null);
+  const [gumletProcessing, setGumletProcessing] = useState(false);
   const [loadingVideo, setLoadingVideo] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
   const [showQuizResults, setShowQuizResults] = useState(false);
@@ -115,8 +128,11 @@ const CourseLessons = () => {
   const screenWidth = Dimensions.get("window").width;
   const drawerWidth = screenWidth * 0.82;
 
+  // Gumlet (DRM) lessons play only in Gumlet's embed, never in expo-video
   const videoPlayer = useVideoPlayer(
-    videoUrl && !isYouTubeUrl(videoUrl) ? videoUrl : null,
+    videoUrl && !isYouTubeUrl(videoUrl) && videoPlayerKind !== "gumlet"
+      ? videoUrl
+      : null,
     (player) => {
       player.loop = false;
     },
@@ -208,7 +224,10 @@ const CourseLessons = () => {
     };
   }, [selectedLesson]);
 
-  const fetchSignedVideoUrl = async (lessonId: number, videoUrl: string) => {
+  const fetchSignedVideoUrl = async (
+    lessonId: number,
+    videoUrl: string,
+  ): Promise<SignedVideo | null> => {
     try {
       setLoadingVideo(true);
       const res = await fetch(
@@ -234,7 +253,14 @@ const CourseLessons = () => {
       //   "[CourseContent] signed-video-url returned:",
       //   payload.signedUrl || null,
       // );
-      return payload.signedUrl || null;
+      const player: VideoPlayerKind =
+        payload.player === "gumlet" || payload.player === "youtube"
+          ? payload.player
+          : "r2";
+      const gumletProcessing =
+        player === "gumlet" && payload.gumletState === "processing";
+      if (!payload.signedUrl && !gumletProcessing) return null;
+      return { url: payload.signedUrl || "", player, gumletProcessing };
     } catch (err) {
       console.error("Failed to fetch signed video URL:", err);
       return null;
@@ -246,6 +272,8 @@ const CourseLessons = () => {
   const handleLessonPress = async (lesson: CourseLesson) => {
     // Clear previous lesson state
     setVideoUrl(null);
+    setVideoPlayerKind(null);
+    setGumletProcessing(false);
     setQuizAnswers({});
     setShowQuizResults(false);
     setSelectedLesson(lesson);
@@ -268,15 +296,18 @@ const CourseLessons = () => {
         //   "[CourseContent] YouTube iframe embed URL:",
         //   getYouTubeEmbedUrl(lesson.contentUrl),
         // );
+        setVideoPlayerKind("youtube");
         setVideoUrl(lesson.contentUrl);
         return;
       }
-      const signedUrl = await fetchSignedVideoUrl(
+      const signed = await fetchSignedVideoUrl(
         lesson.id,
         lesson.contentUrl || "",
       );
-      if (signedUrl) {
-        setVideoUrl(signedUrl);
+      if (signed) {
+        setVideoPlayerKind(signed.player);
+        setGumletProcessing(signed.gumletProcessing);
+        setVideoUrl(signed.url || null);
       }
     }
   };
@@ -298,6 +329,8 @@ const CourseLessons = () => {
   const closeLesson = useCallback(() => {
     setSelectedLesson(null);
     setVideoUrl(null);
+    setVideoPlayerKind(null);
+    setGumletProcessing(false);
     setQuizAnswers({});
     setShowQuizResults(false);
     closeDrawer();
@@ -788,8 +821,47 @@ const CourseLessons = () => {
                   Loading video...
                 </Text>
               </View>
+            ) : gumletProcessing ? (
+              <View className="flex-1 items-center justify-center bg-black px-8">
+                <Feather name="shield" size={32} color="#FF8A50" />
+                <Text className="text-slate-200 font-bold text-sm mt-4 text-center">
+                  This video is being prepared for secure playback.
+                </Text>
+                <Text className="text-slate-400 text-xs mt-2 text-center">
+                  Please check again in a few minutes.
+                </Text>
+                <TouchableOpacity
+                  onPress={() =>
+                    selectedLesson && handleLessonPress(selectedLesson)
+                  }
+                  className="mt-5 px-5 py-2.5 rounded-xl bg-primary"
+                >
+                  <Text className="text-slate-900 font-bold text-sm">
+                    Check again
+                  </Text>
+                </TouchableOpacity>
+              </View>
             ) : videoUrl ? (
-              isYouTubeUrl(videoUrl) ? (
+              videoPlayerKind === "gumlet" ? (
+                <WebView
+                  source={{
+                    html: getGumletPlayerHTML(videoUrl),
+                    baseUrl: "https://testkart.in",
+                  }}
+                  style={{ flex: 1, backgroundColor: "#000" }}
+                  javaScriptEnabled
+                  domStorageEnabled
+                  allowsProtectedMedia
+                  allowsFullscreenVideo
+                  allowsInlineMediaPlayback
+                  mediaPlaybackRequiresUserAction={false}
+                  originWhitelist={["*"]}
+                  onShouldStartLoadWithRequest={(request) =>
+                    !request.isTopFrame ||
+                    isGumletPlayerPageAllowed(request.url)
+                  }
+                />
+              ) : isYouTubeUrl(videoUrl) ? (
                 <WebView
                   source={{
                     html: getYouTubePlayerHTML(getYouTubeEmbedUrl(videoUrl)),
