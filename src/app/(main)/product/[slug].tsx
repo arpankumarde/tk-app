@@ -112,15 +112,13 @@ const ProductDetails = () => {
         setProduct(payload.product);
         setReviews(payload.reviews || []);
 
-        if (payload.product?.category) {
-          const listResponse = await fetch(
-            `${BASE_URL}/_api/shop/list?limit=5&category=${payload.product.category.replace(/ /g, "+")}`,
+        if (payload.product?.id) {
+          const relatedResponse = await fetch(
+            `${BASE_URL}/_api/shop/related?productId=${payload.product.id}&limit=4`,
           );
-          const listData = await listResponse.json();
-          const listPayload = listData.json || listData;
-          setRelatedProducts(
-            listPayload.products?.filter((p: any) => p.slug !== slug) || [],
-          );
+          const relatedData = await relatedResponse.json();
+          const relatedPayload = relatedData.json || relatedData;
+          setRelatedProducts(relatedPayload.products || []);
         }
       } catch (error: any) {
         console.error("Error fetching product details:", error);

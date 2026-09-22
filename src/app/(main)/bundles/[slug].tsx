@@ -1,6 +1,7 @@
 import BottomTabs from "@/components/BottomTabs";
 import { bundleSavings } from "@/components/BundleCard";
 import Header from "@/components/Header";
+import RichText from "@/components/RichText";
 import Placeholder from "@/constants/placeholder";
 import { useAuth } from "@/context/AuthContext";
 import { useCartContext } from "@/context/CartContext";
@@ -51,17 +52,6 @@ const ITEM_META: Record<
 
 const formatInr = (amount: number) =>
   Math.round(amount).toLocaleString("en-IN");
-
-const stripHtml = (raw: string) =>
-  raw
-    .replace(/<[^>]*>?/gm, "")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&#39;/g, "'")
-    .replace(/&quot;/g, '"')
-    .trim();
 
 const itemMetaLine = (item: BundleItem) => {
   if (item.type === "course") {
@@ -436,19 +426,33 @@ const BundleDetailsScreen = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 24 }}
         >
-          {/* Title & Description */}
-          <View className="px-6 pt-4 pb-6">
+          <View className="px-6 pt-4">
             <Text className="text-3xl font-black text-slate-800 dark:text-white leading-[42px] mb-4">
               {bundle.title}
             </Text>
-            <Text className="text-slate-500 dark:text-slate-400 text-base font-medium leading-6 mb-6">
-              {bundle.description
-                ? stripHtml(bundle.description)
-                : "Everything in this pack, bought together for less than buying each item on its own."}
-            </Text>
+          </View>
 
+          {/* Thumbnail */}
+          <View className="px-6 mb-5">
+            <View className="aspect-video w-full rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 relative shadow-2xl">
+              <Image
+                source={{ uri: bundle.thumbnailUrl || Placeholder.COURSE }}
+                className="w-full h-full"
+                resizeMode="cover"
+              />
+              {discountPercent > 0 && savings > 0 && (
+                <View className="absolute top-3 right-3 px-3 py-1.5 bg-emerald-500 rounded-full shadow-sm">
+                  <Text className="text-white text-[10px] font-black">
+                    {discountPercent}% OFF
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          <View className="px-6 pb-6">
             {/* Metadata Row: Author */}
-            <View className="flex-row items-center flex-wrap mb-6">
+            <View className="flex-row items-center flex-wrap mb-4">
               <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
                 Created by{" "}
               </Text>
@@ -471,24 +475,6 @@ const BundleDetailsScreen = () => {
               <Text className="text-primary text-[10px] font-black tracking-widest ml-1.5 uppercase">
                 {items.length} {items.length === 1 ? "Item" : "Items"} Included
               </Text>
-            </View>
-          </View>
-
-          {/* Thumbnail */}
-          <View className="px-6 mb-8">
-            <View className="aspect-video w-full rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 relative shadow-2xl">
-              <Image
-                source={{ uri: bundle.thumbnailUrl || Placeholder.COURSE }}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
-              {discountPercent > 0 && savings > 0 && (
-                <View className="absolute top-3 right-3 px-3 py-1.5 bg-emerald-500 rounded-full shadow-sm">
-                  <Text className="text-white text-[10px] font-black">
-                    {discountPercent}% OFF
-                  </Text>
-                </View>
-              )}
             </View>
           </View>
 
@@ -703,6 +689,15 @@ const BundleDetailsScreen = () => {
               })}
             </View>
 
+            {bundle.description?.trim() ? (
+              <View className="mb-8">
+                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+                  About this Bundle
+                </Text>
+                <RichText content={bundle.description} />
+              </View>
+            ) : null}
+
             {/* Share */}
             <TouchableOpacity
               onPress={handleShare}
@@ -727,11 +722,15 @@ const BundleDetailsScreen = () => {
                     Disclaimer
                   </Text>
                 </View>
-                <Text className="px-4 py-4 text-amber-900/80 dark:text-amber-200/80 text-[13px] leading-6 font-medium">
-                  {stripHtml(
-                    bundle.disclaimer.replace(/^\s*disclaimer\s*:\s*/i, ""),
-                  )}
-                </Text>
+                <View className="px-4 pt-4 pb-1">
+                  <RichText
+                    tone="amber"
+                    content={bundle.disclaimer.replace(
+                      /^\s*disclaimer\s*:\s*/i,
+                      "",
+                    )}
+                  />
+                </View>
               </View>
             ) : null}
           </View>

@@ -141,9 +141,16 @@ const BundleCard = ({ bundle, variant = "list" }: BundleCardProps) => {
       {/* Post Header: teacher avatar + name */}
       <View className="flex-row items-center px-5 pt-4 pb-3">
         <View className="w-9 h-9 rounded-full bg-orange-50 dark:bg-slate-700 items-center justify-center overflow-hidden mr-3">
-          <Text className="text-primary text-xs font-black">
-            {teacherInitials}
-          </Text>
+          {bundle.teacherAvatarUrl ? (
+            <Image
+              source={{ uri: bundle.teacherAvatarUrl }}
+              className="w-full h-full"
+            />
+          ) : (
+            <Text className="text-primary text-xs font-black">
+              {teacherInitials}
+            </Text>
+          )}
         </View>
         <View className="flex-row items-center flex-1">
           <Text

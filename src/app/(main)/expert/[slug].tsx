@@ -1,9 +1,11 @@
 import type { LiveTest } from "@/app/(main)/live/index";
+import BundleCard from "@/components/BundleCard";
 import CourseCard from "@/components/CourseCard";
 import Header from "@/components/Header";
 import LiveTestCard from "@/components/LiveTestCard";
 import MockTestCard from "@/components/MockTestCard";
 import ProductCard from "@/components/ProductCard";
+import type { BundleListItem } from "@/types/bundle";
 import Feather from "@react-native-vector-icons/feather";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
@@ -120,16 +122,33 @@ interface Data {
     studentsEnrolled?: number;
   })[];
   products: Product[];
+  bundles?: ProfileBundle[];
 }
 
-type TabKey = "tests" | "liveTests" | "products" | "courses";
+interface ProfileBundle {
+  id: number;
+  slug: string;
+  title: string;
+  thumbnailUrl: string | null;
+  price: number;
+  originalPrice: number;
+  itemCount: number;
+}
+
+type TabKey = "tests" | "liveTests" | "products" | "courses" | "bundles";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "tests", label: "Mock Tests" },
   { key: "liveTests", label: "Live Tests" },
   { key: "products", label: "Study Notes" },
   { key: "courses", label: "Courses" },
+  { key: "bundles", label: "Bundles" },
 ];
+
+// Bundles come with teachers/profile. A server from before that field was added
+// omits it, so the screen then falls back to bundles/list filtered by the
+// teacher, which pages at 10 by default.
+const BUNDLE_LIMIT = 50;
 
 const ExpertDetails = () => {
   const { slug } = useLocalSearchParams();
@@ -144,6 +163,9 @@ const ExpertDetails = () => {
     Record<number, Partial<LiveTest>>
   >({});
   const [now] = useState(() => Date.now());
+  const [fetchedBundles, setFetchedBundles] = useState<
+    BundleListItem[] | null
+  >(null);
 
   useEffect(() => {
     const fetchExpertDetails = async () => {
@@ -200,6 +222,34 @@ const ExpertDetails = () => {
     fetchCanonicalLiveTests();
   }, [data?.liveTests]);
 
+  const teacherId = data?.teacher?.id;
+  const profileHasBundles = Array.isArray(data?.bundles);
+
+  useEffect(() => {
+    if (!teacherId || profileHasBundles) return;
+    let cancelled = false;
+
+    const fetchBundles = async () => {
+      try {
+        const response = await fetch(
+          `${BASE_URL}/_api/bundles/list?teacherId=${teacherId}&limit=${BUNDLE_LIMIT}`,
+        );
+        const json = await response.json();
+        const payload = json.json || json;
+        if (!cancelled)
+          setFetchedBundles(response.ok ? payload.bundles || [] : []);
+      } catch (error) {
+        console.error("Error fetching expert bundles:", error);
+        if (!cancelled) setFetchedBundles([]);
+      }
+    };
+
+    fetchBundles();
+    return () => {
+      cancelled = true;
+    };
+  }, [teacherId, profileHasBundles]);
+
   const handleShare = async () => {
     try {
       await Share.share({
@@ -235,6 +285,21 @@ const ExpertDetails = () => {
   }
 
   const { teacher, tests, liveTests, products, courses } = data;
+
+  // The profile's bundle rows carry only what the web card needs; the teacher
+  // fields BundleCard shows come from the profile itself.
+  const bundles: BundleListItem[] | null = data.bundles
+    ? data.bundles.map((bundle) => ({
+        ...bundle,
+        description: null,
+        discountPercentage: null,
+        isPublished: true,
+        teacherId: teacher.id,
+        teacherName: teacher.displayName,
+        teacherIsVerified: teacher.isVerified,
+        teacherAvatarUrl: teacher.avatarUrl,
+      }))
+    : fetchedBundles;
 
   const activeSocialLinks = [
     {
@@ -284,6 +349,7 @@ const ExpertDetails = () => {
     liveTests: liveTests?.length || 0,
     products: products?.length || 0,
     courses: courses?.length || 0,
+    bundles: bundles?.length || 0,
   };
 
   const totalStudents =
@@ -814,6 +880,22 @@ const ExpertDetails = () => {
                     ))
                   ) : (
                     <EmptyState label="No courses yet" />
+                  )}
+                </View>
+              )}
+
+              {activeTab === "bundles" && (
+                <View className="px-5">
+                  {bundles === null ? (
+                    <View className="py-12 items-center">
+                      <ActivityIndicator color="#FF8A50" />
+                    </View>
+                  ) : bundles.length > 0 ? (
+                    bundles.map((bundle) => (
+                      <BundleCard key={bundle.id} bundle={bundle} />
+                    ))
+                  ) : (
+                    <EmptyState label="No bundles yet" />
                   )}
                 </View>
               )}

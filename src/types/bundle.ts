@@ -17,6 +17,7 @@ export interface BundleListItem {
   teacherId: number;
   teacherName: string;
   teacherIsVerified: boolean;
+  teacherAvatarUrl?: string | null;
   itemCount: number;
   courseTitles?: string[];
 }
