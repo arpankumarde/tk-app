@@ -168,7 +168,7 @@ export const useProductFileDownload = ({
       setOversized(tooBig);
       setKind(tooBig ? "other" : resolvedKind);
 
-      if (resolvedKind === "pdf" && !tooBig) {
+      if (resolvedKind !== "other" && !tooBig) {
         setState("reading");
         const encoded = await file.base64();
         if (!aliveRef.current) return;

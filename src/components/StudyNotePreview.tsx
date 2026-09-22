@@ -1,14 +1,8 @@
-import Feather from "@react-native-vector-icons/feather";
-import { Image } from "expo-image";
-import { useColorScheme } from "nativewind";
-import { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { useRef, useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import DocumentViewer, {
+  type DocumentPageImage,
+} from "@/components/DocumentViewer";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 const LOAD_ERROR = "This preview page could not be loaded.";
@@ -21,61 +15,50 @@ export interface StudyNoteFileSummary {
   orderIndex: number;
 }
 
-interface PreviewPage {
-  page: number;
-  totalPages: number;
-  imageUrl: string;
-  width: number;
-  height: number;
-}
-
-type PageResult = { data: PreviewPage } | { error: string };
-
-// Same contract as the web ProductPDFPreview: shop/preview-page returns one server-rendered
-// image per page, so the paid PDF itself never reaches the app.
+// shop/preview-page returns one server-rendered image per page, so the paid PDF
+// itself never reaches the app. A page is rendered on first request, so a cold
+// page can take a few seconds.
 const fetchPreviewPage = async (
   productId: number,
   page: number,
   fileId?: number,
-): Promise<PageResult> => {
+): Promise<DocumentPageImage> => {
   const fileQuery = fileId ? `&fileId=${fileId}` : "";
+  let payload: any;
+  let ok = false;
   try {
     const response = await fetch(
       `${BASE_URL}/_api/shop/preview-page?productId=${productId}&page=${page}${fileQuery}`,
     );
     const data = await response.json();
-    const payload = data.json || data;
-    if (!response.ok || !payload?.imageUrl) {
-      return {
-        error: typeof payload?.error === "string" ? payload.error : LOAD_ERROR,
-      };
-    }
-    return { data: payload };
+    payload = data.json || data;
+    ok = response.ok;
   } catch {
-    return { error: LOAD_ERROR };
+    throw new Error(LOAD_ERROR);
   }
+  if (!ok || !payload?.imageUrl) {
+    throw new Error(
+      typeof payload?.error === "string" ? payload.error : LOAD_ERROR,
+    );
+  }
+  return {
+    url: payload.imageUrl,
+    width: payload.width,
+    height: payload.height,
+    totalPages: payload.totalPages,
+  };
 };
 
+/** Preview pages in the same reader as purchased notes, one scrolling document per file. */
 export default function StudyNotePreview({
   productId,
-  previewPages,
   files,
 }: {
   productId: number;
-  previewPages: number;
   files: StudyNoteFileSummary[];
 }) {
   const [fileIndex, setFileIndex] = useState(0);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [results, setResults] = useState<Record<string, PageResult>>({});
-  const [totals, setTotals] = useState<Record<string, number>>({});
-  const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
-  const [failedUrl, setFailedUrl] = useState<string | null>(null);
-  const [imageAttempt, setImageAttempt] = useState(0);
-  const requested = useRef(new Set<string>());
-  const { colorScheme } = useColorScheme();
-  const accentColor = colorScheme === "dark" ? "#FDBA74" : "#903209";
-  const mutedColor = colorScheme === "dark" ? "#94A3B8" : "#64748B";
+  const cache = useRef(new Map<string, Promise<DocumentPageImage>>());
 
   // The first file is the product's main file, which the endpoint previews when fileId is omitted.
   const selectedFile = files[fileIndex];
@@ -83,117 +66,26 @@ export default function StudyNotePreview({
     fileIndex > 0 && selectedFile && selectedFile.id > 0
       ? selectedFile.id
       : undefined;
-  const fileKey = String(fileId ?? 0);
-  const pageKey = `${fileKey}:${pageNumber}`;
 
-  const result = results[pageKey];
-  const previewPage = result && "data" in result ? result.data : null;
-  const pageError = result && "error" in result ? result.error : null;
-  const imageFailed = !!previewPage && failedUrl === previewPage.imageUrl;
-  const isLoading =
-    !result ||
-    (!!previewPage && !imageFailed && loadedUrl !== previewPage.imageUrl);
-
-  const totalPages =
-    totals[fileKey] ??
-    Math.max(
-      1,
-      Math.min(previewPages, selectedFile?.pageCount || previewPages),
-    );
-
-  useEffect(() => {
-    const load = (page: number, prefetchImage: boolean) => {
-      const key = `${fileKey}:${page}`;
-      if (requested.current.has(key)) return;
-      requested.current.add(key);
-      fetchPreviewPage(productId, page, fileId).then((next) => {
-        if ("data" in next) {
-          setTotals((prev) => ({ ...prev, [fileKey]: next.data.totalPages }));
-          if (prefetchImage) {
-            Image.prefetch(next.data.imageUrl).catch(() => {});
-          }
-        }
-        setResults((prev) => ({ ...prev, [key]: next }));
-      });
-    };
-
-    if (!result) {
-      load(pageNumber, false);
+  const loadPage = (page: number) => {
+    const key = `${fileId ?? 0}:${page}`;
+    let request = cache.current.get(key);
+    if (!request) {
+      request = fetchPreviewPage(productId, page, fileId);
+      cache.current.set(key, request);
+      // Drop failures so a retry asks the server again.
+      request.catch(() => cache.current.delete(key));
     }
-    if (previewPage && pageNumber < previewPage.totalPages) {
-      load(pageNumber + 1, true);
-    }
-  }, [productId, fileId, fileKey, pageNumber, result, previewPage]);
-
-  const selectFile = (index: number) => {
-    setFileIndex(index);
-    setPageNumber(1);
+    return request;
   };
-
-  const retry = () => {
-    setFailedUrl(null);
-    setImageAttempt((attempt) => attempt + 1);
-    if (pageError) {
-      requested.current.delete(pageKey);
-      setResults((prev) => {
-        const next = { ...prev };
-        delete next[pageKey];
-        return next;
-      });
-    }
-  };
-
-  const navButton = (
-    label: string,
-    icon: "chevron-left" | "chevron-right",
-    disabled: boolean,
-    onPress: () => void,
-  ) => (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityRole="button"
-      accessibilityLabel={`${label} page`}
-      accessibilityState={{ disabled }}
-      className={`h-11 px-4 rounded-xl border flex-row items-center justify-center ${
-        disabled
-          ? "border-slate-200 dark:border-slate-700"
-          : "border-orange-300 dark:border-orange-400"
-      }`}
-    >
-      {icon === "chevron-left" && (
-        <Feather
-          name={icon}
-          size={18}
-          color={disabled ? mutedColor : accentColor}
-        />
-      )}
-      <Text
-        className={`font-bold text-sm mx-1 ${
-          disabled
-            ? "text-slate-500 dark:text-slate-400"
-            : "text-[#903209] dark:text-orange-300"
-        }`}
-      >
-        {label}
-      </Text>
-      {icon === "chevron-right" && (
-        <Feather
-          name={icon}
-          size={18}
-          color={disabled ? mutedColor : accentColor}
-        />
-      )}
-    </TouchableOpacity>
-  );
 
   return (
-    <View className="flex-1 bg-white dark:bg-slate-900">
+    <View className="flex-1 bg-slate-100 dark:bg-slate-950">
       {files.length > 1 && (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          className="grow-0 border-b border-gray-200 dark:border-slate-700"
+          className="grow-0 border-b border-gray-100 bg-white dark:border-slate-800 dark:bg-slate-950"
           contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 10 }}
         >
           {files.map((file, index) => {
@@ -201,7 +93,7 @@ export default function StudyNotePreview({
             return (
               <TouchableOpacity
                 key={`${file.id}-${index}`}
-                onPress={() => selectFile(index)}
+                onPress={() => setFileIndex(index)}
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
                 className={`px-4 py-2 rounded-full border mr-2 ${
@@ -226,73 +118,11 @@ export default function StudyNotePreview({
         </ScrollView>
       )}
 
-      <Text className="px-4 pt-3 pb-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-        Showing {totalPages} preview {totalPages === 1 ? "page" : "pages"}
-      </Text>
-
-      <ScrollView
-        className="flex-1 bg-slate-100 dark:bg-slate-950"
-        contentContainerStyle={{ padding: 12, flexGrow: 1 }}
-      >
-        {pageError || imageFailed ? (
-          <View className="flex-1 items-center justify-center px-8 py-16">
-            <Feather name="alert-circle" size={32} color="#DC2626" />
-            <Text className="text-slate-700 dark:text-slate-200 text-center text-sm font-medium mt-3">
-              {pageError || LOAD_ERROR}
-            </Text>
-            <TouchableOpacity
-              onPress={retry}
-              accessibilityRole="button"
-              className="mt-4 h-10 px-5 rounded-xl border border-orange-300 dark:border-orange-400 items-center justify-center"
-            >
-              <Text className="text-[#903209] dark:text-orange-300 font-bold text-sm">
-                Retry
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View
-            className="w-full bg-white rounded-md overflow-hidden"
-            style={{
-              aspectRatio: previewPage
-                ? previewPage.width / previewPage.height
-                : 1 / 1.414,
-            }}
-          >
-            {previewPage && (
-              <Image
-                key={`${previewPage.imageUrl}-${imageAttempt}`}
-                source={{ uri: previewPage.imageUrl }}
-                contentFit="contain"
-                accessibilityLabel={`Preview page ${previewPage.page} of ${previewPage.totalPages}`}
-                style={{ width: "100%", height: "100%" }}
-                onLoad={() => setLoadedUrl(previewPage.imageUrl)}
-                onError={() => setFailedUrl(previewPage.imageUrl)}
-              />
-            )}
-            {isLoading && (
-              <View className="absolute inset-0 items-center justify-center bg-slate-100 dark:bg-slate-950">
-                <ActivityIndicator size="large" color="#FF8A50" />
-                <Text className="text-slate-600 dark:text-slate-300 text-sm font-medium mt-3">
-                  Loading preview...
-                </Text>
-              </View>
-            )}
-          </View>
-        )}
-      </ScrollView>
-
-      <View className="flex-row items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-slate-700">
-        {navButton("Previous", "chevron-left", pageNumber <= 1, () =>
-          setPageNumber((page) => page - 1),
-        )}
-        <Text className="text-slate-700 dark:text-slate-200 font-bold text-sm">
-          Page {pageNumber} of {totalPages}
-        </Text>
-        {navButton("Next", "chevron-right", pageNumber >= totalPages, () =>
-          setPageNumber((page) => page + 1),
-        )}
-      </View>
+      <DocumentViewer
+        key={fileId ?? 0}
+        source={{ kind: "pages", loadPage }}
+        endNote="End of preview"
+      />
     </View>
   );
 }

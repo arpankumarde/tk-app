@@ -1,6 +1,6 @@
 import BottomTabs from "@/components/BottomTabs";
 import BundleCrossSell from "@/components/BundleCrossSell";
-import PDFPreview from "@/components/PDFPreview";
+import DocumentViewer from "@/components/DocumentViewer";
 import {
   getYouTubeEmbedUrl,
   getYouTubePlayerHTML,
@@ -10,6 +10,7 @@ import Placeholder from "@/constants/placeholder";
 import { useAuth } from "@/context/AuthContext";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useBuildShareUrl } from "@/hooks/useBuildShareUrl";
+import { useSecureModal } from "@/hooks/useSecureModal";
 import Feather from "@react-native-vector-icons/feather";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -109,6 +110,7 @@ const CourseDetails = () => {
   const [error, setError] = useState<string | null>(null);
   const [expandedModules, setExpandedModules] = useState<number[]>([0]);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const lessonModal = useSecureModal("course-preview-lesson");
   const [showIntroVideo, setShowIntroVideo] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
   const [enrollResult, setEnrollResult] = useState<{
@@ -183,6 +185,11 @@ const CourseDetails = () => {
     } finally {
       setEnrolling(false);
     }
+  };
+
+  const closeLesson = () => {
+    lessonModal.close();
+    setSelectedLesson(null);
   };
 
   useEffect(() => {
@@ -495,6 +502,7 @@ const CourseDetails = () => {
                       onPress={() => {
                         if (!lesson.isPreview) return;
                         setSelectedLesson(lesson);
+                        lessonModal.open();
                       }}
                       className="flex-row items-center py-2.5 border-t border-gray-100 dark:border-slate-700/30"
                     >
@@ -774,9 +782,9 @@ const CourseDetails = () => {
         </View>
       </Modal>
       <Modal
-        visible={!!selectedLesson}
+        visible={lessonModal.visible && !!selectedLesson}
         animationType="slide"
-        onRequestClose={() => setSelectedLesson(null)}
+        onRequestClose={closeLesson}
       >
         <SafeAreaView className="flex-1 bg-black">
           <View className="flex-row items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-700">
@@ -786,17 +794,16 @@ const CourseDetails = () => {
             >
               {selectedLesson?.title}
             </Text>
-            <TouchableOpacity onPress={() => setSelectedLesson(null)}>
+            <TouchableOpacity onPress={closeLesson}>
               <Feather name="x" size={22} color="#94a3b8" />
             </TouchableOpacity>
           </View>
 
           {selectedLesson?.contentType === "pdf" &&
           selectedLesson.contentUrl ? (
-            <PDFPreview
-              pdfUrl={selectedLesson.contentUrl}
-              maxPages={99}
-              style={{ flex: 1 }}
+            <DocumentViewer
+              key={selectedLesson.contentUrl}
+              source={{ kind: "pdfUrl", url: selectedLesson.contentUrl }}
             />
           ) : selectedLesson?.contentType === "video" &&
             selectedLesson.contentUrl ? (

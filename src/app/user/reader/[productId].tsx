@@ -9,13 +9,14 @@ import {
   Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import { useColorScheme } from "nativewind";
 import { router, useLocalSearchParams } from "expo-router";
 import Feather from "@react-native-vector-icons/feather";
 import * as IntentLauncher from "expo-intent-launcher";
 import * as Sharing from "expo-sharing";
-import PdfViewer from "@/components/PdfViewer";
+import { usePreventScreenCapture } from "expo-screen-capture";
+import DocumentViewer from "@/components/DocumentViewer";
+import ReaderHeader from "@/components/ReaderHeader";
 import {
   MAX_INLINE_BYTES,
   useProductFileDownload,
@@ -33,6 +34,7 @@ export default function ProductReaderScreen() {
     fileId?: string;
     title?: string;
   }>();
+  usePreventScreenCapture("study-note-reader");
   const { colorScheme } = useColorScheme();
   const [handingOff, setHandingOff] = useState(false);
 
@@ -125,20 +127,8 @@ export default function ProductReaderScreen() {
       );
     }
 
-    if (kind === "pdf" && base64) {
-      return <PdfViewer base64={base64} />;
-    }
-
-    if (kind === "image" && fileUri) {
-      return (
-        <View className="flex-1 bg-slate-100 dark:bg-slate-950">
-          <Image
-            source={{ uri: fileUri }}
-            contentFit="contain"
-            style={{ flex: 1 }}
-          />
-        </View>
-      );
+    if ((kind === "pdf" || kind === "image") && base64) {
+      return <DocumentViewer source={{ kind: "file", base64, mime }} />;
     }
 
     const sizeLabel = formatSize(sizeBytes);
@@ -190,24 +180,7 @@ export default function ProductReaderScreen() {
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
 
-      <View className="flex-row items-center border-b border-gray-100 px-4 py-3 dark:border-slate-800">
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800"
-        >
-          <Feather
-            name="arrow-left"
-            size={18}
-            color={colorScheme === "dark" ? "#fff" : "#1A1A1A"}
-          />
-        </TouchableOpacity>
-        <Text
-          className="ml-3 flex-1 text-base font-black text-slate-800 dark:text-white"
-          numberOfLines={1}
-        >
-          {heading}
-        </Text>
-      </View>
+      <ReaderHeader title={heading} onClose={() => router.back()} />
 
       {renderBody()}
     </SafeAreaView>

@@ -1,12 +1,14 @@
 import BundleCrossSell from "@/components/BundleCrossSell";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
+import ReaderHeader from "@/components/ReaderHeader";
 import StudyNotePreview, {
   type StudyNoteFileSummary,
 } from "@/components/StudyNotePreview";
 import { useAuth } from "@/context/AuthContext";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useBuildShareUrl } from "@/hooks/useBuildShareUrl";
+import { useSecureModal } from "@/hooks/useSecureModal";
 import Feather from "@react-native-vector-icons/feather";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
@@ -85,7 +87,7 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [previewVisible, setPreviewVisible] = useState(false);
+  const preview = useSecureModal("study-note-preview");
   const [enrolling, setEnrolling] = useState(false);
   const [enrollResult, setEnrollResult] = useState<{
     visible: boolean;
@@ -593,7 +595,7 @@ const ProductDetails = () => {
                 {hasPreview && (
                   <TouchableOpacity
                     className="flex-1 h-14 rounded-2xl bg-transparent border border-orange-100 dark:border-orange-400/20 items-center justify-center mr-2 shadow-sm shadow-orange-500/10"
-                    onPress={() => setPreviewVisible(true)}
+                    onPress={preview.open}
                   >
                     <View className="flex-row items-center">
                       <Feather name="eye" size={18} color="#FF8A50" />
@@ -834,29 +836,22 @@ const ProductDetails = () => {
             ) : null}
 
             <Modal
-              visible={previewVisible}
+              visible={preview.visible}
               animationType="slide"
-              onRequestClose={() => setPreviewVisible(false)}
+              onRequestClose={preview.close}
             >
-              <SafeAreaView className="flex-1 bg-white dark:bg-slate-900">
-                <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700">
-                  <Text
-                    numberOfLines={1}
-                    className="flex-1 mr-3 text-base font-bold text-slate-800 dark:text-white"
-                  >
-                    Preview: {product.title}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => setPreviewVisible(false)}
-                    accessibilityRole="button"
-                    accessibilityLabel="Close preview"
-                  >
-                    <Feather name="x" size={22} color="#64748b" />
-                  </TouchableOpacity>
-                </View>
+              <SafeAreaView
+                edges={["top", "left", "right"]}
+                className="flex-1 bg-white dark:bg-slate-950"
+              >
+                <ReaderHeader
+                  title={product.title}
+                  subtitle="Free preview"
+                  icon="x"
+                  onClose={preview.close}
+                />
                 <StudyNotePreview
                   productId={product.id}
-                  previewPages={product.previewPages ?? 0}
                   files={product.files ?? []}
                 />
               </SafeAreaView>

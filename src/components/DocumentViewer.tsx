@@ -5,23 +5,56 @@ import { useColorScheme } from "nativewind";
 import { WebView, type WebViewMessageEvent } from "react-native-webview";
 import {
   buildReaderHtml,
-  PDF_CHUNK_SIZE,
-  type PdfReaderMessage,
-} from "@/utils/pdfjs";
+  jsArg,
+  READER_CHUNK_SIZE,
+  type ReaderEngine,
+  type ReaderMessage,
+} from "@/utils/readerShell";
 
 // pdf.js is fetched from cdnjs, so a blocked or offline network stalls the
 // shell before it can report anything. Fail loudly instead of hanging.
 const ENGINE_TIMEOUT_MS = 20000;
 
-interface PdfViewerProps {
-  base64: string;
+export interface DocumentPageImage {
+  url: string;
+  width: number;
+  height: number;
+  totalPages: number;
+}
+
+/**
+ * Where the pages come from. Everything else - scrolling, zoom, the page counter -
+ * is the same for every source.
+ * - `file`: a downloaded PDF or image, pushed into the page as base64.
+ * - `pdfUrl`: a PDF pdf.js fetches by URL.
+ * - `pages`: one image per page, loaded as the reader scrolls. Reject with an
+ *   Error whose message is shown on the failed page.
+ */
+export type DocumentSource =
+  | { kind: "file"; base64: string; mime: string }
+  | { kind: "pdfUrl"; url: string }
+  | { kind: "pages"; loadPage: (page: number) => Promise<DocumentPageImage> };
+
+const engineFor = (source: DocumentSource): ReaderEngine =>
+  source.kind === "pages" ||
+  (source.kind === "file" && source.mime.startsWith("image/"))
+    ? "images"
+    : "pdf";
+
+const errorMessage = (err: unknown, fallback: string) =>
+  err instanceof Error && err.message ? err.message : fallback;
+
+interface DocumentViewerProps {
+  source: DocumentSource;
+  /** Shown below the last page, for example to mark the end of a preview. */
+  endNote?: string;
   onError?: (message: string) => void;
 }
 
-const PdfViewer = ({ base64, onError }: PdfViewerProps) => {
+const DocumentViewer = ({ source, endNote, onError }: DocumentViewerProps) => {
   const { colorScheme } = useColorScheme();
   const webViewRef = useRef<WebView>(null);
-  const sentRef = useRef(false);
+  const startedRef = useRef(false);
 
   const [loaded, setLoaded] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
@@ -31,11 +64,9 @@ const PdfViewer = ({ base64, onError }: PdfViewerProps) => {
 
   const isDark = colorScheme === "dark";
   // Pinned for the life of the component. Rebuilding the shell would reload the
-  // WebView and strip the bytes we have already pushed into it.
+  // WebView and strip anything already pushed into it. Remount to change source.
   const [html] = useState(() =>
-    buildReaderHtml({
-      background: colorScheme === "dark" ? "#0f172a" : "#f1f5f9",
-    }),
+    buildReaderHtml({ engine: engineFor(source), dark: isDark, endNote }),
   );
 
   const fail = useCallback(
@@ -49,30 +80,64 @@ const PdfViewer = ({ base64, onError }: PdfViewerProps) => {
   useEffect(() => {
     if (loaded || error) return;
     const timer = setTimeout(() => {
-      if (!sentRef.current) {
+      if (!startedRef.current) {
         fail("Could not load the reader. Check your connection and try again.");
       }
     }, ENGINE_TIMEOUT_MS);
     return () => clearTimeout(timer);
   }, [loaded, error, fail, attempt]);
 
-  const pushDocument = useCallback(async () => {
-    if (sentRef.current) return;
-    sentRef.current = true;
+  const inject = (script: string) => {
+    webViewRef.current?.injectJavaScript(`${script};true;`);
+  };
 
-    for (let start = 0; start < base64.length; start += PDF_CHUNK_SIZE) {
-      const chunk = base64.slice(start, start + PDF_CHUNK_SIZE);
-      // Base64 has no quote or backslash characters, so a plain literal is safe.
-      webViewRef.current?.injectJavaScript(`window.tkChunk('${chunk}');true;`);
-      // Yield between chunks so a large file does not block the JS thread.
-      await new Promise((resolve) => setTimeout(resolve, 0));
+  const start = async () => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+
+    if (source.kind === "file") {
+      for (let at = 0; at < source.base64.length; at += READER_CHUNK_SIZE) {
+        const chunk = source.base64.slice(at, at + READER_CHUNK_SIZE);
+        // Base64 has no quote or backslash characters, so a plain literal is safe.
+        inject(`window.tkChunk('${chunk}')`);
+        // Yield between chunks so a large file does not block the JS thread.
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
+      inject(`window.tkEnd(${jsArg(source.mime)})`);
+      return;
     }
 
-    webViewRef.current?.injectJavaScript("window.tkEnd();true;");
-  }, [base64]);
+    if (source.kind === "pdfUrl") {
+      inject(`window.tkOpenUrl(${jsArg(source.url)})`);
+      return;
+    }
+
+    try {
+      const first = await source.loadPage(1);
+      inject(
+        `window.tkInitPages(${first.totalPages}, ${first.width}, ${first.height})`,
+      );
+    } catch (err) {
+      fail(errorMessage(err, "Could not open this file."));
+    }
+  };
+
+  const supplyPage = async (pageNumber: number) => {
+    if (source.kind !== "pages") return;
+    try {
+      const next = await source.loadPage(pageNumber);
+      inject(`window.tkPage(${pageNumber}, ${jsArg(next.url)})`);
+    } catch (err) {
+      inject(
+        `window.tkPageFailed(${pageNumber}, ${jsArg(
+          errorMessage(err, "This page could not be loaded."),
+        )})`,
+      );
+    }
+  };
 
   const handleMessage = (event: WebViewMessageEvent) => {
-    let message: PdfReaderMessage;
+    let message: ReaderMessage;
     try {
       message = JSON.parse(event.nativeEvent.data);
     } catch {
@@ -81,7 +146,7 @@ const PdfViewer = ({ base64, onError }: PdfViewerProps) => {
 
     switch (message.type) {
       case "READY":
-        pushDocument();
+        start();
         break;
       case "LOADED":
         setTotalPages(message.totalPages);
@@ -90,6 +155,9 @@ const PdfViewer = ({ base64, onError }: PdfViewerProps) => {
       case "PAGE_CHANGED":
         setPage(message.page);
         break;
+      case "NEED_PAGE":
+        supplyPage(message.page);
+        break;
       case "ERROR":
         fail(message.message);
         break;
@@ -97,7 +165,7 @@ const PdfViewer = ({ base64, onError }: PdfViewerProps) => {
   };
 
   const retry = () => {
-    sentRef.current = false;
+    startedRef.current = false;
     setError(null);
     setLoaded(false);
     setTotalPages(0);
@@ -140,7 +208,8 @@ const PdfViewer = ({ base64, onError }: PdfViewerProps) => {
         allowFileAccessFromFileURLs={false}
         allowUniversalAccessFromFileURLs={false}
         allowsLinkPreview={false}
-        setBuiltInZoomControls={false}
+        setBuiltInZoomControls
+        setDisplayZoomControls={false}
         androidLayerType="hardware"
         overScrollMode="never"
         style={{ flex: 1, backgroundColor: isDark ? "#0f172a" : "#f1f5f9" }}
@@ -166,4 +235,4 @@ const PdfViewer = ({ base64, onError }: PdfViewerProps) => {
   );
 };
 
-export default PdfViewer;
+export default DocumentViewer;

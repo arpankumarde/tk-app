@@ -18,7 +18,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import PDFPreview from "@/components/PDFPreview";
+import DocumentViewer from "@/components/DocumentViewer";
 import { useAuth } from "@/context/AuthContext";
 import { usePreventScreenCapture } from "expo-screen-capture";
 import * as ScreenOrientation from "expo-screen-orientation";
@@ -919,10 +919,9 @@ const CourseLessons = () => {
           {/* PDF Content */}
           {selectedLesson?.contentType === "pdf" ? (
             selectedLesson.contentUrl ? (
-              <PDFPreview
-                pdfUrl={selectedLesson.contentUrl}
-                maxPages={Infinity}
-                style={{ flex: 1 }}
+              <DocumentViewer
+                key={selectedLesson.contentUrl}
+                source={{ kind: "pdfUrl", url: selectedLesson.contentUrl }}
               />
             ) : (
               <View className="flex-1 items-center justify-center bg-white dark:bg-slate-900">
