@@ -498,7 +498,7 @@ export default function WalletBank({
                   >
                     <Image
                       source={{
-                        uri: form.panCardImageBase64.startsWith("data:")
+                        uri: /^(https?|data):/i.test(form.panCardImageBase64)
                           ? form.panCardImageBase64
                           : `data:image/jpeg;base64,${form.panCardImageBase64}`,
                       }}
