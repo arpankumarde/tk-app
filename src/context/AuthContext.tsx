@@ -173,14 +173,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return null;
   }, [invalidateSession]);
 
+  // Revokes the session server-side without waiting on the network, so logout
+  // also works offline. Local auth is cleared whatever the request does.
   const logout = useCallback(async () => {
-    await clearStoredAuth();
-    await fetch(`${BASE_URL}/_api/auth/logout`, {
-      method: "POST",
-      credentials: "omit",
-    });
-    await WebBrowser.coolDownAsync();
-  }, [clearStoredAuth]);
+    const authToken = token;
+    if (authToken) {
+      fetch(`${BASE_URL}/_api/auth/logout`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ json: {} }),
+        credentials: "omit",
+      }).catch((e) => console.warn("Server logout skipped (network error):", e));
+    }
+    try {
+      await clearStoredAuth();
+    } catch (e) {
+      console.warn("Failed to clear stored auth:", e);
+    }
+    try {
+      await WebBrowser.coolDownAsync();
+    } catch {}
+  }, [clearStoredAuth, token]);
 
   return (
     <AuthContext.Provider
