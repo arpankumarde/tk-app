@@ -219,12 +219,6 @@ const TeacherCard = ({
         </View>
         <View className="flex-row items-center mt-1.5 flex-wrap">
           <View className="flex-row items-center mr-3">
-            <Feather name="users" size={11} color="#94a3b8" />
-            <Text className="ml-1 text-slate-500 dark:text-slate-400 text-[11px] font-bold">
-              {studentCount} {studentCount === 1 ? "Student" : "Students"}
-            </Text>
-          </View>
-          <View className="flex-row items-center mr-3">
             <Feather name="file-text" size={11} color="#94a3b8" />
             <Text className="ml-1 text-slate-500 dark:text-slate-400 text-[11px] font-bold">
               {testCount} {testCount === 1 ? "Test" : "Tests"}

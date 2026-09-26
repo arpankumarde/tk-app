@@ -352,13 +352,6 @@ const ExpertDetails = () => {
     bundles: bundles?.length || 0,
   };
 
-  const totalStudents =
-    (tests || []).reduce((acc, t) => acc + (t.studentsEnrolled || 0), 0) +
-    (liveTests || []).reduce(
-      (acc, t) => acc + (t.studentsEnrolled || t.enrolledCount || 0),
-      0,
-    );
-
   const mapToLiveCardTest = (liveTest: Data["liveTests"][number]): LiveTest => {
     const canonical = liveTestsCanonicalMap[liveTest.id] || {};
     const merged = { ...liveTest, ...canonical };
@@ -512,14 +505,6 @@ const ExpertDetails = () => {
                 label: "Courses",
                 value: tabCounts.courses,
                 icon: "play-circle" as const,
-              },
-              {
-                label: "Students",
-                value:
-                  totalStudents > 999
-                    ? `${(totalStudents / 1000).toFixed(1)}k`
-                    : String(totalStudents),
-                icon: "users" as const,
               },
             ].map((stat) => (
               <View

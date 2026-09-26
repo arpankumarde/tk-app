@@ -18,9 +18,6 @@ interface HomeContentItem {
   teacherName?: string;
   teacherIsVerified?: boolean;
   examName?: string | null;
-  studentsEnrolled?: number;
-  totalPurchases?: number;
-  views?: number;
 }
 
 const KIND_META: Record<
@@ -28,30 +25,19 @@ const KIND_META: Record<
   {
     placeholder: string;
     href: (item: HomeContentItem) => string;
-    statIcon: string;
-    stat: (item: HomeContentItem) => string;
   }
 > = {
   course: {
     placeholder: Placeholder.COURSE,
     href: (item) => `/course/${item.slug}`,
-    statIcon: "eye",
-    stat: (item) => {
-      const views = item.views ?? 0;
-      return `${views} ${views === 1 ? "View" : "Views"}`;
-    },
   },
   test: {
     placeholder: Placeholder.TEST,
     href: (item) => `/tests/${item.slug}`,
-    statIcon: "users",
-    stat: (item) => `${item.studentsEnrolled ?? 0} enrolled`,
   },
   note: {
     placeholder: Placeholder.NOTE,
     href: (item) => `/product/${item.slug}`,
-    statIcon: "shopping-bag",
-    stat: (item) => `${item.totalPurchases ?? 0} sold`,
   },
 };
 
@@ -181,15 +167,8 @@ const HomeContentCard = ({
 
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-shrink">
-            <Feather name={meta.statIcon as any} size={11} color="#94a3b8" />
-            <Text
-              className="ml-1 text-slate-400 dark:text-slate-500 text-[10px] font-bold"
-              numberOfLines={1}
-            >
-              {meta.stat(item)}
-            </Text>
             {isCourse && hasRatings && (
-              <View className="flex-row items-center ml-2">
+              <View className="flex-row items-center">
                 <Feather name="star" size={11} color="#F97316" />
                 <Text className="ml-1 text-orange-500 text-[10px] font-black">
                   {ratingDisplay}

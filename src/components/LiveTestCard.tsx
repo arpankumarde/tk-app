@@ -190,17 +190,6 @@ const LiveTestCard = ({
                 {test.subjects}
               </Text>
             </View>
-            <View className="w-1/2 flex-row items-center">
-              <Feather
-                name="users"
-                size={14}
-                color="#F97316"
-                style={{ top: -1 }}
-              />
-              <Text className="ml-2 text-xs font-bold text-slate-500 dark:text-slate-400 flex-1">
-                {test.enrolledCount} Enrolled
-              </Text>
-            </View>
           </View>
 
           {/* Countdown Highlighter */}

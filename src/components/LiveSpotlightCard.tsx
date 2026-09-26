@@ -160,12 +160,6 @@ const LiveSpotlightCard = ({ item }: { item: LiveSpotlightItem }) => {
               {countdownText}
             </Text>
           </View>
-          <View className="flex-row items-center">
-            <Feather name="users" size={13} color="#FF8A50" />
-            <Text className="ml-1.5 text-white/80 text-xs font-bold">
-              {item.enrolledCount} enrolled
-            </Text>
-          </View>
           {item.price === 0 ? (
             <Text className="text-emerald-400 font-black text-base">FREE</Text>
           ) : (

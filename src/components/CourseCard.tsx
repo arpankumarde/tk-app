@@ -50,7 +50,6 @@ const CourseCard = ({ course }: CourseCardProps) => {
       .slice(0, 2)
       .map((part) => part[0]?.toUpperCase() || "")
       .join("") || "TE";
-  const views = course.views || 0;
 
   const handlePress = () => {
     router.push(`/(main)/course/${course.slug}` as any);
@@ -114,13 +113,8 @@ const CourseCard = ({ course }: CourseCardProps) => {
       {/* Footer: views / rating (left) — price (right) */}
       <View className="flex-row items-center justify-between px-5 py-4">
         <View className="flex-row items-center">
-          <Feather name="eye" size={13} color="#94a3b8" />
-          <Text className="ml-1.5 text-slate-400 dark:text-slate-500 text-xs font-bold">
-            {views} {views === 1 ? "View" : "Views"}
-          </Text>
-
           {hasRatings && (
-            <View className="flex-row items-center ml-3">
+            <View className="flex-row items-center">
               <Feather name="star" size={13} color="#F59E0B" />
               <Text className="ml-1 text-amber-600 dark:text-amber-500 text-xs font-black">
                 {ratingDisplay} ({course.ratingsCount})
