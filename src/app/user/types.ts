@@ -96,6 +96,7 @@ export interface Question {
   optionB?: string | null;
   optionC?: string | null;
   optionD?: string | null;
+  optionE?: string | null;
   type?:
     | "MCQ"
     | "MSQ"
@@ -181,7 +182,7 @@ export interface StartAttemptResponse {
   startedAt: string;
 }
 
-export type OptionLetter = "A" | "B" | "C" | "D";
+export type OptionLetter = "A" | "B" | "C" | "D" | "E";
 
 export type SingleAnswer = {
   questionId: number;
@@ -262,6 +263,7 @@ export interface LatestAttemptResultItem {
   optionB?: string | null;
   optionC?: string | null;
   optionD?: string | null;
+  optionE?: string | null;
   selectedOption?: OptionLetter | null;
   selectedOptions?: OptionLetter[] | null;
   studentNumericalAnswer?: number | null;

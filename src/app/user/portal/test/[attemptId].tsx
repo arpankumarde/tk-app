@@ -53,7 +53,10 @@ type QuestionCategory =
   | "comprehension"
   | "unknown";
 
+const OPTION_LETTERS: OptionLetter[] = ["A", "B", "C", "D", "E"];
+
 type NormalizedQuestion = Question & {
+  optionLetters: OptionLetter[];
   category: QuestionCategory;
   subjectId: number;
   sectionId: number | null;
@@ -338,21 +341,18 @@ const TestAttemptScreen = () => {
       const data = await response.json();
       const payload = (data.json || data) as QuestionsApiPayload;
 
-      // Transform questions to convert individual options into array format
+      // Collect the non-empty optionA-optionE fields into `options`
       const transformedQuestions: NormalizedQuestion[] = (
         payload.questions || []
       ).map((q: any) => {
-        const optionsArray: string[] = [];
-
-        // Convert optionA, optionB, optionC, optionD to array
-        if (q.optionA) optionsArray.push(q.optionA);
-        if (q.optionB) optionsArray.push(q.optionB);
-        if (q.optionC) optionsArray.push(q.optionC);
-        if (q.optionD) optionsArray.push(q.optionD);
+        const optionLetters = OPTION_LETTERS.filter(
+          (letter) => q[`option${letter}`],
+        );
 
         return {
           ...q,
-          options: optionsArray,
+          options: optionLetters.map((letter) => q[`option${letter}`]),
+          optionLetters,
           type: q.questionType,
           marks: q.positiveMarks ? parseFloat(String(q.positiveMarks)) : 0,
           negativeMarks: q.negativeMarks
@@ -803,16 +803,13 @@ const TestAttemptScreen = () => {
     setShowSubmitConfirm(true);
   };
 
-  const indexToOptionLetter = (index: number): OptionLetter | null => {
-    const option = ["A", "B", "C", "D"][index];
-    return (option as OptionLetter) || null;
-  };
-
   const buildSubmitAnswers = useCallback((): StudentAnswer[] => {
     const answers: StudentAnswer[] = [];
 
     allQuestions.forEach((question) => {
       const value = selectedAnswers[question.id];
+      const indexToOptionLetter = (index: number): OptionLetter | null =>
+        question.optionLetters[index] ?? null;
 
       if (question.category === "multi") {
         if (Array.isArray(value) && value.length > 0) {
@@ -1640,7 +1637,7 @@ const TestAttemptScreen = () => {
                                 : "text-slate-700 dark:text-slate-200"
                             }`}
                           >
-                            {String.fromCharCode(65 + optionIndex)}.
+                            {currentQuestion.optionLetters[optionIndex]}.
                           </Text>
                           <View className="flex-1">
                             {renderHtmlOrText(

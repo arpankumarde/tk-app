@@ -522,6 +522,7 @@ const ResultsScreen = () => {
                 { letter: "B" as OptionLetter, value: item.optionB },
                 { letter: "C" as OptionLetter, value: item.optionC },
                 { letter: "D" as OptionLetter, value: item.optionD },
+                { letter: "E" as OptionLetter, value: item.optionE },
               ].filter((entry) => Boolean(entry.value));
 
               return (

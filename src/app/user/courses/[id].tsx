@@ -92,6 +92,7 @@ interface QuizQuestion {
   optionB: string;
   optionC: string;
   optionD: string;
+  optionE?: string;
   correctAnswer: string;
   explanation: string;
 }
@@ -970,7 +971,8 @@ const CourseLessons = () => {
                           { key: "B", text: q.optionB },
                           { key: "C", text: q.optionC },
                           { key: "D", text: q.optionD },
-                        ];
+                          { key: "E", text: q.optionE },
+                        ].filter((opt) => opt.key !== "E" || opt.text);
                         const selectedAnswer = quizAnswers[q.id];
                         return (
                           <View key={q.id} className="mb-6">
