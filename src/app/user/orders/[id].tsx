@@ -40,6 +40,11 @@ const statusColors: Record<
     text: "text-red-600 dark:text-red-400",
     label: "Failed",
   },
+  refunded: {
+    bg: "bg-gray-100 dark:bg-slate-800",
+    text: "text-slate-700 dark:text-slate-200",
+    label: "Refunded",
+  },
 };
 
 const getStatusStyle = (status: OrderStatus) =>
@@ -228,6 +233,28 @@ export default function OrderDetailsScreen() {
                   <Text className="text-slate-700 dark:text-slate-200 font-bold text-sm mt-0.5">
                     {order.paymentFailure.message}
                   </Text>
+                </View>
+              </View>
+            )}
+            {order.status === "refunded" && (
+              <View className="flex-row items-start mb-3 pb-3 border-b border-gray-100 dark:border-slate-800">
+                <Feather
+                  name="rotate-ccw"
+                  size={16}
+                  color={colorScheme === "dark" ? "#CBD5E1" : "#334155"}
+                  style={{ marginTop: 2 }}
+                />
+                <View className="flex-1 ml-2">
+                  <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+                    {order.refund?.refundedAt
+                      ? `Refunded on ${new Date(order.refund.refundedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`
+                      : "Refunded"}
+                  </Text>
+                  {order.refund?.reason ? (
+                    <Text className="text-slate-700 dark:text-slate-200 font-bold text-sm mt-0.5">
+                      {order.refund.reason}
+                    </Text>
+                  ) : null}
                 </View>
               </View>
             )}

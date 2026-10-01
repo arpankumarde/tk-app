@@ -128,13 +128,13 @@ const htmlToPlainText = (html: string) => {
 
 const shouldUseWebView = (html: string) => {
   const cleaned = sanitizeHtml(html);
-  return /<img|data-type="mathematics"|<table|<ol|<ul|<video|<iframe/i.test(
+  return /<img|data-type="(?:mathematics|inline-math|block-math)"|<table|<ol|<ul|<video|<iframe/i.test(
     cleaned,
   );
 };
 
 // Height measurement is done via onLoadEnd + injectJavaScript (see HtmlContent).
-// KaTeX is loaded from CDN to render data-type="mathematics" spans.
+// KaTeX is loaded from CDN to render inline-math, block-math and legacy mathematics nodes.
 const getHtmlDocument = (html: string, isDark: boolean) => {
   const textColor = isDark ? "#e2e8f0" : "#1e293b";
   const mutedColor = isDark ? "#94a3b8" : "#475569";
@@ -168,11 +168,11 @@ const getHtmlDocument = (html: string, isDark: boolean) => {
   <body>${cleanedHtml}
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/katex.min.js" crossorigin="anonymous"></script>
     <script>
-      document.querySelectorAll('span[data-type="mathematics"]').forEach(function(el) {
-        var math = el.getAttribute('data-math');
+      document.querySelectorAll('span[data-type="mathematics"], span[data-type="inline-math"], [data-type="block-math"]').forEach(function(el) {
+        var math = el.getAttribute('data-latex') || el.getAttribute('data-katex-content') || el.getAttribute('data-math') || el.getAttribute('data-formula');
         if (math) {
           try {
-            katex.render(math, el, { throwOnError: false, displayMode: false });
+            katex.render(math, el, { throwOnError: false, displayMode: el.getAttribute('data-type') === 'block-math' });
           } catch(e) {}
         }
       });

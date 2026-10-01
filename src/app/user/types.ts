@@ -280,7 +280,7 @@ export interface LatestAttemptResultItem {
 // Orders
 export type OrderItemType = "test" | "course" | "product" | "bundle";
 
-export type OrderStatus = "pending" | "completed" | "cancelled" | "failed";
+export type OrderStatus = "pending" | "completed" | "cancelled" | "failed" | "refunded";
 
 export interface OrderItem {
   orderItemId: number;
@@ -311,6 +311,8 @@ export interface Order {
   paymentTransactionId?: string | null;
   // Sent by orders/details for failed and cancelled orders with a PayU reason on record
   paymentFailure?: { reason: string; message: string } | null;
+  // Sent by orders/details for refunded orders; refundedAt is null for refunds made before it was recorded
+  refund?: { refundedAt: string | null; reason: string | null } | null;
 }
 
 export interface OrdersListResponse {

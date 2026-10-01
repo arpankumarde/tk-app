@@ -55,7 +55,7 @@ const htmlToPlainText = (html: string) => {
 
 const shouldUseWebView = (html: string) => {
   const cleaned = sanitizeHtml(html);
-  return /<img|data-type="mathematics"|<table|<ol|<ul|<video|<iframe/i.test(
+  return /<img|data-type="(?:mathematics|inline-math|block-math)"|<table|<ol|<ul|<video|<iframe/i.test(
     cleaned,
   );
 };
@@ -92,11 +92,11 @@ const getHtmlDocument = (html: string, isDark: boolean) => {
   <body>${cleanedHtml}
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/katex.min.js" crossorigin="anonymous"></script>
     <script>
-      document.querySelectorAll('span[data-type="mathematics"]').forEach(function(el) {
-        var math = el.getAttribute('data-math');
+      document.querySelectorAll('span[data-type="mathematics"], span[data-type="inline-math"], [data-type="block-math"]').forEach(function(el) {
+        var math = el.getAttribute('data-latex') || el.getAttribute('data-katex-content') || el.getAttribute('data-math') || el.getAttribute('data-formula');
         if (math) {
           try {
-            katex.render(math, el, { throwOnError: false, displayMode: false });
+            katex.render(math, el, { throwOnError: false, displayMode: el.getAttribute('data-type') === 'block-math' });
           } catch(e) {}
         }
       });

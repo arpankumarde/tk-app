@@ -48,6 +48,11 @@ const statusColors: Record<
     text: "text-red-600 dark:text-red-400",
     label: "Failed",
   },
+  refunded: {
+    bg: "bg-gray-100 dark:bg-slate-800",
+    text: "text-slate-700 dark:text-slate-200",
+    label: "Refunded",
+  },
 };
 
 const getStatusStyle = (status: string) =>
