@@ -37,8 +37,7 @@ const PurchasedProductCard = ({ product }: PurchasedProductCardProps) => {
   const [files, setFiles] = useState<PurchasedProductFile[]>([]);
   const [filesLoading, setFilesLoading] = useState(false);
 
-  // The reader owns the download, so the card only navigates. Nothing here
-  // writes to disk and nothing is handed to another app.
+  // The reader pages the file in from the server, so the card only navigates.
   const openReader = (fileId?: number, fileTitle?: string) => {
     setFilesModalVisible(false);
     router.push({

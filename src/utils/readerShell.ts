@@ -29,7 +29,7 @@ export const jsArg = (value: unknown): string =>
  *   URL for a paid file is ever put into the page. A PDF or a single image.
  * - `tkOpenUrl(url)`: a PDF pdf.js fetches itself (course lessons).
  * - `tkInitPages(total, width, height)`: page images whose URLs React Native supplies
- *   through `tkPage` / `tkPageFailed` after each `NEED_PAGE` (study note previews).
+ *   through `tkPage` / `tkPageFailed` after each `NEED_PAGE` (study note previews and purchased study notes).
  */
 export const buildReaderHtml = (options: {
   engine: ReaderEngine;
