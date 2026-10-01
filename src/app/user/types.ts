@@ -267,13 +267,14 @@ export interface LatestAttemptResultItem {
   selectedOption?: OptionLetter | null;
   selectedOptions?: OptionLetter[] | null;
   studentNumericalAnswer?: number | null;
+  matchAnswers?: Record<string, string> | null;
   correctOption?: OptionLetter | null;
   correctOptions?: OptionLetter[] | null;
   correctNumericalAnswer?: number | null;
   positiveMarks?: number;
   negativeMarks?: number;
   marksObtained?: number;
-  isCorrect?: boolean;
+  isCorrect?: boolean | null;
   explanation?: string | null;
 }
 

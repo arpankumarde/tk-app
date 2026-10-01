@@ -17,6 +17,7 @@ import Feather from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
 import { WebView } from "react-native-webview";
 import { useAuth } from "@/context/AuthContext";
+import { getAttemptStats, isQuestionAttempted } from "@/utils/attemptStats";
 import {
   EnrolledTest,
   LatestAttemptResultItem,
@@ -325,10 +326,15 @@ const ResultsScreen = () => {
     );
   }, [resultData]);
 
-  const incorrectCount = useMemo(() => {
-    if (!resultData) return 0;
-    return Math.max(0, resultData.results.length - correctCount);
-  }, [correctCount, resultData]);
+  const attemptStats = useMemo(
+    () =>
+      getAttemptStats(
+        resultData?.results ?? [],
+        correctCount,
+        resultData?.totalQuestions ?? 0,
+      ),
+    [correctCount, resultData],
+  );
 
   if (loading) {
     return (
@@ -413,9 +419,8 @@ const ResultsScreen = () => {
               {resultData.maxPossibleMarks} marks
             </Text>
             <Text className="text-slate-500 dark:text-slate-400 font-semibold text-lg mt-1">
-              {correctCount} /{" "}
-              {resultData.results.length || resultData.totalQuestions || 0}{" "}
-              correct
+              {correctCount} / {attemptStats.total} correct ·{" "}
+              {attemptStats.attempted} / {attemptStats.total} attempted
             </Text>
 
             <View className="mt-3 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
@@ -448,12 +453,24 @@ const ResultsScreen = () => {
                   </Text>
                 </View>
                 <Text className="text-slate-900 dark:text-white text-3xl font-black">
-                  {incorrectCount}
+                  {attemptStats.incorrect}
                 </Text>
               </View>
             </View>
 
             <View className="flex-row" style={{ gap: 10 }}>
+              <View className="flex-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
+                <View className="flex-row items-center mb-1">
+                  <Feather name="minus-circle" size={18} color="#64748b" />
+                  <Text className="ml-2 text-slate-500 dark:text-slate-400 font-black text-xs uppercase">
+                    Not Attempted
+                  </Text>
+                </View>
+                <Text className="text-slate-900 dark:text-white text-3xl font-black">
+                  {attemptStats.notAttempted}
+                </Text>
+              </View>
+
               <View className="flex-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
                 <View className="flex-row items-center mb-1">
                   <Feather name="clock" size={18} color="#0284c7" />
@@ -465,7 +482,9 @@ const ResultsScreen = () => {
                   {formatDuration(resultData.timeTaken)}
                 </Text>
               </View>
+            </View>
 
+            <View className="flex-row" style={{ gap: 10 }}>
               <View className="flex-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
                 <View className="flex-row items-center mb-1">
                   <Feather name="award" size={18} color="#fb923c" />
@@ -507,6 +526,7 @@ const ResultsScreen = () => {
                   : "-");
 
               const isCorrect = Boolean(item.isCorrect);
+              const attempted = isQuestionAttempted(item);
               const selectedLetters = item.selectedOptions
                 ? item.selectedOptions
                 : item.selectedOption
@@ -535,11 +555,19 @@ const ResultsScreen = () => {
                       {index + 1}.
                     </Text>
                     <Text
-                      className={`font-black text-sm ${isCorrect ? "text-green-600" : "text-red-500"}`}
+                      className={`font-black text-sm ${
+                        !attempted
+                          ? "text-slate-500 dark:text-slate-400"
+                          : isCorrect
+                            ? "text-green-600"
+                            : "text-red-500"
+                      }`}
                     >
-                      {isCorrect
-                        ? `+${item.marksObtained ?? 0} marks`
-                        : `${item.marksObtained ?? 0} marks`}
+                      {!attempted
+                        ? "Not attempted"
+                        : isCorrect
+                          ? `+${item.marksObtained ?? 0} marks`
+                          : `${item.marksObtained ?? 0} marks`}
                     </Text>
                   </View>
 

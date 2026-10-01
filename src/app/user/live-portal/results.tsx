@@ -13,6 +13,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import Feather from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
 import { useAuth } from "@/context/AuthContext";
+import { getAttemptStats } from "@/utils/attemptStats";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -24,7 +25,13 @@ interface LiveResultData {
   correctAnswers: number;
   totalQuestions?: number;
   timeTaken?: number;
-  results: { isCorrect: boolean }[];
+  results: {
+    isCorrect?: boolean | null;
+    selectedOption?: string | null;
+    selectedOptions?: string[] | null;
+    studentNumericalAnswer?: number | null;
+    matchAnswers?: Record<string, string> | null;
+  }[];
 }
 
 const LiveResultsScreen = () => {
@@ -131,12 +138,15 @@ const LiveResultsScreen = () => {
     );
   }, [resultData]);
 
-  const incorrectCount = useMemo(() => {
-    if (!resultData) return 0;
-    const total =
-      resultData.totalQuestions || resultData.results.length || 0;
-    return Math.max(0, total - correctCount);
-  }, [correctCount, resultData]);
+  const attemptStats = useMemo(
+    () =>
+      getAttemptStats(
+        resultData?.results ?? [],
+        correctCount,
+        resultData?.totalQuestions ?? 0,
+      ),
+    [correctCount, resultData],
+  );
 
   if (loading) {
     return (
@@ -205,9 +215,8 @@ const LiveResultsScreen = () => {
               {Number(resultData.score).toFixed(2)}%
             </Text>
             <Text className="text-slate-500 dark:text-slate-400 font-semibold text-lg mt-1">
-              {correctCount} /{" "}
-              {resultData.totalQuestions || resultData.results.length || 0}{" "}
-              correct
+              {correctCount} / {attemptStats.total} correct ·{" "}
+              {attemptStats.attempted} / {attemptStats.total} attempted
             </Text>
 
             <View className="mt-3 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
@@ -241,21 +250,35 @@ const LiveResultsScreen = () => {
                   </Text>
                 </View>
                 <Text className="text-slate-900 dark:text-white text-3xl font-black">
-                  {incorrectCount}
+                  {attemptStats.incorrect}
                 </Text>
               </View>
             </View>
 
-            <View className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
-              <View className="flex-row items-center mb-1">
-                <Feather name="clock" size={18} color="#0284c7" />
-                <Text className="ml-2 text-slate-500 dark:text-slate-400 font-black text-xs uppercase">
-                  Time Taken
+            <View className="flex-row" style={{ gap: 10 }}>
+              <View className="flex-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
+                <View className="flex-row items-center mb-1">
+                  <Feather name="minus-circle" size={18} color="#64748b" />
+                  <Text className="ml-2 text-slate-500 dark:text-slate-400 font-black text-xs uppercase">
+                    Not Attempted
+                  </Text>
+                </View>
+                <Text className="text-slate-900 dark:text-white text-3xl font-black">
+                  {attemptStats.notAttempted}
                 </Text>
               </View>
-              <Text className="text-slate-900 dark:text-white text-3xl font-black">
-                {formatDuration(resultData.timeTaken)}
-              </Text>
+
+              <View className="flex-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
+                <View className="flex-row items-center mb-1">
+                  <Feather name="clock" size={18} color="#0284c7" />
+                  <Text className="ml-2 text-slate-500 dark:text-slate-400 font-black text-xs uppercase">
+                    Time Taken
+                  </Text>
+                </View>
+                <Text className="text-slate-900 dark:text-white text-3xl font-black">
+                  {formatDuration(resultData.timeTaken)}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
