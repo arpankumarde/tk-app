@@ -65,7 +65,6 @@ interface CourseDetail {
   thumbnailUrl: string | null;
   thumbnailImageUrl: string | null;
   price: number;
-  category: string;
   level: string;
   slug: string;
   language: string;
@@ -549,11 +548,6 @@ const CourseLessons = () => {
             {course.title}
           </Text>
           <View className="flex-row items-center mt-1 gap-1.5">
-            <View className="bg-orange-50 dark:bg-orange-950/30 px-2 py-0.5 rounded-md">
-              <Text className="text-primary text-[9px] font-black uppercase">
-                {course.category}
-              </Text>
-            </View>
             <View className="bg-blue-50 dark:bg-blue-950/30 px-2 py-0.5 rounded-md">
               <Text className="text-blue-600 dark:text-blue-400 text-[9px] font-black uppercase">
                 {course.level}
