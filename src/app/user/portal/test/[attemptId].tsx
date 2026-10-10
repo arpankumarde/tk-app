@@ -415,10 +415,10 @@ const TestAttemptScreen = () => {
       setSubjectWiseTiming(Boolean(payload.subjectWiseTiming));
       setQuestionWiseTiming(Boolean(payload.questionWiseTiming));
 
-      // Calculate total duration if not explicitly provided.
-      // The initial state already reflects the route-param duration (or DEFAULT
-      // if none was passed). Only override when this response gives us a better
-      // value — never fall back to DEFAULT here, that would clobber the param.
+      // The route param is the test item's own duration and governs the overall
+      // timer. Subject durations only drive subject-wise timing, so their sum is
+      // used only when no test duration was passed - a 120 min test with a stale
+      // 20 min subject must still run for 120 min.
       const apiDuration = (payload as any).testDurationMinutes;
       const totalSubjectDuration = sortedSubjects.reduce(
         (sum, s) => sum + (s.durationMinutes || 0),
@@ -431,7 +431,7 @@ const TestAttemptScreen = () => {
 
       if (apiDuration) {
         setTestDurationMinutes(apiDuration);
-      } else if (totalSubjectDuration > 0) {
+      } else if (!(routeDuration > 0) && totalSubjectDuration > 0) {
         setTestDurationMinutes(totalSubjectDuration);
       }
 
