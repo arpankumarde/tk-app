@@ -12,7 +12,7 @@ import Feather from "@react-native-vector-icons/feather";
 import { usePreventScreenCapture } from "expo-screen-capture";
 import DocumentViewer from "@/components/DocumentViewer";
 import ReaderHeader from "@/components/ReaderHeader";
-import { useNoteReaderPages } from "../_hooks/useNoteReaderPages";
+import { useNoteReaderPdf } from "../_hooks/useNoteReaderPdf";
 
 export default function ProductReaderScreen() {
   const { productId, fileId, title } = useLocalSearchParams<{
@@ -23,12 +23,12 @@ export default function ProductReaderScreen() {
   usePreventScreenCapture("study-note-reader");
   const { colorScheme } = useColorScheme();
 
-  const { info, error, loadPage, retry } = useNoteReaderPages({
+  const { source, error, retry } = useNoteReaderPdf({
     productId: Number(productId),
     fileId: fileId ? Number(fileId) : undefined,
   });
 
-  const heading = title || info?.title || "Reading";
+  const heading = title || "Reading";
 
   const renderBody = () => {
     if (error) {
@@ -49,9 +49,7 @@ export default function ProductReaderScreen() {
       );
     }
 
-    if (!info) {
-      // The first open of a large file renders its first page on the server,
-      // which can take a few seconds.
+    if (!source) {
       return (
         <View className="flex-1 items-center justify-center px-10">
           <ActivityIndicator size="large" color="#FF8A50" />
@@ -62,7 +60,7 @@ export default function ProductReaderScreen() {
       );
     }
 
-    return <DocumentViewer source={{ kind: "pages", loadPage }} />;
+    return <DocumentViewer source={source} />;
   };
 
   return (

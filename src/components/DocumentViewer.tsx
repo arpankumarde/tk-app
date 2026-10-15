@@ -27,12 +27,21 @@ export interface DocumentPageImage {
  * is the same for every source.
  * - `file`: a downloaded PDF or image, pushed into the page as base64.
  * - `pdfUrl`: a PDF pdf.js fetches by URL.
+ * - `pdfRanges`: a PDF of `length` bytes whose start is `initial` (base64);
+ *   pdf.js asks for the rest through `readRange` (end exclusive, resolves to
+ *   base64) only as pages are read. A rejection shows the error screen.
  * - `pages`: one image per page, loaded as the reader scrolls. Reject with an
  *   Error whose message is shown on the failed page.
  */
 export type DocumentSource =
   | { kind: "file"; base64: string; mime: string }
   | { kind: "pdfUrl"; url: string }
+  | {
+      kind: "pdfRanges";
+      length: number;
+      initial: string;
+      readRange: (begin: number, end: number) => Promise<string>;
+    }
   | { kind: "pages"; loadPage: (page: number) => Promise<DocumentPageImage> };
 
 const engineFor = (source: DocumentSource): ReaderEngine =>
@@ -91,24 +100,33 @@ const DocumentViewer = ({ source, endNote, onError }: DocumentViewerProps) => {
     webViewRef.current?.injectJavaScript(`${script};true;`);
   };
 
+  const pushBase64 = async (base64: string, call: (chunk: string) => string) => {
+    for (let at = 0; at < base64.length; at += READER_CHUNK_SIZE) {
+      // Base64 has no quote or backslash characters, so a plain literal is safe.
+      inject(call(base64.slice(at, at + READER_CHUNK_SIZE)));
+      // Yield between chunks so a large file does not block the JS thread.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+  };
+
   const start = async () => {
     if (startedRef.current) return;
     startedRef.current = true;
 
     if (source.kind === "file") {
-      for (let at = 0; at < source.base64.length; at += READER_CHUNK_SIZE) {
-        const chunk = source.base64.slice(at, at + READER_CHUNK_SIZE);
-        // Base64 has no quote or backslash characters, so a plain literal is safe.
-        inject(`window.tkChunk('${chunk}')`);
-        // Yield between chunks so a large file does not block the JS thread.
-        await new Promise((resolve) => setTimeout(resolve, 0));
-      }
+      await pushBase64(source.base64, (chunk) => `window.tkChunk('${chunk}')`);
       inject(`window.tkEnd(${jsArg(source.mime)})`);
       return;
     }
 
     if (source.kind === "pdfUrl") {
       inject(`window.tkOpenUrl(${jsArg(source.url)})`);
+      return;
+    }
+
+    if (source.kind === "pdfRanges") {
+      await pushBase64(source.initial, (chunk) => `window.tkChunk('${chunk}')`);
+      inject(`window.tkOpenRanges(${source.length})`);
       return;
     }
 
@@ -136,6 +154,17 @@ const DocumentViewer = ({ source, endNote, onError }: DocumentViewerProps) => {
     }
   };
 
+  const supplyRange = async (begin: number, end: number) => {
+    if (source.kind !== "pdfRanges") return;
+    try {
+      const data = await source.readRange(begin, end);
+      await pushBase64(data, (chunk) => `window.tkRangeChunk(${begin}, '${chunk}')`);
+      inject(`window.tkRangeEnd(${begin})`);
+    } catch (err) {
+      fail(errorMessage(err, "Could not load this part of the file."));
+    }
+  };
+
   const handleMessage = (event: WebViewMessageEvent) => {
     let message: ReaderMessage;
     try {
@@ -157,6 +186,9 @@ const DocumentViewer = ({ source, endNote, onError }: DocumentViewerProps) => {
         break;
       case "NEED_PAGE":
         supplyPage(message.page);
+        break;
+      case "NEED_RANGE":
+        supplyRange(message.begin, message.end);
         break;
       case "ERROR":
         fail(message.message);

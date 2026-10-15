@@ -9,6 +9,7 @@ export type ReaderMessage =
   | { type: "LOADED"; totalPages: number }
   | { type: "PAGE_CHANGED"; page: number }
   | { type: "NEED_PAGE"; page: number }
+  | { type: "NEED_RANGE"; begin: number; end: number }
   | { type: "ERROR"; message: string };
 
 /** Base64 payloads are pushed in chunks; keep this a multiple of 4. */
@@ -28,6 +29,11 @@ export const jsArg = (value: unknown): string =>
  * - `tkChunk(b64)` then `tkEnd(mime)`: a purchased file pushed in as base64, so no
  *   URL for a paid file is ever put into the page. A PDF or a single image.
  * - `tkOpenUrl(url)`: a PDF pdf.js fetches itself (course lessons).
+ * - `tkChunk(b64)` for the first bytes, then `tkOpenRanges(length)`: a PDF read in
+ *   byte ranges. pdf.js asks for each missing range with `NEED_RANGE` and React
+ *   Native answers with `tkRangeChunk(begin, b64)` then `tkRangeEnd(begin)`, so
+ *   only the parts being read are fetched and the link stays outside the page
+ *   (purchased study notes).
  * - `tkInitPages(total, width, height)`: page images whose URLs React Native supplies
  *   through `tkPage` / `tkPageFailed` after each `NEED_PAGE` (study note previews and purchased study notes).
  */
@@ -93,28 +99,54 @@ export const buildReaderHtml = (options: {
     post({ type: 'ERROR', message: message || 'Could not open this file.' });
   }
 
+  function decode(b64) {
+    var bin = atob(b64);
+    var out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  function merge(list) {
+    var total = 0;
+    for (var i = 0; i < list.length; i++) total += list[i].length;
+    var merged = new Uint8Array(total);
+    var offset = 0;
+    for (var j = 0; j < list.length; j++) {
+      merged.set(list[j], offset);
+      offset += list[j].length;
+    }
+    return merged;
+  }
+
   // Decode on arrival so each base64 string is freed straight away.
   window.tkChunk = function (b64) {
     try {
-      var bin = atob(b64);
-      var out = new Uint8Array(bin.length);
-      for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-      parts.push(out);
+      parts.push(decode(b64));
     } catch (err) {
       fail('Could not read the file.');
     }
   };
 
   function takeBytes() {
-    var total = 0;
-    for (var i = 0; i < parts.length; i++) total += parts[i].length;
-    var merged = new Uint8Array(total);
-    var offset = 0;
-    for (var j = 0; j < parts.length; j++) {
-      merged.set(parts[j], offset);
-      offset += parts[j].length;
-    }
+    var merged = merge(parts);
     parts = [];
+    return merged;
+  }
+
+  // Several ranges can arrive at once, so their chunks are kept apart by start offset.
+  var rangeParts = {};
+
+  window.tkRangeChunk = function (begin, b64) {
+    try {
+      (rangeParts[begin] = rangeParts[begin] || []).push(decode(b64));
+    } catch (err) {
+      fail('Could not read the file.');
+    }
+  };
+
+  function takeRange(begin) {
+    var merged = merge(rangeParts[begin] || []);
+    delete rangeParts[begin];
     return merged;
   }
 
@@ -368,6 +400,7 @@ export const buildReaderHtml = (options: {
     fail: fail,
     mount: mount,
     takeBytes: takeBytes,
+    takeRange: takeRange,
     cssPageWidth: cssPageWidth,
     maxPagePixels: MAX_PAGE_PIXELS,
     openBytes: null
@@ -425,5 +458,15 @@ async function open(source) {
 
 tk.openBytes = function () { open({ data: tk.takeBytes() }); };
 window.tkOpenUrl = function (url) { open({ url: url, withCredentials: false }); };
+
+// Ranges are fetched only for the pages being read; nothing is read ahead in the background.
+window.tkOpenRanges = function (length) {
+  var transport = new pdfjsLib.PDFDataRangeTransport(length, tk.takeBytes());
+  transport.requestDataRange = function (begin, end) {
+    tk.post({ type: 'NEED_RANGE', begin: begin, end: end });
+  };
+  window.tkRangeEnd = function (begin) { transport.onDataRange(begin, tk.takeRange(begin)); };
+  open({ range: transport, disableAutoFetch: true, disableStream: true, rangeChunkSize: 262144 });
+};
 tk.post({ type: 'READY' });
 </script>`;
