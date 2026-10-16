@@ -1,11 +1,9 @@
-import AutoSlider from "@/components/AutoSlider";
 import BottomTabs from "@/components/BottomTabs";
 import BundleCard from "@/components/BundleCard";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import HomeContentCard from "@/components/HomeContentCard";
 import HomeRail from "@/components/HomeRail";
-import LiveSpotlightCard from "@/components/LiveSpotlightCard";
 import TeacherRailCard from "@/components/TeacherRailCard";
 import type { BundleListItem } from "@/types/bundle";
 import { useColorScheme } from "nativewind";
@@ -24,7 +22,6 @@ const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
 const App = () => {
   const { colorScheme } = useColorScheme();
-  const [liveSpotlight, setLiveSpotlight] = useState<any[]>([]);
   const [topMockTests, setTopMockTests] = useState<any[]>([]);
   const [popularCourses, setPopularCourses] = useState<any[]>([]);
   const [popularNotes, setPopularNotes] = useState<any[]>([]);
@@ -43,7 +40,6 @@ const App = () => {
 
       const payload = data.json || data;
 
-      setLiveSpotlight(payload.liveTestSpotlight || []);
       setTopMockTests(payload.topMockTests || []);
       setPopularCourses(payload.popularCourses || []);
       setPopularNotes(payload.popularNotes || []);
@@ -78,7 +74,6 @@ const App = () => {
   }, [fetchHomeData, fetchBundles]);
 
   const hasContent =
-    liveSpotlight.length > 0 ||
     topMockTests.length > 0 ||
     popularCourses.length > 0 ||
     popularNotes.length > 0 ||
@@ -127,23 +122,7 @@ const App = () => {
           </View>
         ) : (
           <>
-            {liveSpotlight.length > 0 && (
-              <View className="bg-white dark:bg-slate-900 pt-6 pb-2">
-                <View className="flex-row items-center px-6 mb-4">
-                  <View className="w-2 h-2 rounded-full bg-red-500 mr-2" />
-                  <Text className="text-2xl font-black text-slate-800 dark:text-white">
-                    Live Test Spotlight
-                  </Text>
-                </View>
-                <AutoSlider
-                  data={liveSpotlight}
-                  keyExtractor={(item) => `live-${item.id}`}
-                  renderItem={(item) => <LiveSpotlightCard item={item} />}
-                />
-              </View>
-            )}
-
-            <View className="h-[1px] bg-gray-100 dark:bg-slate-800" />
+            <View className="h-6" />
 
             <HomeRail
               title="Top Mock Tests"

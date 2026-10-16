@@ -198,7 +198,7 @@ const BulletItem = ({
 );
 
 const LiveTestDetails = () => {
-  const { id } = useLocalSearchParams();
+  const { slug } = useLocalSearchParams<{ slug: string }>();
   const { colorScheme } = useColorScheme();
   const router = useRouter();
   const [liveTest, setLiveTest] = useState<LiveTest | null>(null);
@@ -265,7 +265,7 @@ const LiveTestDetails = () => {
       try {
         setLoading(true);
         const response = await fetch(
-          `${BASE_URL}/_api/live-tests/details?id=${id}`,
+          `${BASE_URL}/_api/live-tests/details?slug=${encodeURIComponent(slug)}`,
           {
             headers: token ? { Authorization: `Bearer ${token}` } : undefined,
           },
@@ -284,8 +284,8 @@ const LiveTestDetails = () => {
       }
     };
 
-    if (id) fetchLiveTestDetails();
-  }, [id, token]);
+    if (slug) fetchLiveTestDetails();
+  }, [slug, token]);
 
   useEffect(() => {
     // if (activeTab !== "leaderboard" || !liveTest) return;
@@ -315,6 +315,7 @@ const LiveTestDetails = () => {
       router.push("/login");
       return;
     }
+    if (!liveTest) return;
 
     try {
       setEnrolling(true);
@@ -324,7 +325,7 @@ const LiveTestDetails = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ json: { liveTestId: Number(id) } }),
+        body: JSON.stringify({ json: { liveTestId: liveTest.id } }),
       });
 
       const data = await res.json();
@@ -445,7 +446,7 @@ const LiveTestDetails = () => {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Check out this live test: ${liveTest?.title}\n${buildShareUrl(`${BASE_URL}/mock-test/live/${id}`)}`,
+        message: `Check out this live test: ${liveTest?.title}\n${buildShareUrl(`${BASE_URL}/live-test/${liveTest?.slug}`)}`,
       });
     } catch (error: any) {
       console.error(error.message);
@@ -1215,7 +1216,7 @@ const LiveTestDetails = () => {
             !isTestEnded ? (
             <TouchableOpacity
               onPress={() =>
-                router.push(`/user/live-portal/${liveTest.id}` as any)
+                router.push(`/user/live-portal/${liveTest.slug}` as any)
               }
               className="h-14 w-full rounded-2xl flex-row items-center justify-center shadow-md bg-emerald-500 shadow-emerald-500/30"
             >
@@ -1322,7 +1323,7 @@ const LiveTestDetails = () => {
                             visible: false,
                           }));
                           router.push(
-                            `/user/live-portal/${liveTest.id}` as any,
+                            `/user/live-portal/${liveTest.slug}` as any,
                           );
                         }}
                       >

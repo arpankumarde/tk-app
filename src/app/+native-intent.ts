@@ -8,14 +8,18 @@ export function redirectSystemPath({
   try {
     const { pathname, search } = parsePath(path);
     const segments = pathname.split("/").filter(Boolean);
-    const [first, second, third] = segments;
+    const [first, second] = segments;
     const out = (target: string) => `${target}${search}`;
 
     if (first === "course" && !second) return out("/courses");
 
+    if (first === "live-test") {
+      return out(second ? `/live/${second}` : "/live");
+    }
+
     if (first === "mock-test") {
       if (!second) return out("/tests");
-      if (second === "live") return out(third ? `/live/${third}` : "/live");
+      if (second === "live") return out("/live");
       return out(`/tests/${second}`);
     }
 

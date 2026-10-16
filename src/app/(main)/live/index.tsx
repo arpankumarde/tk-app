@@ -44,6 +44,7 @@ export interface Exam {
 
 export interface LiveTest {
   id: number;
+  slug: string;
   title: string;
   description: string;
   price: number;

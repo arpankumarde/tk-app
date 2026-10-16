@@ -45,7 +45,7 @@ const LiveTestCard = ({
 
   return (
     <TouchableOpacity
-      onPress={() => router.push(`/live/${test.id}` as any)}
+      onPress={() => router.push(`/live/${test.slug}` as any)}
       activeOpacity={0.9}
       className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden mb-6 shadow-xl shadow-slate-200/50 dark:shadow-none border border-gray-100 dark:border-slate-700/50"
     >

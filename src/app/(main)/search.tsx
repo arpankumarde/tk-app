@@ -513,7 +513,7 @@ const SearchScreen = () => {
                   subtitle={l.teacherName}
                   badge="LIVE"
                   price={l.price}
-                  onPress={() => router.push(`/live/${l.id}` as any)}
+                  onPress={() => router.push(`/live/${l.slug}` as any)}
                 />
               ))}
             </View>

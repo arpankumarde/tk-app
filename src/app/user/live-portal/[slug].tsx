@@ -53,7 +53,7 @@ interface LiveTestDetails {
 
 const LivePortal = () => {
   usePreventScreenCapture("live-portal");
-  const { id } = useLocalSearchParams();
+  const { slug } = useLocalSearchParams<{ slug: string }>();
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const { token } = useAuth();
@@ -63,10 +63,8 @@ const LivePortal = () => {
   const [startingAttempt, setStartingAttempt] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const liveTestId = Array.isArray(id) ? id[0] : id;
-
   const fetchLiveTestDetails = useCallback(async () => {
-    if (!token || !liveTestId) {
+    if (!token || !slug) {
       setLoading(false);
       setError("Invalid live test.");
       return;
@@ -77,7 +75,7 @@ const LivePortal = () => {
       setError(null);
 
       const response = await fetch(
-        `${BASE_URL}/_api/live-tests/details?id=${liveTestId}`,
+        `${BASE_URL}/_api/live-tests/details?slug=${encodeURIComponent(slug)}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -107,7 +105,7 @@ const LivePortal = () => {
     } finally {
       setLoading(false);
     }
-  }, [liveTestId, token]);
+  }, [slug, token]);
 
   useEffect(() => {
     fetchLiveTestDetails();

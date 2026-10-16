@@ -117,6 +117,7 @@ interface Data {
   tests: Test[];
   liveTests: (Partial<LiveTest> & {
     id: number;
+    slug: string;
     title: string;
     creatorName?: string;
     studentsEnrolled?: number;
@@ -363,6 +364,7 @@ const ExpertDetails = () => {
 
     return {
       id: merged.id,
+      slug: merged.slug,
       title: merged.title || liveTest.title,
       description: merged.description || "",
       price: merged.price ?? 0,

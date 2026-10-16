@@ -43,6 +43,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           { pathPrefix: "/course/" },
           { path: "/mock-test" },
           { pathPrefix: "/mock-test/" },
+          { path: "/live-test" },
+          { pathPrefix: "/live-test/" },
           { path: "/study-notes" },
           { pathPrefix: "/study-notes/" },
           { path: "/bundles" },
