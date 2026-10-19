@@ -75,6 +75,8 @@ export interface PurchasedProduct {
   teacherName: string;
   pdfUrl?: string;
   fileCount?: number;
+  /** The teacher lets buyers save this note's PDFs and open them elsewhere. */
+  allowDownload?: boolean;
 }
 
 // Public (purchase-verified) file metadata — no fileUrl/fileId exposed.
@@ -380,5 +382,9 @@ export interface LatestAttemptResultsPayload {
   timeTaken?: number;
   mockTestId?: number;
   testPackageTitle?: string;
+  // The student's own series review; canReview is false for live test papers. Missing on servers before 25-10-2026.
+  canReview?: boolean;
+  myRating?: number | null;
+  myReviewText?: string | null;
   results: LatestAttemptResultItem[];
 }

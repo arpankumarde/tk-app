@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   View,
   Text,
@@ -13,17 +14,21 @@ import { usePreventScreenCapture } from "expo-screen-capture";
 import DocumentViewer from "@/components/DocumentViewer";
 import ReaderHeader from "@/components/ReaderHeader";
 import { useNoteReaderPdf } from "../_hooks/useNoteReaderPdf";
+import NoteDownloadSheet from "../_components/NoteDownloadSheet";
 
 export default function ProductReaderScreen() {
-  const { productId, fileId, title } = useLocalSearchParams<{
+  const { productId, fileId, title, downloadable } = useLocalSearchParams<{
     productId: string;
     fileId?: string;
     title?: string;
+    downloadable?: string;
   }>();
   usePreventScreenCapture("study-note-reader");
   const { colorScheme } = useColorScheme();
 
-  const { source, error, retry } = useNoteReaderPdf({
+  const [downloadOpen, setDownloadOpen] = useState(false);
+
+  const { source, offline, error, retry } = useNoteReaderPdf({
     productId: Number(productId),
     fileId: fileId ? Number(fileId) : undefined,
   });
@@ -72,9 +77,31 @@ export default function ProductReaderScreen() {
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
 
-      <ReaderHeader title={heading} onClose={() => router.back()} />
+      <ReaderHeader
+        title={heading}
+        subtitle={offline ? "Offline copy on this device" : undefined}
+        onClose={() => router.back()}
+        action={
+          downloadable === "1"
+            ? {
+                icon: "download",
+                label: "Save or open in another app",
+                onPress: () => setDownloadOpen(true),
+              }
+            : undefined
+        }
+      />
 
       {renderBody()}
+
+      {downloadOpen && (
+        <NoteDownloadSheet
+          productId={Number(productId)}
+          fileId={fileId ? Number(fileId) : undefined}
+          title={heading}
+          onClose={() => setDownloadOpen(false)}
+        />
+      )}
     </SafeAreaView>
   );
 }

@@ -18,6 +18,7 @@ import { useColorScheme } from "nativewind";
 import { WebView } from "react-native-webview";
 import { useAuth } from "@/context/AuthContext";
 import { getAttemptStats, isQuestionAttempted } from "@/utils/attemptStats";
+import PostTestReviewScreen from "@/components/PostTestReviewScreen";
 import {
   EnrolledTest,
   LatestAttemptResultItem,
@@ -150,7 +151,7 @@ const ResultsScreen = () => {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const { token } = useAuth();
-  const { testItemId } = useLocalSearchParams();
+  const { testItemId, justSubmitted } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(true);
@@ -160,6 +161,11 @@ const ResultsScreen = () => {
   const [expandedExplanations, setExpandedExplanations] = useState<
     Record<number, boolean>
   >({});
+  const [isReviewVisible, setIsReviewVisible] = useState(false);
+  // Only the visit that follows a submit prompts; reading the flag once keeps later refetches from prompting.
+  const reviewPromptPending = useRef(
+    (Array.isArray(justSubmitted) ? justSubmitted[0] : justSubmitted) === "1",
+  );
 
   const testItemNumericId = useMemo(() => {
     const raw = Array.isArray(testItemId) ? testItemId[0] : testItemId;
@@ -225,6 +231,18 @@ const ResultsScreen = () => {
       const payload = normalizePayload(data.json || data);
 
       setResultData(payload);
+
+      // Right after a submit, ask for a series review if there is none yet, or ask again while it is below 4 stars.
+      if (reviewPromptPending.current) {
+        reviewPromptPending.current = false;
+        if (
+          payload.canReview &&
+          payload.mockTestId &&
+          (payload.myRating == null || payload.myRating < 4)
+        ) {
+          setIsReviewVisible(true);
+        }
+      }
 
       // TODO: remove — temporary first-question results logger
       const first = payload.results?.[0];
@@ -685,6 +703,17 @@ const ResultsScreen = () => {
           </View>
         </View>
       </ScrollView>
+
+      {resultData?.mockTestId ? (
+        <PostTestReviewScreen
+          visible={isReviewVisible}
+          mockTestId={resultData.mockTestId}
+          seriesTitle={resultData.testPackageTitle || "this test series"}
+          initialRating={resultData.myRating ?? null}
+          initialReviewText={resultData.myReviewText ?? null}
+          onClose={() => setIsReviewVisible(false)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 };

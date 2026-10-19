@@ -14,6 +14,8 @@ import { router } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import { PurchasedProduct, PurchasedProductFile } from "../types";
 import Placeholder from "@/constants/placeholder";
+import { findSavedNote } from "@/utils/savedNotes";
+import NoteDownloadSheet from "./NoteDownloadSheet";
 
 const formatFileSize = (bytes: number | null) => {
   if (!bytes) return null;
@@ -28,16 +30,38 @@ interface PurchasedProductCardProps {
   product: PurchasedProduct;
 }
 
+type DownloadTarget = {
+  fileId?: number;
+  title: string;
+  sizeBytes?: number | null;
+};
+
 const PurchasedProductCard = ({ product }: PurchasedProductCardProps) => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const userId = user?.id;
   const displayCategory = product.category?.trim() || "Notes";
   const hasMultipleFiles = (product.fileCount ?? 0) > 1;
+  const allowDownload = !!product.allowDownload;
 
   const [filesModalVisible, setFilesModalVisible] = useState(false);
   const [files, setFiles] = useState<PurchasedProductFile[]>([]);
   const [filesLoading, setFilesLoading] = useState(false);
+  const [downloadTarget, setDownloadTarget] = useState<DownloadTarget | null>(
+    null,
+  );
+  // Read from disk on mount, when the file list loads and when the download
+  // sheet closes.
+  const checkSaved = (list: PurchasedProductFile[]) => ({
+    main: findSavedNote(userId, product.productId) != null,
+    fileIds: list
+      .filter((file) => findSavedNote(userId, product.productId, file.id))
+      .map((file) => file.id),
+  });
+  const [saved, setSaved] = useState(() => checkSaved([]));
+  const isSaved = (fileId?: number) =>
+    fileId == null ? saved.main : saved.fileIds.includes(fileId);
 
-  // The reader pages the file in from the server, so the card only navigates.
+  // The reader picks a saved copy up by itself, so the card only navigates.
   const openReader = (fileId?: number, fileTitle?: string) => {
     setFilesModalVisible(false);
     router.push({
@@ -46,8 +70,19 @@ const PurchasedProductCard = ({ product }: PurchasedProductCardProps) => {
         productId: String(product.productId),
         ...(fileId != null ? { fileId: String(fileId) } : {}),
         title: fileTitle || product.title,
+        ...(allowDownload ? { downloadable: "1" } : {}),
       },
     } as any);
+  };
+
+  const openDownload = (target: DownloadTarget) => {
+    setFilesModalVisible(false);
+    setDownloadTarget(target);
+  };
+
+  const closeDownload = () => {
+    setDownloadTarget(null);
+    setSaved(checkSaved(files));
   };
 
   const openFilePicker = async () => {
@@ -69,6 +104,7 @@ const PurchasedProductCard = ({ product }: PurchasedProductCardProps) => {
       const list: PurchasedProductFile[] = payload.files || [];
       list.sort((a, b) => a.orderIndex - b.orderIndex);
       setFiles(list);
+      setSaved(checkSaved(list));
 
       // If the product actually only has one file, skip the picker entirely.
       if (list.length === 1) {
@@ -125,6 +161,24 @@ const PurchasedProductCard = ({ product }: PurchasedProductCardProps) => {
             )}
           </View>
         </View>
+
+        {allowDownload && !hasMultipleFiles && (
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              openDownload({ title: product.title });
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={isSaved() ? "Saved on device" : "Save to device"}
+            className="ml-2 h-9 w-9 items-center justify-center rounded-xl border-2 border-primary bg-white dark:bg-slate-900"
+          >
+            <Feather
+              name={isSaved() ? "check" : "download"}
+              size={16}
+              color="#FF8A50"
+            />
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity
           onPress={(e) => {
@@ -185,6 +239,8 @@ const PurchasedProductCard = ({ product }: PurchasedProductCardProps) => {
               <ScrollView className="px-4 pt-3">
                 {files.map((file) => {
                   const sizeLabel = formatFileSize(file.fileSizeBytes);
+                  const fileTitle = file.title || `File ${file.orderIndex + 1}`;
+                  const fileSaved = allowDownload && isSaved(file.id);
                   return (
                     <TouchableOpacity
                       key={file.id}
@@ -199,19 +255,42 @@ const PurchasedProductCard = ({ product }: PurchasedProductCardProps) => {
                           className="text-slate-800 dark:text-white font-bold text-sm"
                           numberOfLines={2}
                         >
-                          {file.title || `File ${file.orderIndex + 1}`}
+                          {fileTitle}
                         </Text>
                         {(sizeLabel || file.pageCount) && (
                           <Text className="text-slate-500 dark:text-slate-400 text-xs font-medium mt-0.5">
                             {[
                               file.pageCount ? `${file.pageCount} pages` : null,
                               sizeLabel,
+                              fileSaved ? "Saved" : null,
                             ]
                               .filter(Boolean)
                               .join(" · ")}
                           </Text>
                         )}
                       </View>
+                      {allowDownload && (
+                        <TouchableOpacity
+                          onPress={() =>
+                            openDownload({
+                              fileId: file.id,
+                              title: fileTitle,
+                              sizeBytes: file.fileSizeBytes,
+                            })
+                          }
+                          accessibilityRole="button"
+                          accessibilityLabel={
+                            fileSaved ? "Saved on device" : "Save to device"
+                          }
+                          className="mr-2 h-9 w-9 items-center justify-center rounded-xl border-2 border-primary bg-white dark:bg-slate-900"
+                        >
+                          <Feather
+                            name={fileSaved ? "check" : "download"}
+                            size={16}
+                            color="#FF8A50"
+                          />
+                        </TouchableOpacity>
+                      )}
                       <Feather name="chevron-right" size={18} color="#FF8A50" />
                     </TouchableOpacity>
                   );
@@ -221,6 +300,17 @@ const PurchasedProductCard = ({ product }: PurchasedProductCardProps) => {
           </View>
         </View>
       </Modal>
+
+      {downloadTarget && (
+        <NoteDownloadSheet
+          productId={product.productId}
+          fileId={downloadTarget.fileId}
+          title={downloadTarget.title}
+          sizeBytes={downloadTarget.sizeBytes}
+          onRead={() => openReader(downloadTarget.fileId, downloadTarget.title)}
+          onClose={closeDownload}
+        />
+      )}
     </>
   );
 };

@@ -1,14 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Directory, Paths } from "expo-file-system";
+import {
+  Directory,
+  FileMode,
+  Paths,
+  type FileHandle,
+} from "expo-file-system";
 import { useAuth } from "@/context/AuthContext";
-import { isAuthError } from "@/utils/authError";
+import { findSavedNote } from "@/utils/savedNotes";
 import type { DocumentSource } from "@/components/DocumentViewer";
+import {
+  NOTE_OPEN_ERROR as OPEN_ERROR,
+  NOTE_SIGNED_OUT as SIGNED_OUT,
+  requestNoteLink,
+  type NoteLink as Link,
+} from "./noteLink";
 
-const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
-const OPEN_ERROR = "Could not open this file.";
 const RANGE_ERROR =
   "Could not load this part of the file. Check your connection and try again.";
-const SIGNED_OUT = "Please sign in again to open this file.";
 
 // The first read carries the PDF header and, for most files, the first page.
 const INITIAL_BYTES = 512 * 1024;
@@ -17,7 +25,6 @@ const READ_ATTEMPTS = 3;
 const LINK_MARGIN_MS = 60 * 1000;
 
 type RangeSource = Extract<DocumentSource, { kind: "pdfRanges" }>;
-type Link = { url: string; expiresAt: number };
 
 const toBase64 = (bytes: Uint8Array) => {
   if (typeof bytes.toBase64 === "function") return bytes.toBase64();
@@ -45,11 +52,12 @@ const clearLegacyDownloads = () => {
 };
 
 /**
- * Purchased study notes, read straight from the PDF. student/shop/download
- * checks the purchase and returns a signed link valid for an hour; the app
- * reads only the byte ranges pdf.js asks for, so a 100MB file opens about as
- * fast as a small one and nothing is saved on the device. The link stays on
- * the React Native side and is renewed when it expires.
+ * Purchased study notes, read straight from the PDF. A copy the student saved
+ * on the device (notes whose teacher allows downloads) is read from disk and
+ * works offline. Otherwise student/shop/download returns a signed link valid
+ * for an hour and the app reads only the byte ranges pdf.js asks for, so a
+ * 100MB file opens about as fast as a small one and nothing is saved. The link
+ * stays on the React Native side and is renewed when it expires.
  */
 export const useNoteReaderPdf = ({
   productId,
@@ -58,8 +66,10 @@ export const useNoteReaderPdf = ({
   productId: number;
   fileId?: number;
 }) => {
-  const { token, invalidateSession } = useAuth();
+  const { token, user, invalidateSession } = useAuth();
+  const userId = user?.id;
   const [source, setSource] = useState<RangeSource | null>(null);
+  const [offline, setOffline] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const link = useRef<Link | null>(null);
@@ -67,38 +77,16 @@ export const useNoteReaderPdf = ({
 
   useEffect(clearLegacyDownloads, []);
 
-  const requestLink = useCallback(async (): Promise<Link> => {
-    const response = await fetch(`${BASE_URL}/_api/student/shop/download`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        json: { productId, ...(fileId != null ? { fileId } : {}) },
+  const requestLink = useCallback(
+    () =>
+      requestNoteLink({
+        token,
+        productId,
+        fileId,
+        onSignedOut: invalidateSession,
       }),
-    });
-    const data = await response.json().catch(() => null);
-    const payload = data?.json || data;
-    if (!response.ok) {
-      // 403 here means the note is not in this account's purchases.
-      if (response.status !== 403 && isAuthError(response.status, payload)) {
-        invalidateSession();
-        throw new Error(SIGNED_OUT);
-      }
-      throw new Error(
-        typeof payload?.error === "string" && payload.error
-          ? payload.error
-          : OPEN_ERROR,
-      );
-    }
-    if (typeof payload?.downloadUrl !== "string") throw new Error(OPEN_ERROR);
-    const expiresAt = Date.parse(payload.expiresAt);
-    return {
-      url: payload.downloadUrl,
-      expiresAt: Number.isNaN(expiresAt) ? Date.now() + 10 * 60 * 1000 : expiresAt,
-    };
-  }, [token, productId, fileId, invalidateSession]);
+    [token, productId, fileId, invalidateSession],
+  );
 
   const getLink = useCallback(
     (renew: boolean): Promise<Link> => {
@@ -160,13 +148,47 @@ export const useNoteReaderPdf = ({
   useEffect(() => {
     if (!token) return;
     let alive = true;
+    let handle: FileHandle | null = null;
     link.current = null;
 
+    const openSaved = (): RangeSource | null => {
+      const saved = findSavedNote(userId, productId, fileId);
+      if (!saved) return null;
+      try {
+        const local = saved.open(FileMode.ReadOnly);
+        handle = local;
+        const length = saved.size;
+        const read = (begin: number, end: number) => {
+          local.offset = begin;
+          return toBase64(local.readBytes(Math.min(end, length) - begin));
+        };
+        return {
+          kind: "pdfRanges",
+          length,
+          initial: read(0, INITIAL_BYTES),
+          readRange: async (begin, end) => read(begin, end),
+        };
+      } catch (err: any) {
+        // An unreadable saved copy falls back to reading from the server.
+        console.error("Saved note open error:", err?.message, err);
+        handle?.close();
+        handle = null;
+        return null;
+      }
+    };
+
     (async () => {
+      const local = openSaved();
+      if (local) {
+        setOffline(true);
+        setSource(local);
+        return;
+      }
       try {
         const first = await readBytes(0, INITIAL_BYTES);
         if (!first.total) throw new Error(OPEN_ERROR);
         if (!alive) return;
+        setOffline(false);
         setSource({
           kind: "pdfRanges",
           length: first.total,
@@ -183,8 +205,9 @@ export const useNoteReaderPdf = ({
 
     return () => {
       alive = false;
+      handle?.close();
     };
-  }, [token, readBytes, attempt]);
+  }, [token, userId, productId, fileId, readBytes, attempt]);
 
   const retry = useCallback(() => {
     setSource(null);
@@ -194,6 +217,7 @@ export const useNoteReaderPdf = ({
 
   return {
     source,
+    offline,
     error: token ? error : SIGNED_OUT,
     retry,
   };

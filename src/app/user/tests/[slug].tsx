@@ -23,12 +23,11 @@ import Header from "@/components/Header";
 import { EnrolledTest } from "../types";
 import Placeholder from "@/constants/placeholder";
 import * as SecureStore from "expo-secure-store";
+import { getReviewStorageKey } from "@/components/PostTestReviewScreen";
 import { formatScore, calculateAverageScore } from "@/utils/scoreFormatter";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
-const getReviewStorageKey = (mockTestId: number | string) =>
-  `reviewed_test_${String(mockTestId)}`;
 
 const EnrolledTestDetails = () => {
   const { slug } = useLocalSearchParams();

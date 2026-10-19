@@ -981,7 +981,7 @@ const TestAttemptScreen = () => {
       } else {
         router.replace({
           pathname: "/user/portal/test/results",
-          params: { testItemId: String(testItemNumericId) },
+          params: { testItemId: String(testItemNumericId), justSubmitted: "1" },
         });
       }
     } catch (err: any) {

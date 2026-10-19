@@ -13,6 +13,7 @@ import { useColorScheme } from "nativewind";
 import { useAuth } from "@/context/AuthContext";
 import Feather from "@react-native-vector-icons/feather";
 import { Directory, Paths } from "expo-file-system";
+import { clearSavedNotes } from "@/utils/savedNotes";
 import Header from "@/components/Header";
 import BottomTabs from "@/components/BottomTabs";
 import PurchasedProductCard from "../_components/PurchasedProductCard";
@@ -48,6 +49,7 @@ export default function PurchasedProductsScreen() {
               if (downloads.exists) {
                 downloads.delete();
               }
+              clearSavedNotes();
               Alert.alert("Done", "All downloaded files have been cleared.");
             } catch (error: any) {
               console.error("Clear downloads error:", error);
@@ -136,7 +138,7 @@ export default function PurchasedProductsScreen() {
             All your purchased digital products
           </Text>
 
-          {/* TEMP: Dev tool to clear cached downloads. Remove before release. */}
+          {/* TEMP: Dev tool to clear cached downloads and saved notes. Remove before release. */}
           <TouchableOpacity
             onPress={handleClearDownloads}
             disabled={clearing}

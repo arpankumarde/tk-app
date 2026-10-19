@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import Feather from "@react-native-vector-icons/feather";
+import Feather, { type FeatherIconName } from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
 
 interface ReaderHeaderProps {
@@ -8,6 +8,8 @@ interface ReaderHeaderProps {
   onClose: () => void;
   /** `x` for a modal, `arrow-left` for a pushed screen. */
   icon?: "arrow-left" | "x";
+  /** One button on the right, such as saving the document. */
+  action?: { icon: FeatherIconName; label: string; onPress: () => void };
 }
 
 /** Top bar shared by every screen that shows a DocumentViewer full screen. */
@@ -16,6 +18,7 @@ export default function ReaderHeader({
   subtitle,
   onClose,
   icon = "arrow-left",
+  action,
 }: ReaderHeaderProps) {
   const { colorScheme } = useColorScheme();
 
@@ -49,6 +52,16 @@ export default function ReaderHeader({
           </Text>
         )}
       </View>
+      {action && (
+        <TouchableOpacity
+          onPress={action.onPress}
+          accessibilityRole="button"
+          accessibilityLabel={action.label}
+          className="ml-3 h-9 w-9 items-center justify-center rounded-full border-2 border-primary bg-white dark:bg-slate-950"
+        >
+          <Feather name={action.icon} size={16} color="#FF8A50" />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
