@@ -1,3 +1,5 @@
+import { isPaymentAppUrl, openPaymentApp } from "@/utils/upiIntent";
+import { HIDE_WEBVIEW_UA_JS } from "@/utils/paymentWebView";
 import BottomTabs from "@/components/BottomTabs";
 import { bundleSavings } from "@/components/BundleCard";
 import Header from "@/components/Header";
@@ -38,8 +40,7 @@ import { WebView } from "react-native-webview";
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
 type CheckoutSource =
-  | { html: string }
-  | { uri: string; headers?: Record<string, string> };
+  { html: string } | { uri: string; headers?: Record<string, string> };
 
 const ITEM_META: Record<
   BundleItemType,
@@ -819,20 +820,8 @@ const BundleDetailsScreen = () => {
                   });
                   return false;
                 }
-                // UPI collect flows hand off to an installed payment app.
-                if (
-                  url.startsWith("upi://") ||
-                  url.startsWith("tez://") ||
-                  url.startsWith("phonepe://") ||
-                  url.startsWith("paytmmp://") ||
-                  url.startsWith("intent://")
-                ) {
-                  Linking.openURL(url).catch(() => {
-                    Alert.alert(
-                      "App Not Found",
-                      "No UPI app found to handle this payment.",
-                    );
-                  });
+                if (isPaymentAppUrl(url)) {
+                  openPaymentApp(url);
                   return false;
                 }
                 return true;
@@ -874,16 +863,9 @@ const BundleDetailsScreen = () => {
               }}
               // Card/netbanking flows redirect through bank 3-D Secure domains,
               // so the payment WebView can't be pinned to a fixed origin list.
-              originWhitelist={[
-                "https://*",
-                "http://*",
-                "upi://*",
-                "tez://*",
-                "phonepe://*",
-                "paytmmp://*",
-                "intent://*",
-                "testkart://*",
-              ]}
+              setSupportMultipleWindows={false}
+              injectedJavaScriptBeforeContentLoaded={HIDE_WEBVIEW_UA_JS}
+              originWhitelist={["*"]}
               startInLoadingState
               renderLoading={() => (
                 <View className="flex-1 items-center justify-center">

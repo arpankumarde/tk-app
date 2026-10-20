@@ -288,7 +288,7 @@ const SearchScreen = () => {
       const url = `${BASE_URL}/_api/homepage/search?q=${encodeURIComponent(trimmed)}&limit=${SEARCH_LIMIT}`;
       const res = await fetch(url);
       const data = await res.json();
-      console.log("[Search] response", url, JSON.stringify(data, null, 2));
+      // console.log("[Search] response", url, JSON.stringify(data, null, 2));
       const payload = data.json || data;
       setResults({
         courses: payload.courses || [],

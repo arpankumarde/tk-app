@@ -1,3 +1,5 @@
+import { isPaymentAppUrl, openPaymentApp } from "@/utils/upiIntent";
+import { HIDE_WEBVIEW_UA_JS } from "@/utils/paymentWebView";
 import { useState } from "react";
 import {
   View,
@@ -636,6 +638,7 @@ const Cart = () => {
               source={{
                 html: buildPayuForm(payuData as any),
               }}
+              injectedJavaScriptBeforeContentLoaded={HIDE_WEBVIEW_UA_JS}
               onShouldStartLoadWithRequest={(request) => {
                 const { url } = request;
                 // Intercept deep link redirect from payment callback
@@ -651,34 +654,14 @@ const Cart = () => {
                   });
                   return false;
                 }
-                // Handle UPI app intents
-                if (
-                  url.startsWith("upi://") ||
-                  url.startsWith("tez://") ||
-                  url.startsWith("phonepe://") ||
-                  url.startsWith("paytmmp://") ||
-                  url.startsWith("intent://")
-                ) {
-                  Linking.openURL(url).catch(() => {
-                    Alert.alert(
-                      "App Not Found",
-                      "No UPI app found to handle this payment.",
-                    );
-                  });
+                if (isPaymentAppUrl(url)) {
+                  openPaymentApp(url);
                   return false;
                 }
                 return true;
               }}
-              originWhitelist={[
-                "https://*",
-                "http://*",
-                "upi://*",
-                "tez://*",
-                "phonepe://*",
-                "paytmmp://*",
-                "intent://*",
-                "testkart://*",
-              ]}
+              setSupportMultipleWindows={false}
+              originWhitelist={["*"]}
               startInLoadingState
               renderLoading={() => (
                 <View className="flex-1 items-center justify-center">

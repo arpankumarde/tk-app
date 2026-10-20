@@ -1,3 +1,5 @@
+import { isPaymentAppUrl, openPaymentApp } from "@/utils/upiIntent";
+import { HIDE_WEBVIEW_UA_JS } from "@/utils/paymentWebView";
 import BlinkingDot from "@/components/BlinkingDot";
 import Header from "@/components/Header";
 import Placeholder from "@/constants/placeholder";
@@ -1432,33 +1434,15 @@ const LiveTestDetails = () => {
                     });
                     return false;
                   }
-                  if (
-                    url.startsWith("upi://") ||
-                    url.startsWith("tez://") ||
-                    url.startsWith("phonepe://") ||
-                    url.startsWith("paytmmp://") ||
-                    url.startsWith("intent://")
-                  ) {
-                    Linking.openURL(url).catch(() => {
-                      Alert.alert(
-                        "App Not Found",
-                        "No UPI app found to handle this payment.",
-                      );
-                    });
+                  if (isPaymentAppUrl(url)) {
+                    openPaymentApp(url);
                     return false;
                   }
                   return true;
                 }}
-                originWhitelist={[
-                  "https://*",
-                  "http://*",
-                  "upi://*",
-                  "tez://*",
-                  "phonepe://*",
-                  "paytmmp://*",
-                  "intent://*",
-                  "testkart://*",
-                ]}
+                setSupportMultipleWindows={false}
+                injectedJavaScriptBeforeContentLoaded={HIDE_WEBVIEW_UA_JS}
+                originWhitelist={["*"]}
                 startInLoadingState
                 renderLoading={() => (
                   <View className="flex-1 items-center justify-center">
