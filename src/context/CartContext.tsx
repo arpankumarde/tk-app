@@ -44,9 +44,10 @@ interface CartContextType {
   clearPromo: () => void;
   appliedPromoCode: string | null;
   eligibleItemIds: number[];
-  initiatePayment: () => Promise<any>;
+  /** `useTcoins` pays part of the order with Tcoins; the server rejects it alongside a promo code. */
+  initiatePayment: (useTcoins?: boolean) => Promise<any>;
   verifyPayment: (params: any) => Promise<any>;
-  walletPurchase: () => Promise<{
+  walletPurchase: (useTcoins?: boolean) => Promise<{
     success: boolean;
     orderId?: number;
     walletBalanceAfter?: number;
@@ -249,7 +250,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     setCart((prev) => computeTotals(prev.items, 0));
   }, []);
 
-  const initiatePayment = useCallback(async () => {
+  const initiatePayment = useCallback(async (useTcoins = false) => {
     if (!token) return { success: false, error: "Not authenticated" };
 
     try {
@@ -257,6 +258,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         deepLinkUrl: "testkart://payment/callback",
       };
       if (appliedPromoCodeId != null) body.promoCodeId = appliedPromoCodeId;
+      if (useTcoins) body.useTcoins = true;
 
       const reqBody = { json: body };
       const response = await fetch(`${BASE_URL}/_api/payment/payu/initiate`, {
@@ -339,12 +341,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     [token],
   );
 
-  const walletPurchase = useCallback(async () => {
+  const walletPurchase = useCallback(async (useTcoins = false) => {
     if (!token) return { success: false, error: "Not authenticated" };
 
     try {
       const body: Record<string, any> = {};
       if (appliedPromoCodeId != null) body.promoCodeId = appliedPromoCodeId;
+      if (useTcoins) body.useTcoins = true;
 
       const response = await fetch(`${BASE_URL}/_api/student/wallet/purchase`, {
         method: "POST",

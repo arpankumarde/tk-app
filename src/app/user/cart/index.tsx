@@ -25,6 +25,9 @@ import { useAuth } from "@/context/AuthContext";
 import { useCartContext, CartItem } from "@/context/CartContext";
 import Placeholder from "@/constants/placeholder";
 import { useWallet } from "@/app/user/_hooks/useWallet";
+import { useTcoins } from "@/app/user/_hooks/useTcoins";
+import TcoinsCheckoutOption from "@/components/TcoinsCheckoutOption";
+import { tcoinsToSpend } from "@/utils/tcoins";
 import { buildPayuForm } from "@/utils/payuForm";
 import { paymentFailureMessage } from "@/utils/paymentFailure";
 
@@ -45,6 +48,8 @@ const Cart = () => {
     walletPurchase,
   } = useCartContext();
   const { balance: walletBalance, refetch: refetchWallet } = useWallet(token);
+  const { summary: tcoins, refetch: refetchTcoins } = useTcoins(token);
+  const [wantsTcoins, setWantsTcoins] = useState(false);
 
   const [promoExpanded, setPromoExpanded] = useState(false);
   const [promoCode, setPromoCode] = useState("");
@@ -67,9 +72,22 @@ const Cart = () => {
   > | null>(null);
   const [webViewVisible, setWebViewVisible] = useState(false);
 
+  // Coins cover a share of the order value before any promo code.
+  const orderValue = cart.items.reduce((sum, item) => sum + item.price, 0);
+  const tcoinsUsed = tcoinsToSpend(
+    tcoins,
+    orderValue,
+    wantsTcoins,
+    appliedPromoCode !== null,
+  );
+  const payable = Math.max(
+    0,
+    Math.round((cart.total - tcoinsUsed) * 100) / 100,
+  );
+
   const availableWalletBalance = walletBalance?.availableBalance ?? 0;
   const hasWallet = availableWalletBalance > 0;
-  const canPayWithWallet = hasWallet && availableWalletBalance >= cart.total;
+  const canPayWithWallet = hasWallet && availableWalletBalance >= payable;
 
   const handleRemoveItem = (item: CartItem) => {
     setItemToDelete(item);
@@ -92,7 +110,10 @@ const Cart = () => {
     const result = await applyPromoCode(promoCode.trim());
     setPromoMessage({ text: result.message, success: result.success });
     setPromoLoading(false);
-    if (result.success) setPromoExpanded(false);
+    if (result.success) {
+      setPromoExpanded(false);
+      setWantsTcoins(false);
+    }
   };
 
   const handleClearPromo = () => {
@@ -103,7 +124,7 @@ const Cart = () => {
 
   const handleProceedToPayment = async () => {
     setOrderLoading(true);
-    const result = await initiatePayment();
+    const result = await initiatePayment(tcoinsUsed > 0);
     setOrderLoading(false);
 
     if (!result.success) {
@@ -121,7 +142,7 @@ const Cart = () => {
   const handleWalletPurchase = async () => {
     if (!canPayWithWallet || walletLoading) return;
     setWalletLoading(true);
-    const result = await walletPurchase();
+    const result = await walletPurchase(tcoinsUsed > 0);
     setWalletLoading(false);
 
     if (!result.success) {
@@ -132,7 +153,8 @@ const Cart = () => {
       return;
     }
 
-    await refetchWallet();
+    setWantsTcoins(false);
+    await Promise.all([refetchWallet(), refetchTcoins()]);
 
     setWalletSuccess({
       orderId: result.orderId,
@@ -417,6 +439,17 @@ const Cart = () => {
                 </View>
               )}
 
+              {tcoinsUsed > 0 && (
+                <View className="flex-row items-center justify-between mb-3">
+                  <Text className="text-base text-green-600 dark:text-green-400 font-bold">
+                    Paid with Tcoins
+                  </Text>
+                  <Text className="text-base text-green-600 dark:text-green-400 font-black">
+                    -₹{tcoinsUsed.toFixed(2)}
+                  </Text>
+                </View>
+              )}
+
               {/* Divider */}
               <View className="h-[1px] bg-gray-100 dark:bg-slate-700 my-4" />
 
@@ -426,7 +459,7 @@ const Cart = () => {
                   Total Amount
                 </Text>
                 <Text className="text-2xl font-black text-slate-800 dark:text-white">
-                  ₹{cart.total.toFixed(2)}
+                  ₹{payable.toFixed(2)}
                 </Text>
               </View>
               <Text className="text-sm text-slate-400 dark:text-slate-500 text-right mb-5">
@@ -510,6 +543,17 @@ const Cart = () => {
                 </>
               )}
 
+              {tcoins?.enabled && (
+                <TcoinsCheckoutOption
+                  summary={tcoins}
+                  orderValue={orderValue}
+                  amountToPay={payable}
+                  checked={wantsTcoins}
+                  onToggle={() => setWantsTcoins((on) => !on)}
+                  promoApplied={appliedPromoCode !== null}
+                />
+              )}
+
               {/* Wallet Section — only render when balance > 0 */}
               {hasWallet && (
                 <View className="mb-3 rounded-2xl border border-primary/30 bg-orange-50/60 dark:bg-orange-900/10 p-4">
@@ -548,7 +592,7 @@ const Cart = () => {
                         <>
                           <Feather name="credit-card" size={16} color="white" />
                           <Text className="text-white font-black text-base ml-2">
-                            Pay ₹{cart.total.toFixed(2)} with Wallet
+                            Pay ₹{payable.toFixed(2)} with Wallet
                           </Text>
                         </>
                       )}

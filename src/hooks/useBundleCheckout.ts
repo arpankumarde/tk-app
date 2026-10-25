@@ -51,8 +51,12 @@ export const useBundleCheckout = () => {
   const [purchasing, setPurchasing] = useState(false);
   const [validatingPromo, setValidatingPromo] = useState(false);
 
+  /** `useTcoins` pays part of a paid bundle with Tcoins. Never sent with a promo code. */
   const purchase = useCallback(
-    async (bundleId: number): Promise<BundlePurchaseResult> => {
+    async (
+      bundleId: number,
+      useTcoins = false,
+    ): Promise<BundlePurchaseResult> => {
       if (!token)
         return { status: "error", message: "Please log in to continue" };
 
@@ -64,7 +68,9 @@ export const useBundleCheckout = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ json: { bundleId } }),
+          body: JSON.stringify({
+            json: useTcoins ? { bundleId, useTcoins } : { bundleId },
+          }),
         });
 
         const data = await response.json().catch(() => null);

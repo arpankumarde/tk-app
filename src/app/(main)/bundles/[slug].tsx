@@ -15,6 +15,9 @@ import {
 import type { BundleDetails, BundleItem, BundleItemType } from "@/types/bundle";
 import { buildPayuForm } from "@/utils/payuForm";
 import { paymentFailureMessage } from "@/utils/paymentFailure";
+import { tcoinsToSpend } from "@/utils/tcoins";
+import { useTcoins } from "@/app/user/_hooks/useTcoins";
+import TcoinsCheckoutOption from "@/components/TcoinsCheckoutOption";
 import Feather from "@react-native-vector-icons/feather";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -102,6 +105,11 @@ const BundleDetailsScreen = () => {
   const [promoExpanded, setPromoExpanded] = useState(false);
   const [promoCode, setPromoCode] = useState("");
   const [promo, setPromo] = useState<PromoPreview | null>(null);
+  const { summary: tcoins } = useTcoins(token);
+  const [wantsTcoins, setWantsTcoins] = useState(false);
+  const tcoinsUsed = bundle
+    ? tcoinsToSpend(tcoins, bundle.price, wantsTcoins, !!promo?.valid)
+    : 0;
 
   const [checkoutSource, setCheckoutSource] = useState<CheckoutSource | null>(
     null,
@@ -294,7 +302,7 @@ const BundleDetailsScreen = () => {
       return;
     }
 
-    const outcome = await purchase(bundle.id);
+    const outcome = await purchase(bundle.id, tcoinsUsed > 0);
 
     if (outcome.status === "alreadyEnrolled") {
       markEnrolled();
@@ -337,7 +345,10 @@ const BundleDetailsScreen = () => {
       promoCode.trim(),
     );
     setPromo(preview);
-    if (preview.valid) setPromoExpanded(false);
+    if (preview.valid) {
+      setPromoExpanded(false);
+      setWantsTcoins(false);
+    }
   };
 
   const clearPromo = () => {
@@ -402,7 +413,10 @@ const BundleDetailsScreen = () => {
   const isFree = (bundle.price ?? 0) === 0;
   const payable = Math.max(
     0,
-    bundle.price - (promo?.valid ? promo.discountAmount : 0),
+    Math.round(
+      (bundle.price - (promo?.valid ? promo.discountAmount : 0) - tcoinsUsed) *
+        100,
+    ) / 100,
   );
   const items = [...(bundle.items || [])].sort(
     (a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0),
@@ -627,6 +641,19 @@ const BundleDetailsScreen = () => {
                       {promo.message}
                     </Text>
                   )}
+
+                  {tcoins?.enabled && (
+                    <View className="mt-4">
+                      <TcoinsCheckoutOption
+                        summary={tcoins}
+                        orderValue={bundle.price}
+                        amountToPay={payable}
+                        checked={wantsTcoins}
+                        onToggle={() => setWantsTcoins((on) => !on)}
+                        promoApplied={!!promo?.valid}
+                      />
+                    </View>
+                  )}
                 </View>
               )}
             </View>
@@ -742,13 +769,13 @@ const BundleDetailsScreen = () => {
       <View className="bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 px-6 py-4 flex-row items-center">
         <View className="flex-1 mr-3">
           <Text className="text-slate-400 dark:text-slate-500 text-xs font-black uppercase tracking-tighter">
-            {promo?.valid ? "Payable" : "Bundle Price"}
+            {promo?.valid || tcoinsUsed > 0 ? "Payable" : "Bundle Price"}
           </Text>
           <View className="flex-row items-baseline mt-1">
             <Text className="text-2xl font-black text-slate-800 dark:text-white">
               {isFree ? "FREE" : `₹${formatInr(payable)}`}
             </Text>
-            {!isFree && promo?.valid && promo.discountAmount > 0 && (
+            {!isFree && payable < bundle.price && (
               <Text className="ml-2 text-sm text-slate-400 dark:text-slate-500 font-bold line-through">
                 ₹{formatInr(bundle.price)}
               </Text>

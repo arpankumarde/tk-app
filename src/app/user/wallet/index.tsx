@@ -23,6 +23,8 @@ import type { WalletTabHandle } from "../types";
 import WalletTransaction from "./_components/WalletTransaction";
 import WalletBank from "./_components/WalletBank";
 import WalletWithdrawl from "./_components/WalletWithdrawl";
+import WalletTcoins from "./_components/WalletTcoins";
+import { useTcoins } from "../_hooks/useTcoins";
 
 type WalletTab = "transactions" | "bank" | "withdrawal";
 
@@ -52,6 +54,7 @@ export default function WalletScreen() {
     refetch,
     loadMore,
   } = useWallet(token);
+  const { summary: tcoins, refetch: refetchTcoins } = useTcoins(token);
   const [activeTab, setActiveTab] = useState<WalletTab>("transactions");
   const [refreshing, setRefreshing] = useState(false);
   const tabRef = useRef<WalletTabHandle>(null);
@@ -60,7 +63,7 @@ export default function WalletScreen() {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([refetch(), tabRef.current?.refresh()]);
+    await Promise.all([refetch(), refetchTcoins(), tabRef.current?.refresh()]);
     setRefreshing(false);
   };
 
@@ -141,6 +144,8 @@ export default function WalletScreen() {
                 </View>
               </View>
             </View>
+
+            <WalletTcoins summary={tcoins} />
 
             {/* Tabs */}
             <View className="px-6 mb-4">
