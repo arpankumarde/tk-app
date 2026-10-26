@@ -27,6 +27,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { clientHeaders } from "@/utils/clientHeaders";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -139,6 +140,7 @@ const ProductDetails = () => {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          ...clientHeaders(),
         },
         body: JSON.stringify({ json: { digitalProductId: product.id } }),
       });

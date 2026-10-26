@@ -1,6 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import type { BundlePaymentData, EnrolledBundle } from "@/types/bundle";
 import { isAuthError } from "@/utils/authError";
+import { clientHeaders } from "@/utils/clientHeaders";
 import { useCallback, useState } from "react";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
@@ -67,6 +68,7 @@ export const useBundleCheckout = () => {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
+            ...clientHeaders(),
           },
           body: JSON.stringify({
             json: useTcoins ? { bundleId, useTcoins } : { bundleId },
@@ -201,7 +203,9 @@ export const useBundleCheckout = () => {
       uri:
         `${BASE_URL}/_api/payment/payu/bundle-redirect?bundleId=${bundleId}` +
         (promoCodeId != null ? `&promoCodeId=${promoCodeId}` : ""),
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      headers: token
+        ? { Authorization: `Bearer ${token}`, ...clientHeaders() }
+        : clientHeaders(),
     }),
     [token],
   );

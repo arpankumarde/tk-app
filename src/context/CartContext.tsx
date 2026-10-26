@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { useAuth } from "./AuthContext";
 import { isAuthError } from "@/utils/authError";
+import { clientHeaders } from "@/utils/clientHeaders";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -266,6 +267,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          ...clientHeaders(),
         },
         body: JSON.stringify(reqBody),
       });
@@ -354,6 +356,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          ...clientHeaders(),
         },
         body: JSON.stringify({ json: body }),
       });

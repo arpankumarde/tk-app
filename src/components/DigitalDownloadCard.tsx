@@ -13,6 +13,7 @@ import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useAuth } from "@/context/AuthContext";
 import Placeholder from "@/constants/placeholder";
+import { clientHeaders } from "@/utils/clientHeaders";
 
 interface DigitalDownloadCardProps {
   product: {
@@ -63,6 +64,7 @@ const DigitalDownloadCard = ({
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
+            ...clientHeaders(),
           },
           body: JSON.stringify({ json: { digitalProductId: product.id } }),
         },

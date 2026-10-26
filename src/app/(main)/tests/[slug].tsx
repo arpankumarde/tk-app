@@ -23,6 +23,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { clientHeaders } from "@/utils/clientHeaders";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -177,6 +178,7 @@ const TestDetails = () => {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          ...clientHeaders(),
         },
         body: JSON.stringify({ json: { mockTestId: test?.id } }),
       });

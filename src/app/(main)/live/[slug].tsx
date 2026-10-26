@@ -29,6 +29,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
+import { clientHeaders } from "@/utils/clientHeaders";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -376,6 +377,7 @@ const LiveTestDetails = () => {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          ...clientHeaders(),
         },
         body: JSON.stringify({
           json: {
