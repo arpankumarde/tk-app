@@ -1,4 +1,5 @@
 import ForceUpdate from "@/components/ForceUpdate";
+import SpinWinLauncher from "@/components/spin-win/SpinWinLauncher";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { EnrollmentProvider } from "@/context/EnrollmentContext";
@@ -37,6 +38,7 @@ export default function RootLayout() {
         <EnrollmentProvider>
           <CartProvider>
             <Stack screenOptions={{ headerShown: false }} />
+            <SpinWinLauncher />
           </CartProvider>
         </EnrollmentProvider>
       </AuthProvider>
