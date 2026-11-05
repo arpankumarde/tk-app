@@ -43,6 +43,7 @@ export interface EnrolledTest {
     attemptsCount: number;
     isCompleted: boolean;
     bestScore?: number | null;
+    scheduledDate?: string | null;
   }[];
 }
 

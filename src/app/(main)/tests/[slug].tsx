@@ -5,6 +5,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useEnrollmentContext } from "@/context/EnrollmentContext";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useBuildShareUrl } from "@/hooks/useBuildShareUrl";
+import { useNow } from "@/hooks/useNow";
+import { formatOpensDate, isScheduledAhead } from "@/utils/testSchedule";
 import Feather from "@react-native-vector-icons/feather";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
@@ -50,6 +52,7 @@ interface TestItem {
   isFree: boolean;
   orderIndex: number;
   createdAt: string;
+  scheduledDate: string | null;
   subjects: Subject[];
 }
 
@@ -125,6 +128,7 @@ const TestDetails = () => {
   }>({ visible: false, success: false });
   const { addToCart, adding: addingToCart } = useAddToCart();
   const buildShareUrl = useBuildShareUrl();
+  const now = useNow(60000);
 
   useEffect(() => {
     const fetchTestDetails = async () => {
@@ -464,107 +468,155 @@ const TestDetails = () => {
             </Text>
 
             <View className="bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-xl overflow-hidden">
-              {items.map((item, idx) => (
-                <View
-                  key={item.id}
-                  className={`${idx !== items.length - 1 ? "border-b border-slate-50 dark:border-slate-800/50" : ""}`}
-                >
-                  <TouchableOpacity
-                    onPress={() => toggleItem(idx)}
-                    className="p-5 flex-row items-center justify-between"
+              {items.map((item, idx) => {
+                const isScheduled = isScheduledAhead(item.scheduledDate, now);
+                const opensLabel =
+                  isScheduled && item.scheduledDate
+                    ? `Opens ${formatOpensDate(item.scheduledDate)}`
+                    : null;
+                return (
+                  <View
+                    key={item.id}
+                    className={`${idx !== items.length - 1 ? "border-b border-slate-50 dark:border-slate-800/50" : ""}`}
                   >
-                    <View className="flex-1 mr-3">
-                      <View className="flex-row items-center mb-1.5">
-                        <View className="w-1 h-3 bg-orange-400 rounded-full mr-2" />
-                        <Text className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                          Test {idx + 1}
-                        </Text>
-                        {item.isFree && (
-                          <View className="bg-green-100/50 dark:bg-green-900/20 px-2 py-0.5 rounded-md ml-2">
-                            <Text className="text-green-600 dark:text-green-400 text-[9px] font-black uppercase">
-                              Free
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-                      <Text className="text-slate-800 dark:text-white font-black text-sm">
-                        {item.title}
-                      </Text>
-                      <View className="flex-row items-center mt-2">
-                        <Feather name="file-text" size={11} color="#94a3b8" />
-                        <Text className="text-slate-400 text-[10px] font-bold ml-1.5 mr-4">
-                          {item.totalQuestions} Qs
-                        </Text>
-                        <Feather name="clock" size={11} color="#94a3b8" />
-                        <Text className="text-slate-400 text-[10px] font-bold ml-1.5">
-                          {item.durationMinutes} min
-                        </Text>
-                      </View>
-                    </View>
-                    <Feather
-                      name={
-                        expandedItems.includes(idx)
-                          ? "chevron-up"
-                          : "chevron-down"
-                      }
-                      size={18}
-                      color="#FF8A50"
-                    />
-                  </TouchableOpacity>
-
-                  {expandedItems.includes(idx) && item.subjects.length > 0 && (
-                    <View className="px-5 pb-5 pt-1">
-                      <View className="h-[0.5px] bg-slate-100 dark:bg-slate-700/30 mb-3" />
-                      {item.subjects.map((subject) => (
-                        <View
-                          key={subject.id}
-                          className="flex-row items-center py-2"
-                        >
-                          <View className="w-6 h-6 rounded-full bg-orange-50 dark:bg-orange-900/10 items-center justify-center mr-3">
-                            <Feather
-                              name="book-open"
-                              size={12}
-                              color="#FF8A50"
-                            />
-                          </View>
-                          <Text className="text-slate-600 dark:text-slate-300 text-xs font-bold flex-1">
-                            {subject.subjectName}
+                    <TouchableOpacity
+                      onPress={() => toggleItem(idx)}
+                      className="p-5 flex-row items-center justify-between"
+                    >
+                      <View className="flex-1 mr-3">
+                        <View className="flex-row items-center mb-1.5">
+                          <View className="w-1 h-3 bg-orange-400 rounded-full mr-2" />
+                          <Text className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                            Test {idx + 1}
                           </Text>
-                          <Text className="text-slate-400 text-[10px] font-bold">
-                            {subject.actualQuestionCount} Qs
-                          </Text>
+                          {item.isFree && (
+                            <View className="bg-green-100/50 dark:bg-green-900/20 px-2 py-0.5 rounded-md ml-2">
+                              <Text className="text-green-600 dark:text-green-400 text-[9px] font-black uppercase">
+                                Free
+                              </Text>
+                            </View>
+                          )}
                         </View>
-                      ))}
+                        <Text className="text-slate-800 dark:text-white font-black text-sm">
+                          {item.title}
+                        </Text>
+                        <View className="flex-row items-center flex-wrap mt-2">
+                          {!isScheduled && (
+                            <>
+                              <Feather
+                                name="file-text"
+                                size={11}
+                                color="#94a3b8"
+                              />
+                              <Text className="text-slate-400 text-[10px] font-bold ml-1.5 mr-4">
+                                {item.totalQuestions} Qs
+                              </Text>
+                            </>
+                          )}
+                          {(!isScheduled || item.durationMinutes > 0) && (
+                            <>
+                              <Feather name="clock" size={11} color="#94a3b8" />
+                              <Text className="text-slate-400 text-[10px] font-bold ml-1.5 mr-4">
+                                {item.durationMinutes} min
+                              </Text>
+                            </>
+                          )}
+                          {opensLabel && (
+                            <>
+                              <Feather
+                                name="calendar"
+                                size={11}
+                                color="#FF8A50"
+                              />
+                              <Text className="text-primary text-[10px] font-bold ml-1.5">
+                                {opensLabel}
+                              </Text>
+                            </>
+                          )}
+                        </View>
+                      </View>
+                      <Feather
+                        name={
+                          expandedItems.includes(idx)
+                            ? "chevron-up"
+                            : "chevron-down"
+                        }
+                        size={18}
+                        color="#FF8A50"
+                      />
+                    </TouchableOpacity>
 
-                      {item.isFree && (
-                        <TouchableOpacity
-                          onPress={() => {
-                            if (!user || !token) {
-                              router.push("/login");
-                              return;
-                            }
-                            router.push({
-                              pathname: "/user/portal/[slug]",
-                              params: {
-                                slug: String(item.id),
-                                title: item.title,
-                                duration: String(item.durationMinutes),
-                                questions: String(item.totalQuestions),
-                              },
-                            });
-                          }}
-                          className="mt-4 bg-emerald-500 h-11 rounded-2xl flex-row items-center justify-center shadow-lg shadow-emerald-500/20"
-                        >
-                          <Feather name="play" size={16} color="white" />
-                          <Text className="text-white font-black text-sm ml-2">
-                            Take Test
-                          </Text>
-                        </TouchableOpacity>
+                    {expandedItems.includes(idx) &&
+                      (item.subjects.length > 0 || item.isFree) && (
+                        <View className="px-5 pb-5 pt-1">
+                          <View className="h-[0.5px] bg-slate-100 dark:bg-slate-700/30 mb-3" />
+                          {item.subjects.map((subject) => (
+                            <View
+                              key={subject.id}
+                              className="flex-row items-center py-2"
+                            >
+                              <View className="w-6 h-6 rounded-full bg-orange-50 dark:bg-orange-900/10 items-center justify-center mr-3">
+                                <Feather
+                                  name="book-open"
+                                  size={12}
+                                  color="#FF8A50"
+                                />
+                              </View>
+                              <Text className="text-slate-600 dark:text-slate-300 text-xs font-bold flex-1">
+                                {subject.subjectName}
+                              </Text>
+                              {!isScheduled && (
+                                <Text className="text-slate-400 text-[10px] font-bold">
+                                  {subject.actualQuestionCount} Qs
+                                </Text>
+                              )}
+                            </View>
+                          ))}
+
+                          {item.isFree && opensLabel && (
+                            <View className="mt-4 bg-slate-200 dark:bg-slate-700 h-11 rounded-2xl flex-row items-center justify-center">
+                              <Feather
+                                name="calendar"
+                                size={16}
+                                color={
+                                  colorScheme === "dark" ? "#e2e8f0" : "#475569"
+                                }
+                              />
+                              <Text className="text-slate-600 dark:text-slate-200 font-black text-sm ml-2">
+                                {opensLabel}
+                              </Text>
+                            </View>
+                          )}
+                          {item.isFree && !opensLabel && (
+                            <TouchableOpacity
+                              onPress={() => {
+                                if (!user || !token) {
+                                  router.push("/login");
+                                  return;
+                                }
+                                router.push({
+                                  pathname: "/user/portal/[slug]",
+                                  params: {
+                                    slug: String(item.id),
+                                    title: item.title,
+                                    duration: String(item.durationMinutes),
+                                    questions: String(item.totalQuestions),
+                                  },
+                                });
+                              }}
+                              className="mt-4 bg-emerald-500 h-11 rounded-2xl flex-row items-center justify-center shadow-lg shadow-emerald-500/20"
+                            >
+                              <Feather name="play" size={16} color="white" />
+                              <Text className="text-white font-black text-sm ml-2">
+                                Take Test
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
                       )}
-                    </View>
-                  )}
-                </View>
-              ))}
+                  </View>
+                );
+              })}
             </View>
           </View>
         )}

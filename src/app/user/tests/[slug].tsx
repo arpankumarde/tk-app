@@ -25,15 +25,17 @@ import Placeholder from "@/constants/placeholder";
 import * as SecureStore from "expo-secure-store";
 import { getReviewStorageKey } from "@/components/PostTestReviewScreen";
 import { formatScore, calculateAverageScore } from "@/utils/scoreFormatter";
+import { useNow } from "@/hooks/useNow";
+import { formatOpensDate, isScheduledAhead } from "@/utils/testSchedule";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
-
 
 const EnrolledTestDetails = () => {
   const { slug } = useLocalSearchParams();
   const router = useRouter();
   const { token } = useAuth();
   const { colorScheme } = useColorScheme();
+  const now = useNow(60000);
 
   const [test, setTest] = useState<EnrolledTest | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,10 +81,10 @@ const EnrolledTestDetails = () => {
 
         const serverHasReviewed = Boolean(
           foundTest.hasReviewed ||
-            foundTest.reviewSubmitted ||
-            foundTest.userReviewId ||
-            foundTest.reviewId ||
-            foundTest.myReview,
+          foundTest.reviewSubmitted ||
+          foundTest.userReviewId ||
+          foundTest.reviewId ||
+          foundTest.myReview,
         );
 
         let locallyReviewed = false;
@@ -392,95 +394,167 @@ const EnrolledTestDetails = () => {
           </View>
 
           {test.testItems && test.testItems.length > 0 ? (
-            test.testItems.map((item, index) => (
-              <View
-                key={item.id}
-                className="bg-white dark:bg-slate-900 p-4 rounded-[32px] mb-4 border border-gray-100 dark:border-slate-800 shadow-sm"
-              >
-                <View className="flex-row items-center justify-between mb-3">
-                  <View className="flex-1 mr-3">
-                    <Text
-                      className="text-slate-800 dark:text-white font-black text-base mb-1"
-                      numberOfLines={1}
-                    >
-                      {item.title}
-                    </Text>
-                    <View className="flex-row items-center">
-                      <Text className="text-slate-400 font-bold text-[10px] uppercase">
-                        {item.totalQuestions} Questions
+            test.testItems.map((item) => {
+              const isScheduled = isScheduledAhead(item.scheduledDate, now);
+              const opensLabel =
+                isScheduled && item.scheduledDate
+                  ? `Opens ${formatOpensDate(item.scheduledDate)}`
+                  : null;
+              const hasAttempted = (item.attemptsCount || 0) > 0;
+              const status = item.isCompleted
+                ? "Completed"
+                : !hasAttempted && isScheduled
+                  ? "Scheduled"
+                  : "Ongoing";
+              return (
+                <View
+                  key={item.id}
+                  className="bg-white dark:bg-slate-900 p-4 rounded-[32px] mb-4 border border-gray-100 dark:border-slate-800 shadow-sm"
+                >
+                  <View className="flex-row items-center justify-between mb-3">
+                    <View className="flex-1 mr-3">
+                      <Text
+                        className="text-slate-800 dark:text-white font-black text-base mb-1"
+                        numberOfLines={1}
+                      >
+                        {item.title}
                       </Text>
-                      <View className="mx-2 w-1 h-1 rounded-full bg-slate-300" />
-                      <Text className="text-slate-400 font-bold text-[10px] uppercase">
-                        {item.durationMinutes} Min
+                      <View className="flex-row items-center flex-wrap">
+                        {!isScheduled && (
+                          <Text className="text-slate-400 font-bold text-[10px] uppercase">
+                            {item.totalQuestions} Questions
+                          </Text>
+                        )}
+                        {!isScheduled && (
+                          <View className="mx-2 w-1 h-1 rounded-full bg-slate-300" />
+                        )}
+                        {(!isScheduled || item.durationMinutes > 0) && (
+                          <Text className="text-slate-400 font-bold text-[10px] uppercase">
+                            {item.durationMinutes} Min
+                          </Text>
+                        )}
+                        {opensLabel && (
+                          <View className="flex-row items-center">
+                            {item.durationMinutes > 0 && (
+                              <View className="mx-2 w-1 h-1 rounded-full bg-slate-300" />
+                            )}
+                            <Feather
+                              name="calendar"
+                              size={11}
+                              color="#FF8A50"
+                            />
+                            <Text className="text-primary font-bold text-[10px] uppercase ml-1">
+                              {opensLabel}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                      {(item.attemptsCount || 0) > 0 && (
+                        <Text className="text-slate-500 dark:text-slate-400 font-bold text-xs mt-1">
+                          Best Score:{" "}
+                          <Text className="text-primary">
+                            {formatScore(item.bestScore)}
+                          </Text>
+                        </Text>
+                      )}
+                    </View>
+                    <View
+                      className={`px-3 py-1 rounded-xl ${item.isCompleted ? "bg-green-50 dark:bg-green-900/20" : status === "Scheduled" ? "bg-slate-100 dark:bg-slate-800" : "bg-orange-50 dark:bg-orange-900/20"}`}
+                    >
+                      <Text
+                        className={`font-black text-[9px] uppercase tracking-wider ${item.isCompleted ? "text-green-600 dark:text-green-400" : status === "Scheduled" ? "text-slate-600 dark:text-slate-300" : "text-primary"}`}
+                      >
+                        {status}
                       </Text>
                     </View>
-                    {(item.attemptsCount || 0) > 0 && (
-                      <Text className="text-slate-500 dark:text-slate-400 font-bold text-xs mt-1">
-                        Best Score: <Text className="text-primary">{formatScore(item.bestScore)}</Text>
+                  </View>
+
+                  <View className="flex-row items-center justify-between pt-3 border-t border-gray-50 dark:border-slate-800/50">
+                    <View className="flex-row items-center">
+                      <Feather name="repeat" size={14} color="#94A3B8" />
+                      <Text className="text-slate-500 font-bold text-xs ml-1.5">
+                        {item.attemptsCount || 0} Attempts
                       </Text>
-                    )}
-                  </View>
-                  <View
-                    className={`px-3 py-1 rounded-xl ${item.isCompleted ? "bg-green-50 dark:bg-green-900/20" : "bg-orange-50 dark:bg-orange-900/20"}`}
-                  >
-                    <Text
-                      className={`font-black text-[9px] uppercase tracking-wider ${item.isCompleted ? "text-green-600 dark:text-green-400" : "text-primary"}`}
-                    >
-                      {item.isCompleted ? "Completed" : "Ongoing"}
-                    </Text>
-                  </View>
-                </View>
+                    </View>
 
-                <View className="flex-row items-center justify-between pt-3 border-t border-gray-50 dark:border-slate-800/50">
-                  <View className="flex-row items-center">
-                    <Feather name="repeat" size={14} color="#94A3B8" />
-                    <Text className="text-slate-500 font-bold text-xs ml-1.5">
-                      {item.attemptsCount || 0} Attempts
-                    </Text>
-                  </View>
+                    {opensLabel ? (
+                      <View
+                        className="flex-row items-center flex-wrap justify-end flex-1"
+                        style={{ gap: 8 }}
+                      >
+                        {(hasAttempted || item.isCompleted) && (
+                          <TouchableOpacity
+                            onPress={() =>
+                              router.push({
+                                pathname: "/user/portal/test/results",
+                                params: { testItemId: String(item.id) },
+                              })
+                            }
+                            className="bg-emerald-500 px-4 py-2.5 rounded-2xl shadow-sm"
+                          >
+                            <Text className="text-white font-black text-xs">
+                              See Result
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+                        <View className="bg-slate-200 dark:bg-slate-700 px-4 py-2.5 rounded-2xl">
+                          <Text className="text-slate-600 dark:text-slate-200 font-black text-xs">
+                            {opensLabel}
+                          </Text>
+                        </View>
+                      </View>
+                    ) : hasAttempted || item.isCompleted ? (
+                      <View
+                        className="flex-row items-center flex-wrap justify-end flex-1"
+                        style={{ gap: 8 }}
+                      >
+                        <TouchableOpacity
+                          onPress={() =>
+                            router.push({
+                              pathname: "/user/portal/test/results",
+                              params: { testItemId: String(item.id) },
+                            })
+                          }
+                          className="bg-emerald-500 px-4 py-2.5 rounded-2xl shadow-sm"
+                        >
+                          <Text className="text-white font-black text-xs">
+                            See Result
+                          </Text>
+                        </TouchableOpacity>
 
-                  {(item.attemptsCount || 0) > 0 || item.isCompleted ? (
-                    <View className="flex-row items-center flex-wrap justify-end flex-1" style={{ gap: 8 }}>
+                        <TouchableOpacity
+                          onPress={() =>
+                            router.push({
+                              pathname: "/user/portal/[slug]",
+                              params: { slug: String(item.id) },
+                            })
+                          }
+                          className="bg-primary px-4 py-2.5 rounded-2xl shadow-sm"
+                        >
+                          <Text className="text-white font-black text-xs">
+                            Retake
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
                       <TouchableOpacity
                         onPress={() =>
                           router.push({
-                            pathname: "/user/portal/test/results",
-                            params: { testItemId: String(item.id) },
+                            pathname: "/user/portal/[slug]",
+                            params: { slug: String(item.id) },
                           })
                         }
-                        className="bg-emerald-500 px-4 py-2.5 rounded-2xl shadow-sm"
+                        className="bg-primary px-5 py-2.5 rounded-2xl shadow-sm"
                       >
                         <Text className="text-white font-black text-xs">
-                          See Result
+                          View Details
                         </Text>
                       </TouchableOpacity>
-
-                      <TouchableOpacity
-                        onPress={() =>
-                          router.push({ pathname: "/user/portal/[slug]", params: { slug: String(item.id) } })
-                        }
-                        className="bg-primary px-4 py-2.5 rounded-2xl shadow-sm"
-                      >
-                        <Text className="text-white font-black text-xs">
-                          Retake
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  ) : (
-                    <TouchableOpacity
-                      onPress={() =>
-                        router.push({ pathname: "/user/portal/[slug]", params: { slug: String(item.id) } })
-                      }
-                      className="bg-primary px-5 py-2.5 rounded-2xl shadow-sm"
-                    >
-                      <Text className="text-white font-black text-xs">
-                        View Details
-                      </Text>
-                    </TouchableOpacity>
-                  )}
+                    )}
+                  </View>
                 </View>
-              </View>
-            ))
+              );
+            })
           ) : (
             <View className="items-center justify-center py-16 bg-gray-50 dark:bg-slate-900 rounded-[32px] border border-dashed border-gray-200 dark:border-slate-800">
               <Feather name="file-text" size={32} color="#cbd5e1" />
