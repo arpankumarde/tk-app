@@ -44,7 +44,7 @@ const EnrolledBundleCard = ({ bundle, expanded }: EnrolledBundleCardProps) => {
         className="flex-row items-center p-4"
       >
         <Image
-          source={{ uri: bundle.thumbnailUrl || Placeholder.COURSE }}
+          source={{ uri: bundle.thumbnailUrl || Placeholder.BUNDLE }}
           className="w-20 h-20 rounded-2xl mr-4"
           resizeMode="cover"
         />

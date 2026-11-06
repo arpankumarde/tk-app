@@ -451,7 +451,7 @@ const BundleDetailsScreen = () => {
           <View className="px-6 mb-5">
             <View className="aspect-video w-full rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 relative shadow-2xl">
               <Image
-                source={{ uri: bundle.thumbnailUrl || Placeholder.COURSE }}
+                source={{ uri: bundle.thumbnailUrl || Placeholder.BUNDLE }}
                 className="w-full h-full"
                 resizeMode="cover"
               />

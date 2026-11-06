@@ -73,6 +73,8 @@ const getPlaceholder = (itemType: OrderItemType) => {
       return Placeholder.TEST;
     case "product":
       return Placeholder.NOTE;
+    case "bundle":
+      return Placeholder.BUNDLE;
     default:
       return null;
   }

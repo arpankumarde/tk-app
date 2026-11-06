@@ -23,7 +23,7 @@ export const bundleSavings = (price: number, originalPrice: number) => {
 };
 
 const BundleCard = ({ bundle, variant = "list" }: BundleCardProps) => {
-  const displayImage = bundle.thumbnailUrl || Placeholder.COURSE;
+  const displayImage = bundle.thumbnailUrl || Placeholder.BUNDLE;
   const isFree = (bundle.price ?? 0) === 0;
   const { savings, percent } = bundleSavings(
     bundle.price,
