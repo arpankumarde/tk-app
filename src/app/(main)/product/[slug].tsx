@@ -40,6 +40,7 @@ interface Product {
   pageCount: number;
   previewPages: number | null;
   price: number;
+  discountPrice?: number | null;
   publishedAt: string;
   rating: number | null;
   reviewsCount: number;
@@ -210,6 +211,11 @@ const ProductDetails = () => {
   }
 
   const hasPreview = (product.previewPages ?? 0) > 0;
+  const salePrice =
+    typeof product.discountPrice === "number" &&
+    product.discountPrice < product.price
+      ? product.discountPrice
+      : product.price;
 
   const formatFileSize = (bytes: number) => {
     if (!bytes) return "0 KB";
@@ -529,13 +535,20 @@ const ProductDetails = () => {
                 <Text className="text-slate-500 dark:text-slate-400 text-base font-bold uppercase tracking-wider">
                   Price
                 </Text>
-                <Text className="text-3xl font-black text-orange-500">
-                  {product.price === 0 ? (
-                    <Text className="text-emerald-500">FREE</Text>
-                  ) : (
-                    `₹ ${product.price}`
+                <View className="flex-row items-baseline">
+                  {salePrice < product.price && (
+                    <Text className="mr-2 text-lg font-bold text-slate-400 dark:text-slate-500 line-through">
+                      ₹ {product.price}
+                    </Text>
                   )}
-                </Text>
+                  <Text className="text-3xl font-black text-orange-500">
+                    {salePrice === 0 ? (
+                      <Text className="text-emerald-500">FREE</Text>
+                    ) : (
+                      `₹ ${salePrice}`
+                    )}
+                  </Text>
+                </View>
               </View>
 
               <View className="h-[1px] bg-gray-50 dark:bg-slate-700/50 mb-5" />

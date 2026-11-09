@@ -10,6 +10,7 @@ interface ProductCardProps {
     title: string;
     slug: string;
     price: number;
+    discountPrice?: number | null;
     teacherName?: string;
     teacherAvatar?: string | null;
     teacherIsVerified?: boolean;
@@ -22,7 +23,12 @@ interface ProductCardProps {
 const formatInr = (amount: number) => amount.toLocaleString("en-IN");
 
 const ProductCard = ({ product }: ProductCardProps) => {
-  const isFree = (product.price ?? 0) === 0;
+  const price = product.price ?? 0;
+  const salePrice =
+    typeof product.discountPrice === "number" && product.discountPrice < price
+      ? product.discountPrice
+      : price;
+  const isFree = salePrice === 0;
   const hasRatings = (product.ratingsCount ?? 0) > 0;
   const ratingDisplay =
     typeof product.rating === "number"
@@ -102,11 +108,18 @@ const ProductCard = ({ product }: ProductCardProps) => {
           )}
         </View>
 
-        <Text
-          className={`${isFree ? "text-emerald-500" : "text-primary"} text-lg font-black`}
-        >
-          {isFree ? "FREE" : `₹${formatInr(product.price)}`}
-        </Text>
+        <View className="flex-row items-baseline">
+          {salePrice < price && (
+            <Text className="mr-2 text-slate-400 dark:text-slate-500 text-sm font-bold line-through">
+              ₹{formatInr(price)}
+            </Text>
+          )}
+          <Text
+            className={`${isFree ? "text-emerald-500" : "text-primary"} text-lg font-black`}
+          >
+            {isFree ? "FREE" : `₹${formatInr(salePrice)}`}
+          </Text>
+        </View>
       </View>
     </TouchableOpacity>
   );

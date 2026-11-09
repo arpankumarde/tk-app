@@ -99,6 +99,7 @@ interface Product {
   thumbnailUrl: string | null;
   category: string;
   price: number;
+  discountPrice?: number | null;
   rating: number | null;
   ratingsCount: number;
   totalPurchases: number;

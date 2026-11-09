@@ -40,6 +40,7 @@ type Product = {
   id: number;
   title: string;
   price: number;
+  discountPrice?: number | null;
   publishedAt: string;
   rating: number | null;
   slug: string;
