@@ -29,8 +29,8 @@ const Header = () => {
               source={{
                 uri:
                   colorScheme === "dark"
-                    ? "https://cdn.testkart.in/brand/testkart-new-white.png"
-                    : "https://cdn.testkart.in/brand/testkart-new-black.png",
+                    ? "https://cdn.testkart.in/brand/logo-dark.png"
+                    : "https://cdn.testkart.in/brand/logo-light.png",
               }}
               className="w-[140px] h-[40px]"
               resizeMode="contain"

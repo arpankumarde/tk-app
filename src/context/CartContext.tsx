@@ -193,7 +193,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         const items = cart.items.map((item) => ({
           id: item.resourceId,
-          type: item.type === "digitalProduct" ? "course" : item.type,
+          type: item.type === "digitalProduct" ? "digital_product" : item.type,
           price: item.price,
         }));
         const totalAmount = cart.items.reduce(

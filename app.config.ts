@@ -12,7 +12,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Testkart",
   slug: "testkart",
-  version: "4.13.0",
+  version: "4.14.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: "testkart",
