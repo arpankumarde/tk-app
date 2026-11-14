@@ -20,7 +20,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {},
   android: {
     package: "com.testkart.mocktest.courses.studynotes",
-    versionCode: 73,
+    versionCode: 74,
     adaptiveIcon: {
       backgroundColor: "#FF8A50",
       foregroundImage: "./assets/images/android-icon-foreground.png",
