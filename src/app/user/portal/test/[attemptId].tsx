@@ -1,5 +1,13 @@
 import ScientificCalculator from "@/components/ScientificCalculator";
 import { useAuth } from "@/context/AuthContext";
+import {
+  buildProgressState,
+  CarriedProgress,
+  EMPTY_CARRIED,
+  fetchSavedAttempt,
+  restoreAttempt,
+  saveAttemptProgress,
+} from "@/utils/testProgress";
 import Feather from "@react-native-vector-icons/feather";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { usePreventScreenCapture } from "expo-screen-capture";
@@ -9,6 +17,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  AppState,
+  BackHandler,
   FlatList,
   Modal,
   ScrollView,
@@ -32,6 +42,8 @@ import {
   SubmitAttemptRequest,
   SubmitAttemptResponse,
 } from "../../types";
+import LeaveTestDialog from "./_components/LeaveTestDialog";
+import TimeUpDialog from "./_components/TimeUpDialog";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 const DEFAULT_DURATION_MINUTES = 30;
@@ -230,8 +242,11 @@ const TestAttemptScreen = () => {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const { token } = useAuth();
-  const { attemptId, testItemId, startedAt, durationMinutes, mode } =
+  const { attemptId, testItemId, startedAt, durationMinutes, mode, resume } =
     useLocalSearchParams();
+  const isResume = (Array.isArray(resume) ? resume[0] : resume) === "1";
+  // Live attempts are never paused: their clock runs to the live end.
+  const canPause = mode !== "live";
   const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(true);
@@ -256,15 +271,36 @@ const TestAttemptScreen = () => {
     Record<number, SelectedAnswer>
   >({});
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [isSubjectFilterCollapsed, setIsSubjectFilterCollapsed] =
     useState(false);
   const [isQuestionNavigatorCollapsed, setIsQuestionNavigatorCollapsed] =
     useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
+  // The tick reads the clock from this ref, so running out is acted on in the
+  // interval callback itself, once, and not inside a state updater.
+  const remainingRef = useRef(0);
+  const setTimer = useCallback((seconds: number) => {
+    remainingRef.current = seconds;
+    setRemainingSeconds(seconds);
+  }, []);
+  // Set when the last clock runs out: the attempt is submitted as it stands and
+  // the screen stays locked behind TimeUpDialog until that succeeds.
+  const [timeUp, setTimeUp] = useState(false);
+  const [timeUpError, setTimeUpError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const submitInFlight = useRef(false);
   const [questionRemainingSeconds, setQuestionRemainingSeconds] = useState(0);
   const [isCalculatorVisible, setIsCalculatorVisible] = useState(false);
   const lastTimedSubjectIndex = useRef<number | null>(null);
+  // Saved-state parts this screen does not edit (marked ids, answers it cannot
+  // show) ride along on every save so a test paused on the web stays intact.
+  const carriedRef = useRef<CarriedProgress>(EMPTY_CARRIED);
+  const restoredQuestionTimer = useRef<{ id: number; seconds: number } | null>(
+    null,
+  );
+  const [pausing, setPausing] = useState(false);
   // Tracks question IDs already locked-in in QWT mode (once answered, answer is locked)
   const [lockedAnswers, setLockedAnswers] = useState<Set<number>>(new Set());
 
@@ -280,7 +316,14 @@ const TestAttemptScreen = () => {
 
   const startedAtRaw = useMemo(() => {
     const raw = Array.isArray(startedAt) ? startedAt[0] : startedAt;
-    return typeof raw === "string" ? raw : "";
+    if (typeof raw !== "string") return "";
+    // Callers encode the timestamp; a resumed attempt must read its shifted
+    // start back exactly or the clock would restart from the full duration.
+    try {
+      return decodeURIComponent(raw);
+    } catch {
+      return raw;
+    }
   }, [startedAt]);
 
   const startedAtDisplay = useMemo(() => {
@@ -411,6 +454,23 @@ const TestAttemptScreen = () => {
         s.sections.sort((a, b) => a.orderIndex - b.orderIndex);
       });
 
+      // Read the saved state before any state is set: the timer effect starts
+      // as soon as subjects exist and must already know the restored clock.
+      let restored: ReturnType<typeof restoreAttempt> | null = null;
+      if (isResume) {
+        const saved = await fetchSavedAttempt(token, testItemNumericId);
+        if (!saved || saved.attemptId !== attemptNumericId) {
+          throw new Error(
+            "Could not load your saved test. Go back and try again.",
+          );
+        }
+        restored = restoreAttempt(
+          saved.state,
+          sortedSubjects,
+          Boolean(payload.subjectWiseTiming),
+        );
+      }
+
       setSubjects(sortedSubjects);
       setSubjectWiseTiming(Boolean(payload.subjectWiseTiming));
       setQuestionWiseTiming(Boolean(payload.questionWiseTiming));
@@ -447,18 +507,43 @@ const TestAttemptScreen = () => {
       setIsNoLimit(noLimit);
 
       setCalculatorEnabled(Boolean(payload.calculatorEnabled));
-      setCurrentSubjectIndex(0);
-      setCurrentSectionIndex(0);
-      setCurrentQuestionIndex(0);
-      setSelectedAnswers({});
+      setCurrentSubjectIndex(restored?.subjectIndex ?? 0);
+      setCurrentSectionIndex(restored?.sectionIndex ?? 0);
+      setCurrentQuestionIndex(restored?.questionIndex ?? 0);
+      setSelectedAnswers(restored?.selectedAnswers ?? {});
+      setCompletedSubjectIds(restored?.completedSubjectIds ?? []);
       setLockedAnswers(new Set());
+      carriedRef.current = restored?.carried ?? EMPTY_CARRIED;
+      restoredQuestionTimer.current = restored?.questionTimer ?? null;
+
+      // Whole-test and no-limit clocks come from the resumed startedAt. A
+      // subject clock is restored here, and its index is recorded so the timer
+      // effect does not reset it to the full subject duration.
+      if (
+        restored &&
+        payload.subjectWiseTiming &&
+        restored.subjectRemainingSeconds != null
+      ) {
+        setTimer(restored.subjectRemainingSeconds);
+        lastTimedSubjectIndex.current = restored.subjectIndex;
+      } else {
+        lastTimedSubjectIndex.current = null;
+      }
     } catch (err: any) {
       Alert.alert("Error", err.message || "Unable to load test questions.");
       router.back();
     } finally {
       setLoading(false);
     }
-  }, [router, testItemNumericId, token, durationMinutes]);
+  }, [
+    router,
+    testItemNumericId,
+    token,
+    durationMinutes,
+    isResume,
+    attemptNumericId,
+    setTimer,
+  ]);
 
   useEffect(() => {
     fetchQuestions();
@@ -472,12 +557,12 @@ const TestAttemptScreen = () => {
         const totalElapsed = Math.floor((Date.now() - attemptStartTime) / 1000);
         if (isNoLimit) {
           // Count up: seed with elapsed time so resumed attempts continue.
-          setRemainingSeconds(
+          setTimer(
             Math.min(Math.max(0, totalElapsed), NO_LIMIT_AUTO_SUBMIT_SECONDS),
           );
         } else {
           const initialRemaining = testDurationMinutes * 60 - totalElapsed;
-          setRemainingSeconds(Math.max(0, initialRemaining));
+          setTimer(Math.max(0, initialRemaining));
         }
         lastTimedSubjectIndex.current = -1;
       }
@@ -485,7 +570,7 @@ const TestAttemptScreen = () => {
       if (lastTimedSubjectIndex.current !== currentSubjectIndex) {
         const currentSubjectDuration =
           (subjects[currentSubjectIndex]?.durationMinutes || 0) * 60;
-        setRemainingSeconds(currentSubjectDuration);
+        setTimer(currentSubjectDuration);
         lastTimedSubjectIndex.current = currentSubjectIndex;
       }
     }
@@ -496,6 +581,7 @@ const TestAttemptScreen = () => {
     attemptStartTime,
     testDurationMinutes,
     isNoLimit,
+    setTimer,
   ]);
 
   const timerLabel = useMemo(() => {
@@ -886,20 +972,35 @@ const TestAttemptScreen = () => {
       | LatestAttemptResultsResponse;
   }, [testItemNumericId, token]);
 
-  const handleSubmitTest = useCallback(async () => {
+  // fromTimer: the clock ran out. The attempt goes in as it stands, even with
+  // nothing answered (the server scores that as zero, as on the web), and
+  // failures land in TimeUpDialog instead of an alert.
+  const submitAttempt = useCallback(async (fromTimer: boolean) => {
+    const fail = (title: string, message: string) => {
+      if (fromTimer) {
+        setTimeUpError(message);
+      } else {
+        Alert.alert(title, message);
+      }
+    };
+
+    if (fromTimer) {
+      setTimeUpError(null);
+    }
+
     if (!token) {
-      Alert.alert("Error", "Please login again.");
+      fail("Error", "Please login again.");
       return;
     }
 
     if (!attemptNumericId || Number.isNaN(attemptNumericId)) {
-      Alert.alert("Error", "Invalid attempt id.");
+      fail("Error", "Invalid attempt id.");
       return;
     }
 
     const answers = buildSubmitAnswers();
 
-    if (answers.length === 0) {
+    if (answers.length === 0 && !fromTimer) {
       Alert.alert(
         "No Answers",
         "Please answer at least one question before submitting.",
@@ -908,6 +1009,7 @@ const TestAttemptScreen = () => {
     }
 
     try {
+      submitInFlight.current = true;
       setSubmitting(true);
 
       const payload: SubmitAttemptRequest = {
@@ -963,12 +1065,14 @@ const TestAttemptScreen = () => {
       const submitResult = (submitData.json ||
         submitData) as SubmitAttemptResponse;
 
-      const latest = await fetchLatestResults();
+      // The attempt is already in; a failure here must not read as a failed submit.
+      const latest = await fetchLatestResults().catch(() => null);
 
       // console.log("[TestAttempt] Submit payload:", payload);
       // console.log("[TestAttempt] Submit result:", submitResult);
       // console.log("[TestAttempt] Latest results:", latest);
 
+      setSubmitted(true);
       setShowSubmitConfirm(false);
       if (mode === "live") {
         router.replace({
@@ -985,8 +1089,9 @@ const TestAttemptScreen = () => {
         });
       }
     } catch (err: any) {
-      Alert.alert("Error", err.message || "Unable to submit test.");
+      fail("Error", err.message || "Unable to submit test.");
     } finally {
+      submitInFlight.current = false;
       setSubmitting(false);
     }
   }, [
@@ -998,6 +1103,21 @@ const TestAttemptScreen = () => {
     testItemNumericId,
     token,
   ]);
+
+  const handleSubmitTest = useCallback(
+    () => submitAttempt(false),
+    [submitAttempt],
+  );
+
+  const handleTimeUp = useCallback(() => {
+    setTimeUp(true);
+    setShowSubmitConfirm(false);
+    setShowLeaveConfirm(false);
+    setIsCalculatorVisible(false);
+    if (!submitInFlight.current) {
+      void submitAttempt(true);
+    }
+  }, [submitAttempt]);
 
   const handleSubmitSubject = useCallback(async () => {
     if (currentSubjectIndex < subjects.length - 1) {
@@ -1013,44 +1133,59 @@ const TestAttemptScreen = () => {
       // Reset timer for the next subject
       const nextSubjectDuration =
         (subjects[nextIdx]?.durationMinutes || 0) * 60;
-      setRemainingSeconds(nextSubjectDuration);
+      setTimer(nextSubjectDuration);
 
       setShowSubmitConfirm(false);
     } else {
       await handleSubmitTest();
     }
-  }, [currentSubjectIndex, subjects, handleSubmitTest]);
+  }, [currentSubjectIndex, subjects, handleSubmitTest, setTimer]);
 
+  // One tick a second. The test is submitted when its last clock runs out: the
+  // whole-test countdown, the last subject's countdown, or the no-limit cap.
+  // Question-wise timing has its own per-question clock below.
   useEffect(() => {
-    if (subjects.length === 0) return;
+    if (subjects.length === 0 || timeUp) return;
 
     const interval = setInterval(() => {
-      setRemainingSeconds((prev) => {
-        if (isNoLimit) {
-          const next = prev + 1;
-          if (next >= NO_LIMIT_AUTO_SUBMIT_SECONDS) {
-            handleSubmitTest();
-            return NO_LIMIT_AUTO_SUBMIT_SECONDS;
-          }
-          return next;
+      if (isNoLimit) {
+        const next = Math.min(
+          remainingRef.current + 1,
+          NO_LIMIT_AUTO_SUBMIT_SECONDS,
+        );
+        setTimer(next);
+        if (next >= NO_LIMIT_AUTO_SUBMIT_SECONDS) {
+          handleTimeUp();
         }
-        if (prev <= 1) {
-          if (subjectWiseTiming) {
-            handleSubmitSubject();
-          }
-          return 0;
+        return;
+      }
+
+      const next = Math.max(0, remainingRef.current - 1);
+      setTimer(next);
+      if (next > 0) return;
+
+      if (subjectWiseTiming) {
+        if (currentSubjectIndex < subjects.length - 1) {
+          handleSubmitSubject();
+        } else {
+          handleTimeUp();
         }
-        return prev - 1;
-      });
+      } else if (!questionWiseTiming) {
+        handleTimeUp();
+      }
     }, 1000);
 
     return () => clearInterval(interval);
   }, [
     subjects,
     subjectWiseTiming,
+    questionWiseTiming,
+    currentSubjectIndex,
     handleSubmitSubject,
+    handleTimeUp,
     isNoLimit,
-    handleSubmitTest,
+    setTimer,
+    timeUp,
   ]);
 
   const handleQuestionJump = (sIdx: number, qIdx: number) => {
@@ -1101,6 +1236,12 @@ const TestAttemptScreen = () => {
   // Per-question countdown timer (only active in question-wise timing mode)
   useEffect(() => {
     if (!questionWiseTiming || !currentQuestion) return;
+    const resumed = restoredQuestionTimer.current;
+    if (resumed && resumed.id === currentQuestion.id) {
+      restoredQuestionTimer.current = null;
+      setQuestionRemainingSeconds(Math.max(1, resumed.seconds));
+      return;
+    }
     const durationSecs = (currentQuestion as any).durationSeconds || 60;
     setQuestionRemainingSeconds(durationSecs);
   }, [questionWiseTiming, currentQuestion?.id]);
@@ -1134,6 +1275,139 @@ const TestAttemptScreen = () => {
 
     return () => clearInterval(interval);
   }, [questionWiseTiming, questionRemainingSeconds, handleNextFromFooter]);
+
+  // Android back would otherwise pop the screen and drop every unsubmitted
+  // answer. Only armed while the question UI, which renders the dialog, is up.
+  const attemptOnScreen = !loading && Boolean(currentQuestion);
+
+  useEffect(() => {
+    if (!attemptOnScreen) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (!submitting) setShowLeaveConfirm(true);
+      return true;
+    });
+    return () => sub.remove();
+  }, [attemptOnScreen, submitting]);
+
+  // Autosave: the latest screen state is read through a ref so the timers and
+  // listeners below never hold a stale snapshot. Saves run one at a time, in
+  // order, so an older state can never land after a newer one.
+  const snapshotRef = useRef<() => ReturnType<typeof buildProgressState>>(
+    () => buildProgressState({
+      answers: [],
+      currentQuestionId: null,
+      subjects: [],
+      subjectWiseTiming: false,
+      activeSubjectIndex: 0,
+      completedSubjectIds: [],
+      remainingSeconds: 0,
+      questionRemainingSeconds: null,
+      carried: EMPTY_CARRIED,
+    }),
+  );
+  const saveQueue = useRef<Promise<unknown>>(Promise.resolve());
+
+  useEffect(() => {
+    snapshotRef.current = () =>
+      buildProgressState({
+        answers: buildSubmitAnswers(),
+        currentQuestionId: currentQuestion?.id ?? null,
+        subjects,
+        subjectWiseTiming,
+        activeSubjectIndex: currentSubjectIndex,
+        completedSubjectIds,
+        remainingSeconds: remainingRef.current,
+        questionRemainingSeconds: questionWiseTiming
+          ? questionRemainingSeconds
+          : null,
+        carried: carriedRef.current,
+      });
+  }, [
+    buildSubmitAnswers,
+    currentQuestion?.id,
+    subjects,
+    subjectWiseTiming,
+    currentSubjectIndex,
+    completedSubjectIds,
+    questionWiseTiming,
+    questionRemainingSeconds,
+  ]);
+
+  const saveNow = useCallback((): Promise<boolean> => {
+    if (!token || !attemptNumericId || Number.isNaN(attemptNumericId)) {
+      return Promise.resolve(false);
+    }
+    const run = async () => {
+      const elapsedSeconds = Math.max(
+        0,
+        Math.floor((Date.now() - attemptStartTime) / 1000),
+      );
+      try {
+        await saveAttemptProgress(
+          token,
+          attemptNumericId,
+          elapsedSeconds,
+          snapshotRef.current(),
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    };
+    const next = saveQueue.current.then(run);
+    saveQueue.current = next;
+    return next;
+  }, [token, attemptNumericId, attemptStartTime]);
+
+  const autosaveActive = canPause && attemptOnScreen && !timeUp && !submitted;
+
+  useEffect(() => {
+    if (!autosaveActive) return;
+    const timeout = setTimeout(() => void saveNow(), 1500);
+    return () => clearTimeout(timeout);
+  }, [autosaveActive, saveNow, selectedAnswers, currentQuestion?.id]);
+
+  useEffect(() => {
+    if (!autosaveActive) return;
+    const interval = setInterval(() => void saveNow(), 30000);
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state !== "active") void saveNow();
+    });
+    return () => {
+      clearInterval(interval);
+      sub.remove();
+    };
+  }, [autosaveActive, saveNow]);
+
+  const handleLeaveTest = () => {
+    setShowLeaveConfirm(false);
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace("/user");
+    }
+  };
+
+  const handlePauseAndLeave = async () => {
+    if (pausing) return;
+    setPausing(true);
+    const saved = await saveNow();
+    setPausing(false);
+
+    if (saved) {
+      handleLeaveTest();
+      return;
+    }
+
+    Alert.alert(
+      "Could not save your test",
+      "Check your connection and try again. If you leave now, answers since the last save are lost.",
+      [
+        { text: "Stay", style: "cancel" },
+        { text: "Leave anyway", style: "destructive", onPress: handleLeaveTest },
+      ],
+    );
+  };
 
   if (loading) {
     return (
@@ -1233,6 +1507,21 @@ const TestAttemptScreen = () => {
                 className="flex-row items-center flex-1 justify-end"
                 style={{ gap: 8 }}
               >
+                {canPause && (
+                  <TouchableOpacity
+                    onPress={() => setShowLeaveConfirm(true)}
+                    disabled={submitting}
+                    accessibilityLabel="Pause test"
+                    className="h-12 w-12 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full items-center justify-center"
+                  >
+                    <Feather
+                      name="pause"
+                      size={20}
+                      color={colorScheme === "dark" ? "#e2e8f0" : "#334155"}
+                    />
+                  </TouchableOpacity>
+                )}
+
                 {calculatorEnabled && (
                   <TouchableOpacity
                     onPress={() => setIsCalculatorVisible(true)}
@@ -1878,6 +2167,23 @@ const TestAttemptScreen = () => {
           </View>
         </View>
       </Modal>
+      <LeaveTestDialog
+        visible={showLeaveConfirm}
+        isLive={mode === "live"}
+        answeredCount={overallAnsweredCount}
+        canPause={canPause}
+        pausing={pausing}
+        onStay={() => setShowLeaveConfirm(false)}
+        onLeave={handleLeaveTest}
+        onPause={handlePauseAndLeave}
+      />
+      <TimeUpDialog
+        visible={timeUp}
+        busy={submitting || submitted}
+        error={timeUpError}
+        onRetry={() => void submitAttempt(true)}
+        onLeave={handleLeaveTest}
+      />
       <ScientificCalculator
         visible={isCalculatorVisible}
         onClose={() => setIsCalculatorVisible(false)}

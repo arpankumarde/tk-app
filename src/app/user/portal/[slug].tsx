@@ -15,6 +15,12 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import { useColorScheme } from "nativewind";
 import { useAuth } from "@/context/AuthContext";
 import {
+  discardAttempt,
+  fetchSavedAttempt,
+  resumeAttempt,
+  SavedAttempt,
+} from "@/utils/testProgress";
+import {
   StartAttemptRequest,
   StartAttemptResponse,
   TestItemInstructionsResponse,
@@ -120,6 +126,8 @@ const Portal = () => {
   const [loading, setLoading] = useState(true);
   const [startingAttempt, setStartingAttempt] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState<SavedAttempt | null>(null);
+  const [resuming, setResuming] = useState(false);
 
   const itemId = useMemo(() => {
     const rawSlug = Array.isArray(slug) ? slug[0] : slug;
@@ -203,6 +211,23 @@ const Portal = () => {
     fetchInstructionsDetails();
   }, [fetchInstructionsDetails]);
 
+  // A paused attempt is optional: if it cannot be read the student still sees
+  // the normal Start Test button.
+  useEffect(() => {
+    if (!token || !itemId || Number.isNaN(itemId)) return;
+    let cancelled = false;
+    fetchSavedAttempt(token, itemId)
+      .then((attempt) => {
+        if (!cancelled) setSaved(attempt);
+      })
+      .catch(() => {
+        if (!cancelled) setSaved(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [itemId, token]);
+
   const handleStartTest = useCallback(async () => {
     if (!token || !details?.id) {
       Alert.alert("Error", "Unable to start test. Please login again.");
@@ -263,6 +288,62 @@ const Portal = () => {
     }
   }, [details?.id, details?.durationMinutes, router, token]);
 
+  const handleResumeTest = useCallback(async () => {
+    if (!token || !details?.id || !saved) return;
+
+    try {
+      setResuming(true);
+      const resumed = await resumeAttempt(token, saved.attemptId);
+
+      router.push({
+        pathname: "/user/portal/test/[attemptId]",
+        params: {
+          attemptId: String(resumed.attemptId),
+          testItemId: String(details.id),
+          startedAt: encodeURIComponent(resumed.startedAt),
+          durationMinutes: String(details.durationMinutes),
+          resume: "1",
+        },
+      });
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Could not resume the test.");
+    } finally {
+      setResuming(false);
+    }
+  }, [details, router, saved, token]);
+
+  const handleStartNewTest = useCallback(() => {
+    if (!token || !saved) return;
+
+    Alert.alert(
+      "Start a new test?",
+      "Your paused test and its answers will be deleted and a fresh attempt will begin.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Start new",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setResuming(true);
+              await discardAttempt(token, saved.attemptId);
+              setSaved(null);
+            } catch (err: any) {
+              Alert.alert(
+                "Error",
+                err.message || "Could not clear the saved test.",
+              );
+              return;
+            } finally {
+              setResuming(false);
+            }
+            void handleStartTest();
+          },
+        },
+      ],
+    );
+  }, [handleStartTest, saved, token]);
+
   if (loading) {
     return (
       <View className="flex-1 bg-white dark:bg-slate-900 items-center justify-center">
@@ -290,6 +371,17 @@ const Portal = () => {
       </SafeAreaView>
     );
   }
+
+  // Only a single whole-test clock has a meaningful time left to show.
+  const timeLeftLabel =
+    saved &&
+    details.durationMinutes > 0 &&
+    !details.subjectWiseTiming &&
+    !details.questionWiseTiming
+      ? `${Math.floor(
+          Math.max(0, details.durationMinutes * 60 - saved.elapsedSeconds) / 60,
+        )} min`
+      : null;
 
   const attemptLimits = details.attemptLimits;
   const hasAttemptLimits = attemptLimits.length > 0;
@@ -472,19 +564,70 @@ const Portal = () => {
           </View>
 
           <View className="items-center mt-12">
-            <TouchableOpacity
-              onPress={handleStartTest}
-              disabled={startingAttempt}
-              className="bg-primary w-full h-14 rounded-2xl items-center justify-center shadow-sm"
-            >
-              {startingAttempt ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text className="text-white text-2xl font-black">
-                  Start Test
+            {saved ? (
+              <View className="w-full bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/40 rounded-3xl p-5">
+                <View className="flex-row items-center mb-2">
+                  <Feather name="pause-circle" size={18} color="#FF8A50" />
+                  <Text className="text-slate-900 dark:text-white text-lg font-black ml-2">
+                    You paused this test
+                  </Text>
+                </View>
+                <Text className="text-slate-600 dark:text-slate-300 text-sm font-semibold leading-5 mb-4">
+                  {`${saved.answeredCount} of ${saved.totalQuestions} answered${
+                    timeLeftLabel ? `, ${timeLeftLabel} left` : ""
+                  }. Paused ${new Date(saved.savedAt).toLocaleString(
+                    undefined,
+                    {
+                      day: "2-digit",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    },
+                  )}.`}
                 </Text>
-              )}
-            </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleResumeTest}
+                  disabled={resuming || startingAttempt}
+                  className="bg-primary w-full h-14 rounded-2xl items-center justify-center shadow-sm"
+                >
+                  {resuming ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text className="text-white text-xl font-black">
+                      Resume Test
+                    </Text>
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleStartNewTest}
+                  disabled={resuming || startingAttempt}
+                  className="w-full h-12 mt-3 rounded-2xl items-center justify-center border border-slate-300 dark:border-slate-600"
+                >
+                  {startingAttempt ? (
+                    <ActivityIndicator color="#FF8A50" />
+                  ) : (
+                    <Text className="text-slate-700 dark:text-slate-200 text-base font-black">
+                      Start a new test
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                onPress={handleStartTest}
+                disabled={startingAttempt}
+                className="bg-primary w-full h-14 rounded-2xl items-center justify-center shadow-sm"
+              >
+                {startingAttempt ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text className="text-white text-2xl font-black">
+                    Start Test
+                  </Text>
+                )}
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </ScrollView>
