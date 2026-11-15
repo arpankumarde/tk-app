@@ -46,8 +46,15 @@ export const useBankDetails = (token: string | null) => {
       });
       if (res.ok) {
         const data = await res.json();
-        const payload = data.json || data;
-        setBankDetails(payload || null);
+        const payload =
+          data && typeof data === "object" && "json" in data
+            ? data.json
+            : data;
+        setBankDetails(
+          payload && typeof payload === "object" && payload.verificationStatus
+            ? payload
+            : null,
+        );
       }
     } catch {
       // ignore

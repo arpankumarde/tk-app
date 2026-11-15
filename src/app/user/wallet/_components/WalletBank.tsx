@@ -59,7 +59,7 @@ function StatusPill({
 }: {
   status: "pending" | "verified" | "rejected";
 }) {
-  const s = STATUS_STYLE[status];
+  const s = STATUS_STYLE[status] ?? STATUS_STYLE.pending;
   return (
     <View
       style={{
