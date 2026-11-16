@@ -2,6 +2,7 @@ import { isPaymentAppUrl, openPaymentApp } from "@/utils/upiIntent";
 import { HIDE_WEBVIEW_UA_JS } from "@/utils/paymentWebView";
 import BlinkingDot from "@/components/BlinkingDot";
 import Header from "@/components/Header";
+import RichText from "@/components/RichText";
 import Placeholder from "@/constants/placeholder";
 import { useAuth } from "@/context/AuthContext";
 import { useBuildShareUrl } from "@/hooks/useBuildShareUrl";
@@ -861,10 +862,14 @@ const LiveTestDetails = () => {
               <Text className="text-2xl font-black text-slate-800 dark:text-white mb-3">
                 About This Test
               </Text>
-              <Text className="text-slate-600 dark:text-slate-300 text-base leading-7 mb-8">
-                {liveTest.description ||
-                  "Join this exciting live mock test and compete with thousands of students. Win prizes and improve your exam preparation."}
-              </Text>
+              <View className="mb-5">
+                <RichText
+                  content={
+                    liveTest.description?.trim() ||
+                    "Join this exciting live mock test and compete with thousands of students. Win prizes and improve your exam preparation."
+                  }
+                />
+              </View>
 
               <Text className="text-xl font-black text-slate-800 dark:text-white mb-4">
                 Comprehensive Rules & Information
