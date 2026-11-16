@@ -1,4 +1,5 @@
 import BottomTabs from "@/components/BottomTabs";
+import DetailHeader from "@/components/DetailHeader";
 import BundleCrossSell from "@/components/BundleCrossSell";
 import DocumentViewer from "@/components/DocumentViewer";
 import {
@@ -24,7 +25,6 @@ import {
   Modal,
   ScrollView,
   Share,
-  StatusBar,
   Text,
   TouchableOpacity,
   View,
@@ -284,7 +284,7 @@ const CourseDetails = () => {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-white dark:bg-slate-900 items-center justify-center">
+      <SafeAreaView className="flex-1 bg-paper dark:bg-night items-center justify-center">
         <ActivityIndicator size="large" color="#FF8A50" />
       </SafeAreaView>
     );
@@ -292,13 +292,13 @@ const CourseDetails = () => {
 
   if (error || !course) {
     return (
-      <SafeAreaView className="flex-1 bg-white dark:bg-slate-900 items-center justify-center p-6">
-        <Text className="text-xl font-bold text-slate-800 dark:text-white mb-4 text-center">
+      <SafeAreaView className="flex-1 bg-paper dark:bg-night items-center justify-center p-6">
+        <Text className="w-full text-xl font-bold text-ink dark:text-white mb-4 text-center">
           {error || "Something went wrong"}
         </Text>
         <TouchableOpacity
           onPress={() => router.back()}
-          className="px-6 py-3 bg-primary rounded-full"
+          className="px-6 py-3 bg-primary-deep rounded-full"
         >
           <Text className="text-white font-bold">Go Back</Text>
         </TouchableOpacity>
@@ -309,51 +309,29 @@ const CourseDetails = () => {
   const isFree = course.price === 0;
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-slate-900" edges={["top"]}>
-      <StatusBar
-        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
-      />
+    <SafeAreaView className="flex-1 bg-paper dark:bg-night" edges={["top"]}>
+      <DetailHeader title="Course" onShare={handleShare} />
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Custom Navigation Header */}
-        <View className="px-6 py-4 flex-row items-center justify-between">
-          <View className="flex-row items-center flex-1 mr-4">
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mr-3"
+        <View className="px-6 pt-5 flex-row">
+          <View className="bg-sky-tint dark:bg-night-raised px-3 py-1.5 rounded-full flex-row items-center">
+            <Feather name="bar-chart" size={12} color={colorScheme === "dark" ? "#9CC0D0" : "#3F6577"} />
+            <Text
+              className="text-sky dark:text-night-soft text-xs font-bold ml-1.5 capitalize"
+              numberOfLines={1}
             >
-              <Feather name="chevron-left" size={24} color="#FF8A50" />
-            </TouchableOpacity>
-
-            <View className="flex-1 flex-row items-center flex-wrap gap-2">
-              {/* Level Badge */}
-              <View className="bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-100 dark:border-emerald-500/20 flex-row items-center">
-                <Feather name="bar-chart" size={10} color="#10B981" />
-                <Text
-                  className="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest ml-1.5"
-                  numberOfLines={1}
-                >
-                  {course.level}
-                </Text>
-              </View>
-            </View>
+              {course.level}
+            </Text>
           </View>
-
-          <TouchableOpacity
-            onPress={handleShare}
-            className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center"
-          >
-            <Feather name="share-2" size={18} color="#FF8A50" />
-          </TouchableOpacity>
         </View>
 
         {/* Course Main Title & Info */}
         <View className="px-6 pt-2 pb-2">
-          <Text className="text-3xl font-black text-slate-800 dark:text-white leading-[42px] mb-4">
+          <Text className="text-3xl font-extrabold text-ink dark:text-white leading-[42px] mb-4">
             {course.title}
           </Text>
 
           <View className="flex-row items-center flex-wrap mb-2">
-            <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
+            <Text className="text-ink-soft dark:text-night-soft text-sm font-bold">
               Created by{" "}
             </Text>
             <TouchableOpacity
@@ -365,7 +343,7 @@ const CourseDetails = () => {
               disabled={!course?.teacher?.slug}
               className="flex-row items-center"
             >
-              <Text className="text-primary font-bold text-sm">
+              <Text className="text-primary-deep dark:text-primary font-bold text-sm">
                 {course?.teacher?.displayName}
               </Text>
               {course?.teacherIsVerified && (
@@ -382,7 +360,7 @@ const CourseDetails = () => {
 
         {/* Video Preview Section */}
         <View className="px-6 mb-8">
-          <View className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 relative shadow-2xl">
+          <View className="aspect-video w-full rounded-2xl overflow-hidden bg-sand dark:bg-night-raised relative shadow-2xl">
             {showIntroVideo && course.introVideoUrl ? (
               <VideoView
                 player={introPlayer}
@@ -420,7 +398,7 @@ const CourseDetails = () => {
 
         {/* What you'll learn */}
         <View className="px-6 mb-10">
-          <Text className="text-2xl font-black text-slate-800 dark:text-white mb-6">
+          <Text className="text-2xl font-extrabold text-ink dark:text-white mb-6">
             What you&apos;ll learn
           </Text>
           {[
@@ -435,7 +413,7 @@ const CourseDetails = () => {
               <View className="w-6 h-6 bg-emerald-100 dark:bg-emerald-900/30 rounded-full items-center justify-center mr-4">
                 <Feather name="check" size={14} color="#10b981" />
               </View>
-              <Text className="text-slate-600 dark:text-slate-300 text-sm font-medium flex-1">
+              <Text className="text-ink-soft dark:text-night-soft text-sm font-medium flex-1">
                 {item}
               </Text>
             </View>
@@ -444,10 +422,10 @@ const CourseDetails = () => {
 
         {/* Course Curriculum */}
         <View className="px-6 mb-8">
-          <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+          <Text className="text-2xl font-extrabold text-ink dark:text-white mb-2">
             Course Curriculum
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-4">
+          <Text className="text-ink-soft dark:text-night-soft text-sm font-medium mb-4">
             {course.sections?.length || 0} sections •{" "}
             {course.sections?.[0]?.lessons?.length || 0} lessons • 1h 45m total
             length
@@ -456,17 +434,17 @@ const CourseDetails = () => {
           {course.sections?.map((section, sectionIdx: number) => (
             <View
               key={sectionIdx}
-              className="mb-2.5 bg-gray-50 dark:bg-slate-800/30 border border-gray-100 dark:border-slate-700/50 rounded-2xl overflow-hidden"
+              className="mb-2.5 bg-sand dark:bg-night-raised/30 border border-line dark:border-night-line/50 rounded-2xl overflow-hidden"
             >
               <TouchableOpacity
                 onPress={() => toggleModule(sectionIdx)}
                 className="px-4 py-3.5 flex-row items-center justify-between"
               >
                 <View className="flex-1">
-                  <Text className="text-slate-800 dark:text-white font-black text-lg">
+                  <Text className="text-ink dark:text-white font-extrabold text-lg">
                     {section.title}
                   </Text>
-                  <Text className="text-slate-500 dark:text-slate-400 text-xs font-bold mt-1">
+                  <Text className="text-ink-soft dark:text-night-soft text-xs font-bold mt-1">
                     {section.lessons?.length || 0} lessons
                   </Text>
                 </View>
@@ -492,9 +470,9 @@ const CourseDetails = () => {
                         setSelectedLesson(lesson);
                         lessonModal.open();
                       }}
-                      className="flex-row items-center py-2.5 border-t border-gray-100 dark:border-slate-700/30"
+                      className="flex-row items-center py-2.5 border-t border-line dark:border-night-line/30"
                     >
-                      <View className="w-7 h-7 rounded-full bg-orange-50 dark:bg-orange-900/10 items-center justify-center mr-3">
+                      <View className="w-7 h-7 rounded-full bg-clay-tint dark:bg-night-raised items-center justify-center mr-3">
                         {lesson.contentType === "video" ? (
                           <Feather
                             name="play-circle"
@@ -508,19 +486,19 @@ const CourseDetails = () => {
                         )}
                       </View>
                       <View className="flex-1">
-                        <Text className="text-slate-700 dark:text-slate-300 text-sm font-bold">
+                        <Text className="text-ink-soft dark:text-night-soft text-sm font-bold">
                           {lesson.title}
                         </Text>
                         {lesson.durationMinutes ? (
-                          <Text className="text-slate-400 text-xs mt-1">
+                          <Text className="text-ink-soft text-xs mt-1">
                             {lesson.durationMinutes} min`
                           </Text>
                         ) : null}
                       </View>
                       {lesson.isPreview ? (
-                        <Feather name="eye" size={14} color="#cbd5e1" />
+                        <Feather name="eye" size={14} color="#B5AEA3" />
                       ) : (
-                        <Feather name="lock" size={14} color="#cbd5e1" />
+                        <Feather name="lock" size={14} color="#B5AEA3" />
                       )}
                     </TouchableOpacity>
                   ))}
@@ -532,7 +510,7 @@ const CourseDetails = () => {
 
         {/* Requirements & Description */}
         <View className="px-6 mb-6">
-          <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+          <Text className="text-2xl font-extrabold text-ink dark:text-white mb-4">
             Requirements
           </Text>
           <View className="mb-8">
@@ -542,18 +520,18 @@ const CourseDetails = () => {
               "Internet connection for access",
             ].map((req, rid) => (
               <View key={rid} className="flex-row items-center mb-3">
-                <View className="w-1.5 h-1.5 bg-primary rounded-full mr-3" />
-                <Text className="text-slate-600 dark:text-slate-300 text-sm font-medium">
+                <View className="w-1.5 h-1.5 bg-primary-deep rounded-full mr-3" />
+                <Text className="text-ink-soft dark:text-night-soft text-sm font-medium">
                   {req}
                 </Text>
               </View>
             ))}
           </View>
 
-          <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+          <Text className="text-2xl font-extrabold text-ink dark:text-white mb-4">
             Description
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-6">
+          <Text className="text-ink-soft dark:text-night-soft text-sm font-medium leading-6">
             {course.description
               ? course.description
                   .replace(/<[^>]*>?/gm, "")
@@ -573,7 +551,7 @@ const CourseDetails = () => {
                 <View className="w-8 h-8 rounded-full bg-amber-500 items-center justify-center mr-3">
                   <Feather name="alert-triangle" size={16} color="white" />
                 </View>
-                <Text className="text-amber-900 dark:text-amber-300 font-black text-sm uppercase tracking-wider">
+                <Text className="text-amber-900 dark:text-amber-300 font-extrabold text-sm uppercase tracking-wider">
                   Disclaimer
                 </Text>
               </View>
@@ -600,10 +578,10 @@ const CourseDetails = () => {
 
         {/* Meet your instructor */}
         <View className="px-6">
-          <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+          <Text className="text-2xl font-extrabold text-ink dark:text-white mb-4">
             Meet your instructor
           </Text>
-          <View className="bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-xl p-5">
+          <View className="bg-sand dark:bg-night-raised border border-line dark:border-night-line rounded-xl p-5">
             <TouchableOpacity
               onPress={() =>
                 router.push(`/expert/${course.teacher.slug}` as any)
@@ -620,7 +598,7 @@ const CourseDetails = () => {
               />
               <View className="ml-4 flex-1">
                 <View className="flex-row items-center">
-                  <Text className="text-slate-800 dark:text-white font-black text-base">
+                  <Text className="text-ink dark:text-white font-extrabold text-base">
                     {course.teacher.displayName}
                   </Text>
                   {(course.teacher.isVerified || course.teacherIsVerified) && (
@@ -633,7 +611,7 @@ const CourseDetails = () => {
                   )}
                 </View>
                 {(course.teacher.academyName || course.teacherAcademyName) && (
-                  <Text className="text-slate-400 text-xs font-medium mt-0.5">
+                  <Text className="text-ink-soft text-xs font-medium mt-0.5">
                     {course.teacher.academyName || course.teacherAcademyName}
                   </Text>
                 )}
@@ -642,7 +620,7 @@ const CourseDetails = () => {
             </TouchableOpacity>
 
             {(course.teacher.bio || course.teacherBio) && (
-              <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-6 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700/50 px-1">
+              <Text className="text-ink-soft dark:text-night-soft text-sm font-medium leading-6 mt-4 pt-4 border-t border-line dark:border-night-line/50 px-1">
                 {course.teacher.bio || course.teacherBio}
               </Text>
             )}
@@ -652,12 +630,12 @@ const CourseDetails = () => {
         <View className="h-20" />
       </ScrollView>
       {/* Sticky Bottom Bar */}
-      <View className="bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 p-6 flex-row items-center">
+      <View className="bg-white dark:bg-night border-t border-line dark:border-night-line p-6 flex-row items-center">
         <View className="flex-1">
-          <Text className="text-slate-400 dark:text-slate-500 text-xs font-black uppercase tracking-tighter">
+          <Text className="text-ink-soft dark:text-night-soft text-xs font-extrabold uppercase tracking-tighter">
             Current Price
           </Text>
-          <Text className="text-2xl font-black text-slate-800 dark:text-white mt-1">
+          <Text className="text-2xl font-extrabold text-ink dark:text-white mt-1">
             {isFree ? "FREE" : `₹${course.price}`}
           </Text>
         </View>
@@ -679,12 +657,12 @@ const CourseDetails = () => {
                 }
           }
           disabled={enrolling || addingToCart || (isFree && course.isEnrolled)}
-          className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} h-14 w-44 rounded-xl items-center justify-center shadow-lg disabled:opacity-60`}
+          className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary-deep shadow-orange-500/30"} h-14 w-44 rounded-xl items-center justify-center shadow-lg disabled:opacity-60`}
         >
           {enrolling || addingToCart ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text className="text-white text-lg font-black">
+            <Text className="text-white text-lg font-extrabold">
               {isFree
                 ? course.isEnrolled
                   ? "Enrolled"
@@ -705,19 +683,19 @@ const CourseDetails = () => {
         }
       >
         <View className="flex-1 bg-black/50 items-center justify-center px-6">
-          <View className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-sm items-center shadow-2xl">
+          <View className="bg-white dark:bg-night-raised rounded-2xl p-8 w-full max-w-sm items-center shadow-2xl">
             {enrollResult.success ? (
               <>
                 <View className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 items-center justify-center mb-5">
                   <Feather name="check-circle" size={32} color="#10B981" />
                 </View>
-                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                <Text className="text-2xl font-extrabold text-ink dark:text-white mb-2">
                   Enrollment Successful!
                 </Text>
-                <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm mb-1">
+                <Text className="text-ink-soft dark:text-night-soft font-bold text-sm mb-1">
                   Enrollment ID #{enrollResult.enrollmentId}
                 </Text>
-                <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                <Text className="text-ink-soft dark:text-night-soft text-center text-sm leading-5 mb-6">
                   You now have full access to this course. Head to your
                   dashboard to start learning.
                 </Text>
@@ -728,7 +706,7 @@ const CourseDetails = () => {
                     router.push("/user");
                   }}
                 >
-                  <Text className="text-white font-black text-base">
+                  <Text className="text-white font-extrabold text-base">
                     Go to Dashboard
                   </Text>
                 </TouchableOpacity>
@@ -738,7 +716,7 @@ const CourseDetails = () => {
                     setEnrollResult((prev) => ({ ...prev, visible: false }))
                   }
                 >
-                  <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+                  <Text className="text-ink-soft dark:text-night-soft font-bold text-sm">
                     Continue Browsing
                   </Text>
                 </TouchableOpacity>
@@ -748,19 +726,19 @@ const CourseDetails = () => {
                 <View className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 items-center justify-center mb-5">
                   <Feather name="alert-circle" size={32} color="#EF4444" />
                 </View>
-                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                <Text className="text-2xl font-extrabold text-ink dark:text-white mb-2">
                   Enrollment Failed
                 </Text>
-                <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                <Text className="text-ink-soft dark:text-night-soft text-center text-sm leading-5 mb-6">
                   {enrollResult.message}
                 </Text>
                 <TouchableOpacity
-                  className="bg-primary w-full h-14 rounded-2xl items-center justify-center"
+                  className="bg-primary-deep w-full h-14 rounded-2xl items-center justify-center"
                   onPress={() =>
                     setEnrollResult((prev) => ({ ...prev, visible: false }))
                   }
                 >
-                  <Text className="text-white font-black text-base">
+                  <Text className="text-white font-extrabold text-base">
                     Try Again
                   </Text>
                 </TouchableOpacity>
@@ -775,7 +753,7 @@ const CourseDetails = () => {
         onRequestClose={closeLesson}
       >
         <SafeAreaView className="flex-1 bg-black">
-          <View className="flex-row items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-700">
+          <View className="flex-row items-center justify-between px-4 py-3 bg-ink border-b border-night-line">
             <Text
               className="text-white font-bold text-base flex-1 mr-3"
               numberOfLines={1}
@@ -783,7 +761,7 @@ const CourseDetails = () => {
               {selectedLesson?.title}
             </Text>
             <TouchableOpacity onPress={closeLesson}>
-              <Feather name="x" size={22} color="#94a3b8" />
+              <Feather name="x" size={22} color="#968E82" />
             </TouchableOpacity>
           </View>
 
@@ -810,15 +788,15 @@ const CourseDetails = () => {
             />
           ) : selectedLesson?.contentType === "text" &&
             selectedLesson.textContent ? (
-            <ScrollView className="flex-1 bg-white dark:bg-slate-900 px-6 py-5">
-              <Text className="text-slate-700 dark:text-slate-300 text-base leading-7">
+            <ScrollView className="flex-1 bg-paper dark:bg-night px-6 py-5">
+              <Text className="text-ink-soft dark:text-night-soft text-base leading-7">
                 {selectedLesson.textContent}
               </Text>
             </ScrollView>
           ) : (
             <View className="flex-1 items-center justify-center">
-              <Feather name="alert-circle" size={32} color="#64748b" />
-              <Text className="text-slate-400 mt-3 text-sm">
+              <Feather name="alert-circle" size={32} color="#6A6358" />
+              <Text className="text-ink-soft mt-3 text-sm">
                 No preview available
               </Text>
             </View>

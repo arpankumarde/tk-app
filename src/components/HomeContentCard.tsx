@@ -75,10 +75,10 @@ const HomeContentCard = ({
     <TouchableOpacity
       onPress={() => router.push(meta.href(item) as any)}
       activeOpacity={0.9}
-      className="w-[172px] bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-700/50 shadow-sm shadow-slate-200/60 dark:shadow-none"
+      className="w-[172px] bg-white dark:bg-night-raised rounded-3xl overflow-hidden border border-line dark:border-night-line"
     >
       {showThumbnail && (
-        <View className="w-full aspect-[4/3] bg-slate-100 dark:bg-slate-900 relative">
+        <View className="w-full aspect-video bg-sand dark:bg-night relative">
           <Image
             source={{ uri: item.thumbnailUrl || meta.placeholder }}
             className="w-full h-full"
@@ -87,20 +87,20 @@ const HomeContentCard = ({
 
           {discountPercent !== null && (
             <View className="absolute top-2 left-2 bg-emerald-500 px-2 py-0.5 rounded-full">
-              <Text className="text-white text-[9px] font-black">
+              <Text className="text-white text-[9px] font-extrabold">
                 {discountPercent}% OFF
               </Text>
             </View>
           )}
 
           {!isCourse && (
-            <View className="absolute top-2 right-2 bg-white/95 dark:bg-slate-900/90 px-2 py-1 rounded-full">
+            <View className="absolute top-2 right-2 bg-white/95 dark:bg-night/90 px-2 py-1 rounded-full">
               {isFree ? (
-                <Text className="text-emerald-500 text-[10px] font-black">
+                <Text className="text-emerald-700 dark:text-emerald-400 text-[10px] font-extrabold">
                   FREE
                 </Text>
               ) : (
-                <Text className="text-slate-800 dark:text-white text-[10px] font-black">
+                <Text className="text-ink dark:text-white text-[10px] font-extrabold">
                   ₹{formatInr(actualPrice)}
                 </Text>
               )}
@@ -114,7 +114,7 @@ const HomeContentCard = ({
           <View className="flex-row items-center justify-between mb-2">
             {discountPercent !== null ? (
               <View className="bg-emerald-500 px-2 py-0.5 rounded-full">
-                <Text className="text-white text-[9px] font-black">
+                <Text className="text-white text-[9px] font-extrabold">
                   {discountPercent}% OFF
                 </Text>
               </View>
@@ -122,11 +122,11 @@ const HomeContentCard = ({
               <View />
             )}
             {isFree ? (
-              <Text className="text-emerald-500 text-[10px] font-black">
+              <Text className="text-emerald-700 dark:text-emerald-400 text-[10px] font-extrabold">
                 FREE
               </Text>
             ) : (
-              <Text className="text-slate-800 dark:text-white text-[10px] font-black">
+              <Text className="text-ink dark:text-white text-[10px] font-extrabold">
                 ₹{formatInr(actualPrice)}
               </Text>
             )}
@@ -134,7 +134,7 @@ const HomeContentCard = ({
         )}
         {showExam && (
           <Text
-            className="text-primary text-[9px] font-black uppercase tracking-widest mb-1"
+            className="text-primary-deep dark:text-primary text-[9px] font-extrabold uppercase tracking-widest mb-1"
             numberOfLines={1}
           >
             {item.examName}
@@ -142,7 +142,7 @@ const HomeContentCard = ({
         )}
 
         <Text
-          className="text-sm font-black text-slate-800 dark:text-white leading-[18px] mb-2 h-9"
+          className="text-sm font-extrabold text-ink dark:text-white leading-[18px] mb-2 h-9"
           numberOfLines={2}
         >
           {item.title}
@@ -150,7 +150,7 @@ const HomeContentCard = ({
 
         <View className="flex-row items-center mb-2">
           <Text
-            className="text-slate-500 dark:text-slate-400 text-[11px] font-semibold flex-shrink"
+            className="text-ink-soft dark:text-night-soft text-[11px] font-semibold flex-shrink"
             numberOfLines={1}
           >
             {item.teacherName || "Testkart Expert"}
@@ -170,7 +170,7 @@ const HomeContentCard = ({
             {isCourse && hasRatings && (
               <View className="flex-row items-center">
                 <Feather name="star" size={11} color="#F97316" />
-                <Text className="ml-1 text-orange-500 text-[10px] font-black">
+                <Text className="ml-1 text-primary-deep dark:text-primary text-[10px] font-extrabold">
                   {ratingDisplay}
                 </Text>
               </View>
@@ -178,7 +178,7 @@ const HomeContentCard = ({
           </View>
           {isCourse ? (
             <Text
-              className={`${isFree ? "text-emerald-500" : "text-slate-800 dark:text-white"} text-[11px] font-black flex-shrink-0`}
+              className={`${isFree ? "text-emerald-700 dark:text-emerald-400" : "text-ink dark:text-white"} text-[11px] font-extrabold flex-shrink-0`}
             >
               {isFree ? "FREE" : `₹${formatInr(actualPrice)}`}
             </Text>
@@ -187,7 +187,7 @@ const HomeContentCard = ({
             item.rating > 0 && (
               <View className="flex-row items-center">
                 <Feather name="star" size={11} color="#F97316" />
-                <Text className="ml-1 text-orange-500 text-[10px] font-black">
+                <Text className="ml-1 text-primary-deep dark:text-primary text-[10px] font-extrabold">
                   {item.rating}
                 </Text>
               </View>

@@ -19,23 +19,23 @@ export default function ForceUpdate({
   };
 
   return (
-    <View className="flex-1 bg-white dark:bg-slate-950">
+    <View className="flex-1 bg-paper dark:bg-night">
       <View className="flex-1 items-center justify-center px-9">
-        <View className="mb-8 h-24 w-24 items-center justify-center rounded-[32px] bg-primary">
+        <View className="mb-8 h-24 w-24 items-center justify-center rounded-[32px] bg-primary-deep">
           <Feather name="download" size={40} color="#fff" />
         </View>
 
-        <Text className="mb-3 text-center text-3xl font-black tracking-tight text-gray-900 dark:text-white">
+        <Text className="w-full mb-3 text-center text-3xl font-extrabold tracking-tight text-ink dark:text-white">
           Update Required
         </Text>
 
-        <Text className="mb-4 text-center text-[15px] leading-[22px] text-gray-500 dark:text-white/60">
+        <Text className="mb-4 text-center text-[15px] leading-[22px] text-ink-soft dark:text-white/60">
           A new version of Testkart is available.{"\n"}Please update to continue
           using the app.
         </Text>
 
-        <View className="mb-10 rounded-full border border-gray-200 bg-gray-100 px-4 py-2 dark:border-slate-700 dark:bg-slate-900">
-          <Text className="text-xs font-medium text-gray-500 dark:text-white/50">
+        <View className="mb-10 rounded-full border border-line bg-sand px-4 py-2 dark:border-night-line dark:bg-night">
+          <Text className="text-xs font-medium text-ink-soft dark:text-white/50">
             v{latestVersion} available {"  •  "} Current: v{currentVersion}
           </Text>
         </View>
@@ -43,14 +43,14 @@ export default function ForceUpdate({
         <TouchableOpacity
           onPress={handleUpdate}
           activeOpacity={0.85}
-          className="w-full rounded-2xl bg-primary py-[18px]"
+          className="w-full rounded-2xl bg-primary-deep py-[18px]"
         >
           <Text className="text-center text-[17px] font-semibold tracking-wide text-white">
             Update Now
           </Text>
         </TouchableOpacity>
 
-        <Text className="mt-6 text-center text-xs leading-[18px] text-gray-400 dark:text-white/40">
+        <Text className="mt-6 text-center text-xs leading-[18px] text-ink-soft dark:text-white/40">
           This update includes important security fixes{"\n"}and new features
           for a better experience.
         </Text>

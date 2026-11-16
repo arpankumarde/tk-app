@@ -63,12 +63,12 @@ const LeaveTestDialog = ({
       onRequestClose={pausing ? undefined : onStay}
     >
       <View className="flex-1 bg-black/50 px-6 items-center justify-center">
-        <View className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800">
+        <View className="w-full max-w-sm bg-white dark:bg-night rounded-[32px] overflow-hidden shadow-2xl border border-line dark:border-night-line">
           <View className="p-6">
-            <Text className="text-xl font-black text-slate-900 dark:text-white mb-2">
+            <Text className="text-xl font-extrabold text-ink dark:text-white mb-2">
               {canPause ? "Pause the test?" : "Leave the test?"}
             </Text>
-            <Text className="text-slate-600 dark:text-slate-300 text-sm font-bold leading-5">
+            <Text className="text-ink-soft dark:text-night-soft text-sm font-bold leading-5">
               {leaveMessage(isLive, canPause, answeredCount)}
             </Text>
           </View>
@@ -78,12 +78,12 @@ const LeaveTestDialog = ({
               <TouchableOpacity
                 onPress={onPause}
                 disabled={pausing}
-                className="flex-1 h-12 rounded-xl items-center justify-center border border-slate-200 dark:border-slate-700"
+                className="flex-1 h-12 rounded-xl items-center justify-center border border-line dark:border-night-line"
               >
                 {pausing ? (
                   <ActivityIndicator color="#FF8A50" />
                 ) : (
-                  <Text className="text-slate-700 dark:text-slate-200 font-bold">
+                  <Text className="text-ink dark:text-night-soft font-bold">
                     Pause and leave
                   </Text>
                 )}
@@ -101,9 +101,9 @@ const LeaveTestDialog = ({
             <TouchableOpacity
               onPress={onStay}
               disabled={pausing}
-              className="flex-1 h-12 bg-primary rounded-xl items-center justify-center"
+              className="flex-1 h-12 bg-primary-deep rounded-xl items-center justify-center"
             >
-              <Text className="text-white font-black">Continue test</Text>
+              <Text className="text-white font-extrabold">Continue test</Text>
             </TouchableOpacity>
           </View>
         </View>

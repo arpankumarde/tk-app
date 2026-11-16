@@ -53,25 +53,25 @@ const ProductCard = ({ product }: ProductCardProps) => {
     <TouchableOpacity
       onPress={handlePress}
       activeOpacity={0.9}
-      className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden mb-6 shadow-xl shadow-slate-200/50 dark:shadow-none border border-gray-100 dark:border-slate-700/50"
+      className="bg-white dark:bg-night-raised rounded-3xl overflow-hidden mb-6 shadow-xl dark:shadow-none border border-line dark:border-night-line"
     >
       {/* Post Header: teacher avatar + name */}
       <View className="flex-row items-center px-5 pt-4 pb-3">
-        <View className="w-9 h-9 rounded-full bg-orange-50 dark:bg-slate-700 items-center justify-center overflow-hidden mr-3">
+        <View className="w-9 h-9 rounded-full bg-clay-tint dark:bg-night-line items-center justify-center overflow-hidden mr-3">
           {product.teacherAvatar ? (
             <Image
               source={{ uri: product.teacherAvatar }}
               className="w-full h-full"
             />
           ) : (
-            <Text className="text-primary text-xs font-black">
+            <Text className="text-primary-deep dark:text-primary text-xs font-extrabold">
               {teacherInitials}
             </Text>
           )}
         </View>
         <View className="flex-row items-center flex-1">
           <Text
-            className="text-slate-800 dark:text-white font-bold text-sm"
+            className="text-ink dark:text-white font-bold text-sm"
             numberOfLines={1}
           >
             {displayAuthor}
@@ -89,19 +89,19 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
       {/* Title */}
       <Text
-        className="text-lg font-black text-slate-800 dark:text-white px-5 mb-4 leading-6"
+        className="text-lg font-extrabold text-ink dark:text-white px-5 mb-4 leading-6"
         numberOfLines={2}
       >
         {product.title}
       </Text>
 
       {/* Footer: views / rating (left) — price (right) */}
-      <View className="flex-row items-center justify-between px-5 py-4 border-t border-gray-50 dark:border-slate-700/50">
+      <View className="flex-row items-center justify-between px-5 py-4 border-t border-line dark:border-night-line">
         <View className="flex-row items-center">
           {hasRatings && (
             <View className="flex-row items-center">
               <Feather name="star" size={13} color="#F59E0B" />
-              <Text className="ml-1 text-amber-600 dark:text-amber-500 text-xs font-black">
+              <Text className="ml-1 text-amber-600 dark:text-amber-500 text-xs font-extrabold">
                 {ratingDisplay} ({product.ratingsCount})
               </Text>
             </View>
@@ -110,12 +110,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
         <View className="flex-row items-baseline">
           {salePrice < price && (
-            <Text className="mr-2 text-slate-400 dark:text-slate-500 text-sm font-bold line-through">
+            <Text className="mr-2 text-ink-soft dark:text-night-soft text-sm font-bold line-through">
               ₹{formatInr(price)}
             </Text>
           )}
           <Text
-            className={`${isFree ? "text-emerald-500" : "text-primary"} text-lg font-black`}
+            className={`${isFree ? "text-emerald-700 dark:text-emerald-400" : "text-primary-deep dark:text-primary"} text-lg font-extrabold`}
           >
             {isFree ? "FREE" : `₹${formatInr(salePrice)}`}
           </Text>

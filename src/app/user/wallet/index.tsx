@@ -4,6 +4,7 @@ import {
   ScrollView,
   StatusBar,
   ActivityIndicator,
+  Alert,
   RefreshControl,
   TouchableOpacity,
   NativeScrollEvent,
@@ -16,15 +17,17 @@ import Feather, {
   type FeatherIconName,
 } from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
-import Header from "@/components/Header";
+import DetailHeader from "@/components/DetailHeader";
 import BottomTabs from "@/components/BottomTabs";
 import { useWallet } from "../_hooks/useWallet";
 import type { WalletTabHandle } from "../types";
 import WalletTransaction from "./_components/WalletTransaction";
 import WalletBank from "./_components/WalletBank";
 import WalletWithdrawl from "./_components/WalletWithdrawl";
-import WalletTcoins from "./_components/WalletTcoins";
 import { useTcoins } from "../_hooks/useTcoins";
+import { WalletArcs } from "@/components/AccountArt";
+import { themeColors } from "@/constants/theme";
+import type { TcoinsSummary } from "@/utils/tcoins";
 
 type WalletTab = "transactions" | "bank" | "withdrawal";
 
@@ -34,9 +37,19 @@ const TABS: {
   icon: FeatherIconName;
 }[] = [
   { key: "transactions", label: "Transactions", icon: "list" },
-  { key: "bank", label: "Bank Details", icon: "credit-card" },
+  { key: "bank", label: "Bank details", icon: "credit-card" },
   { key: "withdrawal", label: "Withdrawal", icon: "download" },
 ];
+
+const WALNUT = "#3B2A21";
+const WALNUT_SOFT = "#D6C3B0";
+
+function showTcoinRules(t: TcoinsSummary) {
+  Alert.alert(
+    "How T-coins work",
+    `1 T-coin = ₹1. Pay up to ${t.redeemPercent}% of an order with them (at most ${t.maxRedeem}), and get ${t.cashbackPercent}% back on what you pay (up to ${t.maxCashback} per order). T-coins can't be withdrawn or used with a promo code.`,
+  );
+}
 
 function formatCurrency(amount: number) {
   return `₹${amount.toLocaleString("en-IN")}`;
@@ -45,6 +58,7 @@ function formatCurrency(amount: number) {
 export default function WalletScreen() {
   const { token } = useAuth();
   const { colorScheme } = useColorScheme();
+  const c = themeColors(colorScheme);
   const {
     balance,
     transactions,
@@ -78,12 +92,12 @@ export default function WalletScreen() {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-950"
+      className="flex-1 bg-paper dark:bg-night"
     >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
-      <Header />
+      <DetailHeader title="Wallet" />
 
       <ScrollView
         className="flex-1"
@@ -101,103 +115,107 @@ export default function WalletScreen() {
           </View>
         ) : (
           <>
-            {/* Balance Card */}
-            <View className="px-6 pt-6 pb-4">
-              <View className="bg-primary rounded-3xl p-6 shadow-lg shadow-primary/30">
-                <Text className="text-white/70 font-bold text-sm uppercase tracking-widest mb-1">
-                  Available Balance
-                </Text>
-                <Text className="text-white text-4xl font-black">
+            <View className="px-4 pt-5 pb-6">
+              <View
+                className="rounded-[28px] overflow-hidden"
+                style={{ backgroundColor: WALNUT }}
+              >
+                <View className="absolute right-0 top-0">
+                  <WalletArcs />
+                </View>
+                <View className="px-5 pt-5 flex-row items-start justify-between">
+                  <Text className="text-sm" style={{ color: WALNUT_SOFT }}>
+                    Wallet balance
+                  </Text>
+                  {tcoins?.enabled && (
+                    <View className="flex-row items-center rounded-full bg-wheat-tint px-3 py-1.5">
+                      <Feather name="disc" size={13} color="#8A6A22" />
+                      <Text className="ml-1.5 text-xs font-bold text-wheat">
+                        {tcoins.balance.toLocaleString("en-IN")} T-coins
+                      </Text>
+                    </View>
+                  )}
+                </View>
+                <Text className="px-5 mt-1 text-[44px] font-bold text-white">
                   {formatCurrency(availableBalance)}
                 </Text>
+                {!!tcoins?.enabled && tcoins.pendingCashback > 0 && (
+                  <Text className="px-5 text-xs" style={{ color: WALNUT_SOFT }}>
+                    {tcoins.pendingCashback} T-coins arrive once your pending
+                    payment clears
+                  </Text>
+                )}
+
+                <View
+                  className="mx-5 mt-5 border-t border-dashed"
+                  style={{ borderColor: "#6B5240" }}
+                />
+
+                <View className="flex-row px-5 pt-4 pb-5">
+                  {[
+                    { label: "Credited", value: balance?.totalCredits ?? 0 },
+                    { label: "Spent", value: balance?.totalPurchased ?? 0 },
+                    { label: "Withdrawn", value: balance?.totalWithdrawn ?? 0 },
+                  ].map((stat, i) => (
+                    <View
+                      key={stat.label}
+                      className={`flex-1 ${i > 0 ? "pl-4" : ""}`}
+                      style={
+                        i > 0
+                          ? { borderLeftWidth: 1, borderLeftColor: "#6B5240" }
+                          : undefined
+                      }
+                    >
+                      <Text className="text-xs" style={{ color: WALNUT_SOFT }}>
+                        {stat.label}
+                      </Text>
+                      <Text className="mt-1 text-base font-semibold text-white">
+                        {formatCurrency(stat.value)}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
               </View>
+
+              {tcoins?.enabled && (
+                <TouchableOpacity
+                  onPress={() => showTcoinRules(tcoins)}
+                  className="mt-3 self-start flex-row items-center px-1"
+                >
+                  <Feather name="info" size={14} color={c.inkSoft} />
+                  <Text className="ml-1.5 text-sm font-semibold text-ink-soft dark:text-night-soft">
+                    How T-coins work
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
 
-            {/* Stats Row */}
-            <View className="px-6 mb-6">
-              <View className="bg-white dark:bg-slate-900 rounded-[28px] p-5 flex-row items-center border border-gray-200 dark:border-slate-700 shadow-sm">
-                <View className="items-center flex-1">
-                  <Text className="text-lg font-black text-green-600 dark:text-green-400">
-                    {formatCurrency(balance?.totalCredits ?? 0)}
-                  </Text>
-                  <Text className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">
-                    Credited
-                  </Text>
-                </View>
-                <View className="w-[1px] h-10 bg-gray-200 dark:bg-slate-700" />
-                <View className="items-center flex-1">
-                  <Text className="text-lg font-black text-blue-600 dark:text-blue-400">
-                    {formatCurrency(balance?.totalPurchased ?? 0)}
-                  </Text>
-                  <Text className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">
-                    Purchased
-                  </Text>
-                </View>
-                <View className="w-[1px] h-10 bg-gray-200 dark:bg-slate-700" />
-                <View className="items-center flex-1">
-                  <Text className="text-lg font-black text-red-500 dark:text-red-400">
-                    {formatCurrency(balance?.totalWithdrawn ?? 0)}
-                  </Text>
-                  <Text className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">
-                    Withdrawn
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            <WalletTcoins summary={tcoins} />
-
-            {/* Tabs */}
-            <View className="px-6 mb-4">
-              <View
-                style={{
-                  flexDirection: "row",
-                  backgroundColor:
-                    colorScheme === "dark" ? "#0F172A" : "#F3F4F6",
-                  borderRadius: 16,
-                  padding: 4,
-                }}
-              >
+            <View className="px-4 mb-4">
+              <View className="flex-row bg-sand dark:bg-night-raised rounded-2xl p-1">
                 {TABS.map((tab) => {
                   const isActive = activeTab === tab.key;
-                  const inactiveIconColor =
-                    colorScheme === "dark" ? "#94A3B8" : "#64748B";
                   return (
                     <TouchableOpacity
                       key={tab.key}
                       activeOpacity={0.8}
                       onPress={() => setActiveTab(tab.key)}
-                      style={{
-                        flex: 1,
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        paddingVertical: 10,
-                        borderRadius: 12,
-                        backgroundColor: isActive
-                          ? colorScheme === "dark"
-                            ? "#1E293B"
-                            : "#FFFFFF"
-                          : "transparent",
-                        shadowColor: isActive ? "#000" : "transparent",
-                        shadowOffset: { width: 0, height: 1 },
-                        shadowOpacity: isActive ? 0.05 : 0,
-                        shadowRadius: 2,
-                        elevation: isActive ? 1 : 0,
-                      }}
+                      accessibilityRole="tab"
+                      accessibilityState={{ selected: isActive }}
+                      className={`flex-1 h-10 flex-row items-center justify-center rounded-xl ${
+                        isActive ? "bg-white dark:bg-night-line" : ""
+                      }`}
                     >
                       <Feather
                         name={tab.icon}
                         size={14}
-                        color={isActive ? "#FF8A50" : inactiveIconColor}
+                        color={isActive ? c.ink : c.inkSoft}
                       />
                       <Text
-                        style={{
-                          marginLeft: 6,
-                          fontSize: 12,
-                          fontWeight: "700",
-                          color: isActive ? "#FF8A50" : inactiveIconColor,
-                        }}
+                        className={`ml-1.5 text-xs ${
+                          isActive
+                            ? "font-bold text-ink dark:text-white"
+                            : "font-semibold text-ink-soft dark:text-night-soft"
+                        }`}
                       >
                         {tab.label}
                       </Text>
@@ -208,7 +226,7 @@ export default function WalletScreen() {
             </View>
 
             {/* Tab Content */}
-            <View className="px-6">
+            <View className="px-4">
               {activeTab === "transactions" && (
                 <WalletTransaction
                   transactions={transactions}

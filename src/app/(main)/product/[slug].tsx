@@ -1,5 +1,5 @@
 import BundleCrossSell from "@/components/BundleCrossSell";
-import Header from "@/components/Header";
+import DetailHeader from "@/components/DetailHeader";
 import ProductCard from "@/components/ProductCard";
 import ReaderHeader from "@/components/ReaderHeader";
 import StudyNotePreview, {
@@ -188,7 +188,7 @@ const ProductDetails = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-white dark:bg-slate-900 items-center justify-center">
+      <View className="flex-1 bg-paper dark:bg-night items-center justify-center">
         <ActivityIndicator size="large" color="#FF8A50" />
       </View>
     );
@@ -196,13 +196,13 @@ const ProductDetails = () => {
 
   if (!product) {
     return (
-      <View className="flex-1 bg-white dark:bg-slate-900 items-center justify-center px-10">
-        <Text className="text-xl font-bold text-slate-800 dark:text-white mb-4">
+      <View className="flex-1 bg-paper dark:bg-night items-center justify-center px-10">
+        <Text className="text-xl font-bold text-ink dark:text-white mb-4">
           Product not found
         </Text>
         <TouchableOpacity
           onPress={() => router.back()}
-          className="bg-primary px-8 py-3 rounded-xl"
+          className="bg-primary-deep px-8 py-3 rounded-xl"
         >
           <Text className="text-white font-bold">Go Back</Text>
         </TouchableOpacity>
@@ -229,7 +229,7 @@ const ProductDetails = () => {
     return parts.map((part, i) => {
       if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
         return (
-          <Text key={i} className="font-black text-slate-800 dark:text-white">
+          <Text key={i} className="font-extrabold text-ink dark:text-white">
             {part.slice(2, -2)}
           </Text>
         );
@@ -281,14 +281,14 @@ const ProductDetails = () => {
 
       if (/^-{3,}$/.test(processed)) {
         return (
-          <View key={idx} className="h-px bg-gray-200 dark:bg-slate-700 my-2" />
+          <View key={idx} className="h-px bg-line dark:bg-night-line my-2" />
         );
       }
       if (processed.startsWith("### ")) {
         return (
           <Text
             key={idx}
-            className="text-lg font-black text-slate-800 dark:text-white mt-3 mb-2"
+            className="text-lg font-extrabold text-ink dark:text-white mt-3 mb-2"
           >
             {renderInlineMarkdown(processed.slice(4))}
           </Text>
@@ -298,8 +298,8 @@ const ProductDetails = () => {
         const content = processed.replace(/^[-•*]\s+/, "");
         return (
           <View key={idx} className="flex-row mb-2">
-            <Text className="text-primary text-base mr-2.5 leading-7">•</Text>
-            <Text className="flex-1 text-slate-600 dark:text-slate-300 text-base leading-7">
+            <Text className="text-primary-deep dark:text-primary text-base mr-2.5 leading-7">•</Text>
+            <Text className="flex-1 text-ink-soft dark:text-night-soft text-base leading-7">
               {renderInlineMarkdown(content)}
             </Text>
           </View>
@@ -308,7 +308,7 @@ const ProductDetails = () => {
       return (
         <Text
           key={idx}
-          className="text-slate-600 dark:text-slate-300 text-base leading-7 mb-2"
+          className="text-ink-soft dark:text-night-soft text-base leading-7 mb-2"
         >
           {renderInlineMarkdown(processed)}
         </Text>
@@ -350,7 +350,7 @@ const ProductDetails = () => {
           ) : (
             <Text
               key={`${keyPrefix}-${idx++}`}
-              className="font-black text-slate-800 dark:text-white"
+              className="font-extrabold text-ink dark:text-white"
             >
               {inner}
             </Text>
@@ -398,7 +398,7 @@ const ProductDetails = () => {
         return (
           <Text
             key={i}
-            className={`${sizeClass} font-black text-slate-800 dark:text-white mb-2`}
+            className={`${sizeClass} font-extrabold text-ink dark:text-white mb-2`}
           >
             {renderInlineHtml(block.content, `b${i}`)}
           </Text>
@@ -413,10 +413,10 @@ const ProductDetails = () => {
           <View key={i} className="mb-2">
             {items.map((item, j) => (
               <View key={j} className="flex-row mb-2">
-                <Text className="text-primary text-base mr-2.5 leading-7">
+                <Text className="text-primary-deep dark:text-primary text-base mr-2.5 leading-7">
                   •
                 </Text>
-                <Text className="flex-1 text-slate-600 dark:text-slate-300 text-base leading-7">
+                <Text className="flex-1 text-ink-soft dark:text-night-soft text-base leading-7">
                   {renderInlineHtml(item, `b${i}-${j}`)}
                 </Text>
               </View>
@@ -428,7 +428,7 @@ const ProductDetails = () => {
       return (
         <Text
           key={i}
-          className="text-slate-600 dark:text-slate-300 text-base leading-7 mb-3"
+          className="text-ink-soft dark:text-night-soft text-base leading-7 mb-3"
         >
           {renderInlineHtml(block.content, `b${i}`)}
         </Text>
@@ -437,20 +437,20 @@ const ProductDetails = () => {
   };
 
   return (
-    <View className="flex-1 bg-white dark:bg-slate-900">
+    <View className="flex-1 bg-paper dark:bg-night">
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
       <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
-        <Header />
+        <DetailHeader title="Study notes" onShare={handleShare} />
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 40 }}
         >
           <View className="px-6 pt-4">
             {/* Category Badge */}
-            <View className="self-start bg-slate-900/90 dark:bg-white px-5 py-2 rounded-full shadow-lg">
-              <Text className="text-white dark:text-slate-900 font-black text-xs uppercase tracking-wider">
+            <View className="self-start bg-ink/90 dark:bg-white px-5 py-2 rounded-full shadow-lg">
+              <Text className="text-white dark:text-ink font-extrabold text-xs uppercase tracking-wider">
                 {product.category || "Notes"}
               </Text>
             </View>
@@ -458,7 +458,7 @@ const ProductDetails = () => {
 
           <View className="px-6 py-6">
             {/* Title Section */}
-            <Text className="text-3xl font-black text-slate-800 dark:text-white leading-tight mb-4">
+            <Text className="text-3xl font-extrabold text-ink dark:text-white leading-tight mb-4">
               {product.title}
             </Text>
 
@@ -470,19 +470,19 @@ const ProductDetails = () => {
                 )}
               </View>
             ) : (
-              <Text className="text-slate-600 dark:text-slate-300 text-base leading-7 mb-4">
+              <Text className="text-ink-soft dark:text-night-soft text-base leading-7 mb-4">
                 No description available for this product.
               </Text>
             )}
 
-            <View className="h-[1px] bg-gray-50 dark:bg-slate-800 mb-4" />
+            <View className="h-[1px] bg-sand dark:bg-night-raised mb-4" />
 
             {/* About the Author Card */}
             <View className="mb-8">
-              <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+              <Text className="text-2xl font-extrabold text-ink dark:text-white mb-4">
                 About the Author
               </Text>
-              <View className="bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-xl p-5">
+              <View className="bg-sand dark:bg-night-raised border border-line dark:border-night-line rounded-xl p-5">
                 <TouchableOpacity
                   onPress={() =>
                     router.push(`/expert/${product.teacherSlug}` as any)
@@ -499,7 +499,7 @@ const ProductDetails = () => {
                   />
                   <View className="ml-4 flex-1">
                     <View className="flex-row items-center">
-                      <Text className="text-slate-800 dark:text-white font-black text-base">
+                      <Text className="text-ink dark:text-white font-extrabold text-base">
                         {product.teacherName || "Author"}
                       </Text>
                       {(product.teacherIsVerified ||
@@ -513,7 +513,7 @@ const ProductDetails = () => {
                       )}
                     </View>
                     {product.teacherAcademyName && (
-                      <Text className="text-slate-400 text-xs font-medium mt-0.5">
+                      <Text className="text-ink-soft text-xs font-medium mt-0.5">
                         {product.teacherAcademyName}
                       </Text>
                     )}
@@ -522,7 +522,7 @@ const ProductDetails = () => {
                 </TouchableOpacity>
 
                 {product.teacherBio && (
-                  <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-6 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700/50 px-1">
+                  <Text className="text-ink-soft dark:text-night-soft text-sm font-medium leading-6 mt-4 pt-4 border-t border-line dark:border-night-line/50 px-1">
                     {product.teacherBio}
                   </Text>
                 )}
@@ -530,20 +530,20 @@ const ProductDetails = () => {
             </View>
 
             {/* Detailed Bottom Section (Dynamic Data) */}
-            <View className="bg-white dark:bg-slate-800/50 p-5 rounded-[28px] border border-gray-100 dark:border-slate-700/80 mb-8 shadow-lg shadow-slate-200/50 dark:shadow-none">
+            <View className="bg-white dark:bg-night-raised p-5 rounded-[28px] border border-line dark:border-night-line mb-8">
               <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-slate-500 dark:text-slate-400 text-base font-bold uppercase tracking-wider">
+                <Text className="text-ink-soft dark:text-night-soft text-base font-bold uppercase tracking-wider">
                   Price
                 </Text>
                 <View className="flex-row items-baseline">
                   {salePrice < product.price && (
-                    <Text className="mr-2 text-lg font-bold text-slate-400 dark:text-slate-500 line-through">
+                    <Text className="mr-2 text-lg font-bold text-ink-soft dark:text-night-soft line-through">
                       ₹ {product.price}
                     </Text>
                   )}
-                  <Text className="text-3xl font-black text-orange-500">
+                  <Text className="text-3xl font-extrabold text-primary-deep dark:text-primary">
                     {salePrice === 0 ? (
-                      <Text className="text-emerald-500">FREE</Text>
+                      <Text className="text-emerald-700 dark:text-emerald-400">FREE</Text>
                     ) : (
                       `₹ ${salePrice}`
                     )}
@@ -551,7 +551,7 @@ const ProductDetails = () => {
                 </View>
               </View>
 
-              <View className="h-[1px] bg-gray-50 dark:bg-slate-700/50 mb-5" />
+              <View className="h-[1px] bg-sand dark:bg-night-line/50 mb-5" />
 
               {product.price === 0 ? (
                 <TouchableOpacity
@@ -564,7 +564,7 @@ const ProductDetails = () => {
                   ) : (
                     <>
                       <Feather name="book-open" size={18} color="white" />
-                      <Text className="text-white text-lg font-black ml-2.5">
+                      <Text className="text-white text-lg font-extrabold ml-2.5">
                         Get Free
                       </Text>
                     </>
@@ -572,7 +572,7 @@ const ProductDetails = () => {
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
-                  className="bg-primary h-14 rounded-xl flex-row items-center justify-center shadow-md shadow-orange-500/20 mb-3 disabled:opacity-60"
+                  className="bg-primary-deep h-14 rounded-xl flex-row items-center justify-center shadow-md shadow-orange-500/20 mb-3 disabled:opacity-60"
                   disabled={addingToCart}
                   onPress={async () => {
                     if (!product) return;
@@ -596,7 +596,7 @@ const ProductDetails = () => {
                   ) : (
                     <>
                       <Feather name="shopping-cart" size={18} color="white" />
-                      <Text className="text-white text-lg font-black ml-2.5">
+                      <Text className="text-white text-lg font-extrabold ml-2.5">
                         Add to Cart
                       </Text>
                     </>
@@ -607,65 +607,54 @@ const ProductDetails = () => {
               <View className="flex-row items-center mb-6">
                 {hasPreview && (
                   <TouchableOpacity
-                    className="flex-1 h-14 rounded-2xl bg-transparent border border-orange-100 dark:border-orange-400/20 items-center justify-center mr-2 shadow-sm shadow-orange-500/10"
+                    className="flex-1 h-14 rounded-2xl bg-transparent border border-line dark:border-night-line items-center justify-center shadow-sm shadow-orange-500/10"
                     onPress={preview.open}
                   >
                     <View className="flex-row items-center">
                       <Feather name="eye" size={18} color="#FF8A50" />
-                      <Text className="text-primary font-black text-base ml-2">
+                      <Text className="text-primary-deep dark:text-primary font-extrabold text-base ml-2">
                         Preview
                       </Text>
                     </View>
                   </TouchableOpacity>
                 )}
-                <TouchableOpacity
-                  onPress={handleShare}
-                  className={`flex-1 h-14 rounded-2xl bg-transparent border border-orange-100 dark:border-orange-400/20 items-center justify-center shadow-sm shadow-orange-500/10 ${hasPreview ? "ml-2" : ""}`}
-                >
-                  <View className="flex-row items-center">
-                    <Feather name="share-2" size={18} color="#FF8A50" />
-                    <Text className="text-primary font-black text-base ml-2">
-                      Share
-                    </Text>
-                  </View>
-                </TouchableOpacity>
               </View>
 
               {/* Additional Product Stats (Dynamic) - 2 Column Grid */}
               <View className="px-1 flex-row flex-wrap">
                 <View className="w-1/2 flex-row items-center mb-4">
-                  <View className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800/80 items-center justify-center mr-3">
-                    <Feather name="file-text" size={16} color="#64748b" />
+                  <View className="w-8 h-8 rounded-lg bg-sand dark:bg-night-raised/80 items-center justify-center mr-3">
+                    <Feather name="file-text" size={16} color="#6A6358" />
                   </View>
-                  <Text className="text-slate-700 dark:text-slate-300 font-bold text-sm">
+                  <Text className="text-ink-soft dark:text-night-soft font-bold text-sm">
                     {product.pageCount || 0} Pages
                   </Text>
                 </View>
 
                 <View className="w-1/2 flex-row items-center mb-4">
-                  <View className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800/80 items-center justify-center mr-3">
-                    <Feather name="file" size={16} color="#64748b" />
+                  <View className="w-8 h-8 rounded-lg bg-sand dark:bg-night-raised/80 items-center justify-center mr-3">
+                    <Feather name="file" size={16} color="#6A6358" />
                   </View>
-                  <Text className="text-slate-700 dark:text-slate-300 font-bold text-sm">
+                  <Text className="text-ink-soft dark:text-night-soft font-bold text-sm">
                     {formatFileSize(product.fileSizeBytes)} PDF
                   </Text>
                 </View>
 
                 <View className="w-1/2 flex-row items-center">
-                  <View className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800/80 items-center justify-center mr-3">
-                    <Feather name="globe" size={16} color="#64748b" />
+                  <View className="w-8 h-8 rounded-lg bg-sand dark:bg-night-raised/80 items-center justify-center mr-3">
+                    <Feather name="globe" size={16} color="#6A6358" />
                   </View>
-                  <Text className="text-slate-700 dark:text-slate-300 font-bold text-sm">
+                  <Text className="text-ink-soft dark:text-night-soft font-bold text-sm">
                     {product.language || "English"}
                   </Text>
                 </View>
 
                 {(product.fileCount ?? 0) > 1 && (
                   <View className="w-1/2 flex-row items-center mt-4">
-                    <View className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800/80 items-center justify-center mr-3">
-                      <Feather name="layers" size={16} color="#64748b" />
+                    <View className="w-8 h-8 rounded-lg bg-sand dark:bg-night-raised/80 items-center justify-center mr-3">
+                      <Feather name="layers" size={16} color="#6A6358" />
                     </View>
-                    <Text className="text-slate-700 dark:text-slate-300 font-bold text-sm">
+                    <Text className="text-ink-soft dark:text-night-soft font-bold text-sm">
                       {product.fileCount} Files
                     </Text>
                   </View>
@@ -673,10 +662,10 @@ const ProductDetails = () => {
 
                 {(product.reviewsCount ?? 0) > 0 && (
                   <View className="w-1/2 flex-row items-center mt-4">
-                    <View className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800/80 items-center justify-center mr-3">
+                    <View className="w-8 h-8 rounded-lg bg-sand dark:bg-night-raised/80 items-center justify-center mr-3">
                       <Ionicons name="star" size={16} color="#F59E0B" />
                     </View>
-                    <Text className="text-slate-700 dark:text-slate-300 font-bold text-sm">
+                    <Text className="text-ink-soft dark:text-night-soft font-bold text-sm">
                       {product.rating ? product.rating.toFixed(1) : "New"} (
                       {product.reviewsCount} reviews)
                     </Text>
@@ -697,7 +686,7 @@ const ProductDetails = () => {
             {/* Long Description */}
             {product.description ? (
               <View className="mb-8">
-                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+                <Text className="text-2xl font-extrabold text-ink dark:text-white mb-4">
                   Description
                 </Text>
                 {renderHtmlDescription(product.description)}
@@ -707,16 +696,16 @@ const ProductDetails = () => {
             {/* Tags */}
             {product.tags && product.tags.length > 0 && (
               <View className="mb-8">
-                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+                <Text className="text-2xl font-extrabold text-ink dark:text-white mb-4">
                   Tags
                 </Text>
                 <View className="flex-row flex-wrap">
                   {product.tags.map((tag: string, i: number) => (
                     <View
                       key={i}
-                      className="bg-cyan-50 dark:bg-cyan-900/20 px-4 py-2 rounded-full border border-cyan-100 dark:border-cyan-800/30 mr-2 mb-2"
+                      className="bg-sky-tint dark:bg-night-raised px-4 py-2 rounded-full border border-line dark:border-night-line mr-2 mb-2"
                     >
-                      <Text className="text-cyan-600 dark:text-cyan-400 font-bold text-xs">
+                      <Text className="text-sky dark:text-sky-light font-bold text-xs">
                         {tag}
                       </Text>
                     </View>
@@ -728,14 +717,14 @@ const ProductDetails = () => {
             {/* Reviews */}
             {reviews.length > 0 && (
               <View className="mb-8">
-                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+                <Text className="text-2xl font-extrabold text-ink dark:text-white mb-4">
                   Student Reviews
                 </Text>
 
                 {/* Rating Summary Card */}
-                <View className="bg-white dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700/80 rounded-[28px] p-6 mb-4 shadow-lg shadow-slate-200/50 dark:shadow-none">
+                <View className="bg-white dark:bg-night-raised border border-line dark:border-night-line rounded-[28px] p-6 mb-4">
                   <View className="items-center mb-4">
-                    <Text className="text-5xl font-black text-slate-800 dark:text-white">
+                    <Text className="text-5xl font-extrabold text-ink dark:text-white">
                       {(product.rating ?? 0).toFixed(1)}
                     </Text>
                     <View className="flex-row items-center mt-2">
@@ -747,18 +736,18 @@ const ProductDetails = () => {
                           color={
                             i < Math.round(product.rating ?? 0)
                               ? "#F59E0B"
-                              : "#E2E8F0"
+                              : "#E3DACB"
                           }
                         />
                       ))}
                     </View>
-                    <Text className="text-slate-400 text-sm font-medium mt-2">
+                    <Text className="text-ink-soft text-sm font-medium mt-2">
                       {product.reviewsCount}{" "}
                       {product.reviewsCount === 1 ? "review" : "reviews"}
                     </Text>
                   </View>
 
-                  <View className="h-[1px] bg-gray-50 dark:bg-slate-700/50 mb-4" />
+                  <View className="h-[1px] bg-sand dark:bg-night-line/50 mb-4" />
 
                   {[5, 4, 3, 2, 1].map((star) => {
                     const count = reviews.filter(
@@ -770,18 +759,18 @@ const ProductDetails = () => {
                     return (
                       <View key={star} className="flex-row items-center mb-2.5">
                         <View className="flex-row items-center w-8">
-                          <Text className="text-slate-500 dark:text-slate-400 text-xs font-bold mr-1">
+                          <Text className="text-ink-soft dark:text-night-soft text-xs font-bold mr-1">
                             {star}
                           </Text>
                           <Ionicons name="star" size={11} color="#F59E0B" />
                         </View>
-                        <View className="flex-1 h-2 bg-gray-100 dark:bg-slate-700 rounded-full mx-3 overflow-hidden">
+                        <View className="flex-1 h-2 bg-sand dark:bg-night-line rounded-full mx-3 overflow-hidden">
                           <View
                             className="h-full bg-amber-400 rounded-full"
                             style={{ width: `${pct}%` }}
                           />
                         </View>
-                        <Text className="text-slate-400 text-xs font-bold w-4 text-right">
+                        <Text className="text-ink-soft text-xs font-bold w-4 text-right">
                           {count}
                         </Text>
                       </View>
@@ -793,22 +782,22 @@ const ProductDetails = () => {
                 {reviews.map((review) => (
                   <View
                     key={review.id}
-                    className="flex-row items-start py-3 border-b border-gray-50 dark:border-slate-800"
+                    className="flex-row items-start py-3 border-b border-line dark:border-night-line"
                   >
-                    <View className="w-11 h-11 rounded-full bg-primary items-center justify-center mr-3">
-                      <Text className="text-white font-black text-base">
+                    <View className="w-11 h-11 rounded-full bg-primary-deep items-center justify-center mr-3">
+                      <Text className="text-white font-extrabold text-base">
                         {review.reviewerName?.charAt(0).toUpperCase() || "?"}
                       </Text>
                     </View>
                     <View className="flex-1">
-                      <Text className="text-slate-800 dark:text-white font-black text-sm">
+                      <Text className="text-ink dark:text-white font-extrabold text-sm">
                         {review.reviewerName}
                       </Text>
-                      <Text className="text-slate-400 text-xs font-medium mt-0.5">
+                      <Text className="text-ink-soft text-xs font-medium mt-0.5">
                         {new Date(review.createdAt).toLocaleDateString("en-GB")}
                       </Text>
                       {review.reviewText && (
-                        <Text className="text-slate-600 dark:text-slate-300 text-sm leading-6 mt-2">
+                        <Text className="text-ink-soft dark:text-night-soft text-sm leading-6 mt-2">
                           {review.reviewText}
                         </Text>
                       )}
@@ -819,7 +808,7 @@ const ProductDetails = () => {
                           key={i}
                           name="star"
                           size={13}
-                          color={i < review.rating ? "#F59E0B" : "#E2E8F0"}
+                          color={i < review.rating ? "#F59E0B" : "#E3DACB"}
                         />
                       ))}
                     </View>
@@ -835,7 +824,7 @@ const ProductDetails = () => {
                   <View className="w-8 h-8 rounded-full bg-amber-500 items-center justify-center mr-3">
                     <Feather name="alert-triangle" size={16} color="white" />
                   </View>
-                  <Text className="text-amber-900 dark:text-amber-300 font-black text-sm uppercase tracking-wider">
+                  <Text className="text-amber-900 dark:text-amber-300 font-extrabold text-sm uppercase tracking-wider">
                     Disclaimer
                   </Text>
                 </View>
@@ -855,7 +844,7 @@ const ProductDetails = () => {
             >
               <SafeAreaView
                 edges={["top", "left", "right"]}
-                className="flex-1 bg-white dark:bg-slate-950"
+                className="flex-1 bg-white dark:bg-night-line"
               >
                 <ReaderHeader
                   title={product.title}
@@ -880,7 +869,7 @@ const ProductDetails = () => {
               }
             >
               <View className="flex-1 bg-black/50 items-center justify-center px-6">
-                <View className="bg-white dark:bg-slate-800 rounded-[28px] p-8 w-full max-w-sm items-center shadow-2xl">
+                <View className="bg-white dark:bg-night-raised rounded-[28px] p-8 w-full max-w-sm items-center shadow-2xl">
                   {enrollResult.success ? (
                     <>
                       <View className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 items-center justify-center mb-5">
@@ -890,13 +879,13 @@ const ProductDetails = () => {
                           color="#10B981"
                         />
                       </View>
-                      <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                      <Text className="text-2xl font-extrabold text-ink dark:text-white mb-2">
                         Purchase Successful!
                       </Text>
-                      <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm mb-1">
+                      <Text className="text-ink-soft dark:text-night-soft font-bold text-sm mb-1">
                         Order ID #{enrollResult.orderId}
                       </Text>
-                      <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                      <Text className="text-ink-soft dark:text-night-soft text-center text-sm leading-5 mb-6">
                         Your note is now available in your dashboard.
                       </Text>
                       <TouchableOpacity
@@ -909,7 +898,7 @@ const ProductDetails = () => {
                           router.push("/user");
                         }}
                       >
-                        <Text className="text-white font-black text-base">
+                        <Text className="text-white font-extrabold text-base">
                           Go to Dashboard
                         </Text>
                       </TouchableOpacity>
@@ -922,7 +911,7 @@ const ProductDetails = () => {
                           }))
                         }
                       >
-                        <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+                        <Text className="text-ink-soft dark:text-night-soft font-bold text-sm">
                           Continue Browsing
                         </Text>
                       </TouchableOpacity>
@@ -936,14 +925,14 @@ const ProductDetails = () => {
                           color="#EF4444"
                         />
                       </View>
-                      <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                      <Text className="text-2xl font-extrabold text-ink dark:text-white mb-2">
                         Enrollment Failed
                       </Text>
-                      <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                      <Text className="text-ink-soft dark:text-night-soft text-center text-sm leading-5 mb-6">
                         {enrollResult.message}
                       </Text>
                       <TouchableOpacity
-                        className="bg-primary w-full h-14 rounded-2xl items-center justify-center"
+                        className="bg-primary-deep w-full h-14 rounded-2xl items-center justify-center"
                         onPress={() =>
                           setEnrollResult((prev) => ({
                             ...prev,
@@ -951,7 +940,7 @@ const ProductDetails = () => {
                           }))
                         }
                       >
-                        <Text className="text-white font-black text-base">
+                        <Text className="text-white font-extrabold text-base">
                           Try Again
                         </Text>
                       </TouchableOpacity>
@@ -971,8 +960,8 @@ const ProductDetails = () => {
             {/* Related Products Section */}
             {relatedProducts.length > 0 && (
               <View className="mt-4">
-                <View className="h-[1px] bg-gray-100 dark:bg-slate-800 mb-10" />
-                <Text className="text-3xl font-black text-slate-800 dark:text-white mb-8">
+                <View className="h-[1px] bg-sand dark:bg-night-raised mb-10" />
+                <Text className="text-3xl font-extrabold text-ink dark:text-white mb-8">
                   Related Products
                 </Text>
                 <ScrollView

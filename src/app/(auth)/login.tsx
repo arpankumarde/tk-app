@@ -1,8 +1,9 @@
-import Header from "@/components/Header";
+import LoginIllustration from "@/components/LoginIllustration";
 import TurnstileGate, {
   TurnstileGateHandle,
   TurnstileStatus,
 } from "@/components/TurnstileGate";
+import { themeColors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import { useGoogleAuth } from "@/hooks/useGoogleAuth";
 import Ionicons from "@react-native-vector-icons/ionicons";
@@ -15,6 +16,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
@@ -30,6 +32,8 @@ type AuthMethod = "mobile" | "email";
 
 const Login = () => {
   const { colorScheme } = useColorScheme();
+  const c = themeColors(colorScheme);
+  const isDark = colorScheme === "dark";
   const { signInWithGoogle } = useGoogleAuth();
   const { user, setAuth } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -189,212 +193,218 @@ const Login = () => {
     }
   };
 
+  const inputClass =
+    "border border-line dark:border-night-line rounded-2xl h-14 px-5 text-ink dark:text-white text-base bg-white dark:bg-night-raised";
+
+  const tabClass = (active: boolean) =>
+    `flex-1 h-11 items-center justify-center rounded-xl ${
+      active ? "bg-white dark:bg-night-line" : ""
+    }`;
+
+  const tabTextClass = (active: boolean) =>
+    active
+      ? "font-bold text-ink dark:text-white"
+      : "font-semibold text-ink-soft dark:text-night-soft";
+
   return (
     <SafeAreaView
-      edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-950"
+      edges={["left", "right", "bottom"]}
+      className="flex-1 bg-paper dark:bg-night"
     >
-      <Header />
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor={isDark ? "#202D33" : "#DDE8EC"}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: 80 }}
-          className="px-6 py-10"
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 48 }}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View className="items-center mb-10">
-            <View className="w-12 h-1 bg-orange-500 rounded-full mb-4" />
-            <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2 text-center uppercase tracking-tight">
-              Student Login
-            </Text>
-            <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold text-center px-10">
-              Log in with Google, mobile OTP, or email OTP
-            </Text>
-          </View>
-
-          {/* Google Login */}
-          <TouchableOpacity
-            className="flex-row items-center justify-center border border-gray-100 dark:border-slate-800 rounded-2xl h-14 mb-8 bg-white dark:bg-slate-900 shadow-sm"
-            onPress={handleGoogleSignIn}
-            disabled={loading}
+          <SafeAreaView
+            edges={["top"]}
+            className="bg-sky-tint dark:bg-[#202D33] rounded-b-[32px] overflow-hidden"
           >
-            {loading ? (
-              <ActivityIndicator
-                color={colorScheme === "dark" ? "#fff" : "#000"}
-              />
-            ) : (
-              <>
-                <Ionicons
-                  name="logo-google"
-                  size={24}
-                  color={colorScheme === "dark" ? "#fff" : "#000"}
-                />
-                <Text className="text-slate-900 dark:text-white font-bold ml-3 text-lg">
-                  Continue with Google
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
-
-          {/* Divider */}
-          <View className="flex-row items-center mb-8">
-            <View className="flex-1 h-[1px] bg-gray-100 dark:bg-slate-800" />
-            <Text className="px-4 text-gray-400 font-bold uppercase tracking-widest text-[10px]">
-              OR
-            </Text>
-            <View className="flex-1 h-[1px] bg-gray-100 dark:bg-slate-800" />
-          </View>
-
-          {/* Auth Method Tabs */}
-          <View className="flex-row bg-gray-50 dark:bg-slate-900/50 rounded-2xl p-1 mb-8">
-            <TouchableOpacity
-              className={`flex-1 h-12 items-center justify-center rounded-xl ${
-                authMethod === "mobile" ? "bg-primary" : ""
-              }`}
-              onPress={() => switchAuthMethod("mobile")}
-              disabled={otpLoading}
-            >
-              <Text
-                className={`font-bold ${
-                  authMethod === "mobile"
-                    ? "text-white"
-                    : "text-slate-500 dark:text-slate-400"
-                }`}
-              >
-                Mobile
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className={`flex-1 h-12 items-center justify-center rounded-xl ${
-                authMethod === "email" ? "bg-primary" : ""
-              }`}
-              onPress={() => switchAuthMethod("email")}
-              disabled={otpLoading}
-            >
-              <Text
-                className={`font-bold ${
-                  authMethod === "email"
-                    ? "text-white"
-                    : "text-slate-500 dark:text-slate-400"
-                }`}
-              >
-                Email
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Form */}
-          {authMethod === "mobile" ? (
-            <View className="mb-8">
-              <Text className="text-slate-800 dark:text-white font-black mb-3 text-base">
-                Mobile Number
-              </Text>
-              <TextInput
-                placeholder="Enter your 10-digit mobile number"
-                placeholderTextColor="#94a3b8"
-                keyboardType="phone-pad"
-                maxLength={10}
-                value={mobileNumber}
-                onChangeText={setMobileNumber}
-                editable={!otpSent}
-                className="border border-gray-100 dark:border-slate-800 rounded-2xl h-16 px-5 text-slate-900 dark:text-white text-lg bg-gray-50 dark:bg-slate-900/50"
-              />
-            </View>
-          ) : (
-            <View className="mb-8">
-              <Text className="text-slate-800 dark:text-white font-black mb-3 text-base">
-                Email Address
-              </Text>
-              <TextInput
-                placeholder="Enter your email address"
-                placeholderTextColor="#94a3b8"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                value={email}
-                onChangeText={setEmail}
-                editable={!otpSent}
-                className="border border-gray-100 dark:border-slate-800 rounded-2xl h-16 px-5 text-slate-900 dark:text-white text-lg bg-gray-50 dark:bg-slate-900/50"
-              />
-            </View>
-          )}
-
-          {otpSent && (
-            <View className="mb-8">
-              <Text className="text-slate-800 dark:text-white font-black mb-3 text-base">
-                Enter OTP
-              </Text>
-              <TextInput
-                placeholder="Enter OTP"
-                placeholderTextColor="#94a3b8"
-                keyboardType="number-pad"
-                maxLength={authMethod === "mobile" ? 4 : 6}
-                value={otp}
-                onChangeText={setOtp}
-                className="border border-gray-100 dark:border-slate-800 rounded-2xl h-16 px-5 text-slate-900 dark:text-white text-lg bg-gray-50 dark:bg-slate-900/50"
-              />
+            <View className="flex-row justify-end px-5 pt-2">
               <TouchableOpacity
-                onPress={handleSendOtp}
-                disabled={otpLoading || awaitingTurnstile}
-                className="mt-2"
+                onPress={() => router.replace("/(main)" as any)}
+                accessibilityRole="button"
+                className="px-4 h-9 rounded-full bg-white dark:bg-night-raised items-center justify-center"
               >
-                <Text className="text-primary font-bold text-sm text-right">
-                  Resend OTP
+                <Text className="text-sm font-bold text-ink dark:text-white">
+                  Skip
                 </Text>
               </TouchableOpacity>
             </View>
-          )}
+            <View className="px-4 pt-1">
+              <LoginIllustration height={200} />
+            </View>
+          </SafeAreaView>
 
-          {/* Bot check for both OTP flows. Invisible unless Cloudflare
-              demands an interactive challenge. */}
-          <TurnstileGate
-            ref={turnstileRef}
-            onStatusChange={setTurnstileStatus}
-          />
-
-          {awaitingTurnstile && (
-            <Text className="text-slate-400 dark:text-slate-500 text-xs font-bold text-center mb-4">
-              Verifying your device...
+          <View className="px-6 pt-7">
+            <Text className="text-[28px] leading-9 font-extrabold text-ink dark:text-white">
+              Study smarter for your exam
             </Text>
-          )}
+            <Text className="mt-2 text-[15px] leading-6 text-ink-soft dark:text-night-soft">
+              Mock tests, notes and courses from teachers you trust. Log in to
+              pick up where you left off.
+            </Text>
 
-          {/* Submit Button */}
-          <TouchableOpacity
-            className="bg-primary rounded-2xl h-16 items-center justify-center shadow-lg shadow-primary/30 mb-6"
-            onPress={otpSent ? handleVerifyOtp : handleSendOtp}
-            disabled={otpLoading || (!otpSent && awaitingTurnstile)}
-          >
-            {otpLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text className="text-white text-lg font-bold">
-                {otpSent ? "Verify OTP" : "Send OTP"}
+            <TouchableOpacity
+              className="mt-7 flex-row items-center justify-center border border-line dark:border-night-line rounded-2xl h-14 bg-white dark:bg-night-raised"
+              onPress={handleGoogleSignIn}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={c.ink} />
+              ) : (
+                <>
+                  <Ionicons name="logo-google" size={20} color={c.ink} />
+                  <Text className="text-ink dark:text-white font-bold ml-3 text-base">
+                    Continue with Google
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
+
+            <View className="flex-row items-center my-6">
+              <View className="flex-1 h-px bg-line dark:bg-night-line" />
+              <Text className="px-4 text-ink-soft dark:text-night-soft text-sm">
+                or use a one-time code
               </Text>
-            )}
-          </TouchableOpacity>
+              <View className="flex-1 h-px bg-line dark:bg-night-line" />
+            </View>
 
-          <TouchableOpacity
-            onPress={() => router.push("/(main)" as any)}
-            className="h-10 items-center justify-center mb-6"
-          >
-            <Text className="text-slate-500 dark:text-slate-400 font-bold underline">
-              Skip for now
-            </Text>
-          </TouchableOpacity>
-
-          <View className="flex-row justify-center items-center mt-4">
-            <Text className="text-slate-500 dark:text-slate-400 text-base">
-              Don&apos;t have an account?{" "}
-            </Text>
-            <Link href="/signup" asChild>
-              <TouchableOpacity>
-                <Text className="text-primary font-bold text-base">
-                  Sign up
+            <View className="flex-row bg-sand dark:bg-night-raised rounded-2xl p-1 mb-5">
+              <TouchableOpacity
+                className={tabClass(authMethod === "mobile")}
+                onPress={() => switchAuthMethod("mobile")}
+                disabled={otpLoading}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: authMethod === "mobile" }}
+              >
+                <Text className={tabTextClass(authMethod === "mobile")}>
+                  Mobile
                 </Text>
               </TouchableOpacity>
-            </Link>
+              <TouchableOpacity
+                className={tabClass(authMethod === "email")}
+                onPress={() => switchAuthMethod("email")}
+                disabled={otpLoading}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: authMethod === "email" }}
+              >
+                <Text className={tabTextClass(authMethod === "email")}>
+                  Email
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {authMethod === "mobile" ? (
+              <View className="mb-5">
+                <Text className="text-ink dark:text-white font-semibold mb-2 text-sm">
+                  Mobile number
+                </Text>
+                <TextInput
+                  placeholder="10-digit mobile number"
+                  placeholderTextColor={c.inkSoft}
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  value={mobileNumber}
+                  onChangeText={setMobileNumber}
+                  editable={!otpSent}
+                  className={inputClass}
+                />
+              </View>
+            ) : (
+              <View className="mb-5">
+                <Text className="text-ink dark:text-white font-semibold mb-2 text-sm">
+                  Email address
+                </Text>
+                <TextInput
+                  placeholder="name@example.com"
+                  placeholderTextColor={c.inkSoft}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  value={email}
+                  onChangeText={setEmail}
+                  editable={!otpSent}
+                  className={inputClass}
+                />
+              </View>
+            )}
+
+            {otpSent && (
+              <View className="mb-5">
+                <Text className="text-ink dark:text-white font-semibold mb-2 text-sm">
+                  One-time code
+                </Text>
+                <TextInput
+                  placeholder={
+                    authMethod === "mobile" ? "4-digit code" : "6-digit code"
+                  }
+                  placeholderTextColor={c.inkSoft}
+                  keyboardType="number-pad"
+                  maxLength={authMethod === "mobile" ? 4 : 6}
+                  value={otp}
+                  onChangeText={setOtp}
+                  className={inputClass}
+                />
+                <TouchableOpacity
+                  onPress={handleSendOtp}
+                  disabled={otpLoading || awaitingTurnstile}
+                  className="mt-2 self-end"
+                >
+                  <Text className="text-primary-deep dark:text-primary font-bold text-sm">
+                    Resend code
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Bot check for both OTP flows. Invisible unless Cloudflare
+                demands an interactive challenge. */}
+            <TurnstileGate
+              ref={turnstileRef}
+              onStatusChange={setTurnstileStatus}
+            />
+
+            {awaitingTurnstile && (
+              <Text className="text-ink-soft dark:text-night-soft text-xs font-semibold text-center mb-4">
+                Verifying your device...
+              </Text>
+            )}
+
+            <TouchableOpacity
+              className="bg-primary-deep rounded-2xl h-14 items-center justify-center"
+              onPress={otpSent ? handleVerifyOtp : handleSendOtp}
+              disabled={otpLoading || (!otpSent && awaitingTurnstile)}
+            >
+              {otpLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text className="text-white text-base font-bold">
+                  {otpSent ? "Verify and log in" : "Send code"}
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            <View className="flex-row justify-center items-center mt-8">
+              <Text className="text-ink-soft dark:text-night-soft text-[15px]">
+                New to Testkart?{" "}
+              </Text>
+              <Link href="/signup" asChild>
+                <TouchableOpacity>
+                  <Text className="text-primary-deep dark:text-primary font-bold text-[15px]">
+                    Create an account
+                  </Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

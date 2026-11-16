@@ -1,5 +1,5 @@
 import BottomTabs from "@/components/BottomTabs";
-import Header from "@/components/Header";
+import StoreHeader from "@/components/StoreHeader";
 import LiveTestCard from "@/components/LiveTestCard";
 import Feather from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
@@ -253,43 +253,33 @@ const LiveTests = () => {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-900"
+      className="flex-1 bg-paper dark:bg-night"
     >
-      <Header />
+      <StoreHeader />
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        className="bg-white dark:bg-slate-900"
+        className="bg-paper dark:bg-night"
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero Text Section */}
-        <View className="px-6 pt-6 pb-4">
-          <Text className="text-3xl font-extrabold text-slate-800 dark:text-white leading-9">
-            Live Competitive Tests
-          </Text>
-          <Text className="text-slate-500 dark:text-slate-400 mt-2 text-sm font-medium leading-5">
-            Experience the thrill of real exams. Compete with thousands of
-            students.
-          </Text>
-        </View>
-
+        <View className="h-4" />
         {/* Filter Card Container */}
         <View className="px-6">
-          <View className="bg-white dark:bg-slate-800 rounded-3xl p-4 shadow-sm border border-gray-100 dark:border-slate-800">
+          <View className="bg-white dark:bg-night-raised rounded-3xl p-4 shadow-sm border border-line dark:border-night-line">
             {/* Search Input */}
-            <View className="flex-row items-center bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-700 rounded-2xl px-4 h-12 mb-3">
+            <View className="flex-row items-center bg-sand dark:bg-night/50 border border-line dark:border-night-line rounded-2xl px-4 h-12 mb-3">
               <Feather
                 name="search"
                 size={18}
-                color={colorScheme === "dark" ? "#64748b" : "#94a3b8"}
+                color={colorScheme === "dark" ? "#6E5D66" : "#9A8A93"}
               />
               <TextInput
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 placeholder="Search tests..."
                 placeholderTextColor={
-                  colorScheme === "dark" ? "#64748b" : "#94a3b8"
+                  colorScheme === "dark" ? "#6E5D66" : "#9A8A93"
                 }
-                className="flex-1 ml-3 text-slate-900 dark:text-white text-sm font-semibold"
+                className="flex-1 ml-3 text-ink dark:text-white text-sm font-semibold"
               />
             </View>
 
@@ -297,7 +287,7 @@ const LiveTests = () => {
               {/* Exam Selector */}
               <TouchableOpacity
                 onPress={() => setShowExamModal(true)}
-                className="flex-[1.8] flex-row items-center justify-between bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-700 rounded-2xl px-4 h-12"
+                className="flex-[1.8] flex-row items-center justify-between bg-sand dark:bg-night/50 border border-line dark:border-night-line rounded-2xl px-4 h-12"
               >
                 <View className="flex-row items-center flex-1 mr-2">
                   <Feather
@@ -308,7 +298,7 @@ const LiveTests = () => {
                   />
                   <Text
                     numberOfLines={1}
-                    className={`text-[13px] font-bold flex-1 ${selectedExam ? "text-slate-800 dark:text-white" : "text-slate-400 dark:text-slate-500"}`}
+                    className={`text-[13px] font-bold flex-1 ${selectedExam ? "text-ink dark:text-white" : "text-ink-soft dark:text-night-soft"}`}
                   >
                     {selectedExam
                       ? selectedExam.fullName || selectedExam.examName
@@ -321,7 +311,7 @@ const LiveTests = () => {
               {/* Status Filter */}
               <TouchableOpacity
                 onPress={() => setShowStatusModal(true)}
-                className="flex-1 flex-row items-center justify-between bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-700 rounded-2xl px-4 h-12"
+                className="flex-1 flex-row items-center justify-between bg-sand dark:bg-night/50 border border-line dark:border-night-line rounded-2xl px-4 h-12"
               >
                 <View className="flex-row items-center flex-1 mr-2">
                   <Feather
@@ -332,7 +322,7 @@ const LiveTests = () => {
                   />
                   <Text
                     numberOfLines={1}
-                    className="text-[13px] font-bold text-slate-800 dark:text-white flex-1"
+                    className="text-[13px] font-bold text-ink dark:text-white flex-1"
                   >
                     {statusFilter}
                   </Text>
@@ -348,7 +338,7 @@ const LiveTests = () => {
           {loading || loadingTests ? (
             <View className="items-center justify-center py-20">
               <ActivityIndicator size="large" color="#FF8A50" />
-              <Text className="mt-4 text-slate-500 dark:text-slate-400 font-bold">
+              <Text className="mt-4 text-ink-soft dark:text-night-soft font-bold">
                 Finding best tests for you...
               </Text>
             </View>
@@ -363,7 +353,7 @@ const LiveTests = () => {
                   setError(null);
                   setReloadKey((key) => key + 1);
                 }}
-                className="bg-primary px-8 py-3 rounded-2xl"
+                className="bg-primary-deep px-8 py-3 rounded-2xl"
               >
                 <Text className="text-white font-bold">Retry</Text>
               </TouchableOpacity>
@@ -380,17 +370,17 @@ const LiveTests = () => {
             </View>
           ) : (
             <View className="items-center justify-center py-20">
-              <View className="w-24 h-24 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mb-6">
+              <View className="w-24 h-24 bg-sand dark:bg-night-raised rounded-full items-center justify-center mb-6">
                 <Feather
                   name="search"
                   size={48}
-                  color={colorScheme === "dark" ? "#475569" : "#cbd5e1"}
+                  color={colorScheme === "dark" ? "#6A6358" : "#B5AEA3"}
                 />
               </View>
-              <Text className="text-2xl font-black text-slate-800 dark:text-white mb-3 text-center">
+              <Text className="w-full text-2xl font-extrabold text-ink dark:text-white mb-3 text-center">
                 No Live Tests Found
               </Text>
-              <Text className="text-slate-500 dark:text-slate-400 text-center text-lg font-medium leading-7">
+              <Text className="text-ink-soft dark:text-night-soft text-center text-lg font-medium leading-7">
                 {selectedExam
                   ? `We couldn't find any live tests for ${selectedExam.fullName || selectedExam.examName}.`
                   : "There are no live tests matching your criteria at the moment."}
@@ -432,7 +422,7 @@ const LiveTests = () => {
 
           <View
             style={{
-              backgroundColor: colorScheme === "dark" ? "#1e293b" : "white",
+              backgroundColor: colorScheme === "dark" ? "#231B26" : "white",
               borderRadius: 24,
               width: "100%",
               maxHeight: "80%",
@@ -453,7 +443,7 @@ const LiveTests = () => {
                   padding: 20,
                   borderBottomWidth: 1,
                   borderBottomColor:
-                    colorScheme === "dark" ? "#334155" : "#f1f5f9",
+                    colorScheme === "dark" ? "#3A3731" : "#EFE8DD",
                   flexDirection: "row",
                   justifyContent: "space-between",
                   alignItems: "center",
@@ -466,8 +456,8 @@ const LiveTests = () => {
                     color: !selectedExam
                       ? "#FF8A50"
                       : colorScheme === "dark"
-                        ? "#cbd5e1"
-                        : "#334155",
+                        ? "#B5AEA3"
+                        : "#3A3731",
                   }}
                 >
                   All Exams
@@ -491,7 +481,7 @@ const LiveTests = () => {
                         padding: 20,
                         borderBottomWidth: 1,
                         borderBottomColor:
-                          colorScheme === "dark" ? "#334155" : "#f1f5f9",
+                          colorScheme === "dark" ? "#3A3731" : "#EFE8DD",
                         flexDirection: "row",
                         justifyContent: "space-between",
                         alignItems: "center",
@@ -506,8 +496,8 @@ const LiveTests = () => {
                               selectedExam?.id === exam.id
                                 ? "#FF8A50"
                                 : colorScheme === "dark"
-                                  ? "#cbd5e1"
-                                  : "#334155",
+                                  ? "#B5AEA3"
+                                  : "#3A3731",
                           }}
                         >
                           {exam.fullName || exam.examName}
@@ -554,7 +544,7 @@ const LiveTests = () => {
 
           <View
             style={{
-              backgroundColor: colorScheme === "dark" ? "#1e293b" : "white",
+              backgroundColor: colorScheme === "dark" ? "#231B26" : "white",
               borderRadius: 24,
               width: "100%",
               maxHeight: "40%",
@@ -573,15 +563,15 @@ const LiveTests = () => {
                     padding: 20,
                     borderBottomWidth: 1,
                     borderBottomColor:
-                      colorScheme === "dark" ? "#334155" : "#f1f5f9",
+                      colorScheme === "dark" ? "#3A3731" : "#EFE8DD",
                     flexDirection: "row",
                     justifyContent: "space-between",
                     alignItems: "center",
                     backgroundColor:
                       statusFilter === status
                         ? colorScheme === "dark"
-                          ? "#334155"
-                          : "#f8fafc"
+                          ? "#3A3731"
+                          : "#F8F5EF"
                         : "transparent",
                   }}
                 >
@@ -593,8 +583,8 @@ const LiveTests = () => {
                         statusFilter === status
                           ? "#FF8A50"
                           : colorScheme === "dark"
-                            ? "#cbd5e1"
-                            : "#334155",
+                            ? "#B5AEA3"
+                            : "#3A3731",
                     }}
                   >
                     {status}

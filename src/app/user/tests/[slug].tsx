@@ -19,7 +19,7 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useAuth } from "@/context/AuthContext";
-import Header from "@/components/Header";
+import DetailHeader from "@/components/DetailHeader";
 import { EnrolledTest } from "../types";
 import Placeholder from "@/constants/placeholder";
 import * as SecureStore from "expo-secure-store";
@@ -197,7 +197,7 @@ const EnrolledTestDetails = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-white dark:bg-slate-950 items-center justify-center">
+      <View className="flex-1 bg-paper dark:bg-night items-center justify-center">
         <ActivityIndicator size="large" color="#FF8A50" />
       </View>
     );
@@ -205,24 +205,24 @@ const EnrolledTestDetails = () => {
 
   if (error || !test) {
     return (
-      <SafeAreaView className="flex-1 bg-white dark:bg-slate-950 px-6">
+      <SafeAreaView className="flex-1 bg-paper dark:bg-night px-6">
         <TouchableOpacity onPress={() => router.back()} className="mt-4 mb-8">
           <Feather
-            name="arrow-left"
+            name="chevron-left"
             size={24}
             color={colorScheme === "dark" ? "white" : "black"}
           />
         </TouchableOpacity>
         <View className="items-center justify-center pt-20">
           <Feather name="alert-circle" size={48} color="#FF6B6B" />
-          <Text className="text-xl font-black text-slate-800 dark:text-white mt-4 text-center">
+          <Text className="w-full text-xl font-extrabold text-ink dark:text-white mt-4 text-center">
             {error || "Oops! Test not found."}
           </Text>
           <TouchableOpacity
             onPress={() => router.back()}
-            className="mt-6 bg-primary px-8 py-3 rounded-2xl"
+            className="mt-6 bg-primary-deep px-8 py-3 rounded-2xl"
           >
-            <Text className="text-white font-black">Go Back</Text>
+            <Text className="text-white font-extrabold">Go Back</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -244,12 +244,12 @@ const EnrolledTestDetails = () => {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-950"
+      className="flex-1 bg-paper dark:bg-night"
     >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
-      <Header />
+      <DetailHeader title="Test series" />
 
       <ScrollView
         className="flex-1"
@@ -259,25 +259,15 @@ const EnrolledTestDetails = () => {
         {/* Compact Header Section */}
         <View className="px-6 pt-4 mb-6">
           <View className="flex-row items-center mb-4">
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="w-10 h-10 bg-gray-50 dark:bg-slate-900 rounded-full items-center justify-center border border-gray-100 dark:border-slate-800"
-            >
-              <Feather
-                name="arrow-left"
-                size={20}
-                color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
-              />
-            </TouchableOpacity>
-            <View className="flex-shrink ml-3 bg-orange-100/80 dark:bg-orange-900/40 px-3 py-2 rounded-2xl border border-orange-200/50 dark:border-orange-900/30">
-              <Text className="text-primary font-black text-[10px] uppercase tracking-wider leading-4">
+            <View className="flex-shrink bg-clay-tint dark:bg-night-raised px-3 py-1.5 rounded-full">
+              <Text className="text-primary-deep dark:text-primary font-extrabold text-[10px] uppercase tracking-wider leading-4">
                 {test.examName || "Mock Test"}
               </Text>
             </View>
           </View>
 
-          <View className="flex-row items-center bg-gray-50/50 dark:bg-slate-900/50 p-4 rounded-[32px] border border-gray-100 dark:border-slate-800">
-            <View className="w-20 h-20 rounded-2xl overflow-hidden mr-4 shadow-sm">
+          <View className="flex-row items-center bg-sand/50 dark:bg-night p-4 rounded-[32px] border border-line dark:border-night-line">
+            <View className="w-28 aspect-video rounded-xl overflow-hidden mr-4 bg-sand dark:bg-night-raised">
               <Image
                 source={{ uri: displayThumbnail }}
                 className="w-full h-full"
@@ -286,12 +276,12 @@ const EnrolledTestDetails = () => {
             </View>
             <View className="flex-1">
               <Text
-                className="text-xl font-black text-slate-800 dark:text-white leading-tight mb-1"
+                className="text-xl font-extrabold text-ink dark:text-white leading-tight mb-1"
                 numberOfLines={2}
               >
                 {test.title}
               </Text>
-              <Text className="text-slate-400 dark:text-slate-500 font-bold text-xs uppercase tracking-tight">
+              <Text className="text-ink-soft dark:text-night-soft font-bold text-xs uppercase tracking-tight">
                 Enrolled on:{" "}
                 {test.enrolledAt
                   ? new Date(test.enrolledAt).toLocaleDateString("en-US", {
@@ -306,9 +296,9 @@ const EnrolledTestDetails = () => {
                   onPress={() => setIsReviewModalVisible(true)}
                   className="mt-2 flex-row items-center self-start"
                 >
-                  <View className="bg-orange-500/10 dark:bg-orange-500/20 px-3 py-1.5 rounded-full flex-row items-center border border-orange-500/20">
+                  <View className="bg-orange-500/10 dark:bg-night-raised px-3 py-1.5 rounded-full flex-row items-center border border-orange-500/20">
                     <Feather name="star" size={12} color="#FF8A50" />
-                    <Text className="text-primary font-black ml-1.5 text-[10px] uppercase tracking-wider">
+                    <Text className="text-primary-deep dark:text-primary font-extrabold ml-1.5 text-[10px] uppercase tracking-wider">
                       Write Review
                     </Text>
                   </View>
@@ -318,7 +308,7 @@ const EnrolledTestDetails = () => {
                 <View className="mt-2 flex-row items-center self-start">
                   <View className="bg-green-500/10 dark:bg-green-500/20 px-3 py-1.5 rounded-full flex-row items-center border border-green-500/20">
                     <Feather name="check" size={12} color="#10B981" />
-                    <Text className="text-green-600 dark:text-green-400 font-black ml-1.5 text-[10px] uppercase tracking-wider">
+                    <Text className="text-green-600 dark:text-green-400 font-extrabold ml-1.5 text-[10px] uppercase tracking-wider">
                       Review Submitted
                     </Text>
                   </View>
@@ -330,24 +320,24 @@ const EnrolledTestDetails = () => {
 
         {/* Compact Stats Row */}
         <View className="px-6 mb-8">
-          <View className="flex-row items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm">
+          <View className="flex-row items-center justify-between bg-white dark:bg-night p-4 rounded-3xl border border-line dark:border-night-line shadow-sm">
             <View className="items-center flex-1">
               <View className="flex-row items-center mb-0.5">
                 <Ionicons
                   name="list"
                   size={12}
-                  color="#94A3B8"
+                  color="#968E82"
                   className="mr-1"
                 />
-                <Text className="text-slate-800 dark:text-white font-black text-base">
+                <Text className="text-ink dark:text-white font-extrabold text-base">
                   {test.totalItems || 0}
                 </Text>
               </View>
-              <Text className="text-slate-400 font-bold text-[8px] uppercase tracking-widest">
+              <Text className="text-ink-soft font-bold text-[8px] uppercase tracking-widest">
                 Tests
               </Text>
             </View>
-            <View className="w-[1px] h-6 bg-gray-100 dark:bg-slate-800" />
+            <View className="w-[1px] h-6 bg-sand dark:bg-night-raised" />
             <View className="items-center flex-1">
               <View className="flex-row items-center mb-0.5">
                 <Ionicons
@@ -356,15 +346,15 @@ const EnrolledTestDetails = () => {
                   color="#10B981"
                   className="mr-1"
                 />
-                <Text className="text-slate-800 dark:text-white font-black text-base">
+                <Text className="text-ink dark:text-white font-extrabold text-base">
                   {test.completedItems || 0}
                 </Text>
               </View>
-              <Text className="text-slate-400 font-bold text-[8px] uppercase tracking-widest">
+              <Text className="text-ink-soft font-bold text-[8px] uppercase tracking-widest">
                 Done
               </Text>
             </View>
-            <View className="w-[1px] h-6 bg-gray-100 dark:bg-slate-800" />
+            <View className="w-[1px] h-6 bg-sand dark:bg-night-raised" />
             <View className="items-center flex-1">
               <View className="flex-row items-center mb-0.5">
                 <Ionicons
@@ -373,11 +363,11 @@ const EnrolledTestDetails = () => {
                   color="#FF8A50"
                   className="mr-1"
                 />
-                <Text className="text-slate-800 dark:text-white font-black text-base">
+                <Text className="text-ink dark:text-white font-extrabold text-base">
                   {formatScore(packageAverageScore)}
                 </Text>
               </View>
-              <Text className="text-slate-400 font-bold text-[8px] uppercase tracking-widest">
+              <Text className="text-ink-soft font-bold text-[8px] uppercase tracking-widest">
                 Avg Score
               </Text>
             </View>
@@ -387,10 +377,10 @@ const EnrolledTestDetails = () => {
         {/* Test Items List */}
         <View className="px-6">
           <View className="flex-row items-center mb-4 pl-1">
-            <Text className="text-lg font-black text-slate-800 dark:text-white">
+            <Text className="text-lg font-extrabold text-ink dark:text-white">
               Included Tests
             </Text>
-            <View className="ml-3 flex-1 h-[1px] bg-gray-100 dark:bg-slate-800" />
+            <View className="ml-3 flex-1 h-[1px] bg-sand dark:bg-night-raised" />
           </View>
 
           {test.testItems && test.testItems.length > 0 ? (
@@ -409,70 +399,70 @@ const EnrolledTestDetails = () => {
               return (
                 <View
                   key={item.id}
-                  className="bg-white dark:bg-slate-900 p-4 rounded-[32px] mb-4 border border-gray-100 dark:border-slate-800 shadow-sm"
+                  className="bg-white dark:bg-night p-4 rounded-[32px] mb-4 border border-line dark:border-night-line shadow-sm"
                 >
                   <View className="flex-row items-center justify-between mb-3">
                     <View className="flex-1 mr-3">
                       <Text
-                        className="text-slate-800 dark:text-white font-black text-base mb-1"
+                        className="text-ink dark:text-white font-extrabold text-base mb-1"
                         numberOfLines={1}
                       >
                         {item.title}
                       </Text>
                       <View className="flex-row items-center flex-wrap">
                         {!isScheduled && (
-                          <Text className="text-slate-400 font-bold text-[10px] uppercase">
+                          <Text className="text-ink-soft font-bold text-[10px] uppercase">
                             {item.totalQuestions} Questions
                           </Text>
                         )}
                         {!isScheduled && (
-                          <View className="mx-2 w-1 h-1 rounded-full bg-slate-300" />
+                          <View className="mx-2 w-1 h-1 rounded-full bg-line" />
                         )}
                         {(!isScheduled || item.durationMinutes > 0) && (
-                          <Text className="text-slate-400 font-bold text-[10px] uppercase">
+                          <Text className="text-ink-soft font-bold text-[10px] uppercase">
                             {item.durationMinutes} Min
                           </Text>
                         )}
                         {opensLabel && (
                           <View className="flex-row items-center">
                             {item.durationMinutes > 0 && (
-                              <View className="mx-2 w-1 h-1 rounded-full bg-slate-300" />
+                              <View className="mx-2 w-1 h-1 rounded-full bg-line" />
                             )}
                             <Feather
                               name="calendar"
                               size={11}
                               color="#FF8A50"
                             />
-                            <Text className="text-primary font-bold text-[10px] uppercase ml-1">
+                            <Text className="text-primary-deep dark:text-primary font-bold text-[10px] uppercase ml-1">
                               {opensLabel}
                             </Text>
                           </View>
                         )}
                       </View>
                       {(item.attemptsCount || 0) > 0 && (
-                        <Text className="text-slate-500 dark:text-slate-400 font-bold text-xs mt-1">
+                        <Text className="text-ink-soft dark:text-night-soft font-bold text-xs mt-1">
                           Best Score:{" "}
-                          <Text className="text-primary">
+                          <Text className="text-primary-deep dark:text-primary">
                             {formatScore(item.bestScore)}
                           </Text>
                         </Text>
                       )}
                     </View>
                     <View
-                      className={`px-3 py-1 rounded-xl ${item.isCompleted ? "bg-green-50 dark:bg-green-900/20" : status === "Scheduled" ? "bg-slate-100 dark:bg-slate-800" : "bg-orange-50 dark:bg-orange-900/20"}`}
+                      className={`px-3 py-1 rounded-xl ${item.isCompleted ? "bg-green-50 dark:bg-green-900/20" : status === "Scheduled" ? "bg-sand dark:bg-night-raised" : "bg-clay-tint dark:bg-night-raised"}`}
                     >
                       <Text
-                        className={`font-black text-[9px] uppercase tracking-wider ${item.isCompleted ? "text-green-600 dark:text-green-400" : status === "Scheduled" ? "text-slate-600 dark:text-slate-300" : "text-primary"}`}
+                        className={`font-extrabold text-[9px] uppercase tracking-wider ${item.isCompleted ? "text-green-600 dark:text-green-400" : status === "Scheduled" ? "text-ink-soft dark:text-night-soft" : "text-primary-deep dark:text-primary"}`}
                       >
                         {status}
                       </Text>
                     </View>
                   </View>
 
-                  <View className="flex-row items-center justify-between pt-3 border-t border-gray-50 dark:border-slate-800/50">
+                  <View className="flex-row items-center justify-between pt-3 border-t border-line dark:border-night-line">
                     <View className="flex-row items-center">
-                      <Feather name="repeat" size={14} color="#94A3B8" />
-                      <Text className="text-slate-500 font-bold text-xs ml-1.5">
+                      <Feather name="repeat" size={14} color="#968E82" />
+                      <Text className="text-ink-soft font-bold text-xs ml-1.5">
                         {item.attemptsCount || 0} Attempts
                       </Text>
                     </View>
@@ -492,13 +482,13 @@ const EnrolledTestDetails = () => {
                             }
                             className="bg-emerald-500 px-4 py-2.5 rounded-2xl shadow-sm"
                           >
-                            <Text className="text-white font-black text-xs">
+                            <Text className="text-white font-extrabold text-xs">
                               See Result
                             </Text>
                           </TouchableOpacity>
                         )}
-                        <View className="bg-slate-200 dark:bg-slate-700 px-4 py-2.5 rounded-2xl">
-                          <Text className="text-slate-600 dark:text-slate-200 font-black text-xs">
+                        <View className="bg-line dark:bg-night-line px-4 py-2.5 rounded-2xl">
+                          <Text className="text-ink-soft dark:text-night-soft font-extrabold text-xs">
                             {opensLabel}
                           </Text>
                         </View>
@@ -517,7 +507,7 @@ const EnrolledTestDetails = () => {
                           }
                           className="bg-emerald-500 px-4 py-2.5 rounded-2xl shadow-sm"
                         >
-                          <Text className="text-white font-black text-xs">
+                          <Text className="text-white font-extrabold text-xs">
                             See Result
                           </Text>
                         </TouchableOpacity>
@@ -529,9 +519,9 @@ const EnrolledTestDetails = () => {
                               params: { slug: String(item.id) },
                             })
                           }
-                          className="bg-primary px-4 py-2.5 rounded-2xl shadow-sm"
+                          className="bg-primary-deep px-4 py-2.5 rounded-2xl shadow-sm"
                         >
-                          <Text className="text-white font-black text-xs">
+                          <Text className="text-white font-extrabold text-xs">
                             Retake
                           </Text>
                         </TouchableOpacity>
@@ -544,9 +534,9 @@ const EnrolledTestDetails = () => {
                             params: { slug: String(item.id) },
                           })
                         }
-                        className="bg-primary px-5 py-2.5 rounded-2xl shadow-sm"
+                        className="bg-primary-deep px-5 py-2.5 rounded-2xl shadow-sm"
                       >
-                        <Text className="text-white font-black text-xs">
+                        <Text className="text-white font-extrabold text-xs">
                           View Details
                         </Text>
                       </TouchableOpacity>
@@ -556,9 +546,9 @@ const EnrolledTestDetails = () => {
               );
             })
           ) : (
-            <View className="items-center justify-center py-16 bg-gray-50 dark:bg-slate-900 rounded-[32px] border border-dashed border-gray-200 dark:border-slate-800">
-              <Feather name="file-text" size={32} color="#cbd5e1" />
-              <Text className="text-slate-450 font-bold mt-3 text-center px-10 text-xs">
+            <View className="items-center justify-center py-16 bg-sand dark:bg-night rounded-[32px] border border-dashed border-line dark:border-night-line">
+              <Feather name="file-text" size={32} color="#B5AEA3" />
+              <Text className="text-ink-soft font-bold mt-3 text-center px-10 text-xs">
                 No tests available in this package currently
               </Text>
             </View>
@@ -574,18 +564,18 @@ const EnrolledTestDetails = () => {
         onRequestClose={() => setIsReviewModalVisible(false)}
       >
         <View className="flex-1 bg-black/60 items-center justify-center px-6">
-          <View className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[44px] p-8 border border-gray-100 dark:border-slate-800 shadow-2xl relative overflow-hidden">
+          <View className="bg-white dark:bg-night w-full max-w-sm rounded-[44px] p-8 border border-line dark:border-night-line shadow-2xl relative overflow-hidden">
             {/* Design Element */}
-            <View className="absolute top-0 right-0 w-24 h-24 bg-orange-50 dark:bg-orange-950/20 rounded-bl-full opacity-60" />
+            <View className="absolute top-0 right-0 w-24 h-24 bg-clay-tint dark:bg-night-raised rounded-bl-full opacity-60" />
 
             <View className="items-center mb-4 mt-2">
-              <View className="w-14 h-14 bg-orange-500/10 dark:bg-orange-500/20 rounded-full items-center justify-center mb-5">
+              <View className="w-14 h-14 bg-orange-500/10 dark:bg-night-raised rounded-full items-center justify-center mb-5">
                 <Feather name="star" size={28} color="#FF8A50" />
               </View>
-              <Text className="text-xl font-black text-slate-800 dark:text-white text-center">
+              <Text className="w-full text-xl font-extrabold text-ink dark:text-white text-center">
                 Rate this Package
               </Text>
-              <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold text-center mt-2 px-4 leading-5">
+              <Text className="text-ink-soft dark:text-night-soft text-sm font-bold text-center mt-2 px-4 leading-5">
                 Share your journey to help other students grow
               </Text>
             </View>
@@ -609,19 +599,19 @@ const EnrolledTestDetails = () => {
 
             {/* Review Text */}
             <View className="mb-8">
-              <Text className="text-slate-500 dark:text-slate-400 font-black mb-3 text-[10px] uppercase tracking-[2px]">
+              <Text className="text-ink-soft dark:text-night-soft font-extrabold mb-3 text-[10px] uppercase tracking-[2px]">
                 Your Review
               </Text>
               <TextInput
                 placeholder="Tell us what you liked or how we can improve..."
                 placeholderTextColor={
-                  colorScheme === "dark" ? "#475569" : "#94a3b8"
+                  colorScheme === "dark" ? "#6A6358" : "#968E82"
                 }
                 multiline
                 numberOfLines={4}
                 value={reviewText}
                 onChangeText={setReviewText}
-                className="border border-gray-100 dark:border-slate-800 rounded-3xl p-5 text-slate-900 dark:text-white text-base bg-gray-50/50 dark:bg-slate-950/50 h-28 font-bold"
+                className="border border-line dark:border-night-line rounded-3xl p-5 text-ink dark:text-white text-base bg-sand/50 dark:bg-night h-28 font-bold"
                 style={{ textAlignVertical: "top" }}
               />
             </View>
@@ -630,9 +620,9 @@ const EnrolledTestDetails = () => {
             <View className="flex-row items-center gap-x-3">
               <TouchableOpacity
                 onPress={() => setIsReviewModalVisible(false)}
-                className="flex-1 h-12 items-center justify-center rounded-2xl border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800"
+                className="flex-1 h-12 items-center justify-center rounded-2xl border border-line dark:border-night-line bg-sand dark:bg-night-raised"
               >
-                <Text className="text-slate-500 dark:text-slate-400 font-black text-sm">
+                <Text className="text-ink-soft dark:text-night-soft font-extrabold text-sm">
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -640,13 +630,13 @@ const EnrolledTestDetails = () => {
               <TouchableOpacity
                 onPress={handleReviewSubmit}
                 disabled={submittingReview || rating === 0}
-                className={`flex-[2] h-12 items-center justify-center rounded-2xl shadow-lg ${rating === 0 ? "bg-slate-200 dark:bg-slate-800 shadow-none" : "bg-primary shadow-primary/30"}`}
+                className={`flex-[2] h-12 items-center justify-center rounded-2xl shadow-lg ${rating === 0 ? "bg-line dark:bg-night-raised shadow-none" : "bg-primary-deep shadow-primary/30"}`}
               >
                 {submittingReview ? (
                   <ActivityIndicator color="white" size="small" />
                 ) : (
                   <Text
-                    className={`font-black text-base ${rating === 0 ? "text-slate-400" : "text-white"}`}
+                    className={`font-extrabold text-base ${rating === 0 ? "text-ink-soft" : "text-white"}`}
                   >
                     Submit Review
                   </Text>
@@ -660,7 +650,7 @@ const EnrolledTestDetails = () => {
       {/* Success Modal */}
       <Modal visible={showSuccessReviewModal} transparent animationType="fade">
         <View className="flex-1 bg-black/60 items-center justify-center px-6">
-          <View className="bg-white dark:bg-slate-900 w-full max-w-xs rounded-[44px] p-8 border border-gray-100 dark:border-slate-800 shadow-2xl items-center">
+          <View className="bg-white dark:bg-night w-full max-w-xs rounded-[44px] p-8 border border-line dark:border-night-line shadow-2xl items-center">
             {/* Design Element */}
             <View className="absolute top-0 right-0 w-20 h-20 bg-emerald-50 dark:bg-emerald-950/20 rounded-bl-full opacity-60" />
 
@@ -668,11 +658,11 @@ const EnrolledTestDetails = () => {
               <Feather name="check" size={40} color="#10B981" />
             </View>
 
-            <Text className="text-2xl font-black text-slate-800 dark:text-white text-center">
+            <Text className="w-full text-2xl font-extrabold text-ink dark:text-white text-center">
               Thank You!
             </Text>
 
-            <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold text-center mt-3 mb-8 leading-5">
+            <Text className="text-ink-soft dark:text-night-soft text-sm font-bold text-center mt-3 mb-8 leading-5">
               Your valuable review has been{"\n"}submitted successfully.
             </Text>
 
@@ -680,7 +670,7 @@ const EnrolledTestDetails = () => {
               onPress={() => setShowSuccessReviewModal(false)}
               className="w-full bg-emerald-500 h-14 items-center justify-center rounded-[24px] shadow-lg shadow-emerald-500/30"
             >
-              <Text className="text-white font-black text-lg">Continue</Text>
+              <Text className="text-white font-extrabold text-lg">Continue</Text>
             </TouchableOpacity>
           </View>
         </View>

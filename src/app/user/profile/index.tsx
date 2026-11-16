@@ -1,4 +1,4 @@
-import Header from "@/components/Header";
+import DetailHeader from "@/components/DetailHeader";
 import { useAuth } from "@/context/AuthContext";
 import Feather from "@react-native-vector-icons/feather";
 import * as Application from "expo-application";
@@ -157,12 +157,12 @@ export default function ProfileEditScreen() {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-950"
+      className="flex-1 bg-paper dark:bg-night"
     >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
-      <Header />
+      <DetailHeader title="Edit profile" />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -176,24 +176,24 @@ export default function ProfileEditScreen() {
         >
           {/* Avatar Section */}
           <View className="items-center pt-8 pb-6">
-            <View className="w-28 h-28 rounded-full bg-primary/10 border-4 border-white dark:border-slate-800 shadow-xl items-center justify-center overflow-hidden">
+            <View className="w-28 h-28 rounded-full bg-primary/10 border-4 border-white dark:border-night-line shadow-xl items-center justify-center overflow-hidden">
               {user.avatarUrl ? (
                 <Image
                   source={{ uri: user.avatarUrl }}
                   className="w-full h-full"
                 />
               ) : (
-                <Text className="text-5xl font-black text-primary">
+                <Text className="text-5xl font-extrabold text-primary-deep dark:text-primary">
                   {user.displayName?.charAt(0).toUpperCase() || "P"}
                 </Text>
               )}
             </View>
-            <Text className="text-2xl font-black text-slate-800 dark:text-white mt-4">
+            <Text className="text-2xl font-extrabold text-ink dark:text-white mt-4">
               {user.displayName || "User"}
             </Text>
             {user.role && (
               <View className="bg-primary/10 px-4 py-1.5 rounded-full mt-2">
-                <Text className="text-primary font-bold text-xs uppercase tracking-widest">
+                <Text className="text-primary-deep dark:text-primary font-bold text-xs uppercase tracking-widest">
                   {user.role}
                 </Text>
               </View>
@@ -202,14 +202,14 @@ export default function ProfileEditScreen() {
 
           {/* Editable Fields */}
           <View className="px-6">
-            <Text className="text-lg font-black text-slate-800 dark:text-white mb-4">
+            <Text className="text-lg font-extrabold text-ink dark:text-white mb-4">
               Edit Profile
             </Text>
 
-            <View className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-5 mb-6">
+            <View className="bg-white dark:bg-night rounded-2xl border border-line dark:border-night-line p-5 mb-6">
               {/* Display Name */}
               <View className="mb-5">
-                <Text className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-2">
+                <Text className="text-sm font-bold text-ink-soft dark:text-night-soft mb-2">
                   Display Name
                 </Text>
                 <TextInput
@@ -217,23 +217,23 @@ export default function ProfileEditScreen() {
                   onChangeText={setDisplayName}
                   placeholder="Enter your name"
                   placeholderTextColor={
-                    colorScheme === "dark" ? "#475569" : "#94a3b8"
+                    colorScheme === "dark" ? "#6A6358" : "#968E82"
                   }
-                  className="bg-gray-50 dark:bg-slate-800 rounded-xl px-4 py-3.5 text-slate-800 dark:text-white font-bold text-base border border-gray-200 dark:border-slate-700"
+                  className="bg-sand dark:bg-night-raised rounded-xl px-4 py-3.5 text-ink dark:text-white font-bold text-base border border-line dark:border-night-line"
                 />
               </View>
 
               {/* Bio */}
               <View>
                 <View className="flex-row items-center justify-between mb-2">
-                  <Text className="text-sm font-bold text-slate-500 dark:text-slate-400">
+                  <Text className="text-sm font-bold text-ink-soft dark:text-night-soft">
                     Bio
                   </Text>
                   <Text
                     className={`text-xs font-bold ${
                       bio.length > 500
                         ? "text-red-500"
-                        : "text-slate-400 dark:text-slate-500"
+                        : "text-ink-soft dark:text-night-soft"
                     }`}
                   >
                     {bio.length}/500
@@ -244,12 +244,12 @@ export default function ProfileEditScreen() {
                   onChangeText={setBio}
                   placeholder="Tell us about yourself..."
                   placeholderTextColor={
-                    colorScheme === "dark" ? "#475569" : "#94a3b8"
+                    colorScheme === "dark" ? "#6A6358" : "#968E82"
                   }
                   multiline
                   numberOfLines={4}
                   textAlignVertical="top"
-                  className="bg-gray-50 dark:bg-slate-800 rounded-xl px-4 py-3.5 text-slate-800 dark:text-white font-bold text-base border border-gray-200 dark:border-slate-700 min-h-[120px]"
+                  className="bg-sand dark:bg-night-raised rounded-xl px-4 py-3.5 text-ink dark:text-white font-bold text-base border border-line dark:border-night-line min-h-[120px]"
                 />
               </View>
             </View>
@@ -260,18 +260,18 @@ export default function ProfileEditScreen() {
               disabled={!hasChanges || saving}
               className={`rounded-2xl py-4 items-center mb-8 ${
                 hasChanges && !saving
-                  ? "bg-primary"
-                  : "bg-gray-200 dark:bg-slate-800"
+                  ? "bg-primary-deep"
+                  : "bg-line dark:bg-night-raised"
               }`}
             >
               {saving ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
                 <Text
-                  className={`font-black text-base ${
+                  className={`font-extrabold text-base ${
                     hasChanges
                       ? "text-white"
-                      : "text-slate-400 dark:text-slate-500"
+                      : "text-ink-soft dark:text-night-soft"
                   }`}
                 >
                   Save Changes
@@ -280,27 +280,27 @@ export default function ProfileEditScreen() {
             </TouchableOpacity>
 
             {/* Account Info (Read-Only) */}
-            <Text className="text-lg font-black text-slate-800 dark:text-white mb-4">
+            <Text className="text-lg font-extrabold text-ink dark:text-white mb-4">
               Account Info
             </Text>
 
-            <View className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden mb-6">
+            <View className="bg-white dark:bg-night rounded-2xl border border-line dark:border-night-line overflow-hidden mb-6">
               {user.email && (
-                <View className="flex-row items-center p-5 border-b border-gray-50 dark:border-slate-800">
-                  <View className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 items-center justify-center mr-4">
-                    <Feather name="mail" size={18} color="#3B82F6" />
+                <View className="flex-row items-center p-5 border-b border-line dark:border-night-line">
+                  <View className="w-10 h-10 rounded-xl bg-sky-tint dark:bg-night-raised items-center justify-center mr-4">
+                    <Feather name="mail" size={18} color="#3F6577" />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">
+                    <Text className="text-xs font-bold text-ink-soft dark:text-night-soft uppercase tracking-widest mb-0.5">
                       Email
                     </Text>
                     <Text
-                      className="text-slate-700 dark:text-slate-200 font-bold text-[15px]"
+                      className="text-ink dark:text-night-soft font-bold text-[15px]"
                       numberOfLines={1}
                     >
                       {user.email}
                     </Text>
-                    <Text className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                    <Text className="text-xs text-ink-soft dark:text-night-soft mt-1">
                       Your email address cannot be changed.
                     </Text>
                   </View>
@@ -311,14 +311,14 @@ export default function ProfileEditScreen() {
 
               {user.location && (
                 <View className="flex-row items-center p-5">
-                  <View className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/20 items-center justify-center mr-4">
-                    <Feather name="map-pin" size={18} color="#8B5CF6" />
+                  <View className="w-10 h-10 rounded-xl bg-sky-tint dark:bg-night-raised items-center justify-center mr-4">
+                    <Feather name="map-pin" size={18} color="#3F6577" />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">
+                    <Text className="text-xs font-bold text-ink-soft dark:text-night-soft uppercase tracking-widest mb-0.5">
                       Location
                     </Text>
-                    <Text className="text-slate-700 dark:text-slate-200 font-bold text-[15px]">
+                    <Text className="text-ink dark:text-night-soft font-bold text-[15px]">
                       {user.location}
                     </Text>
                   </View>
@@ -327,7 +327,7 @@ export default function ProfileEditScreen() {
             </View>
 
             {/* Close Account */}
-            <Text className="text-lg font-black text-slate-800 dark:text-white mb-4">
+            <Text className="text-lg font-extrabold text-ink dark:text-white mb-4">
               Danger Zone
             </Text>
 
@@ -339,10 +339,10 @@ export default function ProfileEditScreen() {
                 <Feather name="user-x" size={18} color="#EF4444" />
               </View>
               <View className="flex-1">
-                <Text className="text-red-500 font-black text-[15px]">
+                <Text className="text-red-500 font-extrabold text-[15px]">
                   Close Account
                 </Text>
-                <Text className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <Text className="text-xs text-ink-soft dark:text-night-soft mt-1">
                   Permanently delete your account and data on the web.
                 </Text>
               </View>

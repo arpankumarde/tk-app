@@ -1,7 +1,7 @@
 import type { LiveTest } from "@/app/(main)/live/index";
 import BundleCard from "@/components/BundleCard";
 import CourseCard from "@/components/CourseCard";
-import Header from "@/components/Header";
+import DetailHeader from "@/components/DetailHeader";
 import LiveTestCard from "@/components/LiveTestCard";
 import MockTestCard from "@/components/MockTestCard";
 import ProductCard from "@/components/ProductCard";
@@ -264,7 +264,7 @@ const ExpertDetails = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-white dark:bg-slate-900 items-center justify-center">
+      <View className="flex-1 bg-paper dark:bg-night items-center justify-center">
         <ActivityIndicator size="large" color="#FF8A50" />
       </View>
     );
@@ -272,13 +272,13 @@ const ExpertDetails = () => {
 
   if (!data?.teacher) {
     return (
-      <View className="flex-1 bg-white dark:bg-slate-900 items-center justify-center px-10">
-        <Text className="text-xl font-bold text-slate-800 dark:text-white mb-4 text-center">
+      <View className="flex-1 bg-paper dark:bg-night items-center justify-center px-10">
+        <Text className="w-full text-xl font-bold text-ink dark:text-white mb-4 text-center">
           Expert profile not found
         </Text>
         <TouchableOpacity
           onPress={() => router.back()}
-          className="bg-primary px-8 py-3 rounded-xl"
+          className="bg-primary-deep px-8 py-3 rounded-xl"
         >
           <Text className="text-white font-bold">Go Back</Text>
         </TouchableOpacity>
@@ -400,36 +400,26 @@ const ExpertDetails = () => {
   };
 
   return (
-    <View className="flex-1 bg-white dark:bg-slate-900">
+    <View className="flex-1 bg-paper dark:bg-night">
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
       <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
-        <Header />
+        <DetailHeader title="Teacher" onShare={handleShare} />
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 48 }}
         >
           {/* ── Hero Card ─────────────────────────────── */}
-          <View className="mx-5 mt-4 bg-white dark:bg-slate-800 rounded-[32px] overflow-hidden border border-gray-100 dark:border-slate-700 shadow-sm">
+          <View className="mx-5 mt-4 bg-white dark:bg-night-raised rounded-[32px] overflow-hidden border border-line dark:border-night-line shadow-sm">
             {/* Cover strip */}
-            <View className="h-20 bg-orange-500">
-              <TouchableOpacity
-                onPress={handleShare}
-                className="absolute right-5 top-4 w-11 h-11 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-white/70 dark:border-slate-600 items-center justify-center shadow-sm"
-              >
-                <Feather
-                  name="share-2"
-                  size={17}
-                  color={colorScheme === "dark" ? "#CBD5E1" : "#475569"}
-                />
-              </TouchableOpacity>
+            <View className="h-20 bg-sage-tint dark:bg-night-line">
             </View>
 
             <View className="px-5 pb-6">
               {/* Avatar */}
               <View className="-mt-10 mb-4">
-                <View className="w-20 h-20 rounded-[24px] border-4 border-white dark:border-slate-800 overflow-hidden bg-slate-100 dark:bg-slate-700 shadow-md">
+                <View className="w-20 h-20 rounded-[24px] border-4 border-white dark:border-night-line overflow-hidden bg-sand dark:bg-night-line shadow-md">
                   <Image
                     source={{
                       uri:
@@ -444,7 +434,7 @@ const ExpertDetails = () => {
 
               {/* Name & verified badge */}
               <View className="flex-row items-center mb-0.5">
-                <Text className="text-2xl font-black text-slate-800 dark:text-white mr-2">
+                <Text className="text-2xl font-extrabold text-ink dark:text-white mr-2">
                   {teacher.displayName}
                 </Text>
                 {teacher.isVerified && (
@@ -457,7 +447,7 @@ const ExpertDetails = () => {
                 (() => {
                   const exp = teacher.workExperiences[0];
                   return (
-                    <Text className="text-slate-500 dark:text-slate-400 text-sm font-semibold mb-1">
+                    <Text className="text-ink-soft dark:text-night-soft text-sm font-semibold mb-1">
                       {exp.position}
                       {!!exp.companyName && ` at ${exp.companyName}`}
                     </Text>
@@ -465,7 +455,7 @@ const ExpertDetails = () => {
                 })()}
 
               {!!teacher.tagline && (
-                <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-3">
+                <Text className="text-ink-soft dark:text-night-soft text-sm font-medium mb-3">
                   {teacher.tagline}
                 </Text>
               )}
@@ -473,16 +463,16 @@ const ExpertDetails = () => {
               <View className="flex-row flex-wrap" style={{ gap: 12 }}>
                 {!!teacher.location && (
                   <View className="flex-row items-center">
-                    <Feather name="map-pin" size={13} color="#94a3b8" />
-                    <Text className="ml-1 text-slate-500 dark:text-slate-400 text-xs font-semibold">
+                    <Feather name="map-pin" size={13} color="#968E82" />
+                    <Text className="ml-1 text-ink-soft dark:text-night-soft text-xs font-semibold">
                       {teacher.location}
                     </Text>
                   </View>
                 )}
                 {!!teacher.responseTime && (
                   <View className="flex-row items-center">
-                    <Feather name="clock" size={13} color="#94a3b8" />
-                    <Text className="ml-1 text-slate-500 dark:text-slate-400 text-xs font-semibold">
+                    <Feather name="clock" size={13} color="#968E82" />
+                    <Text className="ml-1 text-ink-soft dark:text-night-soft text-xs font-semibold">
                       Responds in {teacher.responseTime}
                     </Text>
                   </View>
@@ -512,15 +502,15 @@ const ExpertDetails = () => {
             ].map((stat) => (
               <View
                 key={stat.label}
-                className="flex-1 bg-white dark:bg-slate-800 rounded-[20px] py-3 px-2 items-center border border-gray-100 dark:border-slate-700 shadow-sm"
+                className="flex-1 bg-white dark:bg-night-raised rounded-[20px] py-3 px-2 items-center border border-line dark:border-night-line shadow-sm"
               >
-                <View className="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-900/20 items-center justify-center mb-1.5">
+                <View className="w-8 h-8 rounded-xl bg-clay-tint dark:bg-night-raised items-center justify-center mb-1.5">
                   <Feather name={stat.icon} size={15} color="#FF8A50" />
                 </View>
-                <Text className="text-lg font-black text-slate-800 dark:text-white leading-none">
+                <Text className="text-lg font-extrabold text-ink dark:text-white leading-none">
                   {stat.value}
                 </Text>
-                <Text className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-wider">
+                <Text className="text-[10px] font-bold text-ink-soft mt-0.5 uppercase tracking-wider">
                   {stat.label}
                 </Text>
               </View>
@@ -533,7 +523,7 @@ const ExpertDetails = () => {
               marginHorizontal: 20,
               marginTop: 20,
               flexDirection: "row",
-              backgroundColor: colorScheme === "dark" ? "#1e293b" : "#f1f5f9",
+              backgroundColor: colorScheme === "dark" ? "#25231F" : "#EFE8DD",
               borderRadius: 16,
               padding: 4,
             }}
@@ -553,7 +543,7 @@ const ExpertDetails = () => {
                     justifyContent: "center",
                     backgroundColor: isActive
                       ? colorScheme === "dark"
-                        ? "#334155"
+                        ? "#3A3731"
                         : "#ffffff"
                       : "transparent",
                     shadowColor: isActive ? "#000" : "transparent",
@@ -569,8 +559,8 @@ const ExpertDetails = () => {
                       color: isActive
                         ? "#f97316"
                         : colorScheme === "dark"
-                          ? "#94a3b8"
-                          : "#64748b",
+                          ? "#968E82"
+                          : "#6A6358",
                     }}
                   >
                     {key === "content" ? "Content" : "About"}
@@ -582,10 +572,10 @@ const ExpertDetails = () => {
 
           {mainTab === "about" && !!teacher.bio && (
             <View className="mx-5 mt-6">
-              <Text className="text-xl font-black text-slate-800 dark:text-white mb-3">
+              <Text className="text-xl font-extrabold text-ink dark:text-white mb-3">
                 About
               </Text>
-              <Text className="text-slate-600 dark:text-slate-300 text-sm leading-6">
+              <Text className="text-ink-soft dark:text-night-soft text-sm leading-6">
                 {teacher.bio}
               </Text>
             </View>
@@ -594,7 +584,7 @@ const ExpertDetails = () => {
           {/* ── Social Links ──────────────────────────── */}
           {mainTab === "about" && activeSocialLinks.length > 0 && (
             <View className="mx-5 mt-6">
-              <Text className="text-xl font-black text-slate-800 dark:text-white mb-3">
+              <Text className="text-xl font-extrabold text-ink dark:text-white mb-3">
                 Connect
               </Text>
               <View className="flex-row flex-wrap" style={{ gap: 10 }}>
@@ -602,7 +592,7 @@ const ExpertDetails = () => {
                   <TouchableOpacity
                     key={social.key}
                     onPress={() => Linking.openURL(social.url!)}
-                    className="w-12 h-12 rounded-2xl items-center justify-center border border-gray-100 dark:border-slate-700"
+                    className="w-12 h-12 rounded-2xl items-center justify-center border border-line dark:border-night-line"
                     style={{
                       backgroundColor:
                         colorScheme === "dark" ? social.darkBg : social.bg,
@@ -622,16 +612,16 @@ const ExpertDetails = () => {
           {/* ── Expertise Areas ───────────────────────── */}
           {mainTab === "about" && teacher.expertiseAreas?.length > 0 && (
             <View className="mx-5 mt-6">
-              <Text className="text-xl font-black text-slate-800 dark:text-white mb-3">
+              <Text className="text-xl font-extrabold text-ink dark:text-white mb-3">
                 Expertise
               </Text>
               <View className="flex-row flex-wrap" style={{ gap: 8 }}>
                 {teacher.expertiseAreas.map((area, i) => (
                   <View
                     key={i}
-                    className="px-4 py-2 rounded-2xl bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/30"
+                    className="px-4 py-2 rounded-2xl bg-clay-tint dark:bg-night-raised border border-line dark:border-night-line"
                   >
-                    <Text className="text-primary font-black text-xs uppercase tracking-wider">
+                    <Text className="text-primary-deep dark:text-primary font-extrabold text-xs uppercase tracking-wider">
                       {area}
                     </Text>
                   </View>
@@ -643,16 +633,16 @@ const ExpertDetails = () => {
           {/* ── Languages ─────────────────────────────── */}
           {mainTab === "about" && teacher.languages?.length > 0 && (
             <View className="mx-5 mt-6">
-              <Text className="text-xl font-black text-slate-800 dark:text-white mb-3">
+              <Text className="text-xl font-extrabold text-ink dark:text-white mb-3">
                 Languages
               </Text>
               <View className="flex-row flex-wrap" style={{ gap: 8 }}>
                 {teacher.languages.map((lang, i) => (
                   <View
                     key={i}
-                    className="px-4 py-2 rounded-2xl bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-100 dark:border-cyan-800/30"
+                    className="px-4 py-2 rounded-2xl bg-sky-tint dark:bg-night-raised border border-line dark:border-night-line"
                   >
-                    <Text className="text-cyan-600 dark:text-cyan-400 font-black text-xs uppercase tracking-wider">
+                    <Text className="text-sky dark:text-sky-light font-extrabold text-xs uppercase tracking-wider">
                       {lang}
                     </Text>
                   </View>
@@ -665,10 +655,10 @@ const ExpertDetails = () => {
           {mainTab === "about" && teacher.workExperiences?.length > 0 && (
             <View className="mx-5 mt-6">
               <View className="flex-row items-center mb-4">
-                <View className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/20 items-center justify-center mr-3">
+                <View className="w-8 h-8 rounded-lg bg-clay-tint dark:bg-night-raised items-center justify-center mr-3">
                   <Feather name="briefcase" size={16} color="#FF8A50" />
                 </View>
-                <Text className="text-xl font-black text-slate-800 dark:text-white">
+                <Text className="text-xl font-extrabold text-ink dark:text-white">
                   Work Experience
                 </Text>
               </View>
@@ -702,28 +692,28 @@ const ExpertDetails = () => {
                   return (
                     <View
                       key={i}
-                      className="bg-slate-50 dark:bg-slate-800/50 rounded-[24px] p-5 border border-gray-100 dark:border-slate-700 shadow-sm"
+                      className="bg-sand dark:bg-night-raised rounded-[24px] p-5 border border-line dark:border-night-line shadow-sm"
                     >
                       <View className="flex-row justify-between items-start mb-2">
                         <View className="flex-1 mr-2">
-                          <Text className="text-base font-black text-slate-800 dark:text-white leading-tight">
+                          <Text className="text-base font-extrabold text-ink dark:text-white leading-tight">
                             {title}
                           </Text>
-                          <Text className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-0.5">
+                          <Text className="text-sm font-bold text-ink-soft dark:text-night-soft mt-0.5">
                             {org}
                             {!!loc && ` • ${loc}`}
                           </Text>
                         </View>
-                        <View className="px-3 py-1 rounded-full bg-white dark:bg-slate-700 border border-gray-100 dark:border-slate-600">
-                          <Text className="text-[10px] font-black text-primary uppercase">
+                        <View className="px-3 py-1 rounded-full bg-white dark:bg-night-line border border-line dark:border-night-line">
+                          <Text className="text-[10px] font-extrabold text-primary-deep dark:text-primary uppercase">
                             {start} {start && end ? "–" : ""} {end}
                           </Text>
                         </View>
                       </View>
 
                       {!!exp.description && (
-                        <View className="mt-2 pt-2 border-t border-gray-200/50 dark:border-slate-700/50">
-                          <Text className="text-sm text-slate-500 dark:text-slate-400 leading-5 italic">
+                        <View className="mt-2 pt-2 border-t border-line/50 dark:border-night-line/50">
+                          <Text className="text-sm text-ink-soft dark:text-night-soft leading-5 italic">
                             {exp.description}
                           </Text>
                         </View>
@@ -738,24 +728,24 @@ const ExpertDetails = () => {
           {/* ── Awards & Certificates ─────────────────── */}
           {mainTab === "about" && teacher.awardsCertificates?.length > 0 && (
             <View className="mx-5 mt-6">
-              <Text className="text-xl font-black text-slate-800 dark:text-white mb-4">
+              <Text className="text-xl font-extrabold text-ink dark:text-white mb-4">
                 Awards & Certificates
               </Text>
               <View style={{ gap: 12 }}>
                 {teacher.awardsCertificates.map((award, i) => (
                   <View
                     key={i}
-                    className="bg-white dark:bg-slate-800 rounded-[24px] p-5 border border-gray-100 dark:border-slate-700 shadow-sm flex-row items-start"
+                    className="bg-white dark:bg-night-raised rounded-[24px] p-5 border border-line dark:border-night-line shadow-sm flex-row items-start"
                   >
                     <View className="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-900/20 items-center justify-center mr-4 mt-0.5 shrink-0">
                       <Feather name="award" size={18} color="#f59e0b" />
                     </View>
                     <View className="flex-1">
-                      <Text className="text-base font-black text-slate-800 dark:text-white leading-tight">
+                      <Text className="text-base font-extrabold text-ink dark:text-white leading-tight">
                         {award.title}
                       </Text>
                       {!!award.description && (
-                        <Text className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-5">
+                        <Text className="text-sm text-ink-soft dark:text-night-soft mt-1 leading-5">
                           {award.description}
                         </Text>
                       )}
@@ -784,15 +774,15 @@ const ExpertDetails = () => {
                       onPress={() => setActiveTab(tab.key)}
                       className={`px-5 py-2.5 rounded-2xl border flex-row items-center ${
                         isActive
-                          ? "bg-primary border-primary"
-                          : "bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700"
+                          ? "bg-primary-deep border-primary"
+                          : "bg-white dark:bg-night-raised border-line dark:border-night-line"
                       }`}
                     >
                       <Text
-                        className={`font-black text-sm ${
+                        className={`font-extrabold text-sm ${
                           isActive
                             ? "text-white"
-                            : "text-slate-600 dark:text-slate-300"
+                            : "text-ink-soft dark:text-night-soft"
                         }`}
                       >
                         {tab.label}
@@ -801,11 +791,11 @@ const ExpertDetails = () => {
                         className={`ml-2 px-1.5 py-0.5 rounded-lg ${
                           isActive
                             ? "bg-white/20"
-                            : "bg-orange-50 dark:bg-orange-900/20"
+                            : "bg-clay-tint dark:bg-night-raised"
                         }`}
                       >
                         <Text
-                          className={`text-[10px] font-black ${isActive ? "text-white" : "text-primary"}`}
+                          className={`text-[10px] font-extrabold ${isActive ? "text-white" : "text-primary-deep dark:text-primary"}`}
                         >
                           {tabCounts[tab.key]}
                         </Text>
@@ -897,10 +887,10 @@ const ExpertDetails = () => {
 
 const EmptyState = ({ label }: { label: string }) => (
   <View className="items-center py-12 px-10">
-    <View className="w-16 h-16 rounded-[20px] bg-slate-100 dark:bg-slate-800 items-center justify-center mb-4">
-      <Feather name="inbox" size={28} color="#94a3b8" />
+    <View className="w-16 h-16 rounded-[20px] bg-sand dark:bg-night-raised items-center justify-center mb-4">
+      <Feather name="inbox" size={28} color="#968E82" />
     </View>
-    <Text className="text-slate-400 dark:text-slate-500 font-bold text-center">
+    <Text className="text-ink-soft dark:text-night-soft font-bold text-center">
       {label}
     </Text>
   </View>

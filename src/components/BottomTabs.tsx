@@ -1,111 +1,137 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
-import Feather from "@react-native-vector-icons/feather";
-import { useColorScheme } from "nativewind";
-import { Link, usePathname, useSegments, type Href } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { themeColors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
+import { useCartContext } from "@/context/CartContext";
+import Feather, { type FeatherIconName } from "@react-native-vector-icons/feather";
+import { router, usePathname, type Href } from "expo-router";
+import { useColorScheme } from "nativewind";
+import { Image, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+type TabKey = "home" | "mentors" | "cart" | "wallet" | "profile";
+
+type Tab = {
+  key: TabKey;
+  label: string;
+  icon: FeatherIconName;
+  href: string;
+};
+
+const activeTabFor =(pathname: string): TabKey => {
+  if (pathname.startsWith("/one-on-one")) return "mentors";
+  if (pathname.startsWith("/user/cart")) return "cart";
+  if (pathname.startsWith("/user/wallet")) return "wallet";
+  if (pathname.startsWith("/user") || pathname.startsWith("/login"))
+    return "profile";
+  return "home";
+};
 
 const BottomTabs = () => {
   const { colorScheme } = useColorScheme();
+  const c = themeColors(colorScheme);
   const { user } = useAuth();
+  const { itemCount } = useCartContext();
   const insets = useSafeAreaInsets();
   const pathname = usePathname();
-  const segments = useSegments();
+  const loggedIn = !!user;
+  const active = activeTabFor(pathname);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-    }
-  }, [user]);
-
-  const tabs = [
-    { name: "Courses", icon: "book", href: "/courses" },
-    { name: "Tests", icon: "file-text", href: "/tests" },
-    { name: "Live", icon: "radio", badge: true, href: "/live" },
-    { name: "Notes", icon: "shopping-bag", href: "/shop" },
+  const tabs: Tab[] = [
+    { key: "home", label: "Home", icon: "home", href: "/" },
+    { key: "mentors", label: "1:1", icon: "users", href: "/one-on-one" },
     {
-      name: isLoggedIn ? "Dashboard" : "Login",
-      icon: isLoggedIn ? "user" : "user-plus",
-      isProfile: isLoggedIn,
-      href: isLoggedIn ? "/user" : "/login",
+      key: "cart",
+      label: "Cart",
+      icon: "shopping-bag",
+      href: loggedIn ? "/user/cart" : "/login",
+    },
+    ...(loggedIn
+      ? [
+          {
+            key: "wallet" as const,
+            label: "Wallet",
+            icon: "credit-card" as const,
+            href: "/user/wallet",
+          },
+        ]
+      : []),
+    {
+      key: "profile",
+      label: loggedIn ? "Profile" : "Log in",
+      icon: "user",
+      href: loggedIn ? "/user" : "/login",
     },
   ];
 
+  const go = (tab: Tab) => {
+    if (tab.key === active && pathname === tab.href) return;
+    if (pathname !== "/") router.dismissTo("/(main)" as Href);
+    if (tab.href !== "/") router.push(tab.href as Href);
+  };
+
   return (
     <View
-      style={{ paddingBottom: Math.max(insets?.bottom ?? 0, 12) }}
-      className="flex-row bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 pb-2 pt-3 justify-around items-center"
+      style={{ paddingBottom: Math.max(insets.bottom, 10) }}
+      className="flex-row bg-white dark:bg-night-raised border-t border-line dark:border-night-line pt-2"
     >
-      {tabs.map((tab, index) => {
-        const href = tab.href as Href;
-        let isActive = false;
-
-        // More robust active state detection
-        if (tab.isProfile) {
-          isActive = (segments as string[]).includes("user");
-        } else {
-          isActive =
-            pathname === href ||
-            (href !== "/" && pathname.startsWith(href as string));
-        }
-
+      {tabs.map((tab) => {
+        const isActive = tab.key === active;
+        const showAvatar = tab.key === "profile" && loggedIn && user?.avatarUrl;
         return (
-          <Link href={href} key={index} asChild>
-            <TouchableOpacity className="items-center justify-center flex-1 active:opacity-70">
-              <View className="items-center justify-center">
-                {tab.isProfile && isLoggedIn ? (
-                  user?.avatarUrl ? (
-                    <View
-                      className={`w-7 h-7 rounded-full overflow-hidden border-2 ${isActive ? "border-primary" : "border-gray-200 dark:border-slate-700"}`}
-                    >
-                      <Image
-                        source={{ uri: user.avatarUrl }}
-                        className="w-full h-full"
-                        resizeMode="cover"
-                      />
-                    </View>
-                  ) : (
-                    <Feather
-                      name="user"
-                      size={24}
-                      color={
-                        isActive
-                          ? "#FF8A50"
-                          : colorScheme === "dark"
-                            ? "#94a3b8"
-                            : "#64748b"
-                      }
-                    />
-                  )
-                ) : (
-                  <Feather
-                    name={tab.icon as any}
-                    size={24}
-                    color={
-                      isActive
-                        ? "#FF8A50"
-                        : colorScheme === "dark"
-                          ? "#94a3b8"
-                          : "#64748b"
-                    }
+          <TouchableOpacity
+            key={tab.key}
+            onPress={() => go(tab)}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: isActive }}
+            accessibilityLabel={
+              tab.key === "cart" && itemCount > 0
+                ? `Cart, ${itemCount} items`
+                : tab.label
+            }
+            activeOpacity={0.7}
+            className="flex-1 items-center"
+          >
+            <View
+              className={`w-14 h-8 rounded-full items-center justify-center ${
+                isActive ? "bg-sand dark:bg-night-line" : ""
+              }`}
+            >
+              {showAvatar ? (
+                <View
+                  className={`w-6 h-6 rounded-full overflow-hidden border ${
+                    isActive ? "border-ink dark:border-white" : "border-line dark:border-night-line"
+                  }`}
+                >
+                  <Image
+                    source={{ uri: user!.avatarUrl! }}
+                    className="w-full h-full"
+                    resizeMode="cover"
                   />
-                )}
-                {tab.badge && (
-                  <View className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-white dark:border-slate-900" />
-                )}
-              </View>
-              <Text
-                className={`text-[11px] mt-1 font-bold ${isActive ? "text-primary" : colorScheme === "dark" ? "text-slate-500" : "text-slate-400"}`}
-              >
-                {tab.name}
-              </Text>
-            </TouchableOpacity>
-          </Link>
+                </View>
+              ) : (
+                <Feather
+                  name={tab.icon}
+                  size={21}
+                  color={isActive ? c.ink : c.inkSoft}
+                />
+              )}
+              {tab.key === "cart" && itemCount > 0 && (
+                <View className="absolute -top-1 right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary-deep items-center justify-center border-2 border-white dark:border-night-raised">
+                  <Text className="text-white text-[10px] font-bold">
+                    {itemCount > 9 ? "9+" : itemCount}
+                  </Text>
+                </View>
+              )}
+            </View>
+            <Text
+              className={`mt-1 text-[11px] ${
+                isActive
+                  ? "font-bold text-ink dark:text-white"
+                  : "font-medium text-ink-soft dark:text-night-soft"
+              }`}
+            >
+              {tab.label}
+            </Text>
+          </TouchableOpacity>
         );
       })}
     </View>

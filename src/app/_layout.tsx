@@ -4,9 +4,11 @@ import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { EnrollmentProvider } from "@/context/EnrollmentContext";
 import { useForceUpdate } from "@/hooks/useForceUpdate";
+import { restoreThemePreference } from "@/utils/themePreference";
 import * as Clarity from "@microsoft/react-native-clarity";
 import Constants, { ExecutionEnvironment } from "expo-constants";
 import { Stack } from "expo-router";
+import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../../global.css";
 
@@ -20,6 +22,13 @@ if (Constants.executionEnvironment !== ExecutionEnvironment.StoreClient) {
 
 export default function RootLayout() {
   const { forceUpdate, currentVersion } = useForceUpdate();
+  const [themeReady, setThemeReady] = useState(false);
+
+  useEffect(() => {
+    restoreThemePreference().finally(() => setThemeReady(true));
+  }, []);
+
+  if (!themeReady) return null;
 
   if (forceUpdate?.required) {
     return (

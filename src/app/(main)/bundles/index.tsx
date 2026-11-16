@@ -1,6 +1,6 @@
 import BottomTabs from "@/components/BottomTabs";
 import BundleCard from "@/components/BundleCard";
-import Header from "@/components/Header";
+import StoreHeader from "@/components/StoreHeader";
 import type { BundleListItem } from "@/types/bundle";
 import Feather from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   Pressable,
   ScrollView,
-  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
@@ -91,41 +90,27 @@ const BundlesScreen = () => {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-900"
+      className="flex-1 bg-paper dark:bg-night"
     >
-      <StatusBar
-        barStyle={isDark ? "light-content" : "dark-content"}
-        backgroundColor={isDark ? "#0f172a" : "#ffffff"}
-      />
-      <Header />
+      <StoreHeader />
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        className="bg-white dark:bg-slate-900"
+        className="bg-paper dark:bg-night"
         keyboardShouldPersistTaps="handled"
       >
-        {/* Hero */}
-        <View className="px-6 pt-5 pb-4">
-          <Text className="text-[34px] font-extrabold text-slate-800 dark:text-white leading-[40px]">
-            Course Bundles
-          </Text>
-          <Text className="text-slate-500 dark:text-slate-400 mt-2 text-[15px] leading-6 pr-6">
-            Courses, mock tests and notes packaged together — one price, one
-            purchase, big savings.
-          </Text>
-        </View>
-
+        <View className="h-4" />
         {/* Search + sort */}
         <View className="px-6 mb-6">
-          <View className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-4 mb-3">
-            <Feather name="search" size={18} color="#94a3b8" />
+          <View className="flex-row items-center bg-sand dark:bg-night-raised/50 rounded-2xl border border-line dark:border-night-line px-4 mb-3">
+            <Feather name="search" size={18} color="#9A8A93" />
             <TextInput
               value={searchInput}
               onChangeText={setSearchInput}
               onSubmitEditing={() => setSearch(searchInput)}
               returnKeyType="search"
               placeholder="Search bundles..."
-              placeholderTextColor={isDark ? "#64748b" : "#94a3b8"}
-              className="flex-1 ml-3 h-12 text-slate-800 dark:text-white"
+              placeholderTextColor={isDark ? "#6E5D66" : "#9A8A93"}
+              className="flex-1 ml-3 h-12 text-ink dark:text-white"
             />
             {searchInput.length > 0 && (
               <TouchableOpacity
@@ -135,19 +120,19 @@ const BundlesScreen = () => {
                 }}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Feather name="x" size={18} color="#94a3b8" />
+                <Feather name="x" size={18} color="#9A8A93" />
               </TouchableOpacity>
             )}
           </View>
 
           <TouchableOpacity
             onPress={() => setShowSortModal(true)}
-            className="flex-row items-center border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 rounded-xl shadow-sm justify-between"
+            className="flex-row items-center border border-line dark:border-night-line bg-white dark:bg-night-raised px-4 py-2.5 rounded-xl shadow-sm justify-between"
           >
             <View className="flex-row items-center">
               <Feather name="sliders" size={16} color="#FF8A50" />
               <Text
-                className="ml-2 text-slate-600 dark:text-slate-300 font-bold text-sm"
+                className="ml-2 text-ink-soft dark:text-night-soft font-bold text-sm"
                 numberOfLines={1}
               >
                 {activeSortLabel}
@@ -156,7 +141,7 @@ const BundlesScreen = () => {
             <Feather
               name="chevron-down"
               size={16}
-              color={isDark ? "#94a3b8" : "#64748b"}
+              color={isDark ? "#9A8A93" : "#6E5D66"}
             />
           </TouchableOpacity>
         </View>
@@ -170,7 +155,7 @@ const BundlesScreen = () => {
               onPress={() => fetchBundles(currentPage)}
               className="mt-2"
             >
-              <Text className="text-primary text-center font-bold underline">
+              <Text className="text-primary-deep dark:text-primary text-center font-bold underline">
                 Retry
               </Text>
             </TouchableOpacity>
@@ -178,9 +163,9 @@ const BundlesScreen = () => {
         )}
 
         <View className="px-6 mb-4">
-          <Text className="text-slate-600 dark:text-slate-400 text-base">
+          <Text className="text-ink-soft dark:text-night-soft text-base">
             Found{" "}
-            <Text className="text-slate-900 dark:text-white font-black">
+            <Text className="text-ink dark:text-white font-extrabold">
               {totalCount}
             </Text>{" "}
             {totalCount === 1 ? "bundle" : "bundles"}
@@ -199,31 +184,31 @@ const BundlesScreen = () => {
               ))
             ) : (
               <View className="items-center justify-center py-20 px-8">
-                <View className="w-20 h-20 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mb-6">
+                <View className="w-20 h-20 bg-sand dark:bg-night-raised rounded-full items-center justify-center mb-6">
                   <Feather
                     name="package"
                     size={40}
-                    color={isDark ? "#334155" : "#cbd5e1"}
+                    color={isDark ? "#3A3731" : "#B5AEA3"}
                   />
                 </View>
-                <Text className="text-xl font-bold text-slate-800 dark:text-white mb-2 text-center">
+                <Text className="w-full text-xl font-bold text-ink dark:text-white mb-2 text-center">
                   No bundles found
                 </Text>
-                <Text className="text-slate-500 dark:text-slate-400 text-center">
+                <Text className="text-ink-soft dark:text-night-soft text-center">
                   Try a different search, or check back soon for new bundles.
                 </Text>
                 <TouchableOpacity
                   onPress={() => fetchBundles(currentPage)}
-                  className="mt-6 px-6 py-2 bg-orange-50 dark:bg-orange-900/20 rounded-full"
+                  className="mt-6 px-6 py-2 bg-clay-tint dark:bg-night-raised rounded-full"
                 >
-                  <Text className="text-primary font-bold">Refresh</Text>
+                  <Text className="text-primary-deep dark:text-primary font-bold">Refresh</Text>
                 </TouchableOpacity>
               </View>
             )}
 
             {bundles.length > 0 && totalPages > 1 && (
               <View className="px-6 pt-2">
-                <Text className="text-center text-sm text-slate-500 dark:text-slate-400 mb-3">
+                <Text className="text-center text-sm text-ink-soft dark:text-night-soft mb-3">
                   Showing page {currentPage} of {Math.max(totalPages, 1)}
                 </Text>
 
@@ -233,15 +218,15 @@ const BundlesScreen = () => {
                     disabled={loading || currentPage <= 1}
                     className={`px-3 py-2 rounded-lg border mr-2 ${
                       currentPage <= 1
-                        ? "border-gray-100 dark:border-slate-700"
-                        : "border-orange-200 dark:border-orange-800/50"
+                        ? "border-line dark:border-night-line"
+                        : "border-line dark:border-night-line"
                     }`}
                   >
                     <Text
                       className={`font-bold ${
                         currentPage <= 1
-                          ? "text-slate-400 dark:text-slate-600"
-                          : "text-primary"
+                          ? "text-ink-soft dark:text-ink-soft"
+                          : "text-primary-deep dark:text-primary"
                       }`}
                     >
                       Prev
@@ -255,15 +240,15 @@ const BundlesScreen = () => {
                       disabled={loading || pageNum === currentPage}
                       className={`w-9 h-9 rounded-lg items-center justify-center mx-1 border ${
                         pageNum === currentPage
-                          ? "bg-primary border-primary"
-                          : "bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700"
+                          ? "bg-primary-deep border-primary"
+                          : "bg-white dark:bg-night border-line dark:border-night-line"
                       }`}
                     >
                       <Text
                         className={`font-bold text-sm ${
                           pageNum === currentPage
                             ? "text-white"
-                            : "text-slate-700 dark:text-slate-300"
+                            : "text-ink-soft dark:text-night-soft"
                         }`}
                       >
                         {pageNum}
@@ -276,15 +261,15 @@ const BundlesScreen = () => {
                     disabled={loading || currentPage >= totalPages}
                     className={`px-3 py-2 rounded-lg border ml-2 ${
                       currentPage >= totalPages
-                        ? "border-gray-100 dark:border-slate-700"
-                        : "border-orange-200 dark:border-orange-800/50"
+                        ? "border-line dark:border-night-line"
+                        : "border-line dark:border-night-line"
                     }`}
                   >
                     <Text
                       className={`font-bold ${
                         currentPage >= totalPages
-                          ? "text-slate-400 dark:text-slate-600"
-                          : "text-primary"
+                          ? "text-ink-soft dark:text-ink-soft"
+                          : "text-primary-deep dark:text-primary"
                       }`}
                     >
                       Next
@@ -307,9 +292,9 @@ const BundlesScreen = () => {
             onPress={() => setShowSortModal(false)}
             className="absolute inset-0 bg-black/20"
           />
-          <View className="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-[280px] p-2 shadow-2xl border border-gray-100 dark:border-slate-700">
-            <View className="p-4 border-b border-gray-50 dark:border-slate-700/50">
-              <Text className="text-base font-black text-slate-800 dark:text-white">
+          <View className="bg-white dark:bg-night-raised rounded-3xl w-full max-w-[280px] p-2 shadow-2xl border border-line dark:border-night-line">
+            <View className="p-4 border-b border-line dark:border-night-line">
+              <Text className="text-base font-extrabold text-ink dark:text-white">
                 Sort by
               </Text>
             </View>
@@ -323,15 +308,15 @@ const BundlesScreen = () => {
                 }}
                 className={`flex-row items-center justify-between px-4 py-3.5 rounded-2xl ${
                   sort === option.value
-                    ? "bg-orange-50 dark:bg-orange-900/20"
+                    ? "bg-clay-tint dark:bg-night-raised"
                     : ""
                 }`}
               >
                 <Text
                   className={`text-sm font-bold ${
                     sort === option.value
-                      ? "text-primary"
-                      : "text-slate-600 dark:text-slate-300"
+                      ? "text-primary-deep dark:text-primary"
+                      : "text-ink-soft dark:text-night-soft"
                   }`}
                 >
                   {option.label}

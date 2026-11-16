@@ -1,6 +1,6 @@
 import BottomTabs from "@/components/BottomTabs";
 import CourseCard from "@/components/CourseCard";
-import Header from "@/components/Header";
+import StoreHeader from "@/components/StoreHeader";
 import Feather from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -10,7 +10,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
@@ -160,41 +159,41 @@ function FilterSidebarContent({
 
       {/* Sheet with Manual Slide */}
       <Animated.View
-        className="absolute bottom-0 w-full bg-white dark:bg-slate-900 rounded-t-[40px] shadow-2xl overflow-hidden"
+        className="absolute bottom-0 w-full bg-white dark:bg-night rounded-t-[40px] shadow-2xl overflow-hidden"
         style={[{ height: sheetHeight }, animatedStyle]}
       >
         <SafeAreaView edges={["bottom"]} className="flex-1">
           {/* Drag Handle Container */}
           <View className="items-center pt-3 pb-1">
-            <View className="w-12 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full" />
+            <View className="w-12 h-1.5 bg-line dark:bg-night-line rounded-full" />
           </View>
 
           <View className="flex-row items-center justify-between px-7 py-4">
             <View className="flex-row items-center">
-              <Text className="text-2xl font-black text-slate-800 dark:text-white">
+              <Text className="text-2xl font-extrabold text-ink dark:text-white">
                 Filters
               </Text>
               <TouchableOpacity
                 onPress={clearAll}
-                className="ml-4 px-3 py-1 bg-orange-50 dark:bg-orange-900/20 rounded-full"
+                className="ml-4 px-3 py-1 bg-clay-tint dark:bg-night-raised rounded-full"
               >
-                <Text className="text-xs font-bold text-primary">
+                <Text className="text-xs font-bold text-primary-deep dark:text-primary">
                   Clear All
                 </Text>
               </TouchableOpacity>
             </View>
             <TouchableOpacity
               onPress={handleClose}
-              className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center"
+              className="w-10 h-10 bg-sand dark:bg-night-raised rounded-full items-center justify-center"
             >
               <Feather
                 name="x"
                 size={20}
-                color={isDark ? "#94a3b8" : "#64748b"}
+                color={isDark ? "#9A8A93" : "#6E5D66"}
               />
             </TouchableOpacity>
           </View>
-          <View className="h-[1px] bg-gray-100 dark:bg-slate-800 mx-7" />
+          <View className="h-[1px] bg-sand dark:bg-night-raised mx-7" />
 
           <ScrollView
             className="flex-1 px-6 pt-6"
@@ -202,27 +201,27 @@ function FilterSidebarContent({
           >
             {/* Search */}
             <View className="mb-8">
-              <Text className="text-base font-bold text-slate-800 dark:text-white mb-3">
+              <Text className="text-base font-bold text-ink dark:text-white mb-3">
                 Search
               </Text>
-              <View className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-4 py-1">
-                <Feather name="search" size={18} color="#94a3b8" />
+              <View className="flex-row items-center bg-sand dark:bg-night-raised/50 rounded-2xl border border-line dark:border-night-line px-4 py-1">
+                <Feather name="search" size={18} color="#9A8A93" />
                 <TextInput
                   value={search}
                   onChangeText={setSearch}
                   placeholder="Search courses..."
-                  placeholderTextColor={isDark ? "#64748b" : "#94a3b8"}
-                  className="flex-1 ml-3 h-12 text-slate-800 dark:text-white"
+                  placeholderTextColor={isDark ? "#6E5D66" : "#9A8A93"}
+                  className="flex-1 ml-3 h-12 text-ink dark:text-white"
                 />
               </View>
             </View>
 
             {/* Price Type — static className + dynamic style to avoid NativeWind crash */}
             <View className="mb-8">
-              <Text className="text-base font-bold text-slate-800 dark:text-white mb-4">
+              <Text className="text-base font-bold text-ink dark:text-white mb-4">
                 Price Type
               </Text>
-              <View className="flex-row p-1 bg-gray-100 dark:bg-slate-800 rounded-2xl">
+              <View className="flex-row p-1 bg-sand dark:bg-night-raised rounded-2xl">
                 {["all", "free", "paid"].map((type) => (
                   <TouchableOpacity
                     key={type}
@@ -231,7 +230,7 @@ function FilterSidebarContent({
                     style={
                       price === type
                         ? {
-                            backgroundColor: isDark ? "#334155" : "#ffffff",
+                            backgroundColor: isDark ? "#3A3731" : "#ffffff",
                             shadowColor: "#000",
                             shadowOffset: { width: 0, height: 1 },
                             shadowOpacity: 0.05,
@@ -241,14 +240,14 @@ function FilterSidebarContent({
                     }
                   >
                     <Text
-                      className="text-xs font-black capitalize"
+                      className="text-xs font-extrabold capitalize"
                       style={{
                         color:
                           price === type
                             ? "#FF8A50"
                             : isDark
-                              ? "#94a3b8"
-                              : "#64748b",
+                              ? "#9A8A93"
+                              : "#6E5D66",
                       }}
                     >
                       {type}
@@ -260,40 +259,40 @@ function FilterSidebarContent({
 
             {/* Level */}
             <View className="mb-8">
-              <Text className="text-base font-bold text-slate-800 dark:text-white mb-4">
+              <Text className="text-base font-bold text-ink dark:text-white mb-4">
                 Course Level
               </Text>
               <TouchableOpacity
                 onPress={() => setShowLevelModal(true)}
-                className="flex-row items-center justify-between bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-5 py-4"
+                className="flex-row items-center justify-between bg-sand dark:bg-night-raised/50 rounded-2xl border border-line dark:border-night-line px-5 py-4"
               >
-                <Text className="text-slate-800 dark:text-white font-medium capitalize">
+                <Text className="text-ink dark:text-white font-medium capitalize">
                   {level}
                 </Text>
-                <Feather name="chevron-down" size={18} color="#94a3b8" />
+                <Feather name="chevron-down" size={18} color="#9A8A93" />
               </TouchableOpacity>
             </View>
 
             {/* Language */}
             <View className="mb-8">
-              <Text className="text-base font-bold text-slate-800 dark:text-white mb-4">
+              <Text className="text-base font-bold text-ink dark:text-white mb-4">
                 Language
               </Text>
               <TouchableOpacity
                 onPress={() => setShowLanguageModal(true)}
-                className="flex-row items-center justify-between bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-5 py-4"
+                className="flex-row items-center justify-between bg-sand dark:bg-night-raised/50 rounded-2xl border border-line dark:border-night-line px-5 py-4"
               >
-                <Text className="text-slate-800 dark:text-white font-medium">
+                <Text className="text-ink dark:text-white font-medium">
                   {lang}
                 </Text>
-                <Feather name="chevron-down" size={18} color="#94a3b8" />
+                <Feather name="chevron-down" size={18} color="#9A8A93" />
               </TouchableOpacity>
             </View>
 
             <View className="h-10" />
           </ScrollView>
 
-          <View className="p-6 border-t border-gray-100 dark:border-slate-800">
+          <View className="p-6 border-t border-line dark:border-night-line">
             <TouchableOpacity
               onPress={() => {
                 translateY.value = withTiming(
@@ -306,9 +305,9 @@ function FilterSidebarContent({
                   },
                 );
               }}
-              className="bg-primary h-14 rounded-2xl items-center justify-center shadow-lg shadow-orange-500/30"
+              className="bg-primary-deep h-14 rounded-2xl items-center justify-center shadow-lg shadow-orange-500/30"
             >
-              <Text className="text-white text-lg font-black">
+              <Text className="text-white text-lg font-extrabold">
                 Apply Filters
               </Text>
             </TouchableOpacity>
@@ -327,9 +326,9 @@ function FilterSidebarContent({
           onPress={() => setShowLanguageModal(false)}
           className="flex-1 bg-black/20 justify-center items-center px-10"
         >
-          <View className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-[300px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-700">
-            <View className="p-5 border-b border-gray-50 dark:border-slate-700/50">
-              <Text className="text-lg font-black text-slate-800 dark:text-white">
+          <View className="bg-white dark:bg-night rounded-3xl w-full max-w-[300px] overflow-hidden shadow-2xl border border-line dark:border-night-line">
+            <View className="p-5 border-b border-line dark:border-night-line">
+              <Text className="text-lg font-extrabold text-ink dark:text-white">
                 Select Language
               </Text>
             </View>
@@ -341,7 +340,7 @@ function FilterSidebarContent({
                     setLang(l);
                     setShowLanguageModal(false);
                   }}
-                  className="px-6 py-4 border-b border-gray-50 dark:border-slate-700/30"
+                  className="px-6 py-4 border-b border-line dark:border-night-line/30"
                   style={
                     lang === l
                       ? {
@@ -360,8 +359,8 @@ function FilterSidebarContent({
                           lang === l
                             ? "#FF8A50"
                             : isDark
-                              ? "#cbd5e1"
-                              : "#475569",
+                              ? "#B5AEA3"
+                              : "#6A6358",
                         fontWeight: lang === l ? "700" : "400",
                       }}
                     >
@@ -389,9 +388,9 @@ function FilterSidebarContent({
           onPress={() => setShowLevelModal(false)}
           className="flex-1 bg-black/20 justify-center items-center px-10"
         >
-          <View className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-[300px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-700">
-            <View className="p-5 border-b border-gray-50 dark:border-slate-700/50">
-              <Text className="text-lg font-black text-slate-800 dark:text-white">
+          <View className="bg-white dark:bg-night rounded-3xl w-full max-w-[300px] overflow-hidden shadow-2xl border border-line dark:border-night-line">
+            <View className="p-5 border-b border-line dark:border-night-line">
+              <Text className="text-lg font-extrabold text-ink dark:text-white">
                 Select Level
               </Text>
             </View>
@@ -403,7 +402,7 @@ function FilterSidebarContent({
                     setLevel(lvl);
                     setShowLevelModal(false);
                   }}
-                  className="px-6 py-4 border-b border-gray-50 dark:border-slate-700/30"
+                  className="px-6 py-4 border-b border-line dark:border-night-line/30"
                   style={
                     level === lvl
                       ? {
@@ -422,8 +421,8 @@ function FilterSidebarContent({
                           level === lvl
                             ? "#FF8A50"
                             : isDark
-                              ? "#cbd5e1"
-                              : "#475569",
+                              ? "#B5AEA3"
+                              : "#6A6358",
                         fontWeight: level === lvl ? "700" : "400",
                       }}
                     >
@@ -535,41 +534,27 @@ const CourseScreen = () => {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-slate-900" edges={["top"]}>
-      <StatusBar
-        barStyle={isDark ? "light-content" : "dark-content"}
-        backgroundColor={isDark ? "#0f172a" : "#ffffff"}
-      />
-      <Header />
+    <SafeAreaView className="flex-1 bg-paper dark:bg-night" edges={["top"]}>
+      <StoreHeader />
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Header Section */}
-        <View className="px-6 pt-6 pb-4">
-          <Text className="text-4xl font-black text-slate-800 dark:text-white leading-[48px]">
-            Online Courses
-          </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-lg font-medium mt-2 leading-6">
-            Master new skills with comprehensive courses designed by expert
-            educators.
-          </Text>
-        </View>
-
+        <View className="h-4" />
         {/* Filters & Sorting */}
         <View className="px-5 mb-8 flex-row items-center">
           <TouchableOpacity
             onPress={() => setShowFilterSidebar(true)}
-            className="flex-row items-center border border-orange-200 dark:border-orange-800/80 bg-white dark:bg-slate-800 px-4 py-2.5 rounded-xl mr-3 shadow-sm"
+            className="flex-row items-center border border-line dark:border-night-line bg-white dark:bg-night-raised px-4 py-2.5 rounded-xl mr-3 shadow-sm"
           >
             <Feather name="filter" size={16} color="#FF8A50" />
-            <Text className="ml-2 text-primary font-bold text-sm">Filters</Text>
+            <Text className="ml-2 text-primary-deep dark:text-primary font-bold text-sm">Filters</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => setShowSortModal(true)}
-            className="flex-row items-center border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 rounded-xl flex-1 shadow-sm justify-between"
+            className="flex-row items-center border border-line dark:border-night-line bg-white dark:bg-night-raised px-4 py-2.5 rounded-xl flex-1 shadow-sm justify-between"
           >
             <Text
-              className="text-slate-600 dark:text-slate-300 font-bold text-sm"
+              className="text-ink-soft dark:text-night-soft font-bold text-sm"
               numberOfLines={1}
             >
               {SORT_OPTIONS.find((o) => o.value === sort)?.label}
@@ -577,7 +562,7 @@ const CourseScreen = () => {
             <Feather
               name="chevron-down"
               size={16}
-              color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
+              color={colorScheme === "dark" ? "#9A8A93" : "#6E5D66"}
             />
           </TouchableOpacity>
         </View>
@@ -604,7 +589,7 @@ const CourseScreen = () => {
                         borderColor:
                           page === 1
                             ? isDark
-                              ? "#334155"
+                              ? "#3A3731"
                               : "#e5e7eb"
                             : isDark
                               ? "rgba(154,52,18,0.8)"
@@ -615,14 +600,14 @@ const CourseScreen = () => {
                               ? "rgba(30,41,59,0.5)"
                               : "#f9fafb"
                             : isDark
-                              ? "#1e293b"
+                              ? "#231B26"
                               : "#ffffff",
                       }}
                     >
                       <Feather
                         name="chevron-left"
                         size={18}
-                        color={page === 1 ? "#94a3b8" : "#FF8A50"}
+                        color={page === 1 ? "#9A8A93" : "#FF8A50"}
                       />
                     </TouchableOpacity>
 
@@ -633,7 +618,7 @@ const CourseScreen = () => {
                             key={`dots-${i}`}
                             className="w-6 h-10 items-center justify-center"
                           >
-                            <Text className="text-sm font-bold text-slate-400 dark:text-slate-500">
+                            <Text className="text-sm font-bold text-ink-soft dark:text-night-soft">
                               …
                             </Text>
                           </View>
@@ -658,8 +643,8 @@ const CourseScreen = () => {
                                   page === p
                                     ? "#ffffff"
                                     : isDark
-                                      ? "#cbd5e1"
-                                      : "#475569",
+                                      ? "#B5AEA3"
+                                      : "#6A6358",
                               }}
                             >
                               {p}
@@ -679,7 +664,7 @@ const CourseScreen = () => {
                         borderColor:
                           page === totalPages
                             ? isDark
-                              ? "#334155"
+                              ? "#3A3731"
                               : "#e5e7eb"
                             : isDark
                               ? "rgba(154,52,18,0.8)"
@@ -690,14 +675,14 @@ const CourseScreen = () => {
                               ? "rgba(30,41,59,0.5)"
                               : "#f9fafb"
                             : isDark
-                              ? "#1e293b"
+                              ? "#231B26"
                               : "#ffffff",
                       }}
                     >
                       <Feather
                         name="chevron-right"
                         size={18}
-                        color={page === totalPages ? "#94a3b8" : "#FF8A50"}
+                        color={page === totalPages ? "#9A8A93" : "#FF8A50"}
                       />
                     </TouchableOpacity>
                   </View>
@@ -705,24 +690,24 @@ const CourseScreen = () => {
               </>
             ) : (
               <View className="items-center justify-center py-20 px-8">
-                <View className="w-20 h-20 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mb-6">
+                <View className="w-20 h-20 bg-sand dark:bg-night-raised rounded-full items-center justify-center mb-6">
                   <Feather
                     name="video"
                     size={40}
-                    color={isDark ? "#334155" : "#cbd5e1"}
+                    color={isDark ? "#3A3731" : "#B5AEA3"}
                   />
                 </View>
-                <Text className="text-xl font-bold text-slate-800 dark:text-white mb-2 text-center">
+                <Text className="w-full text-xl font-bold text-ink dark:text-white mb-2 text-center">
                   No courses found
                 </Text>
-                <Text className="text-slate-500 dark:text-slate-400 text-center">
+                <Text className="text-ink-soft dark:text-night-soft text-center">
                   Try adjusting your filters or sorting to find something new.
                 </Text>
                 <TouchableOpacity
                   onPress={fetchCourses}
-                  className="mt-6 px-6 py-2 bg-orange-50 dark:bg-orange-900/20 rounded-full"
+                  className="mt-6 px-6 py-2 bg-clay-tint dark:bg-night-raised rounded-full"
                 >
-                  <Text className="text-primary font-bold">Refresh</Text>
+                  <Text className="text-primary-deep dark:text-primary font-bold">Refresh</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -745,9 +730,9 @@ const CourseScreen = () => {
           className="flex-1 bg-black/20"
         >
           <View className="flex-1 justify-center items-center px-10">
-            <View className="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-[280px] p-2 shadow-2xl border border-gray-100 dark:border-slate-700">
-              <View className="p-4 border-b border-gray-50 dark:border-slate-700/50">
-                <Text className="text-base font-black text-slate-800 dark:text-white">
+            <View className="bg-white dark:bg-night-raised rounded-3xl w-full max-w-[280px] p-2 shadow-2xl border border-line dark:border-night-line">
+              <View className="p-4 border-b border-line dark:border-night-line">
+                <Text className="text-base font-extrabold text-ink dark:text-white">
                   Sort by
                 </Text>
               </View>
@@ -778,8 +763,8 @@ const CourseScreen = () => {
                         sort === option.value
                           ? "#FF8A50"
                           : isDark
-                            ? "#cbd5e1"
-                            : "#475569",
+                            ? "#B5AEA3"
+                            : "#6A6358",
                     }}
                   >
                     {option.label}

@@ -1,17 +1,16 @@
 import BottomTabs from "@/components/BottomTabs";
 import BundleCard from "@/components/BundleCard";
-import Header from "@/components/Header";
-import HeroSection from "@/components/HeroSection";
 import HomeContentCard from "@/components/HomeContentCard";
 import HomeRail from "@/components/HomeRail";
+import StoreHeader from "@/components/StoreHeader";
 import TeacherRailCard from "@/components/TeacherRailCard";
+import { themeColors } from "@/constants/theme";
 import type { BundleListItem } from "@/types/bundle";
 import { useColorScheme } from "nativewind";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
-  StatusBar,
   Text,
   TouchableOpacity,
   View,
@@ -22,6 +21,7 @@ const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
 const App = () => {
   const { colorScheme } = useColorScheme();
+  const c = themeColors(colorScheme);
   const [topMockTests, setTopMockTests] = useState<any[]>([]);
   const [popularCourses, setPopularCourses] = useState<any[]>([]);
   const [popularNotes, setPopularNotes] = useState<any[]>([]);
@@ -83,71 +83,64 @@ const App = () => {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-900"
+      className="flex-1 bg-paper dark:bg-night"
     >
-      <StatusBar
-        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={colorScheme === "dark" ? "#0f172a" : "#ffffff"}
-      />
-      <Header />
+      <StoreHeader />
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        className="bg-white dark:bg-slate-900"
+        className="bg-paper dark:bg-night"
       >
-        <HeroSection />
-        <View className="h-[1px] bg-gray-100 dark:bg-slate-800" />
 
         {loading ? (
           <View className="py-20 items-center justify-center">
-            <ActivityIndicator size="large" color="#FF8A50" />
-            <Text className="mt-4 text-slate-500 dark:text-slate-400 font-medium">
+            <ActivityIndicator size="large" color={c.ink} />
+            <Text className="mt-4 text-ink-soft dark:text-night-soft font-medium">
               Loading content...
             </Text>
           </View>
         ) : error ? (
           <View className="px-6 py-10 items-center">
-            <Text className="text-red-500 mb-4 text-center">{error}</Text>
+            <Text className="text-ink dark:text-white font-semibold mb-1 text-center">
+              Home could not be loaded.
+            </Text>
+            <Text className="text-ink-soft dark:text-night-soft mb-4 text-center">
+              Check your connection and try again.
+            </Text>
             <TouchableOpacity
               onPress={fetchHomeData}
-              className="bg-primary px-8 py-3 rounded-xl"
+              className="bg-ink dark:bg-paper px-8 py-3 rounded-xl"
             >
-              <Text className="text-white font-bold">Retry</Text>
+              <Text className="text-white dark:text-ink font-bold">Try again</Text>
             </TouchableOpacity>
           </View>
         ) : !hasContent ? (
           <View className="px-6 py-20 items-center">
-            <Text className="text-slate-400 dark:text-slate-500 font-medium text-center">
+            <Text className="text-ink-soft dark:text-night-soft font-medium text-center">
               Nothing to show right now. Check back soon.
             </Text>
           </View>
         ) : (
           <>
-            <View className="h-6" />
+            <View className="h-5" />
 
             <HomeRail
-              title="Top Mock Tests"
+              title="Top mock tests"
               viewAllHref="/tests"
               data={topMockTests}
               keyExtractor={(item) => `test-${item.id}`}
               renderItem={(item) => <HomeContentCard kind="test" item={item} />}
             />
 
-            <View className="h-[1px] bg-gray-100 dark:bg-slate-800" />
-
             <HomeRail
-              title="Save More with Bundles"
+              title="Save more with bundles"
               viewAllHref="/bundles"
               data={bundles}
               keyExtractor={(item) => `bundle-${item.id}`}
               renderItem={(item) => <BundleCard bundle={item} variant="rail" />}
             />
 
-            {bundles.length > 0 && (
-              <View className="h-[1px] bg-gray-100 dark:bg-slate-800" />
-            )}
-
             <HomeRail
-              title="Popular Courses"
+              title="Popular courses"
               viewAllHref="/courses"
               data={popularCourses}
               keyExtractor={(item) => `course-${item.id}`}
@@ -156,20 +149,16 @@ const App = () => {
               )}
             />
 
-            <View className="h-[1px] bg-gray-100 dark:bg-slate-800" />
-
             <HomeRail
-              title="Popular Notes"
+              title="Popular notes"
               viewAllHref="/shop"
               data={popularNotes}
               keyExtractor={(item) => `note-${item.id}`}
               renderItem={(item) => <HomeContentCard kind="note" item={item} />}
             />
 
-            <View className="h-[1px] bg-gray-100 dark:bg-slate-800" />
-
             <HomeRail
-              title="Popular Teachers"
+              title="Popular teachers"
               data={popularTeachers}
               keyExtractor={(item) => `teacher-${item.id}`}
               renderItem={(item) => <TeacherRailCard teacher={item} />}

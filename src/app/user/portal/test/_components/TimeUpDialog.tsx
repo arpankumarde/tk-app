@@ -29,21 +29,21 @@ const TimeUpDialog = ({
   return (
     <Modal transparent animationType="fade" visible={visible}>
       <View className="flex-1 bg-black/50 px-6 items-center justify-center">
-        <View className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800">
+        <View className="w-full max-w-sm bg-white dark:bg-night rounded-[32px] overflow-hidden shadow-2xl border border-line dark:border-night-line">
           <View className="p-6">
-            <Text className="text-xl font-black text-slate-900 dark:text-white mb-2">
+            <Text className="text-xl font-extrabold text-ink dark:text-white mb-2">
               Time is up
             </Text>
             {busy ? (
               <View className="flex-row items-center mt-2">
                 <ActivityIndicator color="#FF8A50" />
-                <Text className="ml-3 text-slate-600 dark:text-slate-300 text-sm font-bold">
+                <Text className="ml-3 text-ink-soft dark:text-night-soft text-sm font-bold">
                   Submitting your answers...
                 </Text>
               </View>
             ) : (
               <>
-                <Text className="text-slate-600 dark:text-slate-300 text-sm font-bold leading-5">
+                <Text className="text-ink-soft dark:text-night-soft text-sm font-bold leading-5">
                   Your answers could not be submitted. They are still here, so
                   check your connection and try again.
                 </Text>
@@ -68,9 +68,9 @@ const TimeUpDialog = ({
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={onRetry}
-                className="flex-1 h-12 bg-primary rounded-xl items-center justify-center"
+                className="flex-1 h-12 bg-primary-deep rounded-xl items-center justify-center"
               >
-                <Text className="text-white font-black">Try again</Text>
+                <Text className="text-white font-extrabold">Try again</Text>
               </TouchableOpacity>
             </View>
           )}

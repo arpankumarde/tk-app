@@ -1,8 +1,17 @@
 import BottomTabs from "@/components/BottomTabs";
-import Header from "@/components/Header";
+import {
+  CoursesArt,
+  DotField,
+  NotesStack,
+  ProgressTrail,
+  TestsArt,
+} from "@/components/AccountArt";
+import DetailHeader from "@/components/DetailHeader";
+import { themeColors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
-import Feather from "@react-native-vector-icons/feather";
-import Ionicons from "@react-native-vector-icons/ionicons";
+import Feather, {
+  type FeatherIconName,
+} from "@react-native-vector-icons/feather";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import * as Application from "expo-application";
 import Constants from "expo-constants";
@@ -10,7 +19,6 @@ import { router } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useEffect } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Image,
   Linking,
@@ -22,10 +30,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import EnrolledBundleCard from "./_components/EnrolledBundleCard";
-import EnrolledCourseCard from "./_components/EnrolledCourseCard";
-import EnrolledTestCard from "./_components/EnrolledTestCard";
-import PurchasedProductCard from "./_components/PurchasedProductCard";
 import { useEnrolledBundles } from "./_hooks/useEnrolledBundles";
 import { useEnrolledCourses } from "./_hooks/useEnrolledCourses";
 import { useEnrolledTests } from "./_hooks/useEnrolledTests";
@@ -42,15 +46,54 @@ const buildNumber =
   Application.nativeBuildVersion ??
   "—";
 
+const FOREST = "#26352D";
+const FOREST_SOFT = "#B9C8BD";
+
+function MenuRow({
+  icon,
+  label,
+  detail,
+  onPress,
+  last,
+}: {
+  icon: FeatherIconName;
+  label: string;
+  detail?: string;
+  onPress: () => void;
+  last?: boolean;
+}) {
+  const { colorScheme } = useColorScheme();
+  const c = themeColors(colorScheme);
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      className={`flex-row items-center px-5 py-4 ${
+        last ? "" : "border-b border-line dark:border-night-line"
+      }`}
+    >
+      <Feather name={icon} size={20} color={c.ink} />
+      <View className="flex-1 ml-4">
+        <Text className="text-[16px] font-semibold text-ink dark:text-white">
+          {label}
+        </Text>
+        {!!detail && (
+          <Text className="mt-0.5 text-sm text-ink-soft dark:text-night-soft">
+            {detail}
+          </Text>
+        )}
+      </View>
+      <Feather name="chevron-right" size={20} color={c.inkSoft} />
+    </TouchableOpacity>
+  );
+}
+
 export default function ProfileScreen() {
   const { user, token, loading: authLoading, logout } = useAuth();
   const { colorScheme } = useColorScheme();
 
-  const {
-    courses: enrolledCourses,
-    loading: loadingCourses,
-    total: totalCourses,
-  } = useEnrolledCourses(token);
+  const { loading: loadingCourses, total: totalCourses } =
+    useEnrolledCourses(token);
 
   const {
     tests: enrolledTests,
@@ -58,17 +101,11 @@ export default function ProfileScreen() {
     total: totalTests,
   } = useEnrolledTests(token);
 
-  const {
-    products: purchasedProducts,
-    loading: loadingProducts,
-    total: totalProducts,
-  } = usePurchasedProducts(token, { limit: 5 });
+  const { loading: loadingProducts, total: totalProducts } =
+    usePurchasedProducts(token, { limit: 5 });
 
-  const {
-    bundles: enrolledBundles,
-    loading: loadingBundles,
-    total: totalBundles,
-  } = useEnrolledBundles(token);
+  const { loading: loadingBundles, total: totalBundles } =
+    useEnrolledBundles(token);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -104,416 +141,278 @@ export default function ProfileScreen() {
     );
   };
 
+  const completedTests = enrolledTests.reduce(
+    (sum, t) => sum + (t.completedItems || 0),
+    0,
+  );
+  const count = (loading: boolean, value: number) =>
+    loading ? "-" : String(value);
+  const initials =
+    (user.displayName || "")
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase())
+      .join("") || "T";
+
+  const openSupport = () => {
+    let message = `Hello, I need help. I'm ${user?.displayName || "a user"}.`;
+    if (user?.email) message += ` Email: ${user.email}`;
+    const supportUrl = process.env.EXPO_PUBLIC_SUPPORT_URL;
+    Linking.openURL(`${supportUrl}?text=${encodeURIComponent(message)}`);
+  };
+
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-950"
+      className="flex-1 bg-paper dark:bg-night"
     >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
-      <Header />
+      <DetailHeader title="My account" />
 
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 40 }}
       >
-        {/* Profile Card */}
-        <View className="px-6 py-8">
-          <View className="flex-row items-center mb-6">
-            <View className="w-24 h-24 rounded-full bg-primary/10 border-4 border-white dark:border-slate-800 shadow-xl items-center justify-center overflow-hidden">
-              {user?.avatarUrl ? (
-                <Image
-                  source={{ uri: user.avatarUrl }}
-                  className="w-full h-full"
-                />
-              ) : (
-                <Text className="text-4xl font-black text-primary">
-                  {user?.displayName?.charAt(0).toUpperCase() || "P"}
-                </Text>
-              )}
-            </View>
-            <View className="ml-5 flex-1">
-              <Text
-                className="text-2xl font-black text-slate-800 dark:text-white mb-1.5"
-                numberOfLines={1}
-              >
-                {user?.displayName || "User Name"}
-              </Text>
-              <View className="flex-row items-center mb-4">
-                <Text
-                  className="text-slate-500 dark:text-slate-400 font-bold text-sm"
-                  numberOfLines={1}
-                >
-                  {user?.email || user?.mobileNumber || "user@example.com"}
-                </Text>
-                {user?.mobileVerified && (
-                  <MaterialIcons
-                    name="verified"
-                    size={18}
-                    color="#22C55E"
-                    style={{ marginLeft: 6 }}
-                  />
-                )}
-              </View>
-              {/* <TouchableOpacity className="bg-orange-50 dark:bg-orange-950/30 px-6 py-2.5 rounded-full self-start border border-orange-100 dark:border-orange-800/30">
-                <Text className="text-primary font-black text-sm">
-                  Edit Profile
-                </Text>
-              </TouchableOpacity> */}
-            </View>
-          </View>
-
-          {/* Stats Cards */}
-          <View className="flex-row justify-between mb-2">
+        <View className="px-4 pt-5">
+          <View className="rounded-[28px] bg-sage-tint dark:bg-night-raised">
             <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => router.push("/user/tests")}
-              className="flex-1 bg-white dark:bg-slate-800 rounded-2xl py-3 px-2 items-center mr-3 border border-slate-100 dark:border-slate-700/50 shadow-sm shadow-slate-200/50 dark:shadow-none"
-            >
-              <View className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/20 items-center justify-center mb-1.5">
-                <Feather name="file-text" size={14} color="#3B82F6" />
-              </View>
-              <Text className="text-xl font-black text-slate-800 dark:text-white">
-                {totalTests}
-              </Text>
-              <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-bold mt-0.5 uppercase tracking-wider">
-                Tests
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => router.push("/user/courses")}
-              className="flex-1 bg-white dark:bg-slate-800 rounded-2xl py-3 px-2 items-center mr-3 border border-slate-100 dark:border-slate-700/50 shadow-sm shadow-slate-200/50 dark:shadow-none"
-            >
-              <View className="w-8 h-8 rounded-full bg-orange-50 dark:bg-orange-900/20 items-center justify-center mb-1.5">
-                <Feather name="book-open" size={14} color="#FF8A50" />
-              </View>
-              <Text className="text-xl font-black text-slate-800 dark:text-white">
-                {totalCourses}
-              </Text>
-              <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-bold mt-0.5 uppercase tracking-wider">
-                Courses
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => router.push("/user/products")}
-              className="flex-1 bg-white dark:bg-slate-800 rounded-2xl py-3 px-2 items-center border border-slate-100 dark:border-slate-700/50 shadow-sm shadow-slate-200/50 dark:shadow-none"
-            >
-              <View className="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/20 items-center justify-center mb-1.5">
-                <Feather name="shopping-bag" size={14} color="#10B981" />
-              </View>
-              <Text className="text-xl font-black text-slate-800 dark:text-white">
-                {totalProducts}
-              </Text>
-              <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-bold mt-0.5 uppercase tracking-wider">
-                Notes
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View className="px-6">
-          {/* My Bundles — only surfaced once the student owns one */}
-          {(loadingBundles || totalBundles > 0) && (
-            <>
-              <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-xl font-black text-slate-800 dark:text-white">
-                  My Bundles ({totalBundles})
-                </Text>
-                {totalBundles > 0 && (
-                  <TouchableOpacity
-                    onPress={() => router.push("/user/bundles" as any)}
-                  >
-                    <View className="flex-row items-center">
-                      <Text className="text-primary font-black text-sm">
-                        View All
-                      </Text>
-                      <Feather
-                        name="chevron-right"
-                        size={16}
-                        color="#FF8A50"
-                        className="ml-1"
-                      />
-                    </View>
-                  </TouchableOpacity>
-                )}
-              </View>
-
-              {loadingBundles ? (
-                <View className="py-10 items-center justify-center">
-                  <ActivityIndicator color="#FF8A50" />
-                </View>
-              ) : (
-                enrolledBundles
-                  .slice(0, 2)
-                  .map((bundle) => (
-                    <EnrolledBundleCard key={bundle.id} bundle={bundle} />
-                  ))
-              )}
-
-              <View className="h-4" />
-            </>
-          )}
-
-          {/* Ongoing Courses Header */}
-          <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-xl font-black text-slate-800 dark:text-white">
-              Ongoing Courses ({totalCourses})
-            </Text>
-            {totalCourses > 0 && (
-              <TouchableOpacity onPress={() => router.push("/user/courses")}>
-                <View className="flex-row items-center">
-                  <Text className="text-primary font-black text-sm">
-                    View All
-                  </Text>
-                  <Feather
-                    name="chevron-right"
-                    size={16}
-                    color="#FF8A50"
-                    className="ml-1"
-                  />
-                </View>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {loadingCourses ? (
-            <View className="py-10 items-center justify-center">
-              <ActivityIndicator color="#FF8A50" />
-            </View>
-          ) : enrolledCourses.length > 0 ? (
-            enrolledCourses
-              .slice(0, 2)
-              .map((course) => (
-                <EnrolledCourseCard key={course.id} course={course} />
-              ))
-          ) : (
-            <View className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-gray-100 dark:border-slate-800 border-dashed items-center mb-8">
-              <Feather name="book" size={32} color="#CBD5E1" />
-              <Text className="text-slate-400 font-bold mt-2">
-                No ongoing courses yet
-              </Text>
-            </View>
-          )}
-
-          {/* Ongoing Tests Header */}
-          <View className="flex-row items-center justify-between mb-4 mt-4">
-            <Text className="text-xl font-black text-slate-800 dark:text-white">
-              Ongoing Tests ({totalTests})
-            </Text>
-            {totalTests > 0 && (
-              <TouchableOpacity onPress={() => router.push("/user/tests")}>
-                <View className="flex-row items-center">
-                  <Text className="text-primary font-black text-sm">
-                    View All
-                  </Text>
-                  <Feather
-                    name="chevron-right"
-                    size={16}
-                    color="#FF8A50"
-                    className="ml-1"
-                  />
-                </View>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {loadingTests ? (
-            <View className="py-10 items-center justify-center">
-              <ActivityIndicator color="#FF8A50" />
-            </View>
-          ) : enrolledTests.length > 0 ? (
-            enrolledTests
-              .slice(0, 2)
-              .map((test) => <EnrolledTestCard key={test.id} test={test} />)
-          ) : (
-            <View className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-gray-100 dark:border-slate-800 border-dashed items-center mb-8">
-              <Feather name="file-text" size={32} color="#CBD5E1" />
-              <Text className="text-slate-400 font-bold mt-2">
-                No enrolled tests yet
-              </Text>
-            </View>
-          )}
-
-          {/* My Notes Header */}
-          <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-xl font-black text-slate-800 dark:text-white">
-              My Notes ({totalProducts})
-            </Text>
-            {totalProducts > 0 && (
-              <TouchableOpacity onPress={() => router.push("/user/products")}>
-                <View className="flex-row items-center">
-                  <Text className="text-primary font-black text-sm">
-                    View All
-                  </Text>
-                  <Feather
-                    name="chevron-right"
-                    size={16}
-                    color="#FF8A50"
-                    className="ml-1"
-                  />
-                </View>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {loadingProducts ? (
-            <View className="py-10 items-center justify-center">
-              <ActivityIndicator color="#FF8A50" />
-            </View>
-          ) : purchasedProducts.length > 0 ? (
-            purchasedProducts
-              .slice(0, 2)
-              .map((product) => (
-                <PurchasedProductCard
-                  key={product.purchaseId}
-                  product={product}
-                />
-              ))
-          ) : (
-            <View className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-gray-100 dark:border-slate-800 border-dashed items-center mb-8">
-              <Feather name="shopping-bag" size={32} color="#CBD5E1" />
-              <Text className="text-slate-400 font-bold mt-2">
-                No purchased notes yet
-              </Text>
-            </View>
-          )}
-
-          {/* Account Menu List */}
-          <Text className="text-xl font-black text-slate-800 dark:text-white mb-4">
-            My Account
-          </Text>
-          <View className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden shadow-sm mb-8">
-            <TouchableOpacity
-              onPress={() => router.push("/user/orders")}
-              className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800"
-            >
-              <View className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 items-center justify-center mr-4">
-                <Feather name="shopping-cart" size={22} color="#3B82F6" />
-              </View>
-              <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
-                My Orders
-              </Text>
-              <Feather name="chevron-right" size={20} color="#CBD5E1" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => router.push("/user/bundles" as any)}
-              className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800"
-            >
-              <View className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-900/20 items-center justify-center mr-4">
-                <Feather name="package" size={22} color="#FF8A50" />
-              </View>
-              <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
-                My Bundles
-              </Text>
-              <Feather name="chevron-right" size={20} color="#CBD5E1" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => router.push("/user/coupons" as any)}
-              className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800"
-            >
-              <View className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-900/20 items-center justify-center mr-4">
-                <Feather name="gift" size={22} color="#FF8A50" />
-              </View>
-              <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
-                My Coupons
-              </Text>
-              <Feather name="chevron-right" size={20} color="#CBD5E1" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => router.push("/user/wallet")}
-              className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800"
-            >
-              <View className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 items-center justify-center mr-4">
-                <Ionicons name="wallet-outline" size={22} color="#3B82F6" />
-              </View>
-              <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
-                Wallet
-              </Text>
-              <Feather name="chevron-right" size={20} color="#CBD5E1" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
+              activeOpacity={0.9}
               onPress={() => router.push("/user/profile")}
-              className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800"
+              className="rounded-[28px] overflow-hidden"
+              style={{ backgroundColor: FOREST }}
             >
-              <View className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-700/20 items-center justify-center mr-4">
-                <Feather name="settings" size={22} color="#6B7280" />
+              <View className="absolute right-0 top-0">
+                <DotField />
               </View>
-              <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
-                Account Settings
-              </Text>
-              <Feather name="chevron-right" size={20} color="#CBD5E1" />
+              <View className="flex-row items-center px-5 pt-5">
+                {user.avatarUrl ? (
+                  <Image
+                    source={{ uri: user.avatarUrl }}
+                    className="w-12 h-12 rounded-2xl"
+                  />
+                ) : (
+                  <View className="w-12 h-12 rounded-2xl bg-sage-tint items-center justify-center">
+                    <Text className="text-base font-bold text-sage">
+                      {initials}
+                    </Text>
+                  </View>
+                )}
+                <Text
+                  numberOfLines={1}
+                  className="flex-1 ml-4 text-[26px] font-bold text-white"
+                >
+                  {user.displayName || "Student"}
+                </Text>
+                <Feather name="chevron-right" size={22} color="#FFFFFF" />
+              </View>
+
+              <View
+                className="mx-5 mt-5 border-t border-dashed"
+                style={{ borderColor: "#5D7566" }}
+              />
+
+              <View className="flex-row px-5 pt-4 pb-5">
+                <View className="flex-1 pr-3">
+                  <Text className="text-sm" style={{ color: FOREST_SOFT }}>
+                    Phone number
+                  </Text>
+                  <View className="flex-row items-center mt-1">
+                    <Text
+                      numberOfLines={1}
+                      className="text-[15px] font-semibold text-white"
+                    >
+                      {user.mobileNumber
+                        ? `+91 ${user.mobileNumber}`
+                        : "Not added"}
+                    </Text>
+                    {user.mobileVerified && (
+                      <MaterialIcons
+                        name="verified"
+                        size={15}
+                        color="#A9C4AF"
+                        style={{ marginLeft: 4 }}
+                      />
+                    )}
+                  </View>
+                </View>
+                <View
+                  className="w-px my-1"
+                  style={{ backgroundColor: "#5D7566" }}
+                />
+                <View className="flex-1 pl-4">
+                  <Text className="text-sm" style={{ color: FOREST_SOFT }}>
+                    Email
+                  </Text>
+                  <Text
+                    numberOfLines={1}
+                    className="mt-1 text-[15px] font-semibold text-white"
+                  >
+                    {user.email || "Not added"}
+                  </Text>
+                </View>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => router.push("/about" as any)}
-              className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 border-b border-gray-50 dark:border-slate-800"
+              activeOpacity={0.8}
+              onPress={() => router.push("/user/tests")}
+              className="flex-row items-center pl-5 h-[84px] overflow-hidden"
             >
-              <View className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-900/20 items-center justify-center mr-4">
-                <Feather name="info" size={22} color="#FF8A50" />
+              <View className="absolute bottom-0" style={{ right: 84 }}>
+                <ProgressTrail />
               </View>
-              <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
-                About the App
-              </Text>
-              <Feather name="chevron-right" size={20} color="#CBD5E1" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => {
-                let message = `Hello, I need help. I'm ${user?.displayName || "a user"}.`;
-                if (user?.email) message += ` Email: ${user.email}`;
-                const supportUrl = process.env.EXPO_PUBLIC_SUPPORT_URL;
-                Linking.openURL(
-                  `${supportUrl}?text=${encodeURIComponent(message)}`,
-                );
-              }}
-              className="flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50"
-            >
-              <View className="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-900/20 items-center justify-center mr-4">
-                <Feather name="headphones" size={22} color="#22C55E" />
+              <View className="flex-row items-center flex-1">
+                <Text className="text-[16px] font-semibold text-sage dark:text-sage-light">
+                  Tests completed
+                </Text>
+                <View className="ml-2 w-6 h-6 rounded-full bg-sage items-center justify-center">
+                  <Feather name="arrow-right" size={14} color="#FFFFFF" />
+                </View>
               </View>
-              <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-lg">
-                Help & Support
+              <Text className="w-[84px] pr-6 text-right text-[44px] font-light text-ink dark:text-white">
+                {count(loadingTests, completedTests)}
               </Text>
-              <Feather name="chevron-right" size={20} color="#CBD5E1" />
             </TouchableOpacity>
           </View>
 
-          {/* Logout Section */}
+          <View className="flex-row mt-6" style={{ gap: 12 }}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => router.push("/user/tests")}
+              className="flex-1 h-[148px] rounded-3xl bg-sand dark:bg-night-raised overflow-hidden"
+            >
+              <View className="px-4 pt-4">
+                <Text className="text-[17px] font-semibold text-ink dark:text-white">
+                  My tests
+                </Text>
+                <Text className="mt-0.5 text-sm text-ink-soft dark:text-night-soft">
+                  {count(loadingTests, totalTests)} enrolled
+                </Text>
+              </View>
+              <View className="absolute right-0 bottom-0">
+                <TestsArt />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => router.push("/user/courses")}
+              className="flex-1 h-[148px] rounded-3xl bg-sand dark:bg-night-raised overflow-hidden"
+            >
+              <View className="px-4 pt-4">
+                <Text className="text-[17px] font-semibold text-ink dark:text-white">
+                  My courses
+                </Text>
+                <Text className="mt-0.5 text-sm text-ink-soft dark:text-night-soft">
+                  {count(loadingCourses, totalCourses)} enrolled
+                </Text>
+              </View>
+              <View className="absolute right-0 bottom-0">
+                <CoursesArt />
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => router.push("/user/products")}
+            className="mt-3 flex-row items-center rounded-3xl border border-line dark:border-night-line bg-white dark:bg-night-raised px-5 py-4"
+          >
+            <View className="flex-1">
+              <Text className="text-[17px] font-semibold text-ink dark:text-white">
+                My notes
+              </Text>
+              <Text className="mt-0.5 text-sm text-ink-soft dark:text-night-soft">
+                {count(loadingProducts, totalProducts)} purchased
+              </Text>
+            </View>
+            <NotesStack />
+          </TouchableOpacity>
+
+          <Text className="mt-9 mb-3 px-1 text-[22px] font-bold text-ink dark:text-white">
+            Purchases
+          </Text>
+          <View className="rounded-3xl border border-line dark:border-night-line bg-white dark:bg-night-raised overflow-hidden">
+            <MenuRow
+              icon="shopping-bag"
+              label="Orders"
+              detail="Payments and receipts"
+              onPress={() => router.push("/user/orders")}
+            />
+            <MenuRow
+              icon="package"
+              label="Bundles"
+              detail={
+                loadingBundles
+                  ? undefined
+                  : totalBundles > 0
+                    ? `${totalBundles} owned`
+                    : "Courses, tests and notes together"
+              }
+              onPress={() => router.push("/user/bundles" as any)}
+            />
+            <MenuRow
+              icon="gift"
+              label="Coupons"
+              detail="Rewards from Spin and Win"
+              onPress={() => router.push("/user/coupons" as any)}
+            />
+            <MenuRow
+              icon="credit-card"
+              label="Wallet"
+              detail="Balance, T-coins and withdrawals"
+              onPress={() => router.push("/user/wallet")}
+              last
+            />
+          </View>
+
+          <Text className="mt-9 mb-3 px-1 text-[22px] font-bold text-ink dark:text-white">
+            Account
+          </Text>
+          <View className="rounded-3xl border border-line dark:border-night-line bg-white dark:bg-night-raised overflow-hidden">
+            <MenuRow
+              icon="user"
+              label="Edit profile"
+              detail="Name, bio and mobile number"
+              onPress={() => router.push("/user/profile")}
+            />
+            <MenuRow
+              icon="headphones"
+              label="Help and support"
+              detail="Chat with us on WhatsApp"
+              onPress={openSupport}
+            />
+            <MenuRow
+              icon="info"
+              label="About Testkart"
+              onPress={() => router.push("/about" as any)}
+              last
+            />
+          </View>
+
           <TouchableOpacity
             onPress={handleLogout}
-            className="p-4 px-10 bg-red-50 dark:bg-red-950/10 rounded-2xl border border-red-100 dark:border-red-900/20 flex-row items-center justify-center self-center"
+            className="mt-6 h-14 rounded-2xl border border-line dark:border-night-line flex-row items-center justify-center"
           >
-            <Feather name="log-out" size={18} color="#EF4444" />
-            <Text className="text-red-500 font-black text-base ml-2">
-              Sign Out
+            <Feather name="log-out" size={18} color="#B42318" />
+            <Text className="ml-2 text-base font-bold text-[#B42318] dark:text-[#F97066]">
+              Sign out
             </Text>
           </TouchableOpacity>
 
-          {/* App Version & Copyright */}
           <View className="items-center pt-8">
-            <Text className="text-slate-500 dark:text-slate-400 font-bold text-xs">
+            <Text className="text-ink-soft dark:text-night-soft text-xs">
               Version {version} (Build {buildNumber})
             </Text>
-            <Text className="text-slate-400 dark:text-slate-500 font-bold text-xs mt-2">
-              © {new Date().getFullYear()} Testkart. All rights reserved.
-            </Text>
-            <Text className="text-slate-300 dark:text-slate-600 font-medium text-[11px] mt-1">
-              Made with care for learners across India.
+            <Text className="text-ink-soft dark:text-night-soft text-xs mt-1">
+              © {new Date().getFullYear()} Testkart. Made with care for learners
+              across India.
             </Text>
           </View>
         </View>
-
-        <View className="h-10" />
       </ScrollView>
 
       <BottomTabs />

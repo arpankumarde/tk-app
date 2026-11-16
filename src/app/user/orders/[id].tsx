@@ -41,16 +41,16 @@ const statusColors: Record<
     label: "Failed",
   },
   refunded: {
-    bg: "bg-gray-100 dark:bg-slate-800",
-    text: "text-slate-700 dark:text-slate-200",
+    bg: "bg-sand dark:bg-night-raised",
+    text: "text-ink dark:text-night-soft",
     label: "Refunded",
   },
 };
 
 const getStatusStyle = (status: OrderStatus) =>
   statusColors[status] || {
-    bg: "bg-gray-50 dark:bg-gray-900/20",
-    text: "text-gray-600 dark:text-gray-400",
+    bg: "bg-sand dark:bg-night-raised",
+    text: "text-ink-soft dark:text-night-soft",
     label: status,
   };
 
@@ -88,7 +88,7 @@ export default function OrderDetailsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-white dark:bg-slate-950 items-center justify-center">
+      <SafeAreaView className="flex-1 bg-paper dark:bg-night items-center justify-center">
         <ActivityIndicator color="#FF8A50" size="large" />
       </SafeAreaView>
     );
@@ -96,28 +96,28 @@ export default function OrderDetailsScreen() {
 
   if (error || !order) {
     return (
-      <SafeAreaView className="flex-1 bg-white dark:bg-slate-950">
+      <SafeAreaView className="flex-1 bg-paper dark:bg-night">
         <StatusBar
           barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
         />
         <View className="flex-row items-center px-6 py-4">
           <TouchableOpacity
             onPress={() => router.back()}
-            className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 items-center justify-center mr-3"
+            className="w-10 h-10 rounded-full bg-sand dark:bg-night-raised items-center justify-center mr-3"
           >
             <Feather
-              name="arrow-left"
-              size={20}
-              color={colorScheme === "dark" ? "#fff" : "#1E293B"}
+              name="chevron-left"
+              size={22}
+              color={colorScheme === "dark" ? "#fff" : "#25231F"}
             />
           </TouchableOpacity>
-          <Text className="text-xl font-black text-slate-800 dark:text-white">
+          <Text className="text-xl font-extrabold text-ink dark:text-white">
             Order Details
           </Text>
         </View>
         <View className="flex-1 items-center justify-center px-6">
-          <Feather name="alert-circle" size={48} color="#CBD5E1" />
-          <Text className="text-slate-400 font-bold mt-3 text-base text-center">
+          <Feather name="alert-circle" size={48} color="#B5AEA3" />
+          <Text className="text-ink dark:text-white font-bold mt-3 text-base text-center">
             {error || "Order not found"}
           </Text>
         </View>
@@ -128,7 +128,7 @@ export default function OrderDetailsScreen() {
   const style = getStatusStyle(order.status);
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-slate-950">
+    <SafeAreaView className="flex-1 bg-paper dark:bg-night">
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
@@ -137,24 +137,24 @@ export default function OrderDetailsScreen() {
       <View className="flex-row items-center px-6 py-4">
         <TouchableOpacity
           onPress={() => router.back()}
-          className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 items-center justify-center mr-3"
+          className="w-10 h-10 rounded-full bg-sand dark:bg-night-raised items-center justify-center mr-3"
         >
           <Feather
-            name="arrow-left"
-            size={20}
-            color={colorScheme === "dark" ? "#fff" : "#1E293B"}
+            name="chevron-left"
+            size={22}
+            color={colorScheme === "dark" ? "#fff" : "#25231F"}
           />
         </TouchableOpacity>
         <View className="flex-1">
-          <Text className="text-xl font-black text-slate-800 dark:text-white">
+          <Text className="text-xl font-extrabold text-ink dark:text-white">
             Order #{order.id}
           </Text>
-          <Text className="text-slate-400 dark:text-slate-500 font-bold text-xs">
+          <Text className="text-ink-soft dark:text-night-soft font-bold text-xs">
             {formatDate(order.createdAt)}
           </Text>
         </View>
         <View className={`${style.bg} px-3 py-1.5 rounded-full`}>
-          <Text className={`${style.text} font-black text-xs uppercase`}>
+          <Text className={`${style.text} font-extrabold text-xs uppercase`}>
             {style.label}
           </Text>
         </View>
@@ -167,45 +167,45 @@ export default function OrderDetailsScreen() {
       >
         {/* Items */}
         <View className="px-6 mt-2">
-          <Text className="text-lg font-black text-slate-800 dark:text-white mb-3">
+          <Text className="text-lg font-extrabold text-ink dark:text-white mb-3">
             Items ({order.items?.length || 0})
           </Text>
 
-          <View className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 overflow-hidden">
+          <View className="bg-white dark:bg-night rounded-3xl border border-line dark:border-night-line overflow-hidden">
             {order.items?.map((item, index) => (
               <View
                 key={item.orderItemId}
-                className={`flex-row items-center p-4 ${index !== order.items.length - 1 ? "border-b border-gray-50 dark:border-slate-800" : ""}`}
+                className={`flex-row items-center p-4 ${index !== order.items.length - 1 ? "border-b border-line dark:border-night-line" : ""}`}
               >
                 {item.thumbnailUrl || getPlaceholder(item.itemType) ? (
                   <Image
                     source={{
                       uri: item.thumbnailUrl || getPlaceholder(item.itemType)!,
                     }}
-                    className="w-16 h-16 rounded-xl mr-3"
+                    className="w-24 aspect-video rounded-xl mr-3 bg-sand dark:bg-night"
                     resizeMode="cover"
                   />
                 ) : (
-                  <View className="w-16 h-16 rounded-xl bg-slate-100 dark:bg-slate-800 mr-3 items-center justify-center">
-                    <Feather name="package" size={20} color="#94A3B8" />
+                  <View className="w-24 aspect-video rounded-xl bg-sand dark:bg-night-raised mr-3 items-center justify-center">
+                    <Feather name="package" size={20} color="#968E82" />
                   </View>
                 )}
 
                 <View className="flex-1">
                   <Text
-                    className="text-slate-800 dark:text-white font-black text-base"
+                    className="text-ink dark:text-white font-extrabold text-base"
                     numberOfLines={2}
                   >
                     {item.title}
                   </Text>
-                  <View className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full self-start mt-1">
-                    <Text className="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase">
+                  <View className="bg-sand dark:bg-night-raised px-2 py-0.5 rounded-full self-start mt-1">
+                    <Text className="text-ink-soft dark:text-night-soft font-bold text-[10px] uppercase">
                       {item.itemType}
                     </Text>
                   </View>
                 </View>
 
-                <Text className="text-slate-800 dark:text-white font-black text-base ml-2">
+                <Text className="text-ink dark:text-white font-extrabold text-base ml-2">
                   ₹{item.priceAtPurchase}
                 </Text>
               </View>
@@ -215,13 +215,13 @@ export default function OrderDetailsScreen() {
 
         {/* Payment Summary */}
         <View className="px-6 mt-6">
-          <Text className="text-lg font-black text-slate-800 dark:text-white mb-3">
+          <Text className="text-lg font-extrabold text-ink dark:text-white mb-3">
             Payment Summary
           </Text>
 
-          <View className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 p-5">
+          <View className="bg-white dark:bg-night rounded-3xl border border-line dark:border-night-line p-5">
             {order.paymentFailure?.message && (
-              <View className="flex-row items-start mb-3 pb-3 border-b border-gray-100 dark:border-slate-800">
+              <View className="flex-row items-start mb-3 pb-3 border-b border-line dark:border-night-line">
                 <Feather
                   name="alert-circle"
                   size={16}
@@ -229,31 +229,31 @@ export default function OrderDetailsScreen() {
                   style={{ marginTop: 2 }}
                 />
                 <View className="flex-1 ml-2">
-                  <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+                  <Text className="text-ink-soft dark:text-night-soft font-bold text-sm">
                     Reason
                   </Text>
-                  <Text className="text-slate-700 dark:text-slate-200 font-bold text-sm mt-0.5">
+                  <Text className="text-ink dark:text-night-soft font-bold text-sm mt-0.5">
                     {order.paymentFailure.message}
                   </Text>
                 </View>
               </View>
             )}
             {order.status === "refunded" && (
-              <View className="flex-row items-start mb-3 pb-3 border-b border-gray-100 dark:border-slate-800">
+              <View className="flex-row items-start mb-3 pb-3 border-b border-line dark:border-night-line">
                 <Feather
                   name="rotate-ccw"
                   size={16}
-                  color={colorScheme === "dark" ? "#CBD5E1" : "#334155"}
+                  color={colorScheme === "dark" ? "#B5AEA3" : "#3A3731"}
                   style={{ marginTop: 2 }}
                 />
                 <View className="flex-1 ml-2">
-                  <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+                  <Text className="text-ink-soft dark:text-night-soft font-bold text-sm">
                     {order.refund?.refundedAt
                       ? `Refunded on ${new Date(order.refund.refundedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`
                       : "Refunded"}
                   </Text>
                   {order.refund?.reason ? (
-                    <Text className="text-slate-700 dark:text-slate-200 font-bold text-sm mt-0.5">
+                    <Text className="text-ink dark:text-night-soft font-bold text-sm mt-0.5">
                       {order.refund.reason}
                     </Text>
                   ) : null}
@@ -262,11 +262,11 @@ export default function OrderDetailsScreen() {
             )}
             {order.paymentTransactionId && (
               <View className="flex-row items-center justify-between mb-3">
-                <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+                <Text className="text-ink-soft dark:text-night-soft font-bold text-sm">
                   Transaction ID
                 </Text>
                 <Text
-                  className="text-slate-700 dark:text-slate-200 font-bold text-sm"
+                  className="text-ink dark:text-night-soft font-bold text-sm"
                   numberOfLines={1}
                 >
                   {order.paymentTransactionId}
@@ -274,11 +274,11 @@ export default function OrderDetailsScreen() {
               </View>
             )}
 
-            <View className="flex-row items-center justify-between pt-3 border-t border-gray-100 dark:border-slate-800">
-              <Text className="text-slate-800 dark:text-white font-black text-base">
+            <View className="flex-row items-center justify-between pt-3 border-t border-line dark:border-night-line">
+              <Text className="text-ink dark:text-white font-extrabold text-base">
                 Total
               </Text>
-              <Text className="text-primary font-black text-xl">
+              <Text className="text-primary-deep dark:text-primary font-extrabold text-xl">
                 ₹{order.totalAmount}
               </Text>
             </View>

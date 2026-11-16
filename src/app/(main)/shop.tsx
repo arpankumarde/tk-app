@@ -1,5 +1,5 @@
 import BottomTabs from "@/components/BottomTabs";
-import Header from "@/components/Header";
+import StoreHeader from "@/components/StoreHeader";
 import ProductCard from "@/components/ProductCard";
 import Feather from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
@@ -10,7 +10,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
@@ -156,29 +155,29 @@ function FilterSidebarContent({
 
       {/* Sheet with Manual Slide */}
       <Animated.View
-        className="absolute bottom-0 w-full bg-white dark:bg-slate-900 rounded-t-[40px] shadow-2xl overflow-hidden"
+        className="absolute bottom-0 w-full bg-white dark:bg-night rounded-t-[40px] shadow-2xl overflow-hidden"
         style={[{ height: sheetHeight }, animatedStyle]}
       >
         <SafeAreaView
           edges={["bottom"]}
           className="flex-1"
-          style={{ backgroundColor: isDark ? "#0f172a" : "#ffffff" }}
+          style={{ backgroundColor: isDark ? "#18121A" : "#ffffff" }}
         >
           {/* Drag Handle Container */}
           <View className="items-center pt-3 pb-1">
-            <View className="w-12 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full" />
+            <View className="w-12 h-1.5 bg-line dark:bg-night-line rounded-full" />
           </View>
 
-          <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
+          <View className="flex-row items-center justify-between px-6 py-4 border-b border-line dark:border-night-line">
             <View className="flex-row items-center">
-              <Text className="text-2xl font-black text-slate-800 dark:text-white">
+              <Text className="text-2xl font-extrabold text-ink dark:text-white">
                 Filters
               </Text>
               <TouchableOpacity
                 onPress={clearAll}
-                className="ml-4 px-3 py-1 bg-gray-50 dark:bg-slate-800 rounded-full"
+                className="ml-4 px-3 py-1 bg-sand dark:bg-night-raised rounded-full"
               >
-                <Text className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                <Text className="text-xs font-bold text-ink-soft dark:text-night-soft">
                   Clear All
                 </Text>
               </TouchableOpacity>
@@ -187,7 +186,7 @@ function FilterSidebarContent({
               <Feather
                 name="x"
                 size={24}
-                color={isDark ? "#94a3b8" : "#64748b"}
+                color={isDark ? "#9A8A93" : "#6E5D66"}
               />
             </TouchableOpacity>
           </View>
@@ -198,24 +197,24 @@ function FilterSidebarContent({
           >
             {/* Search */}
             <View className="mb-8">
-              <Text className="text-base font-bold text-slate-800 dark:text-white mb-3">
+              <Text className="text-base font-bold text-ink dark:text-white mb-3">
                 Search
               </Text>
-              <View className="flex-row items-center bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-4 py-1">
-                <Feather name="search" size={18} color="#94a3b8" />
+              <View className="flex-row items-center bg-sand dark:bg-night-raised/50 rounded-2xl border border-line dark:border-night-line px-4 py-1">
+                <Feather name="search" size={18} color="#9A8A93" />
                 <TextInput
                   value={search}
                   onChangeText={setSearch}
                   placeholder="Search products..."
-                  placeholderTextColor={isDark ? "#64748b" : "#94a3b8"}
-                  className="flex-1 ml-3 h-12 text-slate-800 dark:text-white"
+                  placeholderTextColor={isDark ? "#6E5D66" : "#9A8A93"}
+                  className="flex-1 ml-3 h-12 text-ink dark:text-white"
                 />
               </View>
             </View>
 
             {/* Category */}
             <View className="mb-8">
-              <Text className="text-base font-bold text-slate-800 dark:text-white mb-4">
+              <Text className="text-base font-bold text-ink dark:text-white mb-4">
                 Category
               </Text>
               <View className="flex-row flex-wrap gap-2">
@@ -227,15 +226,15 @@ function FilterSidebarContent({
                       onPress={() => setSelectedCats([cat])}
                       className={`px-4 py-2 rounded-xl border ${
                         isActive
-                          ? "bg-orange-50 border-primary"
-                          : "bg-gray-50 dark:bg-slate-800/50 border-gray-100 dark:border-slate-700"
+                          ? "bg-clay-tint border-primary"
+                          : "bg-sand dark:bg-night-raised/50 border-line dark:border-night-line"
                       }`}
                     >
                       <Text
                         className={`text-sm font-bold ${
                           isActive
-                            ? "text-primary"
-                            : "text-slate-500 dark:text-slate-400"
+                            ? "text-primary-deep dark:text-primary"
+                            : "text-ink-soft dark:text-night-soft"
                         }`}
                       >
                         {cat}
@@ -248,7 +247,7 @@ function FilterSidebarContent({
 
             {/* Price Range */}
             <View className="mb-8">
-              <Text className="text-base font-bold text-slate-800 dark:text-white mb-4">
+              <Text className="text-base font-bold text-ink dark:text-white mb-4">
                 Price Range (₹)
               </Text>
               <View className="flex-row items-center">
@@ -256,45 +255,45 @@ function FilterSidebarContent({
                   value={minPrice}
                   onChangeText={setMinPrice}
                   placeholder="Min"
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor="#9A8A93"
                   keyboardType="numeric"
-                  className="flex-1 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-4 py-4 text-slate-800 dark:text-white font-bold"
+                  className="flex-1 bg-sand dark:bg-night-raised/50 rounded-2xl border border-line dark:border-night-line px-4 py-4 text-ink dark:text-white font-bold"
                 />
-                <Text className="text-slate-400 mx-3 font-bold">-</Text>
+                <Text className="text-ink-soft mx-3 font-bold">-</Text>
                 <TextInput
                   value={maxPrice}
                   onChangeText={setMaxPrice}
                   placeholder="Max"
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor="#9A8A93"
                   keyboardType="numeric"
-                  className="flex-1 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-4 py-4 text-slate-800 dark:text-white font-bold"
+                  className="flex-1 bg-sand dark:bg-night-raised/50 rounded-2xl border border-line dark:border-night-line px-4 py-4 text-ink dark:text-white font-bold"
                 />
               </View>
             </View>
 
             {/* Language */}
             <View className="mb-10">
-              <Text className="text-base font-bold text-slate-800 dark:text-white mb-4">
+              <Text className="text-base font-bold text-ink dark:text-white mb-4">
                 Language
               </Text>
               <TouchableOpacity
                 onPress={() => setShowLanguageModal(true)}
-                className="flex-row items-center justify-between bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700 px-5 py-4"
+                className="flex-row items-center justify-between bg-sand dark:bg-night-raised/50 rounded-2xl border border-line dark:border-night-line px-5 py-4"
               >
-                <Text className="text-slate-800 dark:text-white font-medium">
+                <Text className="text-ink dark:text-white font-medium">
                   {lang}
                 </Text>
-                <Feather name="chevron-down" size={18} color="#94a3b8" />
+                <Feather name="chevron-down" size={18} color="#9A8A93" />
               </TouchableOpacity>
             </View>
           </ScrollView>
 
-          <View className="p-6 border-t border-gray-100 dark:border-slate-800">
+          <View className="p-6 border-t border-line dark:border-night-line">
             <TouchableOpacity
               onPress={handleApply}
-              className="bg-primary h-14 rounded-2xl items-center justify-center shadow-lg shadow-orange-500/30"
+              className="bg-primary-deep h-14 rounded-2xl items-center justify-center shadow-lg shadow-orange-500/30"
             >
-              <Text className="text-white text-lg font-black">
+              <Text className="text-white text-lg font-extrabold">
                 Apply Filters
               </Text>
             </TouchableOpacity>
@@ -312,9 +311,9 @@ function FilterSidebarContent({
           onPress={() => setShowLanguageModal(false)}
           className="flex-1 bg-black/20 justify-center items-center px-10"
         >
-          <View className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-[300px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-700">
-            <View className="p-5 border-b border-gray-50 dark:border-slate-700/50">
-              <Text className="text-lg font-black text-slate-800 dark:text-white">
+          <View className="bg-white dark:bg-night rounded-3xl w-full max-w-[300px] overflow-hidden shadow-2xl border border-line dark:border-night-line">
+            <View className="p-5 border-b border-line dark:border-night-line">
+              <Text className="text-lg font-extrabold text-ink dark:text-white">
                 Select Language
               </Text>
             </View>
@@ -329,11 +328,11 @@ function FilterSidebarContent({
                     setLang(l);
                     setShowLanguageModal(false);
                   }}
-                  className={`px-6 py-4 border-b border-gray-50 dark:border-slate-700/30 ${lang === l ? "bg-orange-50 dark:bg-orange-900/10" : ""}`}
+                  className={`px-6 py-4 border-b border-line dark:border-night-line/30 ${lang === l ? "bg-clay-tint dark:bg-night-raised" : ""}`}
                 >
                   <View className="flex-row items-center justify-between">
                     <Text
-                      className={`text-base ${lang === l ? "text-primary font-bold" : "text-slate-600 dark:text-slate-300"}`}
+                      className={`text-base ${lang === l ? "text-primary-deep dark:text-primary font-bold" : "text-ink-soft dark:text-night-soft"}`}
                     >
                       {l}
                     </Text>
@@ -495,45 +494,30 @@ const ShopScreen = () => {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-900"
+      className="flex-1 bg-paper dark:bg-night"
     >
-      <StatusBar
-        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={colorScheme === "dark" ? "#0f172a" : "#ffffff"}
-      />
-      <Header />
+      <StoreHeader />
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        className="bg-white dark:bg-slate-900"
+        className="bg-paper dark:bg-night"
       >
-        {/* Hero Section */}
-        <View className="px-6 pt-5 pb-4">
-          <Text className="text-[34px] font-extrabold text-slate-800 dark:text-white leading-[40px]">
-            Buy Study Notes Online
-          </Text>
-
-          <Text className="text-slate-500 dark:text-slate-400 mt-2 text-[15px] leading-6 pr-6">
-            Premium notes, eBooks, and practice resources curated for faster
-            exam prep.
-          </Text>
-        </View>
-
+        <View className="h-4" />
         {/* Filters & Sorting */}
         <View className="px-6 mb-8 flex-row items-center">
           <TouchableOpacity
             onPress={() => setShowFilterSidebar(true)}
-            className="flex-row items-center border border-orange-200 dark:border-orange-800/80 bg-white dark:bg-slate-800 px-4 py-2.5 rounded-xl mr-3 shadow-sm"
+            className="flex-row items-center border border-line dark:border-night-line bg-white dark:bg-night-raised px-4 py-2.5 rounded-xl mr-3 shadow-sm"
           >
             <Feather name="filter" size={16} color="#FF8A50" />
-            <Text className="ml-2 text-primary font-bold text-sm">Filters</Text>
+            <Text className="ml-2 text-primary-deep dark:text-primary font-bold text-sm">Filters</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => setShowSortModal(true)}
-            className="flex-row items-center border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 rounded-xl flex-1 shadow-sm justify-between"
+            className="flex-row items-center border border-line dark:border-night-line bg-white dark:bg-night-raised px-4 py-2.5 rounded-xl flex-1 shadow-sm justify-between"
           >
             <Text
-              className="text-slate-600 dark:text-slate-300 font-bold text-sm"
+              className="text-ink-soft dark:text-night-soft font-bold text-sm"
               numberOfLines={1}
             >
               {activeSortLabel}
@@ -541,7 +525,7 @@ const ShopScreen = () => {
             <Feather
               name="chevron-down"
               size={16}
-              color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
+              color={colorScheme === "dark" ? "#9A8A93" : "#6E5D66"}
             />
           </TouchableOpacity>
         </View>
@@ -555,7 +539,7 @@ const ShopScreen = () => {
               onPress={() => fetchProducts(currentPage)}
               className="mt-2"
             >
-              <Text className="text-primary text-center font-bold underline">
+              <Text className="text-primary-deep dark:text-primary text-center font-bold underline">
                 Retry
               </Text>
             </TouchableOpacity>
@@ -563,9 +547,9 @@ const ShopScreen = () => {
         )}
 
         <View className="px-6 mb-4">
-          <Text className="text-slate-600 dark:text-slate-400 text-base">
+          <Text className="text-ink-soft dark:text-night-soft text-base">
             Found{" "}
-            <Text className="text-slate-900 dark:text-white font-black">
+            <Text className="text-ink dark:text-white font-extrabold">
               {totalCount}
             </Text>{" "}
             products
@@ -585,32 +569,32 @@ const ShopScreen = () => {
               ))
             ) : (
               <View className="items-center justify-center py-20 px-8">
-                <View className="w-20 h-20 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mb-6">
+                <View className="w-20 h-20 bg-sand dark:bg-night-raised rounded-full items-center justify-center mb-6">
                   <Feather
                     name="shopping-bag"
                     size={40}
-                    color={colorScheme === "dark" ? "#334155" : "#cbd5e1"}
+                    color={colorScheme === "dark" ? "#3A3731" : "#B5AEA3"}
                   />
                 </View>
-                <Text className="text-xl font-bold text-slate-800 dark:text-white mb-2 text-center">
+                <Text className="w-full text-xl font-bold text-ink dark:text-white mb-2 text-center">
                   No products found
                 </Text>
-                <Text className="text-slate-500 dark:text-slate-400 text-center">
+                <Text className="text-ink-soft dark:text-night-soft text-center">
                   Try adjusting your filters or sorting to find what you&apos;re
                   looking for.
                 </Text>
                 <TouchableOpacity
                   onPress={() => fetchProducts(currentPage)}
-                  className="mt-6 px-6 py-2 bg-orange-50 dark:bg-orange-900/20 rounded-full"
+                  className="mt-6 px-6 py-2 bg-clay-tint dark:bg-night-raised rounded-full"
                 >
-                  <Text className="text-primary font-bold">Refresh</Text>
+                  <Text className="text-primary-deep dark:text-primary font-bold">Refresh</Text>
                 </TouchableOpacity>
               </View>
             )}
 
             {products.length > 0 && (
               <View className="px-6 pt-2">
-                <Text className="text-center text-sm text-slate-500 dark:text-slate-400 mb-3">
+                <Text className="text-center text-sm text-ink-soft dark:text-night-soft mb-3">
                   Showing page {currentPage} of {Math.max(totalPages, 1)}
                 </Text>
 
@@ -620,15 +604,15 @@ const ShopScreen = () => {
                     disabled={loading || currentPage <= 1}
                     className={`px-3 py-2 rounded-lg border mr-2 ${
                       currentPage <= 1
-                        ? "border-gray-100 dark:border-slate-700"
-                        : "border-orange-200 dark:border-orange-800/50"
+                        ? "border-line dark:border-night-line"
+                        : "border-line dark:border-night-line"
                     }`}
                   >
                     <Text
                       className={`font-bold ${
                         currentPage <= 1
-                          ? "text-slate-400 dark:text-slate-600"
-                          : "text-primary"
+                          ? "text-ink-soft dark:text-ink-soft"
+                          : "text-primary-deep dark:text-primary"
                       }`}
                     >
                       Prev
@@ -642,15 +626,15 @@ const ShopScreen = () => {
                       disabled={loading || pageNum === currentPage}
                       className={`w-9 h-9 rounded-lg items-center justify-center mx-1 border ${
                         pageNum === currentPage
-                          ? "bg-primary border-primary"
-                          : "bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700"
+                          ? "bg-primary-deep border-primary"
+                          : "bg-white dark:bg-night border-line dark:border-night-line"
                       }`}
                     >
                       <Text
                         className={`font-bold text-sm ${
                           pageNum === currentPage
                             ? "text-white"
-                            : "text-slate-700 dark:text-slate-300"
+                            : "text-ink-soft dark:text-night-soft"
                         }`}
                       >
                         {pageNum}
@@ -663,15 +647,15 @@ const ShopScreen = () => {
                     disabled={loading || currentPage >= totalPages}
                     className={`px-3 py-2 rounded-lg border ml-2 ${
                       currentPage >= totalPages
-                        ? "border-gray-100 dark:border-slate-700"
-                        : "border-orange-200 dark:border-orange-800/50"
+                        ? "border-line dark:border-night-line"
+                        : "border-line dark:border-night-line"
                     }`}
                   >
                     <Text
                       className={`font-bold ${
                         currentPage >= totalPages
-                          ? "text-slate-400 dark:text-slate-600"
-                          : "text-primary"
+                          ? "text-ink-soft dark:text-ink-soft"
+                          : "text-primary-deep dark:text-primary"
                       }`}
                     >
                       Next
@@ -694,9 +678,9 @@ const ShopScreen = () => {
             onPress={() => setShowSortModal(false)}
             className="absolute inset-0 bg-black/20"
           />
-          <View className="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-[280px] p-2 shadow-2xl border border-gray-100 dark:border-slate-700">
-            <View className="p-4 border-b border-gray-50 dark:border-slate-700/50">
-              <Text className="text-base font-black text-slate-800 dark:text-white">
+          <View className="bg-white dark:bg-night-raised rounded-3xl w-full max-w-[280px] p-2 shadow-2xl border border-line dark:border-night-line">
+            <View className="p-4 border-b border-line dark:border-night-line">
+              <Text className="text-base font-extrabold text-ink dark:text-white">
                 Sort by
               </Text>
             </View>
@@ -710,15 +694,15 @@ const ShopScreen = () => {
                 }}
                 className={`flex-row items-center justify-between px-4 py-3.5 rounded-2xl ${
                   sort === option.value
-                    ? "bg-orange-50 dark:bg-orange-900/20"
+                    ? "bg-clay-tint dark:bg-night-raised"
                     : ""
                 }`}
               >
                 <Text
                   className={`text-sm font-bold ${
                     sort === option.value
-                      ? "text-primary"
-                      : "text-slate-600 dark:text-slate-300"
+                      ? "text-primary-deep dark:text-primary"
+                      : "text-ink-soft dark:text-night-soft"
                   }`}
                 >
                   {option.label}

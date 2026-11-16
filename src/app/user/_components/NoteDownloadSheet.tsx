@@ -35,25 +35,25 @@ const ActionRow = ({
   <TouchableOpacity
     onPress={onPress}
     accessibilityRole="button"
-    className="mb-3 flex-row items-center rounded-2xl border border-gray-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
+    className="mb-3 flex-row items-center rounded-2xl border border-line bg-white p-4 dark:border-night-line dark:bg-night-raised"
   >
     <View
       className={`mr-3 h-10 w-10 items-center justify-center rounded-xl ${
-        danger ? "bg-red-600" : "bg-primary"
+        danger ? "bg-red-600" : "bg-primary-deep"
       }`}
     >
       <Feather name={icon} size={18} color="#fff" />
     </View>
     <View className="flex-1">
       <Text
-        className={`text-sm font-black ${
-          danger ? "text-red-700 dark:text-red-400" : "text-slate-800 dark:text-white"
+        className={`text-sm font-extrabold ${
+          danger ? "text-red-700 dark:text-red-400" : "text-ink dark:text-white"
         }`}
       >
         {label}
       </Text>
       {hint && (
-        <Text className="mt-0.5 text-xs font-medium text-slate-600 dark:text-slate-300">
+        <Text className="mt-0.5 text-xs font-medium text-ink-soft dark:text-night-soft">
           {hint}
         </Text>
       )}
@@ -100,16 +100,16 @@ export default function NoteDownloadSheet({
   return (
     <Modal visible transparent animationType="slide" onRequestClose={close}>
       <View className="flex-1 justify-end bg-black/60">
-        <View className="rounded-t-3xl bg-white pb-8 dark:bg-slate-900">
-          <View className="flex-row items-center justify-between border-b border-gray-100 px-6 pb-4 pt-5 dark:border-slate-800">
+        <View className="rounded-t-3xl bg-white pb-8 dark:bg-night">
+          <View className="flex-row items-center justify-between border-b border-line px-6 pb-4 pt-5 dark:border-night-line">
             <View className="flex-1 pr-4">
               <Text
-                className="text-lg font-black text-slate-800 dark:text-white"
+                className="text-lg font-extrabold text-ink dark:text-white"
                 numberOfLines={1}
               >
                 {title}
               </Text>
-              <Text className="mt-0.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+              <Text className="mt-0.5 text-xs font-bold text-ink-soft dark:text-night-soft">
                 {[saved ? "Saved on this device" : "Not saved yet", sizeLabel]
                   .filter(Boolean)
                   .join(" · ")}
@@ -119,42 +119,42 @@ export default function NoteDownloadSheet({
               onPress={close}
               accessibilityRole="button"
               accessibilityLabel="Close"
-              className="h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800"
+              className="h-9 w-9 items-center justify-center rounded-full bg-sand dark:bg-night-raised"
             >
               <Feather
                 name="x"
                 size={18}
-                color={colorScheme === "dark" ? "#fff" : "#1A1A1A"}
+                color={colorScheme === "dark" ? "#fff" : "#2D2A24"}
               />
             </TouchableOpacity>
           </View>
 
           <View className="px-4 pt-4">
             {saving ? (
-              <View className="rounded-2xl border border-gray-200 p-4 dark:border-slate-700">
+              <View className="rounded-2xl border border-line p-4 dark:border-night-line">
                 <View className="mb-3 flex-row items-center justify-between">
-                  <Text className="text-sm font-black text-slate-800 dark:text-white">
+                  <Text className="text-sm font-extrabold text-ink dark:text-white">
                     Saving to your device...
                   </Text>
-                  <Text className="text-sm font-black text-[#903209] dark:text-orange-300">
+                  <Text className="text-sm font-extrabold text-[#903209] dark:text-orange-300">
                     {percent}%
                   </Text>
                 </View>
-                <View className="h-2.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                <View className="h-2.5 overflow-hidden rounded-full bg-line dark:bg-night-line">
                   <View
-                    className="h-full rounded-full bg-primary"
+                    className="h-full rounded-full bg-primary-deep"
                     style={{ width: `${percent}%` }}
                   />
                 </View>
-                <Text className="mt-3 text-xs font-medium text-slate-600 dark:text-slate-300">
+                <Text className="mt-3 text-xs font-medium text-ink-soft dark:text-night-soft">
                   Keep this open until it finishes.
                 </Text>
                 <TouchableOpacity
                   onPress={cancel}
                   accessibilityRole="button"
-                  className="mt-4 items-center rounded-xl border border-gray-300 py-3 dark:border-slate-600"
+                  className="mt-4 items-center rounded-xl border border-line py-3 dark:border-night-line"
                 >
-                  <Text className="text-sm font-black text-slate-700 dark:text-white">
+                  <Text className="text-sm font-extrabold text-ink dark:text-white">
                     Cancel
                   </Text>
                 </TouchableOpacity>
@@ -193,17 +193,17 @@ export default function NoteDownloadSheet({
               </>
             ) : (
               <>
-                <Text className="mb-4 px-2 text-sm font-medium leading-5 text-slate-700 dark:text-slate-200">
+                <Text className="mb-4 px-2 text-sm font-medium leading-5 text-ink dark:text-night-soft">
                   Save this note to read it without internet, open it in
                   another PDF app or keep a copy in your files.
                 </Text>
                 <TouchableOpacity
                   onPress={save}
                   accessibilityRole="button"
-                  className="flex-row items-center justify-center rounded-2xl bg-primary py-4"
+                  className="flex-row items-center justify-center rounded-2xl bg-primary-deep py-4"
                 >
                   <Feather name="download" size={16} color="#fff" />
-                  <Text className="ml-2 text-sm font-black text-white">
+                  <Text className="ml-2 text-sm font-extrabold text-white">
                     {sizeLabel ? `Save to device (${sizeLabel})` : "Save to device"}
                   </Text>
                 </TouchableOpacity>

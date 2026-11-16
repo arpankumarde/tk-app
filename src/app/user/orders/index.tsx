@@ -11,7 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useColorScheme } from "nativewind";
 import { useAuth } from "@/context/AuthContext";
 import Feather from "@react-native-vector-icons/feather";
-import Header from "@/components/Header";
+import DetailHeader from "@/components/DetailHeader";
 import BottomTabs from "@/components/BottomTabs";
 import { router } from "expo-router";
 import { OrderSummary } from "../types";
@@ -34,8 +34,8 @@ const statusColors: Record<
     label: "Pending",
   },
   processing: {
-    bg: "bg-blue-50 dark:bg-blue-900/20",
-    text: "text-blue-600 dark:text-blue-400",
+    bg: "bg-sky-tint dark:bg-night-raised",
+    text: "text-sky dark:text-sky-light",
     label: "Processing",
   },
   cancelled: {
@@ -49,16 +49,16 @@ const statusColors: Record<
     label: "Failed",
   },
   refunded: {
-    bg: "bg-gray-100 dark:bg-slate-800",
-    text: "text-slate-700 dark:text-slate-200",
+    bg: "bg-sand dark:bg-night-raised",
+    text: "text-ink dark:text-night-soft",
     label: "Refunded",
   },
 };
 
 const getStatusStyle = (status: string) =>
   statusColors[status.toLowerCase()] || {
-    bg: "bg-gray-50 dark:bg-gray-900/20",
-    text: "text-gray-600 dark:text-gray-400",
+    bg: "bg-sand dark:bg-night-raised",
+    text: "text-ink-soft dark:text-night-soft",
     label: status,
   };
 
@@ -133,12 +133,12 @@ export default function OrdersScreen() {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-950"
+      className="flex-1 bg-paper dark:bg-night"
     >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
-      <Header />
+      <DetailHeader title="Orders" />
 
       <ScrollView
         className="flex-1"
@@ -146,10 +146,7 @@ export default function OrdersScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         <View className="px-6 pt-6 pb-2">
-          <Text className="text-2xl font-black text-slate-800 dark:text-white mb-1">
-            My Orders
-          </Text>
-          <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm mb-6">
+          <Text className="text-ink-soft dark:text-night-soft font-semibold text-sm mb-6">
             Your purchase history
           </Text>
         </View>
@@ -170,16 +167,16 @@ export default function OrdersScreen() {
                     onPress={() =>
                       router.push({ pathname: "/user/orders/[id]", params: { id: String(order.id) } })
                     }
-                    className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm mb-4 overflow-hidden"
+                    className="bg-white dark:bg-night rounded-3xl border border-line dark:border-night-line shadow-sm mb-4 overflow-hidden"
                   >
                     <View className="p-4">
                       <View className="flex-row items-center justify-between mb-3">
-                        <Text className="text-slate-800 dark:text-white font-black text-base">
+                        <Text className="text-ink dark:text-white font-extrabold text-base">
                           Order #{order.id}
                         </Text>
                         <View className={`${style.bg} px-3 py-1 rounded-full`}>
                           <Text
-                            className={`${style.text} font-black text-[10px] uppercase`}
+                            className={`${style.text} font-extrabold text-[10px] uppercase`}
                           >
                             {style.label}
                           </Text>
@@ -187,25 +184,25 @@ export default function OrdersScreen() {
                       </View>
 
                       <View className="flex-row items-center">
-                        <View className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 mr-3 items-center justify-center">
-                          <Feather name="package" size={18} color="#94A3B8" />
+                        <View className="w-10 h-10 rounded-xl bg-sand dark:bg-night-raised mr-3 items-center justify-center">
+                          <Feather name="package" size={18} color="#968E82" />
                         </View>
-                        <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm flex-1">
+                        <Text className="text-ink-soft dark:text-night-soft font-bold text-sm flex-1">
                           {order.itemCount} item
                           {order.itemCount !== 1 ? "s" : ""}
                         </Text>
                         <Feather
                           name="chevron-right"
                           size={20}
-                          color="#CBD5E1"
+                          color="#B5AEA3"
                         />
                       </View>
 
-                      <View className="flex-row items-center justify-between mt-3 pt-3 border-t border-gray-50 dark:border-slate-800">
-                        <Text className="text-slate-400 dark:text-slate-500 font-bold text-xs">
+                      <View className="flex-row items-center justify-between mt-3 pt-3 border-t border-line dark:border-night-line">
+                        <Text className="text-ink-soft dark:text-night-soft font-bold text-xs">
                           {formatDate(order.createdAt)}
                         </Text>
-                        <Text className="text-slate-800 dark:text-white font-black text-base">
+                        <Text className="text-ink dark:text-white font-extrabold text-base">
                           ₹{order.totalAmount}
                         </Text>
                       </View>
@@ -223,7 +220,7 @@ export default function OrdersScreen() {
                   {loadingMore ? (
                     <ActivityIndicator color="#FF8A50" />
                   ) : (
-                    <Text className="text-primary font-black text-sm">
+                    <Text className="text-primary-deep dark:text-primary font-extrabold text-sm">
                       Load More
                     </Text>
                   )}
@@ -231,12 +228,12 @@ export default function OrdersScreen() {
               )}
             </>
           ) : (
-            <View className="bg-white dark:bg-slate-900 p-12 rounded-3xl border border-gray-100 dark:border-slate-800 border-dashed items-center">
-              <Feather name="shopping-cart" size={40} color="#CBD5E1" />
-              <Text className="text-slate-400 font-bold mt-3 text-base">
+            <View className="bg-white dark:bg-night p-12 rounded-3xl border border-line dark:border-night-line border-dashed items-center">
+              <Feather name="shopping-cart" size={40} color="#B5AEA3" />
+              <Text className="text-ink dark:text-white font-bold mt-3 text-base">
                 No orders yet
               </Text>
-              <Text className="text-slate-400 text-sm mt-1 text-center">
+              <Text className="text-ink-soft text-sm mt-1 text-center">
                 Your order history will appear here
               </Text>
             </View>

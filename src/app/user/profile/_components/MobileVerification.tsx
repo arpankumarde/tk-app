@@ -153,19 +153,19 @@ export default function MobileVerification() {
 
   return (
     <>
-      <View className="flex-row items-center p-5 border-b border-gray-50 dark:border-slate-800">
+      <View className="flex-row items-center p-5 border-b border-line dark:border-night-line">
         <View className="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-900/20 items-center justify-center mr-4">
           <Feather name="phone" size={18} color="#22C55E" />
         </View>
         <View className="flex-1">
-          <Text className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">
+          <Text className="text-xs font-bold text-ink-soft dark:text-night-soft uppercase tracking-widest mb-0.5">
             Mobile
           </Text>
 
           {hasNumber ? (
             <>
               <View className="flex-row items-center">
-                <Text className="text-slate-700 dark:text-slate-200 font-bold text-[15px]">
+                <Text className="text-ink dark:text-night-soft font-bold text-[15px]">
                   {user.mobileNumber}
                 </Text>
                 {verified ? (
@@ -189,7 +189,7 @@ export default function MobileVerification() {
                 {!verified && (
                   <TouchableOpacity
                     onPress={() => openModal(user.mobileNumber ?? "")}
-                    className="bg-primary px-3 py-1.5 rounded-lg mr-3"
+                    className="bg-primary-deep px-3 py-1.5 rounded-lg mr-3"
                   >
                     <Text className="text-white font-bold text-xs">
                       Verify Now
@@ -197,7 +197,7 @@ export default function MobileVerification() {
                   </TouchableOpacity>
                 )}
                 <TouchableOpacity onPress={() => openModal("")}>
-                  <Text className="text-primary font-bold text-xs">
+                  <Text className="text-primary-deep dark:text-primary font-bold text-xs">
                     Change Number
                   </Text>
                 </TouchableOpacity>
@@ -206,7 +206,7 @@ export default function MobileVerification() {
           ) : (
             <TouchableOpacity
               onPress={() => openModal("")}
-              className="bg-primary self-start px-3 py-1.5 rounded-lg mt-1"
+              className="bg-primary-deep self-start px-3 py-1.5 rounded-lg mt-1"
             >
               <Text className="text-white font-bold text-xs">
                 Add Mobile Number
@@ -227,27 +227,27 @@ export default function MobileVerification() {
           behavior={Platform.OS === "ios" ? "padding" : undefined}
           className="flex-1 justify-end bg-black/50"
         >
-          <View className="bg-white dark:bg-slate-900 rounded-t-3xl p-6 pb-10">
+          <View className="bg-white dark:bg-night rounded-t-3xl p-6 pb-10">
             <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-xl font-black text-slate-800 dark:text-white">
+              <Text className="text-xl font-extrabold text-ink dark:text-white">
                 {step === "phone" ? "Mobile Number" : "Verify OTP"}
               </Text>
               <TouchableOpacity
                 onPress={closeModal}
                 disabled={sending || verifying}
-                className="w-9 h-9 rounded-full bg-gray-100 dark:bg-slate-800 items-center justify-center"
+                className="w-9 h-9 rounded-full bg-sand dark:bg-night-raised items-center justify-center"
               >
                 <Feather
                   name="x"
                   size={18}
-                  color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
+                  color={colorScheme === "dark" ? "#968E82" : "#6A6358"}
                 />
               </TouchableOpacity>
             </View>
 
             {step === "phone" ? (
               <>
-                <Text className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-2">
+                <Text className="text-sm font-bold text-ink-soft dark:text-night-soft mb-2">
                   Enter your mobile number
                 </Text>
                 <TextInput
@@ -255,15 +255,15 @@ export default function MobileVerification() {
                   onChangeText={setMobileNumber}
                   placeholder="10-digit mobile number"
                   placeholderTextColor={
-                    colorScheme === "dark" ? "#475569" : "#94a3b8"
+                    colorScheme === "dark" ? "#6A6358" : "#968E82"
                   }
                   keyboardType="phone-pad"
                   maxLength={13}
                   autoFocus
                   editable={!sending}
-                  className="bg-gray-50 dark:bg-slate-800 rounded-xl px-4 py-3.5 text-slate-800 dark:text-white font-bold text-base border border-gray-200 dark:border-slate-700"
+                  className="bg-sand dark:bg-night-raised rounded-xl px-4 py-3.5 text-ink dark:text-white font-bold text-base border border-line dark:border-night-line"
                 />
-                <Text className="text-xs text-slate-400 dark:text-slate-500 mt-2 mb-6">
+                <Text className="text-xs text-ink-soft dark:text-night-soft mt-2 mb-6">
                   We&apos;ll send a 4-digit OTP to verify this number.
                 </Text>
 
@@ -271,13 +271,13 @@ export default function MobileVerification() {
                   onPress={handleSendOtp}
                   disabled={sending}
                   className={`rounded-2xl py-4 items-center ${
-                    sending ? "bg-gray-200 dark:bg-slate-800" : "bg-primary"
+                    sending ? "bg-line dark:bg-night-raised" : "bg-primary-deep"
                   }`}
                 >
                   {sending ? (
                     <ActivityIndicator color="#FFFFFF" />
                   ) : (
-                    <Text className="text-white font-black text-base">
+                    <Text className="text-white font-extrabold text-base">
                       Send OTP
                     </Text>
                   )}
@@ -285,9 +285,9 @@ export default function MobileVerification() {
               </>
             ) : (
               <>
-                <Text className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-2">
+                <Text className="text-sm font-bold text-ink-soft dark:text-night-soft mb-2">
                   Enter the 4-digit OTP sent to{" "}
-                  <Text className="text-slate-800 dark:text-white">
+                  <Text className="text-ink dark:text-white">
                     {mobileNumber.trim()}
                   </Text>
                 </Text>
@@ -296,13 +296,13 @@ export default function MobileVerification() {
                   onChangeText={(t) => setOtp(t.replace(/[^0-9]/g, ""))}
                   placeholder="• • • •"
                   placeholderTextColor={
-                    colorScheme === "dark" ? "#475569" : "#94a3b8"
+                    colorScheme === "dark" ? "#6A6358" : "#968E82"
                   }
                   keyboardType="number-pad"
                   maxLength={4}
                   autoFocus
                   editable={!verifying}
-                  className="bg-gray-50 dark:bg-slate-800 rounded-xl px-4 py-3.5 text-slate-800 dark:text-white font-black text-2xl tracking-[8px] text-center border border-gray-200 dark:border-slate-700"
+                  className="w-full bg-sand dark:bg-night-raised rounded-xl px-4 py-3.5 text-ink dark:text-white font-extrabold text-2xl tracking-[8px] text-center border border-line dark:border-night-line"
                 />
 
                 <View className="flex-row items-center justify-between mt-3 mb-6">
@@ -313,7 +313,7 @@ export default function MobileVerification() {
                     }}
                     disabled={verifying}
                   >
-                    <Text className="text-slate-500 dark:text-slate-400 font-bold text-xs">
+                    <Text className="text-ink-soft dark:text-night-soft font-bold text-xs">
                       Change number
                     </Text>
                   </TouchableOpacity>
@@ -324,8 +324,8 @@ export default function MobileVerification() {
                     <Text
                       className={`font-bold text-xs ${
                         cooldown > 0
-                          ? "text-slate-400 dark:text-slate-600"
-                          : "text-primary"
+                          ? "text-ink-soft dark:text-night-soft"
+                          : "text-primary-deep dark:text-primary"
                       }`}
                     >
                       {cooldown > 0
@@ -339,13 +339,13 @@ export default function MobileVerification() {
                   onPress={handleVerifyOtp}
                   disabled={verifying}
                   className={`rounded-2xl py-4 items-center ${
-                    verifying ? "bg-gray-200 dark:bg-slate-800" : "bg-primary"
+                    verifying ? "bg-line dark:bg-night-raised" : "bg-primary-deep"
                   }`}
                 >
                   {verifying ? (
                     <ActivityIndicator color="#FFFFFF" />
                   ) : (
-                    <Text className="text-white font-black text-base">
+                    <Text className="text-white font-extrabold text-base">
                       Verify
                     </Text>
                   )}

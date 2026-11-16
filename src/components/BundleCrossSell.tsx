@@ -92,11 +92,11 @@ const BundleCrossSell = ({
     <View className="mb-8">
       <View className="flex-row items-center mb-1">
         <Feather name="package" size={18} color="#FF8A50" />
-        <Text className="ml-2 text-2xl font-black text-slate-800 dark:text-white">
+        <Text className="ml-2 text-2xl font-extrabold text-ink dark:text-white">
           Save with Bundles
         </Text>
       </View>
-      <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-4">
+      <Text className="text-ink-soft dark:text-night-soft text-sm font-medium mb-4">
         This is included in{" "}
         {matches.length === 1 ? "a bundle" : "these bundles"} — get more for
         less.

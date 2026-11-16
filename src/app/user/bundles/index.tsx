@@ -1,5 +1,5 @@
 import BottomTabs from "@/components/BottomTabs";
-import Header from "@/components/Header";
+import DetailHeader from "@/components/DetailHeader";
 import { useAuth } from "@/context/AuthContext";
 import Feather from "@react-native-vector-icons/feather";
 import { router } from "expo-router";
@@ -31,12 +31,12 @@ export default function MyBundlesScreen() {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-950"
+      className="flex-1 bg-paper dark:bg-night"
     >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
-      <Header />
+      <DetailHeader title="My bundles" />
 
       <ScrollView
         className="flex-1"
@@ -44,10 +44,7 @@ export default function MyBundlesScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         <View className="px-6 pt-6 pb-4">
-          <Text className="text-2xl font-black text-slate-800 dark:text-white mb-1">
-            My Bundles
-          </Text>
-          <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+          <Text className="text-ink-soft dark:text-night-soft font-semibold text-sm">
             Every course, test and note included in the bundles you own
           </Text>
         </View>
@@ -59,7 +56,7 @@ export default function MyBundlesScreen() {
                 {error}
               </Text>
               <TouchableOpacity onPress={refetch} className="mt-2">
-                <Text className="text-primary text-center font-bold underline">
+                <Text className="text-primary-deep dark:text-primary text-center font-bold underline">
                   Retry
                 </Text>
               </TouchableOpacity>
@@ -75,19 +72,19 @@ export default function MyBundlesScreen() {
               <EnrolledBundleCard key={bundle.id} bundle={bundle} expanded />
             ))
           ) : (
-            <View className="bg-white dark:bg-slate-900 p-12 rounded-3xl border border-gray-100 dark:border-slate-800 border-dashed items-center">
-              <Feather name="package" size={40} color="#CBD5E1" />
-              <Text className="text-slate-400 font-bold mt-3 text-base">
+            <View className="bg-white dark:bg-night p-12 rounded-3xl border border-line dark:border-night-line border-dashed items-center">
+              <Feather name="package" size={40} color="#B5AEA3" />
+              <Text className="text-ink dark:text-white font-bold mt-3 text-base">
                 No bundles yet
               </Text>
-              <Text className="text-slate-400 text-sm mt-1 text-center">
+              <Text className="text-ink-soft text-sm mt-1 text-center">
                 Bundles pack courses, tests and notes together at a lower price.
               </Text>
               <TouchableOpacity
                 onPress={() => router.push("/bundles" as any)}
-                className="mt-6 bg-primary px-8 py-3 rounded-2xl"
+                className="mt-6 bg-primary-deep px-8 py-3 rounded-2xl"
               >
-                <Text className="text-white font-black text-sm">
+                <Text className="text-white font-extrabold text-sm">
                   Browse Bundles
                 </Text>
               </TouchableOpacity>

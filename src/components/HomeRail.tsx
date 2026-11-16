@@ -1,5 +1,7 @@
 import Feather from "@react-native-vector-icons/feather";
+import { themeColors } from "@/constants/theme";
 import { router } from "expo-router";
+import { useColorScheme } from "nativewind";
 import React from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
 
@@ -18,12 +20,15 @@ function HomeRail<T>({
   keyExtractor,
   renderItem,
 }: HomeRailProps<T>) {
+  const { colorScheme } = useColorScheme();
+  const accent = themeColors(colorScheme).accentText;
+
   if (!data || data.length === 0) return null;
 
   return (
-    <View className="bg-white dark:bg-slate-900 pb-10">
-      <View className="flex-row items-end justify-between px-6 mb-4">
-        <Text className="text-2xl font-black text-slate-800 dark:text-white">
+    <View className="pb-9">
+      <View className="flex-row items-end justify-between px-5 mb-3">
+        <Text className="text-[22px] font-extrabold text-ink dark:text-white">
           {title}
         </Text>
         {viewAllHref && (
@@ -31,10 +36,10 @@ function HomeRail<T>({
             onPress={() => router.push(viewAllHref as any)}
             className="flex-row items-center pb-1"
           >
-            <Text className="text-primary font-bold text-sm mr-1">
+            <Text className="text-primary-deep dark:text-primary font-bold text-sm mr-0.5">
               View all
             </Text>
-            <Feather name="chevron-right" size={16} color="#FF8A50" />
+            <Feather name="chevron-right" size={16} color={accent} />
           </TouchableOpacity>
         )}
       </View>
@@ -44,7 +49,7 @@ function HomeRail<T>({
         horizontal
         showsHorizontalScrollIndicator={false}
         keyExtractor={keyExtractor}
-        contentContainerStyle={{ paddingHorizontal: 24, gap: 14 }}
+        contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}
         renderItem={({ item, index }) => renderItem(item, index)}
       />
     </View>

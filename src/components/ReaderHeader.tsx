@@ -23,22 +23,22 @@ export default function ReaderHeader({
   const { colorScheme } = useColorScheme();
 
   return (
-    <View className="flex-row items-center border-b border-gray-100 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
+    <View className="flex-row items-center border-b border-line bg-white px-4 py-3 dark:border-night-line dark:bg-night">
       <TouchableOpacity
         onPress={onClose}
         accessibilityRole="button"
         accessibilityLabel={icon === "x" ? "Close" : "Back"}
-        className="h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800"
+        className="h-9 w-9 items-center justify-center rounded-full bg-sand dark:bg-night-raised"
       >
         <Feather
           name={icon}
           size={18}
-          color={colorScheme === "dark" ? "#fff" : "#1A1A1A"}
+          color={colorScheme === "dark" ? "#fff" : "#2D2A24"}
         />
       </TouchableOpacity>
       <View className="ml-3 flex-1">
         <Text
-          className="text-base font-black text-slate-800 dark:text-white"
+          className="text-base font-extrabold text-ink dark:text-white"
           numberOfLines={1}
         >
           {title}
@@ -57,7 +57,7 @@ export default function ReaderHeader({
           onPress={action.onPress}
           accessibilityRole="button"
           accessibilityLabel={action.label}
-          className="ml-3 h-9 w-9 items-center justify-center rounded-full border-2 border-primary bg-white dark:bg-slate-950"
+          className="ml-3 h-9 w-9 items-center justify-center rounded-full border-2 border-primary bg-white dark:bg-night"
         >
           <Feather name={action.icon} size={16} color="#FF8A50" />
         </TouchableOpacity>

@@ -14,7 +14,7 @@ import { useAuth } from "@/context/AuthContext";
 import Feather from "@react-native-vector-icons/feather";
 import { Directory, Paths } from "expo-file-system";
 import { clearSavedNotes } from "@/utils/savedNotes";
-import Header from "@/components/Header";
+import DetailHeader from "@/components/DetailHeader";
 import BottomTabs from "@/components/BottomTabs";
 import PurchasedProductCard from "../_components/PurchasedProductCard";
 import { PurchasedProduct } from "../types";
@@ -118,12 +118,12 @@ export default function PurchasedProductsScreen() {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-950"
+      className="flex-1 bg-paper dark:bg-night"
     >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
-      <Header />
+      <DetailHeader title="My notes" />
 
       <ScrollView
         className="flex-1"
@@ -131,10 +131,7 @@ export default function PurchasedProductsScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         <View className="px-6 pt-6 pb-2">
-          <Text className="text-2xl font-black text-slate-800 dark:text-white mb-1">
-            My Purchases
-          </Text>
-          <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm mb-4">
+          <Text className="text-ink-soft dark:text-night-soft font-semibold text-sm mb-4">
             All your purchased digital products
           </Text>
 
@@ -180,7 +177,7 @@ export default function PurchasedProductsScreen() {
                   {loadingMore ? (
                     <ActivityIndicator color="#FF8A50" />
                   ) : (
-                    <Text className="text-primary font-black text-sm">
+                    <Text className="text-primary-deep dark:text-primary font-extrabold text-sm">
                       Load More
                     </Text>
                   )}
@@ -188,12 +185,12 @@ export default function PurchasedProductsScreen() {
               )}
             </>
           ) : (
-            <View className="bg-white dark:bg-slate-900 p-12 rounded-3xl border border-gray-100 dark:border-slate-800 border-dashed items-center">
-              <Feather name="shopping-bag" size={40} color="#CBD5E1" />
-              <Text className="text-slate-400 font-bold mt-3 text-base">
+            <View className="bg-white dark:bg-night p-12 rounded-3xl border border-line dark:border-night-line border-dashed items-center">
+              <Feather name="shopping-bag" size={40} color="#B5AEA3" />
+              <Text className="text-ink dark:text-white font-bold mt-3 text-base">
                 No purchases yet
               </Text>
-              <Text className="text-slate-400 text-sm mt-1 text-center">
+              <Text className="text-ink-soft text-sm mt-1 text-center">
                 Products you buy will appear here
               </Text>
             </View>

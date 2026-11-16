@@ -115,23 +115,23 @@ const ResultCard = ({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
-      className="flex-row bg-white dark:bg-slate-800 rounded-2xl p-4 mb-3 border border-gray-100 dark:border-slate-700 shadow-sm"
+      className="flex-row bg-white dark:bg-night-raised rounded-2xl p-4 mb-3 border border-line dark:border-night-line shadow-sm"
     >
       <Image
         source={{ uri: thumbnail || fallback }}
-        className="w-16 h-16 rounded-xl"
+        className="w-28 aspect-video rounded-xl bg-sand dark:bg-night self-center"
         resizeMode="cover"
       />
       <View className="flex-1 ml-3 justify-center">
         <Text
-          className="text-slate-800 dark:text-white font-black text-sm leading-tight"
+          className="text-ink dark:text-white font-extrabold text-sm leading-tight"
           numberOfLines={2}
         >
           {title}
         </Text>
         <View className="flex-row items-center mt-1">
           <Text
-            className="text-slate-500 dark:text-slate-400 text-xs font-medium"
+            className="text-ink-soft dark:text-night-soft text-xs font-medium"
             numberOfLines={1}
           >
             {subtitle}
@@ -142,14 +142,14 @@ const ResultCard = ({
         </View>
         <View className="flex-row items-center mt-1.5 gap-2">
           {badge && (
-            <View className="bg-orange-100 dark:bg-orange-900/30 px-2 py-0.5 rounded-full">
-              <Text className="text-primary text-[9px] font-black uppercase tracking-wide">
+            <View className="bg-clay-tint dark:bg-night-raised px-2 py-0.5 rounded-full">
+              <Text className="text-primary-deep dark:text-primary text-[9px] font-extrabold uppercase tracking-wide">
                 {badge}
               </Text>
             </View>
           )}
           <Text
-            className={`font-black text-sm ${price === 0 ? "text-emerald-500" : "text-slate-800 dark:text-white"}`}
+            className={`font-extrabold text-sm ${price === 0 ? "text-emerald-700 dark:text-emerald-400" : "text-ink dark:text-white"}`}
           >
             {price === 0 ? "FREE" : `₹${price}`}
           </Text>
@@ -158,7 +158,7 @@ const ResultCard = ({
       <Feather
         name="chevron-right"
         size={18}
-        color={isDark ? "#475569" : "#cbd5e1"}
+        color={isDark ? "#6A6358" : "#B5AEA3"}
         style={{ alignSelf: "center" }}
       />
     </TouchableOpacity>
@@ -189,7 +189,7 @@ const TeacherCard = ({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
-      className="flex-row items-center bg-white dark:bg-slate-800 rounded-2xl p-4 mb-3 border border-gray-100 dark:border-slate-700 shadow-sm"
+      className="flex-row items-center bg-white dark:bg-night-raised rounded-2xl p-4 mb-3 border border-line dark:border-night-line shadow-sm"
     >
       <Image
         source={{
@@ -203,7 +203,7 @@ const TeacherCard = ({
       <View className="flex-1 ml-3 justify-center">
         <View className="flex-row items-center">
           <Text
-            className="text-slate-800 dark:text-white font-black text-sm leading-tight flex-shrink"
+            className="text-ink dark:text-white font-extrabold text-sm leading-tight flex-shrink"
             numberOfLines={1}
           >
             {name}
@@ -219,14 +219,14 @@ const TeacherCard = ({
         </View>
         <View className="flex-row items-center mt-1.5 flex-wrap">
           <View className="flex-row items-center mr-3">
-            <Feather name="file-text" size={11} color="#94a3b8" />
-            <Text className="ml-1 text-slate-500 dark:text-slate-400 text-[11px] font-bold">
+            <Feather name="file-text" size={11} color="#968E82" />
+            <Text className="ml-1 text-ink-soft dark:text-night-soft text-[11px] font-bold">
               {testCount} {testCount === 1 ? "Test" : "Tests"}
             </Text>
           </View>
           <View className="flex-row items-center">
-            <Feather name="book-open" size={11} color="#94a3b8" />
-            <Text className="ml-1 text-slate-500 dark:text-slate-400 text-[11px] font-bold">
+            <Feather name="book-open" size={11} color="#968E82" />
+            <Text className="ml-1 text-ink-soft dark:text-night-soft text-[11px] font-bold">
               {courseCount} {courseCount === 1 ? "Course" : "Courses"}
             </Text>
           </View>
@@ -235,7 +235,7 @@ const TeacherCard = ({
       <Feather
         name="chevron-right"
         size={18}
-        color={isDark ? "#475569" : "#cbd5e1"}
+        color={isDark ? "#6A6358" : "#B5AEA3"}
         style={{ alignSelf: "center" }}
       />
     </TouchableOpacity>
@@ -244,11 +244,11 @@ const TeacherCard = ({
 
 const SectionHeader = ({ title, count }: { title: string; count: number }) => (
   <View className="flex-row items-center mb-3 mt-6">
-    <Text className="text-lg font-black text-slate-800 dark:text-white flex-1">
+    <Text className="text-lg font-extrabold text-ink dark:text-white flex-1">
       {title}
     </Text>
-    <View className="bg-orange-100 dark:bg-orange-900/30 px-2.5 py-1 rounded-full">
-      <Text className="text-primary text-xs font-black">{count}</Text>
+    <View className="bg-clay-tint dark:bg-night-raised px-2.5 py-1 rounded-full">
+      <Text className="text-primary-deep dark:text-primary text-xs font-extrabold">{count}</Text>
     </View>
   </View>
 );
@@ -315,29 +315,29 @@ const SearchScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-slate-900" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-paper dark:bg-night" edges={["top"]}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
-        backgroundColor={isDark ? "#0f172a" : "#ffffff"}
+        backgroundColor={isDark ? "#1A1916" : "#F8F5EF"}
       />
       {/* Search Header */}
-      <View className="flex-row items-center px-4 py-3 border-b border-gray-100 dark:border-slate-800 gap-3">
+      <View className="flex-row items-center px-4 py-3 border-b border-line dark:border-night-line gap-3">
         <TouchableOpacity
           onPress={() => router.back()}
-          className="w-10 h-10 rounded-full bg-gray-50 dark:bg-slate-800 items-center justify-center"
+          className="w-10 h-10 rounded-full bg-sand dark:bg-night-raised items-center justify-center"
         >
-          <Feather name="chevron-left" size={20} color={isDark ? "#94a3b8" : "#64748b"} />
+          <Feather name="chevron-left" size={20} color={isDark ? "#968E82" : "#6A6358"} />
         </TouchableOpacity>
 
-        <View className="flex-1 flex-row items-center bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-full px-4 h-12">
+        <View className="flex-1 flex-row items-center bg-sand dark:bg-night-raised border border-line dark:border-night-line rounded-full px-4 h-12">
           <TextInput
             ref={inputRef}
             value={query}
             onChangeText={setQuery}
             onSubmitEditing={handleSubmit}
             placeholder="Search courses, tests, notes..."
-            placeholderTextColor={isDark ? "#475569" : "#94a3b8"}
-            className="flex-1 text-slate-800 dark:text-white text-sm font-medium"
+            placeholderTextColor={isDark ? "#6A6358" : "#968E82"}
+            className="flex-1 text-ink dark:text-white text-sm font-medium"
             returnKeyType="search"
             autoFocus={!q}
           />
@@ -348,14 +348,14 @@ const SearchScreen = () => {
                 setResults(null);
               }}
             >
-              <Feather name="x" size={16} color={isDark ? "#64748b" : "#94a3b8"} />
+              <Feather name="x" size={16} color={isDark ? "#6A6358" : "#968E82"} />
             </TouchableOpacity>
           )}
         </View>
 
         <TouchableOpacity
           onPress={handleSubmit}
-          className="bg-primary px-4 h-10 rounded-full items-center justify-center shadow-sm shadow-orange-500/30"
+          className="bg-primary-deep px-4 h-10 rounded-full items-center justify-center shadow-sm shadow-orange-500/30"
         >
           <Feather name="search" size={18} color="white" />
         </TouchableOpacity>
@@ -364,49 +364,49 @@ const SearchScreen = () => {
       {loading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#FF8A50" />
-          <Text className="text-slate-400 dark:text-slate-500 mt-4 font-medium text-sm">
+          <Text className="text-ink-soft dark:text-night-soft mt-4 font-medium text-sm">
             Searching...
           </Text>
         </View>
       ) : error ? (
         <View className="flex-1 items-center justify-center px-8">
-          <Feather name="wifi-off" size={48} color={isDark ? "#334155" : "#e2e8f0"} />
-          <Text className="text-slate-800 dark:text-white font-black text-xl mt-4 mb-2">
+          <Feather name="wifi-off" size={48} color={isDark ? "#3A3731" : "#E3DACB"} />
+          <Text className="text-ink dark:text-white font-extrabold text-xl mt-4 mb-2">
             Search Failed
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-center text-sm mb-6">
+          <Text className="text-ink-soft dark:text-night-soft text-center text-sm mb-6">
             {error}
           </Text>
           <TouchableOpacity
             onPress={handleSubmit}
-            className="bg-primary px-6 py-3 rounded-xl"
+            className="bg-primary-deep px-6 py-3 rounded-xl"
           >
-            <Text className="text-white font-black">Retry</Text>
+            <Text className="text-white font-extrabold">Retry</Text>
           </TouchableOpacity>
         </View>
       ) : results === null ? (
         /* Empty / initial state */
         (<View className="flex-1 items-center justify-center px-8">
-          <View className="w-24 h-24 rounded-full bg-orange-50 dark:bg-orange-900/20 items-center justify-center mb-6">
+          <View className="w-24 h-24 rounded-full bg-clay-tint dark:bg-night-raised items-center justify-center mb-6">
             <Feather name="search" size={40} color="#FF8A50" />
           </View>
-          <Text className="text-slate-800 dark:text-white font-black text-2xl mb-2 text-center">
+          <Text className="w-full text-ink dark:text-white font-extrabold text-2xl mb-2 text-center">
             Search Everything
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-6">
+          <Text className="text-ink-soft dark:text-night-soft text-center text-sm leading-6">
             Find courses, mock tests, study notes, and live exams all in one place.
           </Text>
         </View>)
       ) : !hasResults ? (
         /* No results */
         (<View className="flex-1 items-center justify-center px-8">
-          <View className="w-24 h-24 rounded-full bg-gray-50 dark:bg-slate-800 items-center justify-center mb-6">
-            <Feather name="inbox" size={40} color={isDark ? "#334155" : "#cbd5e1"} />
+          <View className="w-24 h-24 rounded-full bg-sand dark:bg-night-raised items-center justify-center mb-6">
+            <Feather name="inbox" size={40} color={isDark ? "#3A3731" : "#B5AEA3"} />
           </View>
-          <Text className="text-slate-800 dark:text-white font-black text-xl mb-2 text-center">
+          <Text className="w-full text-ink dark:text-white font-extrabold text-xl mb-2 text-center">
             No Results Found
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-center text-sm">
+          <Text className="text-ink-soft dark:text-night-soft text-center text-sm">
             Try different keywords or check your spelling.
           </Text>
         </View>)
@@ -419,10 +419,10 @@ const SearchScreen = () => {
         >
           {/* Summary */}
           <View className="flex-row items-center justify-between pt-5 pb-2">
-            <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium">
-              <Text className="text-slate-800 dark:text-white font-black">{totalResults} </Text>
+            <Text className="text-ink-soft dark:text-night-soft text-sm font-medium">
+              <Text className="text-ink dark:text-white font-extrabold">{totalResults} </Text>
               results for{" "}
-              <Text className="text-primary font-black">{`"${query}"`}</Text>
+              <Text className="text-primary-deep dark:text-primary font-extrabold">{`"${query}"`}</Text>
             </Text>
           </View>
           {/* Teachers */}

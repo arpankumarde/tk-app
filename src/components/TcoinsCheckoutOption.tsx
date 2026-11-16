@@ -43,7 +43,7 @@ const TcoinsCheckoutOption = ({
           : `Balance ${summary.balance} Tcoins. This order is too small to use them.`;
 
   return (
-    <View className="mb-3 rounded-2xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/40 p-4">
+    <View className="mb-3 rounded-2xl border border-line dark:border-night-line bg-sand dark:bg-night-line/40 p-4">
       <TouchableOpacity
         className="flex-row items-start"
         onPress={onToggle}
@@ -55,8 +55,8 @@ const TcoinsCheckoutOption = ({
         <View
           className={`w-6 h-6 rounded-md border-2 items-center justify-center mt-0.5 ${
             isOn
-              ? "bg-primary border-primary"
-              : "border-slate-400 dark:border-slate-500"
+              ? "bg-primary-deep border-primary"
+              : "border-ink-soft dark:border-night-line"
           }`}
         >
           {isOn && <Feather name="check" size={14} color="white" />}
@@ -64,13 +64,13 @@ const TcoinsCheckoutOption = ({
         <View className="flex-1 ml-3">
           <View className="flex-row items-center">
             <Feather name="disc" size={16} color="#FF8A50" />
-            <Text className="ml-2 text-base font-black text-slate-800 dark:text-white">
+            <Text className="ml-2 text-base font-extrabold text-ink dark:text-white">
               {canUse
                 ? `Use ${redeemable} Tcoins and save ₹${redeemable}`
                 : "Tcoins"}
             </Text>
           </View>
-          <Text className="mt-1 text-sm font-bold text-slate-500 dark:text-slate-400">
+          <Text className="mt-1 text-sm font-bold text-ink-soft dark:text-night-soft">
             {hint}
           </Text>
         </View>

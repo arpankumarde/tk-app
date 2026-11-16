@@ -99,13 +99,13 @@ function Field({
 }) {
   return (
     <View
-      className={`py-2.5 ${last ? "" : "border-b border-gray-100 dark:border-slate-800"}`}
+      className={`py-2.5 ${last ? "" : "border-b border-line dark:border-night-line"}`}
     >
-      <Text className="text-slate-400 text-[11px] font-bold uppercase tracking-widest">
+      <Text className="text-ink-soft text-[11px] font-bold uppercase tracking-widest">
         {label}
       </Text>
       <Text
-        className="text-slate-800 dark:text-slate-100 font-bold text-[15px] mt-0.5"
+        className="text-ink dark:text-white font-bold text-[15px] mt-0.5"
         numberOfLines={1}
       >
         {value}
@@ -140,26 +140,26 @@ function FormInput({
   const isDark = colorScheme === "dark";
   return (
     <View style={{ marginBottom: 12 }}>
-      <Text className="text-slate-700 dark:text-slate-200 text-xs font-bold mb-1.5">
+      <Text className="text-ink dark:text-night-soft text-xs font-bold mb-1.5">
         {label}
       </Text>
       <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={isDark ? "#64748B" : "#94A3B8"}
+        placeholderTextColor={isDark ? "#6A6358" : "#968E82"}
         editable={editable}
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
         multiline={multiline}
         style={{
           borderWidth: 1,
-          borderColor: isDark ? "#334155" : "#E2E8F0",
+          borderColor: isDark ? "#3A3731" : "#E3DACB",
           borderRadius: 12,
           paddingHorizontal: 12,
           paddingVertical: 10,
           fontSize: 14,
-          color: isDark ? "#F1F5F9" : "#1E293B",
+          color: isDark ? "#EFE8DD" : "#25231F",
           minHeight,
           textAlignVertical: multiline ? "top" : "center",
         }}
@@ -320,20 +320,20 @@ export default function WalletBank({
       ) : bankDetails ? (
         <>
           <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-base font-black text-slate-800 dark:text-white">
+            <Text className="text-base font-extrabold text-ink dark:text-white">
               Bank Details
             </Text>
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={openForm}
-              className="bg-primary rounded-xl px-4 py-2 flex-row items-center"
+              className="bg-primary-deep rounded-xl px-4 py-2 flex-row items-center"
             >
               <Feather name="edit-2" size={12} color="#fff" />
-              <Text className="text-white font-black text-xs ml-1">Edit</Text>
+              <Text className="text-white font-extrabold text-xs ml-1">Edit</Text>
             </TouchableOpacity>
           </View>
 
-          <View className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 p-5">
+          <View className="bg-white dark:bg-night rounded-3xl border border-line dark:border-night-line p-5">
             <StatusPill status={bankDetails.verificationStatus} />
             {bankDetails.verificationStatus === "rejected" &&
               bankDetails.rejectionReason && (
@@ -362,20 +362,20 @@ export default function WalletBank({
           </View>
         </>
       ) : (
-        <View className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-gray-100 dark:border-slate-800 border-dashed items-center">
-          <Feather name="credit-card" size={32} color="#CBD5E1" />
-          <Text className="text-slate-700 dark:text-slate-200 font-black text-base mt-3">
+        <View className="bg-white dark:bg-night p-8 rounded-3xl border border-line dark:border-night-line border-dashed items-center">
+          <Feather name="credit-card" size={32} color="#B5AEA3" />
+          <Text className="text-ink dark:text-night-soft font-extrabold text-base mt-3">
             No bank account added
           </Text>
-          <Text className="text-slate-400 font-bold text-xs mt-1 text-center">
+          <Text className="text-ink-soft font-bold text-xs mt-1 text-center">
             Add your bank details to withdraw funds
           </Text>
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={openForm}
-            className="bg-primary rounded-2xl px-6 py-3 mt-4"
+            className="bg-primary-deep rounded-2xl px-6 py-3 mt-4"
           >
-            <Text className="text-white font-black text-sm">
+            <Text className="text-white font-extrabold text-sm">
               Add Bank Details
             </Text>
           </TouchableOpacity>
@@ -399,14 +399,14 @@ export default function WalletBank({
         >
           <View
             style={{
-              backgroundColor: colorScheme === "dark" ? "#0F172A" : "#FFFFFF",
+              backgroundColor: colorScheme === "dark" ? "#1A1916" : "#FFFFFF",
               borderRadius: 24,
               padding: 20,
               maxHeight: "90%",
             }}
           >
             <View className="flex-row items-center justify-between mb-3">
-              <Text className="text-slate-800 dark:text-white text-xl font-black">
+              <Text className="text-ink dark:text-white text-xl font-extrabold">
                 {bankDetails ? "Update Bank Details" : "Add Bank Details"}
               </Text>
               <TouchableOpacity
@@ -416,7 +416,7 @@ export default function WalletBank({
                 <Feather
                   name="x"
                   size={22}
-                  color={colorScheme === "dark" ? "#94A3B8" : "#64748B"}
+                  color={colorScheme === "dark" ? "#968E82" : "#6A6358"}
                 />
               </TouchableOpacity>
             </View>
@@ -483,7 +483,7 @@ export default function WalletBank({
                 colorScheme={colorScheme}
               />
               <View style={{ marginBottom: 12 }}>
-                <Text className="text-slate-700 dark:text-slate-200 text-xs font-bold mb-1.5">
+                <Text className="text-ink dark:text-night-soft text-xs font-bold mb-1.5">
                   PAN Card Image
                 </Text>
                 {form.panCardImageBase64 ? (
@@ -491,7 +491,7 @@ export default function WalletBank({
                     style={{
                       borderWidth: 1,
                       borderColor:
-                        colorScheme === "dark" ? "#334155" : "#E2E8F0",
+                        colorScheme === "dark" ? "#3A3731" : "#E3DACB",
                       borderRadius: 12,
                       padding: 8,
                     }}
@@ -506,7 +506,7 @@ export default function WalletBank({
                         width: "100%",
                         height: 160,
                         borderRadius: 8,
-                        backgroundColor: "#F1F5F9",
+                        backgroundColor: "#EFE8DD",
                       }}
                       contentFit="contain"
                     />
@@ -515,14 +515,14 @@ export default function WalletBank({
                         onPress={pickPanImage}
                         disabled={saving}
                         activeOpacity={0.8}
-                        className="flex-1 bg-gray-100 dark:bg-slate-800 rounded-xl py-2.5 items-center mr-2 flex-row justify-center"
+                        className="flex-1 bg-sand dark:bg-night-raised rounded-xl py-2.5 items-center mr-2 flex-row justify-center"
                       >
                         <Feather
                           name="refresh-cw"
                           size={14}
-                          color={colorScheme === "dark" ? "#CBD5E1" : "#475569"}
+                          color={colorScheme === "dark" ? "#B5AEA3" : "#6A6358"}
                         />
-                        <Text className="text-slate-700 dark:text-slate-200 font-bold text-xs ml-1.5">
+                        <Text className="text-ink dark:text-night-soft font-bold text-xs ml-1.5">
                           Replace
                         </Text>
                       </TouchableOpacity>
@@ -548,7 +548,7 @@ export default function WalletBank({
                       borderWidth: 1,
                       borderStyle: "dashed",
                       borderColor:
-                        colorScheme === "dark" ? "#334155" : "#CBD5E1",
+                        colorScheme === "dark" ? "#3A3731" : "#B5AEA3",
                       borderRadius: 12,
                       paddingVertical: 24,
                       alignItems: "center",
@@ -557,12 +557,12 @@ export default function WalletBank({
                     <Feather
                       name="upload"
                       size={24}
-                      color={colorScheme === "dark" ? "#94A3B8" : "#64748B"}
+                      color={colorScheme === "dark" ? "#968E82" : "#6A6358"}
                     />
-                    <Text className="text-slate-600 dark:text-slate-300 font-bold text-sm mt-2">
+                    <Text className="text-ink-soft dark:text-night-soft font-bold text-sm mt-2">
                       Pick PAN Image
                     </Text>
-                    <Text className="text-slate-400 text-[11px] mt-0.5">
+                    <Text className="text-ink-soft text-[11px] mt-0.5">
                       Max 5MB
                     </Text>
                   </TouchableOpacity>
@@ -586,7 +586,7 @@ export default function WalletBank({
               {saving ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text className="text-white font-black text-base">
+                <Text className="text-white font-extrabold text-base">
                   {bankDetails ? "Update Details" : "Save Details"}
                 </Text>
               )}

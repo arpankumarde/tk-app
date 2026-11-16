@@ -1,4 +1,5 @@
 import BottomTabs from "@/components/BottomTabs";
+import DetailHeader from "@/components/DetailHeader";
 import BundleCrossSell from "@/components/BundleCrossSell";
 import Placeholder from "@/constants/placeholder";
 import { useAuth } from "@/context/AuthContext";
@@ -19,7 +20,6 @@ import {
   Modal,
   ScrollView,
   Share,
-  StatusBar,
   Text,
   TouchableOpacity,
   View,
@@ -228,7 +228,7 @@ const TestDetails = () => {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-white dark:bg-slate-900 items-center justify-center">
+      <SafeAreaView className="flex-1 bg-paper dark:bg-night items-center justify-center">
         <ActivityIndicator size="large" color="#FF8A50" />
       </SafeAreaView>
     );
@@ -236,13 +236,13 @@ const TestDetails = () => {
 
   if (!test) {
     return (
-      <SafeAreaView className="flex-1 bg-white dark:bg-slate-900 items-center justify-center p-6">
-        <Text className="text-xl font-bold text-slate-800 dark:text-white mb-4 text-center">
+      <SafeAreaView className="flex-1 bg-paper dark:bg-night items-center justify-center p-6">
+        <Text className="w-full text-xl font-bold text-ink dark:text-white mb-4 text-center">
           Test not found
         </Text>
         <TouchableOpacity
           onPress={() => router.back()}
-          className="px-6 py-3 bg-primary rounded-full"
+          className="px-6 py-3 bg-primary-deep rounded-full"
         >
           <Text className="text-white font-bold">Go Back</Text>
         </TouchableOpacity>
@@ -266,45 +266,24 @@ const TestDetails = () => {
   const totalDuration = items.reduce((sum, t) => sum + t.durationMinutes, 0);
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-slate-900" edges={["top"]}>
-      <StatusBar
-        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
-      />
+    <SafeAreaView className="flex-1 bg-paper dark:bg-night" edges={["top"]}>
+      <DetailHeader title="Mock test" onShare={handleShare} />
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Navigation Header */}
-        <View className="px-6 py-4 flex-row items-center justify-between">
-          <View className="flex-row items-center flex-1">
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mr-4"
-            >
-              <Feather name="chevron-left" size={24} color="#FF8A50" />
-            </TouchableOpacity>
-            <View className="flex-row items-center flex-1 mr-4">
-              {/* Exam Badge */}
-              <View className="bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-700 flex-row items-center flex-shrink-1">
-                <Feather name="award" size={10} color="#64748b" />
-                <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1.5 flex-shrink-1 leading-4">
-                  {test.examName || "Details"}
-                </Text>
-              </View>
-            </View>
+        <View className="px-6 pt-5 flex-row">
+          <View className="bg-sage-tint dark:bg-night-raised px-3 py-1.5 rounded-full flex-row items-center flex-shrink-1">
+            <Feather name="award" size={12} color={colorScheme === "dark" ? "#A9C4AF" : "#4F6F58"} />
+            <Text className="text-sage dark:text-night-soft text-xs font-bold ml-1.5 flex-shrink-1">
+              {test.examName || "Mock test"}
+            </Text>
           </View>
-
-          <TouchableOpacity
-            onPress={handleShare}
-            className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center"
-          >
-            <Feather name="share-2" size={18} color="#FF8A50" />
-          </TouchableOpacity>
         </View>
 
         {/* Title & Description */}
         <View className="px-6 pt-2 pb-6">
-          <Text className="text-3xl font-black text-slate-800 dark:text-white leading-[42px] mb-4">
+          <Text className="text-3xl font-extrabold text-ink dark:text-white leading-[42px] mb-4">
             {test.title}
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-base font-medium leading-6 mb-6">
+          <Text className="text-ink-soft dark:text-night-soft text-base font-medium leading-6 mb-6">
             {test.description ||
               "Prepare with this comprehensive test series covering all key topics and exam patterns."}
           </Text>
@@ -312,7 +291,7 @@ const TestDetails = () => {
           {/* Metadata Row: Author + Rating */}
           <View className="flex-row items-center justify-between mb-2">
             <View className="flex-1 pr-3 flex-row items-center flex-wrap">
-              <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
+              <Text className="text-ink-soft dark:text-night-soft text-sm font-bold">
                 Created by{" "}
               </Text>
               <TouchableOpacity
@@ -324,7 +303,7 @@ const TestDetails = () => {
                 disabled={!test.teacherSlug}
                 className="flex-row items-center"
               >
-                <Text className="text-primary font-bold text-sm">
+                <Text className="text-primary-deep dark:text-primary font-bold text-sm">
                   {test.teacherName || "Expert"}
                 </Text>
                 {test.teacherIsVerified && (
@@ -339,12 +318,12 @@ const TestDetails = () => {
             </View>
 
             <View className="flex-row items-center">
-              <Text className="mr-3 text-slate-300">|</Text>
+              <Text className="mr-3 text-line">|</Text>
               <Ionicons name="star" size={16} color="#FF8A50" />
-              <Text className="ml-1 text-slate-800 dark:text-white font-black text-sm">
+              <Text className="ml-1 text-ink dark:text-white font-extrabold text-sm">
                 {test.rating ? test.rating.toFixed(1) : "New"}
               </Text>
-              <Text className="ml-1 text-slate-400 text-xs">
+              <Text className="ml-1 text-ink-soft text-xs">
                 ({test.reviewsCount || 0})
               </Text>
             </View>
@@ -352,9 +331,9 @@ const TestDetails = () => {
 
           {/* Language Pill */}
           <View className="mb-6">
-            <View className="self-start px-3 py-1 bg-cyan-50 dark:bg-cyan-900/30 rounded-full border border-cyan-100 dark:border-cyan-800/30 flex-row items-center">
-              <Feather name="globe" size={12} color="#06b6d4" />
-              <Text className="text-cyan-600 dark:text-cyan-400 text-[10px] font-black tracking-widest ml-1.5 uppercase">
+            <View className="self-start px-3 py-1 bg-sky-tint dark:bg-night-raised rounded-full border border-line dark:border-night-line flex-row items-center">
+              <Feather name="globe" size={12} color="#3F6577" />
+              <Text className="text-sky dark:text-sky-light text-[10px] font-extrabold tracking-widest ml-1.5 uppercase">
                 {test.language?.trim() || "English"}
               </Text>
             </View>
@@ -363,7 +342,7 @@ const TestDetails = () => {
 
         {/* Thumbnail */}
         <View className="px-6 mb-8">
-          <View className="aspect-video w-full rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 relative shadow-2xl">
+          <View className="aspect-video w-full rounded-3xl overflow-hidden bg-sand dark:bg-night-raised relative shadow-2xl">
             <Image
               source={{
                 uri: test.thumbnailUrl || Placeholder.TEST,
@@ -376,21 +355,21 @@ const TestDetails = () => {
 
         {/* Package Stats Card */}
         <View className="px-6 mb-8">
-          <View className="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-5 border border-gray-100 dark:border-slate-700">
-            <Text className="text-slate-800 dark:text-white font-black text-lg mb-5">
+          <View className="bg-sand dark:bg-night-raised rounded-xl p-5 border border-line dark:border-night-line">
+            <Text className="text-ink dark:text-white font-extrabold text-lg mb-5">
               This package includes
             </Text>
 
             <View className="flex-row flex-wrap">
               <View className="w-1/2 flex-row items-center mb-4">
-                <View className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900/50 items-center justify-center mr-3">
+                <View className="w-8 h-8 rounded-lg bg-white dark:bg-night/50 items-center justify-center mr-3">
                   <Feather name="layers" size={16} color="#FF8A50" />
                 </View>
                 <View>
-                  <Text className="text-slate-800 dark:text-white font-black text-sm">
+                  <Text className="text-ink dark:text-white font-extrabold text-sm">
                     {test.totalTests || items.length}
                   </Text>
-                  <Text className="text-slate-400 text-[10px] font-bold">
+                  <Text className="text-ink-soft text-[10px] font-bold">
                     Total Tests
                   </Text>
                 </View>
@@ -398,14 +377,14 @@ const TestDetails = () => {
 
               {test.freeTestsCount > 0 && (
                 <View className="w-1/2 flex-row items-center mb-4">
-                  <View className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900/50 items-center justify-center mr-3">
+                  <View className="w-8 h-8 rounded-lg bg-white dark:bg-night/50 items-center justify-center mr-3">
                     <Feather name="gift" size={16} color="#10b981" />
                   </View>
                   <View>
-                    <Text className="text-slate-800 dark:text-white font-black text-sm">
+                    <Text className="text-ink dark:text-white font-extrabold text-sm">
                       {test.freeTestsCount}
                     </Text>
-                    <Text className="text-slate-400 text-[10px] font-bold">
+                    <Text className="text-ink-soft text-[10px] font-bold">
                       Free Tests
                     </Text>
                   </View>
@@ -413,42 +392,42 @@ const TestDetails = () => {
               )}
 
               <View className="w-1/2 flex-row items-center mb-4">
-                <View className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900/50 items-center justify-center mr-3">
+                <View className="w-8 h-8 rounded-lg bg-white dark:bg-night/50 items-center justify-center mr-3">
                   <Feather name="file-text" size={16} color="#FF8A50" />
                 </View>
                 <View>
-                  <Text className="text-slate-800 dark:text-white font-black text-sm">
+                  <Text className="text-ink dark:text-white font-extrabold text-sm">
                     {totalQuestions}
                   </Text>
-                  <Text className="text-slate-400 text-[10px] font-bold">
+                  <Text className="text-ink-soft text-[10px] font-bold">
                     Questions
                   </Text>
                 </View>
               </View>
 
               <View className="w-1/2 flex-row items-center mb-4">
-                <View className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900/50 items-center justify-center mr-3">
+                <View className="w-8 h-8 rounded-lg bg-white dark:bg-night/50 items-center justify-center mr-3">
                   <Feather name="clock" size={16} color="#FF8A50" />
                 </View>
                 <View>
-                  <Text className="text-slate-800 dark:text-white font-black text-sm">
+                  <Text className="text-ink dark:text-white font-extrabold text-sm">
                     {totalDuration} min
                   </Text>
-                  <Text className="text-slate-400 text-[10px] font-bold">
+                  <Text className="text-ink-soft text-[10px] font-bold">
                     Total Duration
                   </Text>
                 </View>
               </View>
 
               <View className="w-1/2 flex-row items-center">
-                <View className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900/50 items-center justify-center mr-3">
+                <View className="w-8 h-8 rounded-lg bg-white dark:bg-night/50 items-center justify-center mr-3">
                   <Feather name="globe" size={16} color="#FF8A50" />
                 </View>
                 <View>
-                  <Text className="text-slate-800 dark:text-white font-black text-sm">
+                  <Text className="text-ink dark:text-white font-extrabold text-sm">
                     {test.language || "English"}
                   </Text>
-                  <Text className="text-slate-400 text-[10px] font-bold">
+                  <Text className="text-ink-soft text-[10px] font-bold">
                     Language
                   </Text>
                 </View>
@@ -460,14 +439,14 @@ const TestDetails = () => {
         {/* Test Series Content (Expandable Items) */}
         {items.length > 0 && (
           <View className="px-6 mb-8">
-            <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+            <Text className="text-2xl font-extrabold text-ink dark:text-white mb-2">
               Test series content
             </Text>
-            <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-6">
+            <Text className="text-ink-soft dark:text-night-soft text-sm font-medium mb-6">
               {items.length} tests • {totalQuestions} questions
             </Text>
 
-            <View className="bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-xl overflow-hidden">
+            <View className="bg-sand dark:bg-night-raised border border-line dark:border-night-line rounded-xl overflow-hidden">
               {items.map((item, idx) => {
                 const isScheduled = isScheduledAhead(item.scheduledDate, now);
                 const opensLabel =
@@ -477,7 +456,7 @@ const TestDetails = () => {
                 return (
                   <View
                     key={item.id}
-                    className={`${idx !== items.length - 1 ? "border-b border-slate-50 dark:border-slate-800/50" : ""}`}
+                    className={`${idx !== items.length - 1 ? "border-b border-line dark:border-night-line/50" : ""}`}
                   >
                     <TouchableOpacity
                       onPress={() => toggleItem(idx)}
@@ -486,18 +465,18 @@ const TestDetails = () => {
                       <View className="flex-1 mr-3">
                         <View className="flex-row items-center mb-1.5">
                           <View className="w-1 h-3 bg-orange-400 rounded-full mr-2" />
-                          <Text className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                          <Text className="text-ink-soft text-[10px] font-extrabold uppercase tracking-widest">
                             Test {idx + 1}
                           </Text>
                           {item.isFree && (
                             <View className="bg-green-100/50 dark:bg-green-900/20 px-2 py-0.5 rounded-md ml-2">
-                              <Text className="text-green-600 dark:text-green-400 text-[9px] font-black uppercase">
+                              <Text className="text-green-600 dark:text-green-400 text-[9px] font-extrabold uppercase">
                                 Free
                               </Text>
                             </View>
                           )}
                         </View>
-                        <Text className="text-slate-800 dark:text-white font-black text-sm">
+                        <Text className="text-ink dark:text-white font-extrabold text-sm">
                           {item.title}
                         </Text>
                         <View className="flex-row items-center flex-wrap mt-2">
@@ -506,17 +485,17 @@ const TestDetails = () => {
                               <Feather
                                 name="file-text"
                                 size={11}
-                                color="#94a3b8"
+                                color="#968E82"
                               />
-                              <Text className="text-slate-400 text-[10px] font-bold ml-1.5 mr-4">
+                              <Text className="text-ink-soft text-[10px] font-bold ml-1.5 mr-4">
                                 {item.totalQuestions} Qs
                               </Text>
                             </>
                           )}
                           {(!isScheduled || item.durationMinutes > 0) && (
                             <>
-                              <Feather name="clock" size={11} color="#94a3b8" />
-                              <Text className="text-slate-400 text-[10px] font-bold ml-1.5 mr-4">
+                              <Feather name="clock" size={11} color="#968E82" />
+                              <Text className="text-ink-soft text-[10px] font-bold ml-1.5 mr-4">
                                 {item.durationMinutes} min
                               </Text>
                             </>
@@ -528,7 +507,7 @@ const TestDetails = () => {
                                 size={11}
                                 color="#FF8A50"
                               />
-                              <Text className="text-primary text-[10px] font-bold ml-1.5">
+                              <Text className="text-primary-deep dark:text-primary text-[10px] font-bold ml-1.5">
                                 {opensLabel}
                               </Text>
                             </>
@@ -549,24 +528,24 @@ const TestDetails = () => {
                     {expandedItems.includes(idx) &&
                       (item.subjects.length > 0 || item.isFree) && (
                         <View className="px-5 pb-5 pt-1">
-                          <View className="h-[0.5px] bg-slate-100 dark:bg-slate-700/30 mb-3" />
+                          <View className="h-[0.5px] bg-sand dark:bg-night-line/30 mb-3" />
                           {item.subjects.map((subject) => (
                             <View
                               key={subject.id}
                               className="flex-row items-center py-2"
                             >
-                              <View className="w-6 h-6 rounded-full bg-orange-50 dark:bg-orange-900/10 items-center justify-center mr-3">
+                              <View className="w-6 h-6 rounded-full bg-clay-tint dark:bg-night-raised items-center justify-center mr-3">
                                 <Feather
                                   name="book-open"
                                   size={12}
                                   color="#FF8A50"
                                 />
                               </View>
-                              <Text className="text-slate-600 dark:text-slate-300 text-xs font-bold flex-1">
+                              <Text className="text-ink-soft dark:text-night-soft text-xs font-bold flex-1">
                                 {subject.subjectName}
                               </Text>
                               {!isScheduled && (
-                                <Text className="text-slate-400 text-[10px] font-bold">
+                                <Text className="text-ink-soft text-[10px] font-bold">
                                   {subject.actualQuestionCount} Qs
                                 </Text>
                               )}
@@ -574,15 +553,15 @@ const TestDetails = () => {
                           ))}
 
                           {item.isFree && opensLabel && (
-                            <View className="mt-4 bg-slate-200 dark:bg-slate-700 h-11 rounded-2xl flex-row items-center justify-center">
+                            <View className="mt-4 bg-sand dark:bg-night-line h-11 rounded-2xl flex-row items-center justify-center">
                               <Feather
                                 name="calendar"
                                 size={16}
                                 color={
-                                  colorScheme === "dark" ? "#e2e8f0" : "#475569"
+                                  colorScheme === "dark" ? "#E3DACB" : "#6A6358"
                                 }
                               />
-                              <Text className="text-slate-600 dark:text-slate-200 font-black text-sm ml-2">
+                              <Text className="text-ink-soft dark:text-night-soft font-extrabold text-sm ml-2">
                                 {opensLabel}
                               </Text>
                             </View>
@@ -607,7 +586,7 @@ const TestDetails = () => {
                               className="mt-4 bg-emerald-500 h-11 rounded-2xl flex-row items-center justify-center shadow-lg shadow-emerald-500/20"
                             >
                               <Feather name="play" size={16} color="white" />
-                              <Text className="text-white font-black text-sm ml-2">
+                              <Text className="text-white font-extrabold text-sm ml-2">
                                 Take Test
                               </Text>
                             </TouchableOpacity>
@@ -624,7 +603,7 @@ const TestDetails = () => {
         {/* What You'll Learn */}
         {test.whatYouLearn && test.whatYouLearn.length > 0 && (
           <View className="px-6 mb-8">
-            <Text className="text-2xl font-black text-slate-800 dark:text-white mb-6">
+            <Text className="text-2xl font-extrabold text-ink dark:text-white mb-6">
               What you&apos;ll learn
             </Text>
             {test.whatYouLearn.map((point, id) => (
@@ -632,7 +611,7 @@ const TestDetails = () => {
                 <View className="w-6 h-6 bg-emerald-100 dark:bg-emerald-900/30 rounded-full items-center justify-center mr-4">
                   <Feather name="check" size={14} color="#10b981" />
                 </View>
-                <Text className="text-slate-600 dark:text-slate-300 text-sm font-medium flex-1">
+                <Text className="text-ink-soft dark:text-night-soft text-sm font-medium flex-1">
                   {point}
                 </Text>
               </View>
@@ -643,13 +622,13 @@ const TestDetails = () => {
         {/* Requirements */}
         {test.requirements && test.requirements.length > 0 && (
           <View className="px-6 mb-8">
-            <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+            <Text className="text-2xl font-extrabold text-ink dark:text-white mb-4">
               Requirements
             </Text>
             {test.requirements.map((req, rid) => (
               <View key={rid} className="flex-row items-center mb-3">
-                <View className="w-1.5 h-1.5 bg-primary rounded-full mr-3" />
-                <Text className="text-slate-600 dark:text-slate-300 text-sm font-medium flex-1">
+                <View className="w-1.5 h-1.5 bg-primary-deep rounded-full mr-3" />
+                <Text className="text-ink-soft dark:text-night-soft text-sm font-medium flex-1">
                   {req}
                 </Text>
               </View>
@@ -662,10 +641,10 @@ const TestDetails = () => {
           <View className="px-6 mb-8">
             {test.longDescription ? (
               <>
-                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+                <Text className="text-2xl font-extrabold text-ink dark:text-white mb-4">
                   Description
                 </Text>
-                <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-6">
+                <Text className="text-ink-soft dark:text-night-soft text-sm font-medium leading-6">
                   {test.longDescription.replace(/<[^>]*>?/gm, "")}
                 </Text>
               </>
@@ -679,7 +658,7 @@ const TestDetails = () => {
                   <View className="w-8 h-8 rounded-full bg-amber-500 items-center justify-center mr-3">
                     <Feather name="alert-triangle" size={16} color="white" />
                   </View>
-                  <Text className="text-amber-900 dark:text-amber-300 font-black text-sm uppercase tracking-wider">
+                  <Text className="text-amber-900 dark:text-amber-300 font-extrabold text-sm uppercase tracking-wider">
                     Disclaimer
                   </Text>
                 </View>
@@ -707,10 +686,10 @@ const TestDetails = () => {
 
         {/* About the Author */}
         <View className="px-6 mb-8">
-          <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+          <Text className="text-2xl font-extrabold text-ink dark:text-white mb-4">
             About the Author
           </Text>
-          <View className="bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-xl p-5">
+          <View className="bg-sand dark:bg-night-raised border border-line dark:border-night-line rounded-xl p-5">
             <TouchableOpacity
               onPress={() => router.push(`/expert/${test.teacherSlug}` as any)}
               className="flex-row items-center"
@@ -725,7 +704,7 @@ const TestDetails = () => {
               />
               <View className="ml-4 flex-1">
                 <View className="flex-row items-center">
-                  <Text className="text-slate-800 dark:text-white font-black text-base">
+                  <Text className="text-ink dark:text-white font-extrabold text-base">
                     {test.teacherName || "Author"}
                   </Text>
                   {test.teacherIsVerified && (
@@ -738,7 +717,7 @@ const TestDetails = () => {
                   )}
                 </View>
                 {test.teacherAcademyName && (
-                  <Text className="text-slate-400 text-xs font-medium mt-0.5">
+                  <Text className="text-ink-soft text-xs font-medium mt-0.5">
                     {test.teacherAcademyName}
                   </Text>
                 )}
@@ -747,7 +726,7 @@ const TestDetails = () => {
             </TouchableOpacity>
 
             {test.teacherBio && (
-              <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-6 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700/50 px-1">
+              <Text className="text-ink-soft dark:text-night-soft text-sm font-medium leading-6 mt-4 pt-4 border-t border-line dark:border-night-line/50 px-1">
                 {test.teacherBio}
               </Text>
             )}
@@ -757,26 +736,26 @@ const TestDetails = () => {
         <View className="h-20" />
       </ScrollView>
       {/* Sticky Bottom Bar */}
-      <View className="bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 p-6 flex-row items-center">
+      <View className="bg-white dark:bg-night border-t border-line dark:border-night-line p-6 flex-row items-center">
         <View className="flex-1">
-          <Text className="text-slate-400 dark:text-slate-500 text-xs font-black uppercase tracking-tighter">
+          <Text className="text-ink-soft dark:text-night-soft text-xs font-extrabold uppercase tracking-tighter">
             Price
           </Text>
           <View className="flex-row items-center mt-1">
             {actualPrice === 0 ? (
-              <Text className="text-2xl font-black text-green-500">Free</Text>
+              <Text className="text-2xl font-extrabold text-green-500">Free</Text>
             ) : (
-              <Text className="text-2xl font-black text-slate-800 dark:text-white">
+              <Text className="text-2xl font-extrabold text-ink dark:text-white">
                 ₹{formatInr(actualPrice)}
               </Text>
             )}
             {originalPrice && (
               <>
-                <Text className="ml-2 text-slate-400 line-through text-sm">
+                <Text className="ml-2 text-ink-soft line-through text-sm">
                   ₹{formatInr(originalPrice)}
                 </Text>
                 <View className="ml-2 bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-md">
-                  <Text className="text-green-600 dark:text-green-400 font-black text-[10px]">
+                  <Text className="text-green-600 dark:text-green-400 font-extrabold text-[10px]">
                     {discountPercent}% OFF
                   </Text>
                 </View>
@@ -810,12 +789,12 @@ const TestDetails = () => {
                 }
           }
           disabled={addingToCart || (isFree && enrolling)}
-          className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary shadow-orange-500/30"} h-14 w-44 rounded-xl items-center justify-center shadow-lg disabled:opacity-60`}
+          className={`${isFree ? "bg-emerald-500 shadow-emerald-500/30" : "bg-primary-deep shadow-orange-500/30"} h-14 w-44 rounded-xl items-center justify-center shadow-lg disabled:opacity-60`}
         >
           {addingToCart || (isFree && enrolling) ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text className="text-white text-lg font-black">
+            <Text className="text-white text-lg font-extrabold">
               {isFree
                 ? !user || !token
                   ? "Login to Start"
@@ -837,19 +816,19 @@ const TestDetails = () => {
         }
       >
         <View className="flex-1 bg-black/50 items-center justify-center px-6">
-          <View className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-sm items-center shadow-2xl">
+          <View className="bg-white dark:bg-night-raised rounded-3xl p-8 w-full max-w-sm items-center shadow-2xl">
             {enrollResult.success ? (
               <>
                 <View className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 items-center justify-center mb-5">
                   <Feather name="check-circle" size={32} color="#10B981" />
                 </View>
-                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                <Text className="text-2xl font-extrabold text-ink dark:text-white mb-2">
                   Enrolled Successfully!
                 </Text>
-                <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm mb-1">
+                <Text className="text-ink-soft dark:text-night-soft font-bold text-sm mb-1">
                   Order ID #{enrollResult.orderId}
                 </Text>
-                <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                <Text className="text-ink-soft dark:text-night-soft text-center text-sm leading-5 mb-6">
                   Your test series is now available in your dashboard.
                 </Text>
                 <TouchableOpacity
@@ -862,7 +841,7 @@ const TestDetails = () => {
                     router.push("/user");
                   }}
                 >
-                  <Text className="text-white font-black text-base">
+                  <Text className="text-white font-extrabold text-base">
                     Go to Dashboard
                   </Text>
                 </TouchableOpacity>
@@ -875,7 +854,7 @@ const TestDetails = () => {
                     }))
                   }
                 >
-                  <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+                  <Text className="text-ink-soft dark:text-night-soft font-bold text-sm">
                     Continue Browsing
                   </Text>
                 </TouchableOpacity>
@@ -885,14 +864,14 @@ const TestDetails = () => {
                 <View className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 items-center justify-center mb-5">
                   <Feather name="alert-circle" size={32} color="#EF4444" />
                 </View>
-                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                <Text className="text-2xl font-extrabold text-ink dark:text-white mb-2">
                   Enrollment Failed
                 </Text>
-                <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                <Text className="text-ink-soft dark:text-night-soft text-center text-sm leading-5 mb-6">
                   {enrollResult.message}
                 </Text>
                 <TouchableOpacity
-                  className="bg-primary w-full h-14 rounded-2xl items-center justify-center"
+                  className="bg-primary-deep w-full h-14 rounded-2xl items-center justify-center"
                   onPress={() =>
                     setEnrollResult((prev) => ({
                       ...prev,
@@ -900,7 +879,7 @@ const TestDetails = () => {
                     }))
                   }
                 >
-                  <Text className="text-white font-black text-base">
+                  <Text className="text-white font-extrabold text-base">
                     Try Again
                   </Text>
                 </TouchableOpacity>

@@ -40,15 +40,15 @@ export default function ProductReaderScreen() {
       return (
         <View className="flex-1 items-center justify-center px-8">
           <Feather name="alert-circle" size={36} color="#DC2626" />
-          <Text className="mt-4 text-center text-base font-black text-slate-800 dark:text-white">
+          <Text className="mt-4 text-center text-base font-extrabold text-ink dark:text-white">
             {error}
           </Text>
           <TouchableOpacity
             onPress={retry}
-            className="mt-5 flex-row items-center rounded-2xl bg-primary px-6 py-3"
+            className="mt-5 flex-row items-center rounded-2xl bg-primary-deep px-6 py-3"
           >
             <Feather name="refresh-cw" size={14} color="#fff" />
-            <Text className="ml-2 text-sm font-black text-white">Try again</Text>
+            <Text className="ml-2 text-sm font-extrabold text-white">Try again</Text>
           </TouchableOpacity>
         </View>
       );
@@ -58,7 +58,7 @@ export default function ProductReaderScreen() {
       return (
         <View className="flex-1 items-center justify-center px-10">
           <ActivityIndicator size="large" color="#FF8A50" />
-          <Text className="mt-4 text-sm font-black text-slate-700 dark:text-white">
+          <Text className="mt-4 text-sm font-extrabold text-ink dark:text-white">
             Preparing your file...
           </Text>
         </View>
@@ -71,7 +71,7 @@ export default function ProductReaderScreen() {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-950"
+      className="flex-1 bg-paper dark:bg-night"
     >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}

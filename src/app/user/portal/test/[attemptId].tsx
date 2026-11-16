@@ -148,8 +148,8 @@ const shouldUseWebView = (html: string) => {
 // Height measurement is done via onLoadEnd + injectJavaScript (see HtmlContent).
 // KaTeX is loaded from CDN to render inline-math, block-math and legacy mathematics nodes.
 const getHtmlDocument = (html: string, isDark: boolean) => {
-  const textColor = isDark ? "#e2e8f0" : "#1e293b";
-  const mutedColor = isDark ? "#94a3b8" : "#475569";
+  const textColor = isDark ? "#E3DACB" : "#25231F";
+  const mutedColor = isDark ? "#968E82" : "#6A6358";
   const cleanedHtml = sanitizeHtml(html);
 
   return `<!DOCTYPE html>
@@ -1411,7 +1411,7 @@ const TestAttemptScreen = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-white dark:bg-slate-900 items-center justify-center">
+      <View className="flex-1 bg-paper dark:bg-night items-center justify-center">
         <ActivityIndicator size="large" color="#FF8A50" />
       </View>
     );
@@ -1419,15 +1419,15 @@ const TestAttemptScreen = () => {
 
   if (!currentQuestion) {
     return (
-      <SafeAreaView className="flex-1 bg-white dark:bg-slate-900 px-6 items-center justify-center">
-        <Text className="text-slate-700 dark:text-slate-200 text-lg font-bold text-center">
+      <SafeAreaView className="flex-1 bg-paper dark:bg-night px-6 items-center justify-center">
+        <Text className="text-ink dark:text-night-soft text-lg font-bold text-center">
           No questions found for this test.
         </Text>
         <TouchableOpacity
           onPress={() => router.back()}
-          className="mt-5 bg-primary px-6 py-3 rounded-xl"
+          className="mt-5 bg-primary-deep px-6 py-3 rounded-xl"
         >
-          <Text className="text-white font-black">Go Back</Text>
+          <Text className="text-white font-extrabold">Go Back</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -1457,7 +1457,7 @@ const TestAttemptScreen = () => {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-900"
+      className="flex-1 bg-paper dark:bg-night"
     >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
@@ -1469,33 +1469,33 @@ const TestAttemptScreen = () => {
         contentContainerStyle={{ paddingBottom: 60 }}
       >
         <View className="pt-4">
-          <View className="px-6 pb-4 border-b border-gray-100 dark:border-slate-800">
+          <View className="px-6 pb-4 border-b border-line dark:border-night-line">
             <View
               className="flex-row items-center justify-between mb-2"
               style={{ gap: 12 }}
             >
-              <View className="h-12 flex-row items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-xl px-4 border border-slate-200 dark:border-slate-700 shrink-0">
+              <View className="h-12 flex-row items-center justify-center bg-sand dark:bg-night-raised rounded-xl px-4 border border-line dark:border-night-line shrink-0">
                 <Feather
                   name="clock"
                   size={18}
-                  color={colorScheme === "dark" ? "#e2e8f0" : "#334155"}
+                  color={colorScheme === "dark" ? "#E3DACB" : "#3A3731"}
                 />
                 <View className="ml-2 flex-row items-center">
                   {subjectWiseTiming && (
-                    <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase mr-1.5 mt-1">
+                    <Text className="text-ink-soft dark:text-night-soft text-[10px] font-extrabold uppercase mr-1.5 mt-1">
                       Subject:
                     </Text>
                   )}
                   {questionWiseTiming && (
-                    <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase mr-1.5 mt-1">
+                    <Text className="text-ink-soft dark:text-night-soft text-[10px] font-extrabold uppercase mr-1.5 mt-1">
                       Q:
                     </Text>
                   )}
                   <Text
-                    className={`text-2xl font-black tracking-wider ${
+                    className={`text-2xl font-extrabold tracking-wider ${
                       questionWiseTiming && questionRemainingSeconds <= 10
                         ? "text-red-500"
-                        : "text-slate-900 dark:text-white"
+                        : "text-ink dark:text-white"
                     }`}
                   >
                     {questionWiseTiming ? questionTimerLabel : timerLabel}
@@ -1512,12 +1512,12 @@ const TestAttemptScreen = () => {
                     onPress={() => setShowLeaveConfirm(true)}
                     disabled={submitting}
                     accessibilityLabel="Pause test"
-                    className="h-12 w-12 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full items-center justify-center"
+                    className="h-12 w-12 bg-sand dark:bg-night-raised border border-line dark:border-night-line rounded-full items-center justify-center"
                   >
                     <Feather
                       name="pause"
                       size={20}
-                      color={colorScheme === "dark" ? "#e2e8f0" : "#334155"}
+                      color={colorScheme === "dark" ? "#E3DACB" : "#3A3731"}
                     />
                   </TouchableOpacity>
                 )}
@@ -1540,7 +1540,7 @@ const TestAttemptScreen = () => {
                     <ActivityIndicator color="#FFFFFF" />
                   ) : (
                     <Text
-                      className="text-white text-base font-black"
+                      className="text-white text-base font-extrabold"
                       numberOfLines={1}
                       ellipsizeMode="tail"
                     >
@@ -1553,9 +1553,9 @@ const TestAttemptScreen = () => {
               </View>
             </View>
 
-            <View className="mt-3 h-1 rounded-full bg-gray-100 dark:bg-slate-800 overflow-hidden">
+            <View className="mt-3 h-1 rounded-full bg-sand dark:bg-night-raised overflow-hidden">
               <View
-                className="h-full bg-primary"
+                className="h-full bg-primary-deep"
                 style={{
                   width: `${
                     ((currentGlobalIndex + 1) / allSubjectQuestions.length) *
@@ -1574,13 +1574,13 @@ const TestAttemptScreen = () => {
               }
               className="flex-row items-center justify-between"
             >
-              <Text className="text-slate-800 dark:text-slate-100 font-black text-xs tracking-wider uppercase">
+              <Text className="text-ink dark:text-white font-extrabold text-xs tracking-wider uppercase">
                 Subjects
               </Text>
               <Feather
                 name={isSubjectFilterCollapsed ? "chevron-down" : "chevron-up"}
                 size={18}
-                color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
+                color={colorScheme === "dark" ? "#968E82" : "#6A6358"}
               />
             </TouchableOpacity>
 
@@ -1618,8 +1618,8 @@ const TestAttemptScreen = () => {
                           : isCompleted
                             ? "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/20"
                             : isLocked
-                              ? "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 opacity-50"
-                              : "bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700"
+                              ? "bg-sand dark:bg-night-raised border-line dark:border-night-line opacity-50"
+                              : "bg-white dark:bg-night-raised border-line dark:border-night-line"
                       }`}
                     >
                       {isCompleted && (
@@ -1628,12 +1628,12 @@ const TestAttemptScreen = () => {
                         </View>
                       )}
                       <Text
-                        className={`text-sm font-black ${
+                        className={`text-sm font-extrabold ${
                           isActive
-                            ? "text-primary"
+                            ? "text-primary-deep dark:text-primary"
                             : isCompleted
                               ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-slate-600 dark:text-slate-400"
+                              : "text-ink-soft dark:text-night-soft"
                         }`}
                       >
                         {subj.subjectName}
@@ -1651,7 +1651,7 @@ const TestAttemptScreen = () => {
               onPress={() => setIsQuestionNavigatorCollapsed((prev) => !prev)}
               className="flex-row items-center justify-between"
             >
-              <Text className="text-slate-800 dark:text-slate-100 font-black text-xs tracking-wider uppercase">
+              <Text className="text-ink dark:text-white font-extrabold text-xs tracking-wider uppercase">
                 Question Navigator
               </Text>
               <Feather
@@ -1659,7 +1659,7 @@ const TestAttemptScreen = () => {
                   isQuestionNavigatorCollapsed ? "chevron-down" : "chevron-up"
                 }
                 size={18}
-                color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
+                color={colorScheme === "dark" ? "#968E82" : "#6A6358"}
               />
             </TouchableOpacity>
 
@@ -1677,9 +1677,9 @@ const TestAttemptScreen = () => {
                       return (
                         <View className="flex-row items-center px-1">
                           {!item.isFirst && (
-                            <View className="h-6 w-[1px] bg-gray-200 dark:bg-slate-700 mx-3" />
+                            <View className="h-6 w-[1px] bg-line dark:bg-night-line mx-3" />
                           )}
-                          <Text className="text-slate-400 dark:text-slate-500 font-black text-[10px] tracking-widest uppercase">
+                          <Text className="text-ink-soft dark:text-night-soft font-extrabold text-[10px] tracking-widest uppercase">
                             {item.title}
                           </Text>
                         </View>
@@ -1696,19 +1696,19 @@ const TestAttemptScreen = () => {
                         onPress={() => handleQuestionJump(item.sIdx, item.qIdx)}
                         className={`w-12 h-12 rounded-xl border items-center justify-center ${
                           isCurrent
-                            ? "border-primary bg-orange-50 dark:bg-orange-900/20"
+                            ? "border-primary bg-clay-tint dark:bg-night-raised"
                             : isAnswered
                               ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20"
-                              : "border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800"
+                              : "border-line dark:border-night-line bg-sand dark:bg-night-raised"
                         }`}
                       >
                         <Text
-                          className={`font-black text-base ${
+                          className={`font-extrabold text-base ${
                             isCurrent
-                              ? "text-primary"
+                              ? "text-primary-deep dark:text-primary"
                               : isAnswered
                                 ? "text-green-700 dark:text-green-300"
-                                : "text-slate-600 dark:text-slate-300"
+                                : "text-ink-soft dark:text-night-soft"
                           }`}
                         >
                           {item.globalIndex + 1}
@@ -1722,23 +1722,23 @@ const TestAttemptScreen = () => {
           </View>
 
           <View className="px-6 pt-4 pb-2">
-            <View className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-3xl p-5 shadow-sm mb-4">
+            <View className="bg-white dark:bg-night-raised border border-line dark:border-night-line rounded-3xl p-5 shadow-sm mb-4">
               <View
                 className="flex-row items-center justify-between mb-3"
                 style={{ gap: 12 }}
               >
                 <View className="flex-row items-center">
-                  <Text className="text-primary text-sm font-black tracking-wider">
+                  <Text className="text-primary-deep dark:text-primary text-sm font-extrabold tracking-wider">
                     QUESTION
                   </Text>
-                  <Text className="text-primary text-sm font-black tracking-wider ml-1">
+                  <Text className="text-primary-deep dark:text-primary text-sm font-extrabold tracking-wider ml-1">
                     {currentGlobalIndex + 1}
                   </Text>
                 </View>
 
                 <View className="flex-row items-center" style={{ gap: 12 }}>
                   <Text
-                    className="text-slate-500 dark:text-slate-400 text-[10px] font-bold"
+                    className="text-ink-soft dark:text-night-soft text-[10px] font-bold"
                     numberOfLines={1}
                   >
                     {currentGlobalIndex + 1}/{allSubjectQuestions.length}
@@ -1748,23 +1748,23 @@ const TestAttemptScreen = () => {
               {currentQuestion.paragraphText
                 ? renderHtmlOrText(
                     currentQuestion.paragraphText,
-                    "text-slate-700 dark:text-slate-200 text-base font-semibold mb-4",
+                    "text-ink dark:text-night-soft text-base font-semibold mb-4",
                     `para-${currentQuestion.id}`,
                   )
                 : null}
 
               {renderHtmlOrText(
                 currentQuestion.questionText,
-                "text-slate-800 dark:text-white text-xl font-semibold leading-8",
+                "text-ink dark:text-white text-xl font-semibold leading-8",
                 `q-${currentQuestion.id}`,
               )}
             </View>
 
             <View className="mb-4">
               {attemptLimitInfo && (
-                <View className="flex-row items-center bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-2xl mb-4">
-                  <Feather name="info" size={16} color="#3b82f6" />
-                  <Text className="ml-2 text-blue-700 dark:text-blue-300 text-xs font-bold leading-5 flex-1">
+                <View className="flex-row items-center bg-sky-tint dark:bg-night-raised border border-line dark:border-night-line p-4 rounded-2xl mb-4">
+                  <Feather name="info" size={16} color="#3F6577" />
+                  <Text className="ml-2 text-sky dark:text-sky-light text-xs font-bold leading-5 flex-1">
                     You can attempt {attemptLimitInfo.limit} out of{" "}
                     {attemptLimitInfo.total} questions in{" "}
                     {attemptLimitInfo.label}. ({attemptLimitInfo.answered}{" "}
@@ -1774,7 +1774,7 @@ const TestAttemptScreen = () => {
               )}
 
               {showAttemptLimitWarning && activeAttemptLimit && (
-                <View className="flex-row items-center bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 p-4 rounded-2xl mb-4">
+                <View className="flex-row items-center bg-clay-tint dark:bg-night-raised border border-line dark:border-night-line p-4 rounded-2xl mb-4">
                   <Feather name="lock" size={16} color="#f97316" />
                   <Text className="ml-2 text-orange-700 dark:text-orange-300 text-xs font-bold leading-5 flex-1">
                     You have reached the maximum attempts for this{" "}
@@ -1788,30 +1788,30 @@ const TestAttemptScreen = () => {
               {currentQuestion.category === "numeric" ? (
                 <>
                   <View className="flex-row items-center justify-between mb-3">
-                    <Text className="text-slate-500 dark:text-slate-400 font-black text-xs tracking-wider uppercase">
+                    <Text className="text-ink-soft dark:text-night-soft font-extrabold text-xs tracking-wider uppercase">
                       Enter Answer
                     </Text>
                     {isCurrentQuestionAnswered ? (
                       <TouchableOpacity
                         onPress={() => handleClearResponse(currentQuestion.id)}
-                        className="flex-row items-center bg-orange-50 dark:bg-orange-900/20 px-2.5 py-1 rounded-md border border-orange-100 dark:border-orange-800/40"
+                        className="flex-row items-center bg-clay-tint dark:bg-night-raised px-2.5 py-1 rounded-md border border-line dark:border-night-line"
                       >
                         <Feather name="rotate-ccw" size={12} color="#FF8A50" />
-                        <Text className="ml-1.5 text-primary font-black text-[10px] uppercase tracking-wider">
+                        <Text className="ml-1.5 text-primary-deep dark:text-primary font-extrabold text-[10px] uppercase tracking-wider">
                           Clear
                         </Text>
                       </TouchableOpacity>
                     ) : questionWiseTiming ? (
                       <TouchableOpacity
                         onPress={handleNextFromFooter}
-                        className="flex-row items-center bg-slate-50 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700"
+                        className="flex-row items-center bg-sand dark:bg-night-raised px-2.5 py-1 rounded-md border border-line dark:border-night-line"
                       >
                         <Feather
                           name="skip-forward"
                           size={12}
-                          color={isDark ? "#94a3b8" : "#64748b"}
+                          color={isDark ? "#968E82" : "#6A6358"}
                         />
-                        <Text className="ml-1.5 text-slate-600 dark:text-slate-300 font-black text-[10px] uppercase tracking-wider">
+                        <Text className="ml-1.5 text-ink-soft dark:text-night-soft font-extrabold text-[10px] uppercase tracking-wider">
                           Skip
                         </Text>
                       </TouchableOpacity>
@@ -1827,16 +1827,16 @@ const TestAttemptScreen = () => {
                     editable={!showAttemptLimitWarning}
                     className={`rounded-2xl border px-4 py-4 text-base font-semibold ${
                       showAttemptLimitWarning
-                        ? "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 opacity-50"
-                        : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700"
-                    } text-slate-800 dark:text-slate-100`}
-                    placeholderTextColor={isDark ? "#94a3b8" : "#64748b"}
+                        ? "bg-sand dark:bg-night-raised border-line dark:border-night-line opacity-50"
+                        : "bg-white dark:bg-night-raised border-line dark:border-night-line"
+                    } text-ink dark:text-white`}
+                    placeholderTextColor={isDark ? "#968E82" : "#6A6358"}
                   />
                 </>
               ) : (
                 <>
                   <View className="flex-row items-center justify-between mb-3">
-                    <Text className="text-slate-500 dark:text-slate-400 font-black text-xs tracking-wider uppercase">
+                    <Text className="text-ink-soft dark:text-night-soft font-extrabold text-xs tracking-wider uppercase">
                       {currentQuestion.category === "multi"
                         ? "Select One or More Options"
                         : "Select One Option"}
@@ -1844,24 +1844,24 @@ const TestAttemptScreen = () => {
                     {isCurrentQuestionAnswered ? (
                       <TouchableOpacity
                         onPress={() => handleClearResponse(currentQuestion.id)}
-                        className="flex-row items-center bg-orange-50 dark:bg-orange-900/20 px-2.5 py-1 rounded-md border border-orange-100 dark:border-orange-800/40"
+                        className="flex-row items-center bg-clay-tint dark:bg-night-raised px-2.5 py-1 rounded-md border border-line dark:border-night-line"
                       >
                         <Feather name="rotate-ccw" size={12} color="#FF8A50" />
-                        <Text className="ml-1.5 text-primary font-black text-[10px] uppercase tracking-wider">
+                        <Text className="ml-1.5 text-primary-deep dark:text-primary font-extrabold text-[10px] uppercase tracking-wider">
                           Clear
                         </Text>
                       </TouchableOpacity>
                     ) : questionWiseTiming ? (
                       <TouchableOpacity
                         onPress={handleNextFromFooter}
-                        className="flex-row items-center bg-slate-50 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700"
+                        className="flex-row items-center bg-sand dark:bg-night-raised px-2.5 py-1 rounded-md border border-line dark:border-night-line"
                       >
                         <Feather
                           name="skip-forward"
                           size={12}
-                          color={isDark ? "#94a3b8" : "#64748b"}
+                          color={isDark ? "#968E82" : "#6A6358"}
                         />
-                        <Text className="ml-1.5 text-slate-600 dark:text-slate-300 font-black text-[10px] uppercase tracking-wider">
+                        <Text className="ml-1.5 text-ink-soft dark:text-night-soft font-extrabold text-[10px] uppercase tracking-wider">
                           Skip
                         </Text>
                       </TouchableOpacity>
@@ -1892,10 +1892,10 @@ const TestAttemptScreen = () => {
                         disabled={showAttemptLimitWarning}
                         className={`rounded-2xl border px-4 py-4 mb-3 flex-row items-center ${
                           isSelected
-                            ? "bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700"
+                            ? "bg-clay-tint dark:bg-night-raised border-orange-300 dark:border-orange-700"
                             : showAttemptLimitWarning
-                              ? "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 opacity-50"
-                              : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700"
+                              ? "bg-sand dark:bg-night-raised border-line dark:border-night-line opacity-50"
+                              : "bg-white dark:bg-night-raised border-line dark:border-night-line"
                         }`}
                       >
                         <View
@@ -1904,12 +1904,12 @@ const TestAttemptScreen = () => {
                           } ${
                             isSelected
                               ? "border-primary"
-                              : "border-gray-300 dark:border-slate-600"
+                              : "border-line dark:border-night-line"
                           }`}
                         >
                           {isSelected ? (
                             <View
-                              className={`w-3 h-3 bg-primary ${
+                              className={`w-3 h-3 bg-primary-deep ${
                                 useCircularIndicator
                                   ? "rounded-full"
                                   : "rounded-sm"
@@ -1920,10 +1920,10 @@ const TestAttemptScreen = () => {
 
                         <View className="flex-1 flex-row items-start">
                           <Text
-                            className={`text-base leading-6 font-black mr-2 ${
+                            className={`text-base leading-6 font-extrabold mr-2 ${
                               isSelected
-                                ? "text-primary"
-                                : "text-slate-700 dark:text-slate-200"
+                                ? "text-primary-deep dark:text-primary"
+                                : "text-ink dark:text-night-soft"
                             }`}
                           >
                             {currentQuestion.optionLetters[optionIndex]}.
@@ -1933,8 +1933,8 @@ const TestAttemptScreen = () => {
                               option,
                               `text-base font-semibold ${
                                 isSelected
-                                  ? "text-primary"
-                                  : "text-slate-700 dark:text-slate-200"
+                                  ? "text-primary-deep dark:text-primary"
+                                  : "text-ink dark:text-night-soft"
                               }`,
                               `opt-${currentQuestion.id}-${optionIndex}`,
                             )}
@@ -1952,7 +1952,7 @@ const TestAttemptScreen = () => {
 
       {/* Sticky Navigation Footer */}
       <View
-        className="px-6 py-4 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 shadow-lg"
+        className="px-6 py-4 bg-white dark:bg-night border-t border-line dark:border-night-line shadow-lg"
         style={{ paddingBottom: Math.max(insets.bottom, 16) }}
       >
         <View className="flex-row items-center" style={{ gap: 12 }}>
@@ -1989,17 +1989,17 @@ const TestAttemptScreen = () => {
                 currentQuestionIndex === 0 &&
                 currentSectionIndex === 0 &&
                 (subjectWiseTiming || currentSubjectIndex === 0)
-                  ? "border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/20"
-                  : "border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                  ? "border-line dark:border-night-line bg-sand/50 dark:bg-night-raised"
+                  : "border-line dark:border-night-line bg-white dark:bg-night-raised"
               }`}
             >
               <Text
-                className={`font-black text-sm ${
+                className={`font-extrabold text-sm ${
                   currentQuestionIndex === 0 &&
                   currentSectionIndex === 0 &&
                   (subjectWiseTiming || currentSubjectIndex === 0)
-                    ? "text-slate-400 dark:text-slate-600"
-                    : "text-slate-700 dark:text-slate-200"
+                    ? "text-ink-soft dark:text-night-soft"
+                    : "text-ink dark:text-night-soft"
                 }`}
               >
                 Prev
@@ -2016,14 +2016,14 @@ const TestAttemptScreen = () => {
               disabled={questionWiseTiming && !isCurrentQuestionAnswered}
               className={`flex-1 py-3.5 rounded-2xl shadow-sm items-center justify-center ${
                 questionWiseTiming && !isCurrentQuestionAnswered
-                  ? "bg-slate-300 dark:bg-slate-700 shadow-none"
-                  : "bg-primary shadow-primary/20"
+                  ? "bg-line dark:bg-night-line shadow-none"
+                  : "bg-primary-deep shadow-primary/20"
               }`}
             >
               <Text
-                className={`font-black text-base ${
+                className={`font-extrabold text-base ${
                   questionWiseTiming && !isCurrentQuestionAnswered
-                    ? "text-slate-500 dark:text-slate-400"
+                    ? "text-ink-soft dark:text-night-soft"
                     : "text-white"
                 }`}
               >
@@ -2041,7 +2041,7 @@ const TestAttemptScreen = () => {
               {submitting ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text className="text-white font-black text-base">
+                <Text className="text-white font-extrabold text-base">
                   {subjectWiseTiming ? "Submit Subject" : "Submit Test"}
                 </Text>
               )}
@@ -2061,10 +2061,10 @@ const TestAttemptScreen = () => {
         }}
       >
         <View className="flex-1 bg-black/50 px-6 items-center justify-center">
-          <View className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800">
-            <View className="p-6 border-b border-gray-100 dark:border-slate-800">
+          <View className="w-full max-w-sm bg-white dark:bg-night rounded-[32px] overflow-hidden shadow-2xl border border-line dark:border-night-line">
+            <View className="p-6 border-b border-line dark:border-night-line">
               <View className="flex-row items-start justify-between mb-2">
-                <Text className="flex-1 text-xl font-black text-slate-900 dark:text-white mr-4">
+                <Text className="flex-1 text-xl font-extrabold text-ink dark:text-white mr-4">
                   {subjectWiseTiming
                     ? `Submit ${currentSubject?.subjectName}`
                     : "Submit Test"}
@@ -2072,16 +2072,16 @@ const TestAttemptScreen = () => {
                 <TouchableOpacity
                   onPress={() => setShowSubmitConfirm(false)}
                   disabled={submitting}
-                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-800 items-center justify-center shrink-0"
+                  className="w-8 h-8 rounded-full bg-sand dark:bg-night-raised items-center justify-center shrink-0"
                 >
                   <Feather
                     name="x"
                     size={16}
-                    color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
+                    color={colorScheme === "dark" ? "#968E82" : "#6A6358"}
                   />
                 </TouchableOpacity>
               </View>
-              <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold leading-5">
+              <Text className="text-ink-soft dark:text-night-soft text-sm font-bold leading-5">
                 {subjectWiseTiming
                   ? "Are you sure you want to complete this subject? You cannot return to it once submitted."
                   : "Are you sure you want to submit the entire test?"}
@@ -2093,21 +2093,21 @@ const TestAttemptScreen = () => {
               showsVerticalScrollIndicator={false}
             >
               <View className="flex-row flex-wrap justify-between mb-6">
-                <View className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl w-[48%] mb-4 border border-slate-100 dark:border-slate-700">
-                  <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
+                <View className="bg-sand dark:bg-night-raised p-4 rounded-2xl w-[48%] mb-4 border border-line dark:border-night-line">
+                  <Text className="text-ink-soft text-xs font-bold uppercase tracking-wider mb-1">
                     Questions
                   </Text>
-                  <Text className="text-slate-900 dark:text-white text-xl font-black">
+                  <Text className="text-ink dark:text-white text-xl font-extrabold">
                     {subjectWiseTiming
                       ? currentSubjectProgress.total
                       : allQuestions.length}
                   </Text>
                 </View>
-                <View className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl w-[48%] mb-4 border border-slate-100 dark:border-slate-700">
-                  <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
+                <View className="bg-sand dark:bg-night-raised p-4 rounded-2xl w-[48%] mb-4 border border-line dark:border-night-line">
+                  <Text className="text-ink-soft text-xs font-bold uppercase tracking-wider mb-1">
                     Answered
                   </Text>
-                  <Text className="text-emerald-500 text-xl font-black">
+                  <Text className="text-emerald-700 dark:text-emerald-400 text-xl font-extrabold">
                     {subjectWiseTiming
                       ? currentSubjectProgress.answered
                       : overallAnsweredCount}
@@ -2115,7 +2115,7 @@ const TestAttemptScreen = () => {
                 </View>
               </View>
 
-              <Text className="text-slate-900 dark:text-white font-bold mb-3">
+              <Text className="text-ink dark:text-white font-bold mb-3">
                 {subjectWiseTiming
                   ? "Current Subject Progress"
                   : "Subject Progress"}
@@ -2129,12 +2129,12 @@ const TestAttemptScreen = () => {
                 .map((row) => (
                   <View
                     key={row.subjectName}
-                    className="flex-row items-center justify-between py-3 border-b border-gray-50 dark:border-slate-800"
+                    className="flex-row items-center justify-between py-3 border-b border-line dark:border-night-line"
                   >
-                    <Text className="flex-1 text-slate-700 dark:text-slate-300 font-medium mr-4">
+                    <Text className="flex-1 text-ink dark:text-night-soft font-medium mr-4">
                       {row.subjectName}
                     </Text>
-                    <Text className="text-slate-900 dark:text-white font-bold shrink-0">
+                    <Text className="text-ink dark:text-white font-bold shrink-0">
                       {row.answeredCount}/{row.totalCount}
                     </Text>
                   </View>
@@ -2144,9 +2144,9 @@ const TestAttemptScreen = () => {
             <View className="p-6 flex-row gap-3">
               <TouchableOpacity
                 onPress={() => setShowSubmitConfirm(false)}
-                className="flex-1 h-12 rounded-xl items-center justify-center border border-slate-200 dark:border-slate-700"
+                className="flex-1 h-12 rounded-xl items-center justify-center border border-line dark:border-night-line"
               >
-                <Text className="text-slate-600 dark:text-slate-400 font-bold">
+                <Text className="text-ink-soft dark:text-night-soft font-bold">
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -2155,12 +2155,12 @@ const TestAttemptScreen = () => {
                   subjectWiseTiming ? handleSubmitSubject : handleSubmitTest
                 }
                 disabled={submitting}
-                className="flex-1 h-12 bg-primary rounded-xl items-center justify-center"
+                className="flex-1 h-12 bg-primary-deep rounded-xl items-center justify-center"
               >
                 {submitting ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text className="text-white font-black">Yes, Submit</Text>
+                  <Text className="text-white font-extrabold">Yes, Submit</Text>
                 )}
               </TouchableOpacity>
             </View>

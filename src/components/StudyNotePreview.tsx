@@ -80,12 +80,12 @@ export default function StudyNotePreview({
   };
 
   return (
-    <View className="flex-1 bg-slate-100 dark:bg-slate-950">
+    <View className="flex-1 bg-sand dark:bg-night">
       {files.length > 1 && (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          className="grow-0 border-b border-gray-100 bg-white dark:border-slate-800 dark:bg-slate-950"
+          className="grow-0 border-b border-line bg-white dark:border-night-line dark:bg-night"
           contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 10 }}
         >
           {files.map((file, index) => {
@@ -99,7 +99,7 @@ export default function StudyNotePreview({
                 className={`px-4 py-2 rounded-full border mr-2 ${
                   selected
                     ? "bg-[#903209] border-[#903209]"
-                    : "bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600"
+                    : "bg-white dark:bg-night-raised border-line dark:border-night-line"
                 }`}
               >
                 <Text
@@ -107,7 +107,7 @@ export default function StudyNotePreview({
                   className={`text-sm font-bold max-w-[220px] ${
                     selected
                       ? "text-white"
-                      : "text-slate-700 dark:text-slate-200"
+                      : "text-ink dark:text-night-soft"
                   }`}
                 >
                   {file.title || `File ${index + 1}`}

@@ -2,7 +2,7 @@ import { isPaymentAppUrl, openPaymentApp } from "@/utils/upiIntent";
 import { HIDE_WEBVIEW_UA_JS } from "@/utils/paymentWebView";
 import BottomTabs from "@/components/BottomTabs";
 import { bundleSavings } from "@/components/BundleCard";
-import Header from "@/components/Header";
+import DetailHeader from "@/components/DetailHeader";
 import RichText from "@/components/RichText";
 import Placeholder from "@/constants/placeholder";
 import { useAuth } from "@/context/AuthContext";
@@ -50,7 +50,7 @@ const ITEM_META: Record<
   { label: string; icon: "book-open" | "file-text" | "file"; color: string }
 > = {
   course: { label: "Course", icon: "book-open", color: "#FF8A50" },
-  test: { label: "Mock Test", icon: "file-text", color: "#3B82F6" },
+  test: { label: "Mock Test", icon: "file-text", color: "#3F6577" },
   digital_product: { label: "Notes", icon: "file", color: "#10B981" },
 };
 
@@ -371,7 +371,7 @@ const BundleDetailsScreen = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-white dark:bg-slate-900 items-center justify-center">
+      <View className="flex-1 bg-paper dark:bg-night items-center justify-center">
         <ActivityIndicator size="large" color="#FF8A50" />
       </View>
     );
@@ -379,24 +379,24 @@ const BundleDetailsScreen = () => {
 
   if (error || !bundle) {
     return (
-      <View className="flex-1 bg-white dark:bg-slate-900 items-center justify-center px-10">
-        <Feather name="package" size={44} color="#CBD5E1" />
-        <Text className="text-xl font-bold text-slate-800 dark:text-white mt-4 mb-2 text-center">
+      <View className="flex-1 bg-paper dark:bg-night items-center justify-center px-10">
+        <Feather name="package" size={44} color="#B5AEA3" />
+        <Text className="w-full text-xl font-bold text-ink dark:text-white mt-4 mb-2 text-center">
           Bundle not available
         </Text>
-        <Text className="text-slate-500 dark:text-slate-400 text-center mb-6">
+        <Text className="text-ink-soft dark:text-night-soft text-center mb-6">
           {error || "This bundle may have been unpublished."}
         </Text>
         <View className="flex-row">
           <TouchableOpacity
             onPress={fetchBundle}
-            className="border border-orange-200 dark:border-orange-800/50 px-6 py-3 rounded-xl mr-3"
+            className="border border-line dark:border-night-line px-6 py-3 rounded-xl mr-3"
           >
-            <Text className="text-primary font-bold">Retry</Text>
+            <Text className="text-primary-deep dark:text-primary font-bold">Retry</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => router.push("/bundles" as any)}
-            className="bg-primary px-6 py-3 rounded-xl"
+            className="bg-primary-deep px-6 py-3 rounded-xl"
           >
             <Text className="text-white font-bold">Browse Bundles</Text>
           </TouchableOpacity>
@@ -431,25 +431,25 @@ const BundleDetailsScreen = () => {
   const busy = purchasing || claiming || verifying;
 
   return (
-    <View className="flex-1 bg-white dark:bg-slate-900">
+    <View className="flex-1 bg-paper dark:bg-night">
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
       <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
-        <Header />
+        <DetailHeader title="Bundle" onShare={handleShare} />
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 24 }}
         >
           <View className="px-6 pt-4">
-            <Text className="text-3xl font-black text-slate-800 dark:text-white leading-[42px] mb-4">
+            <Text className="text-3xl font-extrabold text-ink dark:text-white leading-[42px] mb-4">
               {bundle.title}
             </Text>
           </View>
 
           {/* Thumbnail */}
           <View className="px-6 mb-5">
-            <View className="aspect-video w-full rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 relative shadow-2xl">
+            <View className="aspect-video w-full rounded-3xl overflow-hidden bg-sand dark:bg-night-raised relative shadow-2xl">
               <Image
                 source={{ uri: bundle.thumbnailUrl || Placeholder.BUNDLE }}
                 className="w-full h-full"
@@ -457,7 +457,7 @@ const BundleDetailsScreen = () => {
               />
               {discountPercent > 0 && savings > 0 && (
                 <View className="absolute top-3 right-3 px-3 py-1.5 bg-emerald-500 rounded-full shadow-sm">
-                  <Text className="text-white text-[10px] font-black">
+                  <Text className="text-white text-[10px] font-extrabold">
                     {discountPercent}% OFF
                   </Text>
                 </View>
@@ -468,11 +468,11 @@ const BundleDetailsScreen = () => {
           <View className="px-6 pb-6">
             {/* Metadata Row: Author */}
             <View className="flex-row items-center flex-wrap mb-4">
-              <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
+              <Text className="text-ink-soft dark:text-night-soft text-sm font-bold">
                 Created by{" "}
               </Text>
               <View className="flex-row items-center">
-                <Text className="text-primary font-bold text-sm">
+                <Text className="text-primary-deep dark:text-primary font-bold text-sm">
                   {bundle.teacher?.displayName || "Testkart Expert"}
                 </Text>
                 <MaterialIcons
@@ -485,9 +485,9 @@ const BundleDetailsScreen = () => {
             </View>
 
             {/* Item Count Pill */}
-            <View className="self-start px-3 py-1 bg-orange-50 dark:bg-orange-900/20 rounded-full border border-orange-100 dark:border-orange-800/30 flex-row items-center">
+            <View className="self-start px-3 py-1 bg-clay-tint dark:bg-night-raised rounded-full border border-line dark:border-night-line flex-row items-center">
               <Feather name="layers" size={12} color="#FF8A50" />
-              <Text className="text-primary text-[10px] font-black tracking-widest ml-1.5 uppercase">
+              <Text className="text-primary-deep dark:text-primary text-[10px] font-extrabold tracking-widest ml-1.5 uppercase">
                 {items.length} {items.length === 1 ? "Item" : "Items"} Included
               </Text>
             </View>
@@ -504,20 +504,20 @@ const BundleDetailsScreen = () => {
             )}
 
             {/* Value summary */}
-            <View className="bg-white dark:bg-slate-800/50 rounded-[28px] border border-gray-100 dark:border-slate-700/80 p-5 mb-6 shadow-lg shadow-slate-200/50 dark:shadow-none">
+            <View className="bg-white dark:bg-night-raised rounded-[28px] border border-line dark:border-night-line p-5 mb-6">
               <View className="flex-row items-end justify-between mb-3">
                 <View>
-                  <Text className="text-slate-500 dark:text-slate-400 text-xs font-black uppercase tracking-wider mb-1">
+                  <Text className="text-ink-soft dark:text-night-soft text-xs font-extrabold uppercase tracking-wider mb-1">
                     Bundle Price
                   </Text>
                   <View className="flex-row items-baseline">
                     <Text
-                      className={`text-3xl font-black ${isFree ? "text-emerald-500" : "text-primary"}`}
+                      className={`text-3xl font-extrabold ${isFree ? "text-emerald-700 dark:text-emerald-400" : "text-primary-deep dark:text-primary"}`}
                     >
                       {isFree ? "FREE" : `₹${formatInr(bundle.price)}`}
                     </Text>
                     {!isFree && savings > 0 && (
-                      <Text className="ml-2 text-base text-slate-400 dark:text-slate-500 font-bold line-through">
+                      <Text className="ml-2 text-base text-ink-soft dark:text-night-soft font-bold line-through">
                         ₹{formatInr(bundle.originalPrice)}
                       </Text>
                     )}
@@ -525,28 +525,28 @@ const BundleDetailsScreen = () => {
                 </View>
                 {savings > 0 && (
                   <View className="rounded-xl bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2">
-                    <Text className="text-emerald-600 dark:text-emerald-400 font-black text-sm">
+                    <Text className="text-emerald-600 dark:text-emerald-400 font-extrabold text-sm">
                       Save ₹{formatInr(savings)}
                     </Text>
                   </View>
                 )}
               </View>
 
-              <View className="h-[1px] bg-gray-50 dark:bg-slate-700/50 my-3" />
+              <View className="h-[1px] bg-sand dark:bg-night-line/50 my-3" />
 
               <View className="flex-row flex-wrap">
                 {(Object.keys(ITEM_META) as BundleItemType[]).map((type) =>
                   counts[type] ? (
                     <View
                       key={type}
-                      className="flex-row items-center rounded-lg bg-gray-50 dark:bg-slate-800 px-3 py-1.5 mr-2 mb-2"
+                      className="flex-row items-center rounded-lg bg-sand dark:bg-night-raised px-3 py-1.5 mr-2 mb-2"
                     >
                       <Feather
                         name={ITEM_META[type].icon}
                         size={13}
                         color={ITEM_META[type].color}
                       />
-                      <Text className="ml-1.5 text-slate-700 dark:text-slate-300 font-bold text-xs">
+                      <Text className="ml-1.5 text-ink-soft dark:text-night-soft font-bold text-xs">
                         {counts[type]}{" "}
                         {counts[type] === 1
                           ? ITEM_META[type].label
@@ -569,7 +569,7 @@ const BundleDetailsScreen = () => {
                           color="#16a34a"
                         />
                         <Text
-                          className="ml-2 text-sm font-black text-slate-800 dark:text-white"
+                          className="ml-2 text-sm font-extrabold text-ink dark:text-white"
                           numberOfLines={1}
                         >
                           {promoCode.trim().toUpperCase()}
@@ -582,7 +582,7 @@ const BundleDetailsScreen = () => {
                         onPress={clearPromo}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                       >
-                        <Feather name="x" size={18} color="#64748b" />
+                        <Feather name="x" size={18} color="#6A6358" />
                       </TouchableOpacity>
                     </View>
                   ) : (
@@ -593,7 +593,7 @@ const BundleDetailsScreen = () => {
                       >
                         <View className="flex-row items-center">
                           <Feather name="tag" size={16} color="#FF8A50" />
-                          <Text className="ml-2 text-primary font-black text-sm">
+                          <Text className="ml-2 text-primary-deep dark:text-primary font-extrabold text-sm">
                             Have a Promo Code?
                           </Text>
                         </View>
@@ -608,24 +608,24 @@ const BundleDetailsScreen = () => {
                         <View className="mt-3">
                           <View className="flex-row items-center">
                             <TextInput
-                              className="flex-1 h-12 border border-gray-200 dark:border-slate-600 rounded-xl px-4 text-slate-800 dark:text-white bg-gray-50 dark:bg-slate-700 font-bold"
+                              className="flex-1 h-12 border border-line dark:border-night-line rounded-xl px-4 text-ink dark:text-white bg-sand dark:bg-night-line font-bold"
                               placeholder="Enter Promo Code"
                               placeholderTextColor={
-                                colorScheme === "dark" ? "#64748b" : "#9ca3af"
+                                colorScheme === "dark" ? "#6A6358" : "#9ca3af"
                               }
                               value={promoCode}
                               onChangeText={setPromoCode}
                               autoCapitalize="characters"
                             />
                             <TouchableOpacity
-                              className="ml-3 bg-primary h-12 px-6 rounded-xl items-center justify-center"
+                              className="ml-3 bg-primary-deep h-12 px-6 rounded-xl items-center justify-center"
                               onPress={handleApplyPromo}
                               disabled={validatingPromo}
                             >
                               {validatingPromo ? (
                                 <ActivityIndicator size="small" color="white" />
                               ) : (
-                                <Text className="text-white font-black text-base">
+                                <Text className="text-white font-extrabold text-base">
                                   Apply
                                 </Text>
                               )}
@@ -659,10 +659,10 @@ const BundleDetailsScreen = () => {
             </View>
 
             {/* Included items */}
-            <Text className="text-2xl font-black text-slate-800 dark:text-white mb-1">
+            <Text className="text-2xl font-extrabold text-ink dark:text-white mb-1">
               What&apos;s Included
             </Text>
-            <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-4">
+            <Text className="text-ink-soft dark:text-night-soft text-sm font-medium mb-4">
               {items.length} {items.length === 1 ? "item" : "items"} — bought
               separately they&apos;d cost ₹{formatInr(bundle.originalPrice)}
             </Text>
@@ -679,7 +679,7 @@ const BundleDetailsScreen = () => {
                     activeOpacity={route ? 0.7 : 1}
                     disabled={!route}
                     onPress={() => route && router.push(route as any)}
-                    className="flex-row items-center bg-white dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700/80 rounded-2xl p-4 mb-3"
+                    className="flex-row items-center bg-white dark:bg-night-raised border border-line dark:border-night-line rounded-2xl p-4 mb-3"
                   >
                     <View
                       className="w-11 h-11 rounded-xl items-center justify-center mr-3"
@@ -689,18 +689,18 @@ const BundleDetailsScreen = () => {
                     </View>
                     <View className="flex-1">
                       <Text
-                        className="text-slate-800 dark:text-white font-black text-base leading-5"
+                        className="text-ink dark:text-white font-extrabold text-base leading-5"
                         numberOfLines={2}
                       >
                         {item.title}
                       </Text>
-                      <Text className="text-slate-400 dark:text-slate-500 text-xs font-bold mt-1">
+                      <Text className="text-ink-soft dark:text-night-soft text-xs font-bold mt-1">
                         {[meta.label, metaLine].filter(Boolean).join(" · ")}
                       </Text>
                     </View>
                     <View className="items-end ml-2">
                       {item.price > 0 && (
-                        <Text className="text-slate-400 dark:text-slate-500 text-sm font-bold line-through">
+                        <Text className="text-ink-soft dark:text-night-soft text-sm font-bold line-through">
                           ₹{formatInr(item.price)}
                         </Text>
                       )}
@@ -708,7 +708,7 @@ const BundleDetailsScreen = () => {
                         <Feather
                           name="chevron-right"
                           size={16}
-                          color="#CBD5E1"
+                          color="#B5AEA3"
                         />
                       )}
                     </View>
@@ -719,25 +719,13 @@ const BundleDetailsScreen = () => {
 
             {bundle.description?.trim() ? (
               <View className="mb-8">
-                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+                <Text className="text-2xl font-extrabold text-ink dark:text-white mb-4">
                   About this Bundle
                 </Text>
                 <RichText content={bundle.description} />
               </View>
             ) : null}
 
-            {/* Share */}
-            <TouchableOpacity
-              onPress={handleShare}
-              className="h-14 rounded-2xl border border-orange-100 dark:border-orange-400/20 items-center justify-center mb-8"
-            >
-              <View className="flex-row items-center">
-                <Feather name="share-2" size={18} color="#FF8A50" />
-                <Text className="text-primary font-black text-base ml-2">
-                  Share Bundle
-                </Text>
-              </View>
-            </TouchableOpacity>
 
             {/* Disclaimer */}
             {bundle.disclaimer ? (
@@ -746,7 +734,7 @@ const BundleDetailsScreen = () => {
                   <View className="w-8 h-8 rounded-full bg-amber-500 items-center justify-center mr-3">
                     <Feather name="alert-triangle" size={16} color="white" />
                   </View>
-                  <Text className="text-amber-900 dark:text-amber-300 font-black text-sm uppercase tracking-wider">
+                  <Text className="text-amber-900 dark:text-amber-300 font-extrabold text-sm uppercase tracking-wider">
                     Disclaimer
                   </Text>
                 </View>
@@ -766,17 +754,17 @@ const BundleDetailsScreen = () => {
       </SafeAreaView>
 
       {/* Sticky buy bar */}
-      <View className="bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 px-6 py-4 flex-row items-center">
+      <View className="bg-white dark:bg-night border-t border-line dark:border-night-line px-6 py-4 flex-row items-center">
         <View className="flex-1 mr-3">
-          <Text className="text-slate-400 dark:text-slate-500 text-xs font-black uppercase tracking-tighter">
+          <Text className="text-ink-soft dark:text-night-soft text-xs font-extrabold uppercase tracking-tighter">
             {promo?.valid || tcoinsUsed > 0 ? "Payable" : "Bundle Price"}
           </Text>
           <View className="flex-row items-baseline mt-1">
-            <Text className="text-2xl font-black text-slate-800 dark:text-white">
+            <Text className="text-2xl font-extrabold text-ink dark:text-white">
               {isFree ? "FREE" : `₹${formatInr(payable)}`}
             </Text>
             {!isFree && payable < bundle.price && (
-              <Text className="ml-2 text-sm text-slate-400 dark:text-slate-500 font-bold line-through">
+              <Text className="ml-2 text-sm text-ink-soft dark:text-night-soft font-bold line-through">
                 ₹{formatInr(bundle.price)}
               </Text>
             )}
@@ -788,13 +776,13 @@ const BundleDetailsScreen = () => {
           className={`${
             bundle.isEnrolled
               ? "bg-emerald-500 shadow-emerald-500/30"
-              : "bg-primary shadow-orange-500/30"
+              : "bg-primary-deep shadow-orange-500/30"
           } h-14 w-44 rounded-xl items-center justify-center shadow-lg disabled:opacity-60`}
         >
           {busy ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text className="text-white text-lg font-black">
+            <Text className="text-white text-lg font-extrabold">
               {bundle.isEnrolled
                 ? "My Bundles"
                 : isFree
@@ -814,8 +802,8 @@ const BundleDetailsScreen = () => {
           animationType="slide"
           onRequestClose={handleWebViewClose}
         >
-          <SafeAreaView className="flex-1 bg-white dark:bg-slate-900">
-            <View className="flex-row items-center px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+          <SafeAreaView className="flex-1 bg-paper dark:bg-night">
+            <View className="flex-row items-center px-4 py-3 border-b border-line dark:border-night-line">
               <TouchableOpacity
                 onPress={handleWebViewClose}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -823,10 +811,10 @@ const BundleDetailsScreen = () => {
                 <Feather
                   name="x"
                   size={24}
-                  color={colorScheme === "dark" ? "#fff" : "#1e293b"}
+                  color={colorScheme === "dark" ? "#fff" : "#25231F"}
                 />
               </TouchableOpacity>
-              <Text className="ml-4 text-base font-black text-slate-800 dark:text-white">
+              <Text className="ml-4 text-base font-extrabold text-ink dark:text-white">
                 Complete Payment
               </Text>
             </View>
@@ -907,12 +895,12 @@ const BundleDetailsScreen = () => {
       {/* Verifying overlay */}
       {verifying && (
         <View className="absolute inset-0 bg-black/50 items-center justify-center px-10">
-          <View className="bg-white dark:bg-slate-800 rounded-3xl px-8 py-10 items-center w-full max-w-sm">
+          <View className="bg-white dark:bg-night-raised rounded-3xl px-8 py-10 items-center w-full max-w-sm">
             <ActivityIndicator size="large" color="#FF8A50" />
-            <Text className="text-slate-800 dark:text-white font-black text-base mt-5 text-center">
+            <Text className="text-ink dark:text-white font-extrabold text-base mt-5 text-center">
               Verifying payment
             </Text>
-            <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-2 text-center">
+            <Text className="text-ink-soft dark:text-night-soft text-sm font-medium mt-2 text-center">
               This takes a few seconds. Please don&apos;t close the app.
             </Text>
           </View>

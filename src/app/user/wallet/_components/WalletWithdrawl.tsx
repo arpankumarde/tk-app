@@ -63,7 +63,7 @@ function WithdrawalItem({ item }: { item: Withdrawal }) {
   const style = STATUS_STYLE[item.status] ?? STATUS_STYLE.pending;
 
   return (
-    <View className="py-4 border-b border-gray-100 dark:border-slate-800">
+    <View className="py-4 border-b border-line dark:border-night-line">
       <View className="flex-row items-center">
         <View
           style={{
@@ -80,17 +80,17 @@ function WithdrawalItem({ item }: { item: Withdrawal }) {
         </View>
         <View className="flex-1 pr-2">
           <Text
-            className="text-slate-700 dark:text-slate-200 font-bold text-[15px]"
+            className="text-ink dark:text-night-soft font-bold text-[15px]"
             numberOfLines={1}
           >
             Withdrawal #{item.id}
           </Text>
-          <Text className="text-slate-400 text-xs mt-0.5">
+          <Text className="text-ink-soft text-xs mt-0.5">
             Requested {formatDate(item.requestedDate || item.createdAt || "")}
           </Text>
         </View>
         <View className="items-end">
-          <Text className="font-black text-base text-slate-800 dark:text-white">
+          <Text className="font-extrabold text-base text-ink dark:text-white">
             {formatCurrency(Math.abs(item.amount))}
           </Text>
           <View
@@ -116,12 +116,12 @@ function WithdrawalItem({ item }: { item: Withdrawal }) {
         </View>
       </View>
       {item.notes && (
-        <Text className="text-slate-500 dark:text-slate-400 text-xs mt-2 ml-[52px]">
+        <Text className="text-ink-soft dark:text-night-soft text-xs mt-2 ml-[52px]">
           {item.notes}
         </Text>
       )}
       {item.transactionId && (
-        <Text className="text-slate-400 text-[11px] mt-1 ml-[52px] font-mono">
+        <Text className="text-ink-soft text-[11px] mt-1 ml-[52px] font-mono">
           Txn ID: {item.transactionId}
         </Text>
       )}
@@ -235,16 +235,16 @@ export default function WalletWithdrawl({
   return (
     <>
       <View className="flex-row items-center justify-between mb-3">
-        <Text className="text-base font-black text-slate-800 dark:text-white">
+        <Text className="text-base font-extrabold text-ink dark:text-white">
           Withdrawal Requests
         </Text>
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={openModal}
-          className="bg-primary rounded-xl px-4 py-2 flex-row items-center"
+          className="bg-primary-deep rounded-xl px-4 py-2 flex-row items-center"
         >
           <Feather name="plus" size={14} color="#fff" />
-          <Text className="text-white font-black text-xs ml-1">Request</Text>
+          <Text className="text-white font-extrabold text-xs ml-1">Request</Text>
         </TouchableOpacity>
       </View>
 
@@ -253,18 +253,18 @@ export default function WalletWithdrawl({
           <ActivityIndicator color="#FF8A50" />
         </View>
       ) : withdrawals.length > 0 ? (
-        <View className="bg-white dark:bg-slate-900 rounded-3xl px-5 border border-gray-100 dark:border-slate-800">
+        <View className="bg-white dark:bg-night rounded-3xl px-5 border border-line dark:border-night-line">
           {withdrawals.map((w) => (
             <WithdrawalItem key={w.id} item={w} />
           ))}
         </View>
       ) : (
-        <View className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-gray-100 dark:border-slate-800 border-dashed items-center">
-          <Feather name="download" size={32} color="#CBD5E1" />
-          <Text className="text-slate-700 dark:text-slate-200 font-black text-base mt-3">
+        <View className="bg-white dark:bg-night p-8 rounded-3xl border border-line dark:border-night-line border-dashed items-center">
+          <Feather name="download" size={32} color="#B5AEA3" />
+          <Text className="text-ink dark:text-night-soft font-extrabold text-base mt-3">
             No withdrawals yet
           </Text>
-          <Text className="text-slate-400 font-bold text-xs mt-1 text-center">
+          <Text className="text-ink-soft font-bold text-xs mt-1 text-center">
             Request a withdrawal from your available balance
           </Text>
         </View>
@@ -287,13 +287,13 @@ export default function WalletWithdrawl({
         >
           <View
             style={{
-              backgroundColor: colorScheme === "dark" ? "#0F172A" : "#FFFFFF",
+              backgroundColor: colorScheme === "dark" ? "#1A1916" : "#FFFFFF",
               borderRadius: 24,
               padding: 24,
             }}
           >
             <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-slate-800 dark:text-white text-xl font-black">
+              <Text className="text-ink dark:text-white text-xl font-extrabold">
                 Request Withdrawal
               </Text>
               <TouchableOpacity
@@ -303,19 +303,19 @@ export default function WalletWithdrawl({
                 <Feather
                   name="x"
                   size={22}
-                  color={colorScheme === "dark" ? "#94A3B8" : "#64748B"}
+                  color={colorScheme === "dark" ? "#968E82" : "#6A6358"}
                 />
               </TouchableOpacity>
             </View>
 
-            <Text className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">
+            <Text className="text-ink-soft dark:text-night-soft text-xs font-bold uppercase tracking-widest mb-2">
               Available Balance
             </Text>
-            <Text className="text-primary text-2xl font-black mb-5">
+            <Text className="text-primary-deep dark:text-primary text-2xl font-extrabold mb-5">
               {formatCurrency(availableBalance)}
             </Text>
 
-            <Text className="text-slate-700 dark:text-slate-200 text-sm font-bold mb-2">
+            <Text className="text-ink dark:text-night-soft text-sm font-bold mb-2">
               Amount (min ₹100)
             </Text>
             <TextInput
@@ -324,23 +324,23 @@ export default function WalletWithdrawl({
               keyboardType="numeric"
               placeholder="Enter amount"
               placeholderTextColor={
-                colorScheme === "dark" ? "#64748B" : "#94A3B8"
+                colorScheme === "dark" ? "#6A6358" : "#968E82"
               }
               editable={!submitting}
               style={{
                 borderWidth: 1,
-                borderColor: colorScheme === "dark" ? "#334155" : "#E2E8F0",
+                borderColor: colorScheme === "dark" ? "#3A3731" : "#E3DACB",
                 borderRadius: 12,
                 paddingHorizontal: 14,
                 paddingVertical: 12,
                 fontSize: 16,
                 fontWeight: "700",
-                color: colorScheme === "dark" ? "#F1F5F9" : "#1E293B",
+                color: colorScheme === "dark" ? "#EFE8DD" : "#25231F",
                 marginBottom: 16,
               }}
             />
 
-            <Text className="text-slate-700 dark:text-slate-200 text-sm font-bold mb-2">
+            <Text className="text-ink dark:text-night-soft text-sm font-bold mb-2">
               Notes (optional)
             </Text>
             <TextInput
@@ -348,18 +348,18 @@ export default function WalletWithdrawl({
               onChangeText={setNotes}
               placeholder="Add a note"
               placeholderTextColor={
-                colorScheme === "dark" ? "#64748B" : "#94A3B8"
+                colorScheme === "dark" ? "#6A6358" : "#968E82"
               }
               editable={!submitting}
               multiline
               style={{
                 borderWidth: 1,
-                borderColor: colorScheme === "dark" ? "#334155" : "#E2E8F0",
+                borderColor: colorScheme === "dark" ? "#3A3731" : "#E3DACB",
                 borderRadius: 12,
                 paddingHorizontal: 14,
                 paddingVertical: 12,
                 fontSize: 14,
-                color: colorScheme === "dark" ? "#F1F5F9" : "#1E293B",
+                color: colorScheme === "dark" ? "#EFE8DD" : "#25231F",
                 minHeight: 70,
                 textAlignVertical: "top",
                 marginBottom: 20,
@@ -381,7 +381,7 @@ export default function WalletWithdrawl({
               {submitting ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text className="text-white font-black text-base">
+                <Text className="text-white font-extrabold text-base">
                   Submit Request
                 </Text>
               )}

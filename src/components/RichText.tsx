@@ -11,11 +11,11 @@ type Block =
 
 const TONES = {
   default: {
-    text: "text-slate-600 dark:text-slate-300",
-    strong: "text-slate-800 dark:text-white",
-    heading: "text-slate-800 dark:text-white",
-    marker: "text-primary",
-    rule: "bg-gray-200 dark:bg-slate-700",
+    text: "text-ink-soft dark:text-night-soft",
+    strong: "text-ink dark:text-white",
+    heading: "text-ink dark:text-white",
+    marker: "text-primary-deep dark:text-primary",
+    rule: "bg-line dark:bg-night-line",
     quote: "border-orange-300 dark:border-orange-500",
   },
   amber: {
@@ -137,7 +137,7 @@ const renderInline = (text: string, strongClass: string) =>
         return (
           <Text
             key={i}
-            className="text-primary underline"
+            className="text-primary-deep dark:text-primary underline"
             onPress={() => Linking.openURL(link[2]).catch(() => {})}
           >
             {label}
@@ -175,7 +175,7 @@ const RichText = ({ content, tone = "default" }: RichTextProps) => {
           return (
             <Text
               key={i}
-              className={`${block.level === 2 ? "text-xl" : "text-lg"} font-black mb-2 ${i > 0 ? "mt-3" : ""} ${t.heading}`}
+              className={`${block.level === 2 ? "text-xl" : "text-lg"} font-extrabold mb-2 ${i > 0 ? "mt-3" : ""} ${t.heading}`}
             >
               {renderInline(block.text, t.strong)}
             </Text>

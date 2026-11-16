@@ -42,11 +42,11 @@ const EnrolledTestCard = ({ test }: EnrolledTestCardProps) => {
   return (
     <TouchableOpacity
       onPress={handlePress}
-      className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm mb-5"
+      className="bg-white dark:bg-night p-5 rounded-2xl border border-line dark:border-night-line shadow-sm mb-5"
     >
       <View className="flex-row items-center mb-4">
         {/* Small Thumbnail */}
-        <View className="w-16 h-16 rounded-2xl bg-orange-50 dark:bg-orange-950/30 mr-4 overflow-hidden relative items-center justify-center">
+        <View className="w-24 aspect-video rounded-xl bg-clay-tint dark:bg-night-raised mr-4 overflow-hidden relative items-center justify-center">
           <Image
             source={{ uri: displayThumbnail }}
             className="w-full h-full"
@@ -56,41 +56,41 @@ const EnrolledTestCard = ({ test }: EnrolledTestCardProps) => {
 
         {/* Title and Date */}
         <View className="flex-1">
-          <View className="bg-orange-50 dark:bg-orange-900/20 px-2 py-0.5 rounded-md self-start mb-1">
-            <Text className="text-primary font-black text-[10px]">
+          <View className="bg-clay-tint dark:bg-night-raised px-2 py-0.5 rounded-md self-start mb-1">
+            <Text className="text-primary-deep dark:text-primary font-extrabold text-[10px]">
               {displayExamName}
             </Text>
           </View>
           <Text
-            className="text-slate-800 dark:text-white font-black text-base"
+            className="text-ink dark:text-white font-extrabold text-base"
             numberOfLines={1}
           >
             {test.title}
           </Text>
           {formattedDate && (
-            <Text className="text-slate-400 dark:text-slate-500 font-bold text-[10px] mt-0.5">
+            <Text className="text-ink-soft dark:text-night-soft font-bold text-[10px] mt-0.5">
               Enrolled on {formattedDate}
             </Text>
           )}
         </View>
-        <Feather name="chevron-right" size={20} color="#CBD5E1" />
+        <Feather name="chevron-right" size={20} color="#B5AEA3" />
       </View>
 
       {/* Progress Section */}
-      <View className="pt-3 border-t border-gray-50 dark:border-slate-800">
+      <View className="pt-3 border-t border-line dark:border-night-line">
         <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-slate-800 dark:text-white font-black text-[11px]">
+          <Text className="text-ink dark:text-white font-extrabold text-[11px]">
             Overall Progress
           </Text>
-          <Text className="text-slate-400 dark:text-slate-500 font-bold text-[10px]">
+          <Text className="text-ink-soft dark:text-night-soft font-bold text-[10px]">
             {test.completedItems || 0} of {test.totalItems || 0} tests completed
           </Text>
         </View>
 
         {/* Progress Bar */}
-        <View className="h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden mb-4">
+        <View className="h-1.5 bg-sand dark:bg-night-raised rounded-full overflow-hidden mb-4">
           <View
-            className="h-full bg-primary"
+            className="h-full bg-primary-deep"
             style={{ width: `${Math.min(test.progressPercentage || 0, 100)}%` }}
           />
         </View>
@@ -98,28 +98,28 @@ const EnrolledTestCard = ({ test }: EnrolledTestCardProps) => {
         {/* Stats Grid */}
         <View className="flex-row justify-between">
           <View className="items-center flex-1">
-            <Text className="text-slate-800 dark:text-white font-black text-sm">
+            <Text className="text-ink dark:text-white font-extrabold text-sm">
               {test.totalItems || 0}
             </Text>
-            <Text className="text-slate-400 font-bold text-[9px] uppercase tracking-wider">
+            <Text className="text-ink-soft font-bold text-[9px] uppercase tracking-wider">
               Total Tests
             </Text>
           </View>
-          <View className="w-[1px] h-6 bg-gray-100 dark:bg-slate-800" />
+          <View className="w-[1px] h-6 bg-sand dark:bg-night-raised" />
           <View className="items-center flex-1">
-            <Text className="text-slate-800 dark:text-white font-black text-sm">
+            <Text className="text-ink dark:text-white font-extrabold text-sm">
               {test.completedItems || 0}
             </Text>
-            <Text className="text-slate-400 font-bold text-[9px] uppercase tracking-wider">
+            <Text className="text-ink-soft font-bold text-[9px] uppercase tracking-wider">
               Completed
             </Text>
           </View>
-          <View className="w-[1px] h-6 bg-gray-100 dark:bg-slate-800" />
+          <View className="w-[1px] h-6 bg-sand dark:bg-night-raised" />
           <View className="items-center flex-1">
-            <Text className="text-slate-800 dark:text-white font-black text-sm">
+            <Text className="text-ink dark:text-white font-extrabold text-sm">
               {formatScore(calculateAverageScore(test))}
             </Text>
-            <Text className="text-slate-400 font-bold text-[9px] uppercase tracking-wider">
+            <Text className="text-ink-soft font-bold text-[9px] uppercase tracking-wider">
               Avg Score
             </Text>
           </View>

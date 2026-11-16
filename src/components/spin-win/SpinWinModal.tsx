@@ -374,12 +374,12 @@ export default function SpinWinModal({ onClose, view, onChanged, onLoginRequeste
             <>
               <View className="rounded-xl border-2 border-dashed border-[#683A8D] dark:border-[#DCC9F5] bg-[#F9DDE9] dark:bg-[#3A2A4F] px-3 py-2.5">
                 <View className="flex-row items-center justify-between gap-3 mb-1.5">
-                  <Text className="text-[11px] font-semibold text-[#5E4B72] dark:text-slate-300">
+                  <Text className="text-[11px] font-semibold text-[#5E4B72] dark:text-night-soft">
                     Your coupon code
                   </Text>
                   <TouchableOpacity
                     onPress={() => copyCode(spin.coupon!.code)}
-                    className="flex-row items-center rounded-full border-[1.5px] border-[#683A8D] dark:border-[#DCC9F5] bg-white dark:bg-slate-800 px-3 min-h-[36px]"
+                    className="flex-row items-center rounded-full border-[1.5px] border-[#683A8D] dark:border-[#DCC9F5] bg-white dark:bg-night-raised px-3 min-h-[36px]"
                   >
                     <Feather name={copied ? "check" : "copy"} size={14} color={dark ? "#DCC9F5" : PLUM} />
                     <Text className="ml-1.5 text-[13px] font-bold text-[#683A8D] dark:text-[#DCC9F5]">
@@ -403,7 +403,7 @@ export default function SpinWinModal({ onClose, view, onChanged, onLoginRequeste
                 onPress={() => goTo(shopRouteFor(spin.eligibleCategories))}
               />
               <SecondaryButton label="My Coupons" onPress={() => goTo("/user/coupons")} />
-              <Text className="text-xs leading-[18px] text-[#5E4B72] dark:text-slate-400">
+              <Text className="text-xs leading-[18px] text-[#5E4B72] dark:text-night-soft">
                 Apply the code in your cart. Minimum order, maximum discount and expiry for this
                 coupon are under My Coupons.
               </Text>
@@ -418,7 +418,7 @@ export default function SpinWinModal({ onClose, view, onChanged, onLoginRequeste
                 disabled={claiming}
                 loading={claiming}
               />
-              <Text className="text-xs text-center text-[#5E4B72] dark:text-slate-400">
+              <Text className="text-xs text-center text-[#5E4B72] dark:text-night-soft">
                 Claim it to see your coupon and its details under My Coupons.
               </Text>
             </>
@@ -450,7 +450,7 @@ export default function SpinWinModal({ onClose, view, onChanged, onLoginRequeste
             {benefits.map((b) => (
               <View
                 key={b.text}
-                className="flex-row items-center rounded-xl border border-[#E6DAF2] dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-1.5"
+                className="flex-row items-center rounded-xl border border-[#E6DAF2] dark:border-night-line bg-white dark:bg-night-raised px-2.5 py-1.5"
               >
                 <View
                   style={{ backgroundColor: b.bg }}
@@ -468,14 +468,14 @@ export default function SpinWinModal({ onClose, view, onChanged, onLoginRequeste
             <>
               <PrimaryButton label="Log in to Spin" icon="log-in" onPress={() => goToAuth("/login")} />
               <SecondaryButton label="New here? Sign Up" onPress={() => goToAuth("/signup")} />
-              <Text className="text-xs leading-[18px] text-[#5E4B72] dark:text-slate-400">
+              <Text className="text-xs leading-[18px] text-[#5E4B72] dark:text-night-soft">
                 Log in or sign up to spin. One spin per account, and your coupon is saved to it.
               </Text>
             </>
           ) : (
             <>
               <PrimaryButton label="Spin the Wheel" icon="disc" onPress={startSpin} />
-              <Text className="text-xs leading-[18px] text-[#5E4B72] dark:text-slate-400">
+              <Text className="text-xs leading-[18px] text-[#5E4B72] dark:text-night-soft">
                 One spin. One guaranteed reward. Use your coupon on eligible Testkart products.
               </Text>
             </>
@@ -502,7 +502,7 @@ export default function SpinWinModal({ onClose, view, onChanged, onLoginRequeste
         />
         <View
           style={{ width: cardWidth, maxHeight: height - 48 }}
-          className="rounded-3xl overflow-hidden bg-[#FFF9F1] dark:bg-slate-900 border border-[#E6DAF2] dark:border-slate-700"
+          className="rounded-3xl overflow-hidden bg-[#FFF9F1] dark:bg-night border border-[#E6DAF2] dark:border-night-line"
         >
           <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
             <View
@@ -526,8 +526,8 @@ export default function SpinWinModal({ onClose, view, onChanged, onLoginRequeste
                     onPress={() => setScreen("play")}
                     className="flex-row items-center self-start py-1"
                   >
-                    <Feather name="arrow-left" size={14} color={dark ? "#CBD5E1" : "#5E4B72"} />
-                    <Text className="ml-1 text-[13px] font-semibold text-[#5E4B72] dark:text-slate-300">
+                    <Feather name="arrow-left" size={14} color={dark ? "#B5AEA3" : "#5E4B72"} />
+                    <Text className="ml-1 text-[13px] font-semibold text-[#5E4B72] dark:text-night-soft">
                       Back
                     </Text>
                   </TouchableOpacity>
@@ -548,7 +548,7 @@ export default function SpinWinModal({ onClose, view, onChanged, onLoginRequeste
                       <Text style={{ color: GOLD }} className="text-[13px] mr-2">
                         {"•"}
                       </Text>
-                      <Text className="flex-1 text-[13px] leading-5 text-[#2A1640] dark:text-slate-200">
+                      <Text className="flex-1 text-[13px] leading-5 text-[#2A1640] dark:text-night-soft">
                         {rule}
                       </Text>
                     </View>
@@ -566,7 +566,7 @@ export default function SpinWinModal({ onClose, view, onChanged, onLoginRequeste
                       <Text className="text-[22px] font-extrabold text-[#2A1640] dark:text-white">
                         Diwali Special! Spin & Win
                       </Text>
-                      <Text className="text-[13px] leading-5 text-[#5E4B72] dark:text-slate-300">
+                      <Text className="text-[13px] leading-5 text-[#5E4B72] dark:text-night-soft">
                         Your preparation deserves a little extra happiness. Spin the wheel and
                         unlock exciting discounts on Testkart!
                       </Text>
@@ -578,7 +578,7 @@ export default function SpinWinModal({ onClose, view, onChanged, onLoginRequeste
                       {error}
                     </Text>
                   ) : null}
-                  <View className="flex-row flex-wrap gap-x-6 gap-y-1 pt-3 border-t border-[#E6DAF2] dark:border-slate-700">
+                  <View className="flex-row flex-wrap gap-x-6 gap-y-1 pt-3 border-t border-[#E6DAF2] dark:border-night-line">
                     <TouchableOpacity onPress={() => setScreen("terms")} className="py-1">
                       <Text className="text-[13px] font-bold underline text-[#683A8D] dark:text-[#DCC9F5]">
                         Terms & Conditions
@@ -602,7 +602,7 @@ export default function SpinWinModal({ onClose, view, onChanged, onLoginRequeste
             disabled={isSpinning}
             accessibilityLabel="Close"
             style={{ opacity: isSpinning ? 0.5 : 1 }}
-            className="absolute top-3 right-3 w-9 h-9 rounded-full items-center justify-center bg-white dark:bg-slate-800 border border-[#E6DAF2] dark:border-slate-700"
+            className="absolute top-3 right-3 w-9 h-9 rounded-full items-center justify-center bg-white dark:bg-night-raised border border-[#E6DAF2] dark:border-night-line"
           >
             <Feather name="x" size={18} color={dark ? "#FFFFFF" : "#2A1640"} />
           </TouchableOpacity>

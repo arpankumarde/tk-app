@@ -115,39 +115,39 @@ const ScientificCalculator = ({
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View className="flex-1 bg-black/50 items-center justify-center px-6">
-        <View className="bg-slate-50 dark:bg-slate-900 w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800">
+        <View className="bg-sand dark:bg-night w-full rounded-3xl overflow-hidden shadow-2xl border border-line dark:border-night-line">
           {/* Header */}
-          <View className="flex-row items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800">
-            <Text className="text-slate-900 dark:text-white font-black text-sm">
+          <View className="flex-row items-center justify-between px-6 py-4 border-b border-line dark:border-night-line bg-sand dark:bg-night-raised">
+            <Text className="text-ink dark:text-white font-extrabold text-sm">
               Scientific Calculator
             </Text>
             <TouchableOpacity onPress={onClose}>
               <Feather
                 name="minimize-2"
                 size={20}
-                color={isDark ? "#94a3b8" : "#64748b"}
+                color={isDark ? "#968E82" : "#6A6358"}
               />
             </TouchableOpacity>
           </View>
 
           {/* Display */}
-          <View className="px-6 py-8 bg-white dark:bg-slate-950 items-end justify-center min-h-[100px]">
+          <View className="px-6 py-8 bg-white dark:bg-night items-end justify-center min-h-[100px]">
             <Text
               numberOfLines={1}
               adjustsFontSizeToFit
-              className="text-slate-900 dark:text-white text-5xl font-black"
+              className="text-ink dark:text-white text-5xl font-extrabold"
             >
               {display}
             </Text>
           </View>
 
           {/* Buttons */}
-          <View className="p-4 bg-slate-50 dark:bg-slate-900">
+          <View className="p-4 bg-sand dark:bg-night">
             {buttons.map((row, ridx) => (
               <View key={ridx} className="flex-row justify-between mb-2">
                 {row.map((btn) => {
-                  let bgColor = isDark ? "bg-slate-800" : "bg-white";
-                  let textColor = isDark ? "text-slate-300" : "text-slate-700";
+                  let bgColor = isDark ? "bg-ink" : "bg-white";
+                  let textColor = isDark ? "text-line" : "text-ink";
                   let fontWeight = "font-bold";
 
                   if (
@@ -171,8 +171,8 @@ const ScientificCalculator = ({
                       "M-",
                     ].includes(btn)
                   ) {
-                    bgColor = isDark ? "bg-slate-800/50" : "bg-slate-100";
-                    textColor = isDark ? "text-slate-400" : "text-slate-500";
+                    bgColor = isDark ? "bg-ink/50" : "bg-sand";
+                    textColor = isDark ? "text-ink-soft" : "text-ink-soft";
                     fontWeight = "font-semibold";
                   } else if (btn === "=") {
                     bgColor = "bg-orange-500";
@@ -204,7 +204,7 @@ const ScientificCalculator = ({
                         else if (btn === "e") handlePress("e");
                         else handlePress(btn);
                       }}
-                      className={`${bgColor} h-12 w-[18%] items-center justify-center rounded-xl border border-slate-200/50 dark:border-slate-700/50`}
+                      className={`${bgColor} h-12 w-[18%] items-center justify-center rounded-xl border border-line/50 dark:border-night-line`}
                     >
                       <Text className={`${textColor} ${fontWeight} text-sm`}>
                         {btn}

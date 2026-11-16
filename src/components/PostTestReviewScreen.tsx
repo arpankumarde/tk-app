@@ -127,23 +127,23 @@ const PostTestReviewScreen = ({
       onRequestClose={handleClose}
     >
       <SafeAreaProvider>
-        <SafeAreaView className="flex-1 bg-white dark:bg-slate-950">
+        <SafeAreaView className="flex-1 bg-paper dark:bg-night">
           {submitted ? (
             <View className="flex-1 items-center justify-center px-8">
-              <View className="w-20 h-20 rounded-full bg-orange-100 dark:bg-orange-500/20 items-center justify-center mb-6">
+              <View className="w-20 h-20 rounded-full bg-clay-tint dark:bg-night-raised items-center justify-center mb-6">
                 <Feather name="check" size={40} color="#C2410C" />
               </View>
-              <Text className="text-2xl font-black text-slate-900 dark:text-white text-center">
+              <Text className="w-full text-2xl font-extrabold text-ink dark:text-white text-center">
                 Thanks for your feedback
               </Text>
-              <Text className="text-slate-600 dark:text-slate-300 text-base font-bold text-center mt-3 leading-6">
+              <Text className="text-ink-soft dark:text-night-soft text-base font-bold text-center mt-3 leading-6">
                 Your rating helps other students choose and helps the teacher improve.
               </Text>
               <TouchableOpacity
                 onPress={onClose}
-                className="mt-10 w-full h-14 rounded-2xl bg-primary items-center justify-center"
+                className="mt-10 w-full h-14 rounded-2xl bg-primary-deep items-center justify-center"
               >
-                <Text className="text-white font-black text-base">
+                <Text className="text-white font-extrabold text-base">
                   See my results
                 </Text>
               </TouchableOpacity>
@@ -157,12 +157,12 @@ const PostTestReviewScreen = ({
                 <TouchableOpacity
                   onPress={handleClose}
                   accessibilityLabel="Close"
-                  className="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 items-center justify-center"
+                  className="w-11 h-11 rounded-full bg-sand dark:bg-night-raised items-center justify-center"
                 >
                   <Feather
                     name="x"
                     size={22}
-                    color={isDark ? "#e2e8f0" : "#334155"}
+                    color={isDark ? "#E3DACB" : "#3A3731"}
                   />
                 </TouchableOpacity>
               </View>
@@ -178,19 +178,19 @@ const PostTestReviewScreen = ({
                 keyboardShouldPersistTaps="handled"
               >
                 <View className="items-center">
-                  <View className="w-16 h-16 rounded-full bg-orange-100 dark:bg-orange-500/20 items-center justify-center mb-6">
+                  <View className="w-16 h-16 rounded-full bg-clay-tint dark:bg-night-raised items-center justify-center mb-6">
                     <Ionicons name="star" size={30} color="#FF8A50" />
                   </View>
-                  <Text className="text-2xl font-black text-slate-900 dark:text-white text-center">
+                  <Text className="w-full text-2xl font-extrabold text-ink dark:text-white text-center">
                     {isReconsider ? "Changed your mind?" : "How was this test series?"}
                   </Text>
                   <Text
-                    className="text-base font-black text-orange-700 dark:text-orange-300 text-center mt-2"
+                    className="text-base font-extrabold text-orange-700 dark:text-orange-300 text-center mt-2"
                     numberOfLines={2}
                   >
                     {seriesTitle}
                   </Text>
-                  <Text className="text-slate-600 dark:text-slate-300 text-sm font-bold text-center mt-3 leading-5 px-2">
+                  <Text className="text-ink-soft dark:text-night-soft text-sm font-bold text-center mt-3 leading-5 px-2">
                     {isReconsider
                       ? `You rated this series ${initialRating} out of 5 earlier. If this test changed how you feel about it, update your rating.`
                       : "You just finished a test. Rate the series to help other students and the teacher."}
@@ -213,19 +213,19 @@ const PostTestReviewScreen = ({
                     </TouchableOpacity>
                   ))}
                 </View>
-                <Text className="text-center text-sm font-black text-slate-700 dark:text-slate-200 mt-3 h-5">
+                <Text className="text-center text-sm font-extrabold text-ink dark:text-night-soft mt-3 h-5">
                   {rating > 0 ? RATING_LABELS[rating] : "Tap a star to rate"}
                 </Text>
 
                 <TextInput
                   placeholder="Tell us more about your experience (optional)"
-                  placeholderTextColor={isDark ? "#94a3b8" : "#64748b"}
+                  placeholderTextColor={isDark ? "#968E82" : "#6A6358"}
                   multiline
                   maxLength={1000}
                   value={reviewText}
                   onChangeText={setReviewText}
                   editable={!submitting}
-                  className="mt-8 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-slate-900 dark:text-white text-base bg-slate-50 dark:bg-slate-900 h-32 font-bold"
+                  className="mt-8 border border-line dark:border-night-line rounded-2xl p-4 text-ink dark:text-white text-base bg-sand dark:bg-night h-32 font-bold"
                   style={{ textAlignVertical: "top" }}
                 />
 
@@ -240,13 +240,13 @@ const PostTestReviewScreen = ({
                 <TouchableOpacity
                   onPress={handleSubmit}
                   disabled={submitting || rating === 0}
-                  className={`h-14 rounded-2xl items-center justify-center ${rating === 0 ? "bg-slate-200 dark:bg-slate-800" : "bg-primary"}`}
+                  className={`h-14 rounded-2xl items-center justify-center ${rating === 0 ? "bg-line dark:bg-night-raised" : "bg-primary-deep"}`}
                 >
                   {submitting ? (
                     <ActivityIndicator color="white" size="small" />
                   ) : (
                     <Text
-                      className={`font-black text-base ${rating === 0 ? "text-slate-500 dark:text-slate-400" : "text-white"}`}
+                      className={`font-extrabold text-base ${rating === 0 ? "text-ink-soft dark:text-night-soft" : "text-white"}`}
                     >
                       {isReconsider ? "Update Review" : "Submit Review"}
                     </Text>
@@ -255,9 +255,9 @@ const PostTestReviewScreen = ({
                 <TouchableOpacity
                   onPress={handleClose}
                   disabled={submitting}
-                  className="h-12 rounded-2xl items-center justify-center border border-slate-200 dark:border-slate-700"
+                  className="h-12 rounded-2xl items-center justify-center border border-line dark:border-night-line"
                 >
-                  <Text className="text-slate-700 dark:text-slate-200 font-black text-sm">
+                  <Text className="text-ink dark:text-night-soft font-extrabold text-sm">
                     {isReconsider ? "Keep my rating" : "Skip for now"}
                   </Text>
                 </TouchableOpacity>

@@ -52,9 +52,9 @@ const BundleCard = ({ bundle, variant = "list" }: BundleCardProps) => {
       <TouchableOpacity
         onPress={handlePress}
         activeOpacity={0.9}
-        className="w-[172px] bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-700/50 shadow-sm shadow-slate-200/60 dark:shadow-none"
+        className="w-[172px] bg-white dark:bg-night-raised rounded-3xl overflow-hidden border border-line dark:border-night-line"
       >
-        <View className="w-full aspect-[4/3] bg-slate-100 dark:bg-slate-900 relative">
+        <View className="w-full aspect-video bg-sand dark:bg-night relative">
           <Image
             source={{ uri: displayImage }}
             className="w-full h-full"
@@ -63,19 +63,19 @@ const BundleCard = ({ bundle, variant = "list" }: BundleCardProps) => {
 
           {showDiscount && (
             <View className="absolute top-2 left-2 bg-emerald-500 px-2 py-0.5 rounded-full">
-              <Text className="text-white text-[9px] font-black">
+              <Text className="text-white text-[9px] font-extrabold">
                 {discountPercent}% OFF
               </Text>
             </View>
           )}
 
-          <View className="absolute top-2 right-2 bg-white/95 dark:bg-slate-900/90 px-2 py-1 rounded-full">
+          <View className="absolute top-2 right-2 bg-white/95 dark:bg-night/90 px-2 py-1 rounded-full">
             {isFree ? (
-              <Text className="text-emerald-500 text-[10px] font-black">
+              <Text className="text-emerald-700 dark:text-emerald-400 text-[10px] font-extrabold">
                 FREE
               </Text>
             ) : (
-              <Text className="text-slate-800 dark:text-white text-[10px] font-black">
+              <Text className="text-ink dark:text-white text-[10px] font-extrabold">
                 ₹{formatInr(bundle.price)}
               </Text>
             )}
@@ -83,12 +83,12 @@ const BundleCard = ({ bundle, variant = "list" }: BundleCardProps) => {
         </View>
 
         <View className="p-3">
-          <Text className="text-primary text-[9px] font-black uppercase tracking-widest mb-1">
+          <Text className="text-primary-deep dark:text-primary text-[9px] font-extrabold uppercase tracking-widest mb-1">
             Bundle
           </Text>
 
           <Text
-            className="text-sm font-black text-slate-800 dark:text-white leading-[18px] mb-2 h-9"
+            className="text-sm font-extrabold text-ink dark:text-white leading-[18px] mb-2 h-9"
             numberOfLines={2}
           >
             {bundle.title}
@@ -96,7 +96,7 @@ const BundleCard = ({ bundle, variant = "list" }: BundleCardProps) => {
 
           <View className="flex-row items-center mb-2">
             <Text
-              className="text-slate-500 dark:text-slate-400 text-[11px] font-semibold flex-shrink"
+              className="text-ink-soft dark:text-night-soft text-[11px] font-semibold flex-shrink"
               numberOfLines={1}
             >
               {displayAuthor}
@@ -113,16 +113,16 @@ const BundleCard = ({ bundle, variant = "list" }: BundleCardProps) => {
 
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center flex-shrink">
-              <Feather name="layers" size={11} color="#94a3b8" />
+              <Feather name="layers" size={11} color="#9A8A93" />
               <Text
-                className="ml-1 text-slate-400 dark:text-slate-500 text-[10px] font-bold"
+                className="ml-1 text-ink-soft dark:text-night-soft text-[10px] font-bold"
                 numberOfLines={1}
               >
                 {itemLabel}
               </Text>
             </View>
             {savings > 0 && (
-              <Text className="text-emerald-500 text-[10px] font-black flex-shrink-0">
+              <Text className="text-emerald-700 dark:text-emerald-400 text-[10px] font-extrabold flex-shrink-0">
                 Save ₹{formatInr(savings)}
               </Text>
             )}
@@ -136,25 +136,25 @@ const BundleCard = ({ bundle, variant = "list" }: BundleCardProps) => {
     <TouchableOpacity
       onPress={handlePress}
       activeOpacity={0.9}
-      className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden mb-6 shadow-xl shadow-slate-200/50 dark:shadow-none border border-gray-100 dark:border-slate-700/50"
+      className="bg-white dark:bg-night-raised rounded-3xl overflow-hidden mb-6 shadow-xl dark:shadow-none border border-line dark:border-night-line"
     >
       {/* Post Header: teacher avatar + name */}
       <View className="flex-row items-center px-5 pt-4 pb-3">
-        <View className="w-9 h-9 rounded-full bg-orange-50 dark:bg-slate-700 items-center justify-center overflow-hidden mr-3">
+        <View className="w-9 h-9 rounded-full bg-clay-tint dark:bg-night-line items-center justify-center overflow-hidden mr-3">
           {bundle.teacherAvatarUrl ? (
             <Image
               source={{ uri: bundle.teacherAvatarUrl }}
               className="w-full h-full"
             />
           ) : (
-            <Text className="text-primary text-xs font-black">
+            <Text className="text-primary-deep dark:text-primary text-xs font-extrabold">
               {teacherInitials}
             </Text>
           )}
         </View>
         <View className="flex-row items-center flex-1">
           <Text
-            className="text-slate-800 dark:text-white font-bold text-sm"
+            className="text-ink dark:text-white font-bold text-sm"
             numberOfLines={1}
           >
             {displayAuthor}
@@ -172,30 +172,30 @@ const BundleCard = ({ bundle, variant = "list" }: BundleCardProps) => {
 
       {/* Title */}
       <Text
-        className="text-lg font-black text-slate-800 dark:text-white px-5 mb-3 leading-6"
+        className="text-lg font-extrabold text-ink dark:text-white px-5 mb-3 leading-6"
         numberOfLines={2}
       >
         {bundle.title}
       </Text>
 
       {/* Thumbnail */}
-      <View className="aspect-video relative bg-gray-100 dark:bg-slate-900">
+      <View className="aspect-video relative bg-sand dark:bg-night">
         <Image
           source={{ uri: displayImage }}
           className="w-full h-full"
           resizeMode="cover"
         />
 
-        <View className="absolute top-3 left-3 flex-row items-center px-3 py-1.5 bg-slate-900/85 rounded-full shadow-sm">
+        <View className="absolute top-3 left-3 flex-row items-center px-3 py-1.5 bg-ink/85 rounded-full shadow-sm">
           <Feather name="layers" size={10} color="#FF8A50" />
-          <Text className="ml-1.5 text-white text-[10px] font-black uppercase tracking-wider">
+          <Text className="ml-1.5 text-white text-[10px] font-extrabold uppercase tracking-wider">
             Bundle · {itemLabel}
           </Text>
         </View>
 
         {showDiscount && (
           <View className="absolute top-3 right-3 px-3 py-1.5 bg-emerald-500 rounded-full shadow-sm">
-            <Text className="text-white text-[10px] font-black">
+            <Text className="text-white text-[10px] font-extrabold">
               {discountPercent}% OFF
             </Text>
           </View>
@@ -205,20 +205,20 @@ const BundleCard = ({ bundle, variant = "list" }: BundleCardProps) => {
       {/* Footer: savings (left) — price (right) */}
       <View className="flex-row items-center justify-between px-5 py-4">
         <View className="flex-row items-center">
-          <Feather name="tag" size={13} color="#94a3b8" />
-          <Text className="ml-1.5 text-slate-400 dark:text-slate-500 text-xs font-bold">
+          <Feather name="tag" size={13} color="#9A8A93" />
+          <Text className="ml-1.5 text-ink-soft dark:text-night-soft text-xs font-bold">
             {savings > 0 ? `You save ₹${formatInr(savings)}` : "Bundle deal"}
           </Text>
         </View>
 
         <View className="flex-row items-baseline">
           {!isFree && savings > 0 && (
-            <Text className="mr-2 text-slate-400 dark:text-slate-500 text-xs font-bold line-through">
+            <Text className="mr-2 text-ink-soft dark:text-night-soft text-xs font-bold line-through">
               ₹{formatInr(bundle.originalPrice)}
             </Text>
           )}
           <Text
-            className={`${isFree ? "text-emerald-500" : "text-primary"} text-lg font-black`}
+            className={`${isFree ? "text-emerald-700 dark:text-emerald-400" : "text-primary-deep dark:text-primary"} text-lg font-extrabold`}
           >
             {isFree ? "FREE" : `₹${formatInr(bundle.price)}`}
           </Text>

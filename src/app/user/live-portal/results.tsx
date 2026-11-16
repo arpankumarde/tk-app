@@ -150,7 +150,7 @@ const LiveResultsScreen = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-white dark:bg-slate-900 items-center justify-center">
+      <View className="flex-1 bg-paper dark:bg-night items-center justify-center">
         <ActivityIndicator size="large" color="#FF8A50" />
       </View>
     );
@@ -158,20 +158,20 @@ const LiveResultsScreen = () => {
 
   if (error || !resultData) {
     return (
-      <SafeAreaView className="flex-1 bg-white dark:bg-slate-900 px-6">
+      <SafeAreaView className="flex-1 bg-paper dark:bg-night px-6">
         <TouchableOpacity
           onPress={() => router.replace("/user")}
           className="mt-5 mb-8"
         >
           <Feather
-            name="arrow-left"
+            name="chevron-left"
             size={22}
-            color={colorScheme === "dark" ? "#e2e8f0" : "#1e293b"}
+            color={colorScheme === "dark" ? "#E3DACB" : "#25231F"}
           />
         </TouchableOpacity>
         <View className="flex-1 items-center justify-center">
           <Feather name="alert-circle" size={44} color="#FF6B6B" />
-          <Text className="text-slate-800 dark:text-white font-black text-xl mt-4 text-center">
+          <Text className="w-full text-ink dark:text-white font-extrabold text-xl mt-4 text-center">
             {error || "Unable to load results"}
           </Text>
         </View>
@@ -182,7 +182,7 @@ const LiveResultsScreen = () => {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-900"
+      className="flex-1 bg-paper dark:bg-night"
     >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
@@ -197,31 +197,31 @@ const LiveResultsScreen = () => {
           <View className="flex-row items-center mb-4">
             <TouchableOpacity
               onPress={() => router.replace("/user")}
-              className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-full items-center justify-center mr-3"
+              className="w-10 h-10 bg-sand dark:bg-night-raised rounded-full items-center justify-center mr-3"
             >
               <Feather name="chevron-left" size={24} color="#FF8A50" />
             </TouchableOpacity>
-            <Text className="text-slate-900 dark:text-white text-2xl font-black leading-tight">
+            <Text className="text-ink dark:text-white text-2xl font-extrabold leading-tight">
               Test Results
             </Text>
           </View>
 
           {/* Score Card */}
-          <View className="mt-3 bg-white dark:bg-slate-900 border border-orange-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm mb-3">
-            <Text className="text-slate-600 dark:text-slate-300 font-black text-base mb-1">
+          <View className="mt-3 bg-white dark:bg-night border border-line dark:border-night-line rounded-2xl p-4 shadow-sm mb-3">
+            <Text className="text-ink-soft dark:text-night-soft font-extrabold text-base mb-1">
               Your Score
             </Text>
-            <Text className="text-primary text-5xl font-black tracking-tight">
+            <Text className="text-primary-deep dark:text-primary text-5xl font-extrabold tracking-tight">
               {Number(resultData.score).toFixed(2)}%
             </Text>
-            <Text className="text-slate-500 dark:text-slate-400 font-semibold text-lg mt-1">
+            <Text className="text-ink-soft dark:text-night-soft font-semibold text-lg mt-1">
               {correctCount} / {attemptStats.total} correct ·{" "}
               {attemptStats.attempted} / {attemptStats.total} attempted
             </Text>
 
-            <View className="mt-3 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+            <View className="mt-3 h-2.5 rounded-full bg-line dark:bg-night-line overflow-hidden">
               <View
-                className="h-full bg-primary"
+                className="h-full bg-primary-deep"
                 style={{ width: `${scoreProgress}%` }}
               />
             </View>
@@ -230,52 +230,52 @@ const LiveResultsScreen = () => {
           {/* Stats Cards */}
           <View style={{ gap: 8 }}>
             <View className="flex-row" style={{ gap: 10 }}>
-              <View className="flex-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
+              <View className="flex-1 bg-paper dark:bg-night border border-line dark:border-night-line rounded-2xl p-3">
                 <View className="flex-row items-center mb-1">
                   <Feather name="check-circle" size={18} color="#22c55e" />
-                  <Text className="ml-2 text-slate-500 dark:text-slate-400 font-black text-xs uppercase">
+                  <Text className="ml-2 text-ink-soft dark:text-night-soft font-extrabold text-xs uppercase">
                     Correct
                   </Text>
                 </View>
-                <Text className="text-slate-900 dark:text-white text-3xl font-black">
+                <Text className="text-ink dark:text-white text-3xl font-extrabold">
                   {correctCount}
                 </Text>
               </View>
 
-              <View className="flex-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
+              <View className="flex-1 bg-paper dark:bg-night border border-line dark:border-night-line rounded-2xl p-3">
                 <View className="flex-row items-center mb-1">
                   <Feather name="x-circle" size={18} color="#ef4444" />
-                  <Text className="ml-2 text-slate-500 dark:text-slate-400 font-black text-xs uppercase">
+                  <Text className="ml-2 text-ink-soft dark:text-night-soft font-extrabold text-xs uppercase">
                     Incorrect
                   </Text>
                 </View>
-                <Text className="text-slate-900 dark:text-white text-3xl font-black">
+                <Text className="text-ink dark:text-white text-3xl font-extrabold">
                   {attemptStats.incorrect}
                 </Text>
               </View>
             </View>
 
             <View className="flex-row" style={{ gap: 10 }}>
-              <View className="flex-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
+              <View className="flex-1 bg-paper dark:bg-night border border-line dark:border-night-line rounded-2xl p-3">
                 <View className="flex-row items-center mb-1">
-                  <Feather name="minus-circle" size={18} color="#64748b" />
-                  <Text className="ml-2 text-slate-500 dark:text-slate-400 font-black text-xs uppercase">
+                  <Feather name="minus-circle" size={18} color="#6A6358" />
+                  <Text className="ml-2 text-ink-soft dark:text-night-soft font-extrabold text-xs uppercase">
                     Not Attempted
                   </Text>
                 </View>
-                <Text className="text-slate-900 dark:text-white text-3xl font-black">
+                <Text className="text-ink dark:text-white text-3xl font-extrabold">
                   {attemptStats.notAttempted}
                 </Text>
               </View>
 
-              <View className="flex-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
+              <View className="flex-1 bg-paper dark:bg-night border border-line dark:border-night-line rounded-2xl p-3">
                 <View className="flex-row items-center mb-1">
-                  <Feather name="clock" size={18} color="#0284c7" />
-                  <Text className="ml-2 text-slate-500 dark:text-slate-400 font-black text-xs uppercase">
+                  <Feather name="clock" size={18} color="#3F6577" />
+                  <Text className="ml-2 text-ink-soft dark:text-night-soft font-extrabold text-xs uppercase">
                     Time Taken
                   </Text>
                 </View>
-                <Text className="text-slate-900 dark:text-white text-3xl font-black">
+                <Text className="text-ink dark:text-white text-3xl font-extrabold">
                   {formatDuration(resultData.timeTaken)}
                 </Text>
               </View>

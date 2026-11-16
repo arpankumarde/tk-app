@@ -17,9 +17,9 @@ const EnrolledCourseCard = ({ course }: EnrolledCourseCardProps) => {
           params: { id: String(course.id) },
         })
       }
-      className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm flex-row items-center mb-4"
+      className="bg-white dark:bg-night p-4 rounded-2xl border border-line dark:border-night-line shadow-sm flex-row items-center mb-4"
     >
-      <View className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-slate-800 mr-4 overflow-hidden relative">
+      <View className="w-28 aspect-video rounded-xl bg-sand dark:bg-night-raised mr-4 overflow-hidden relative">
         <Image
           source={{
             uri:
@@ -36,30 +36,30 @@ const EnrolledCourseCard = ({ course }: EnrolledCourseCardProps) => {
       {/* Content Section */}
       <View className="flex-1">
         <Text
-          className="text-slate-800 dark:text-white font-black text-lg mb-0.5"
+          className="text-ink dark:text-white font-extrabold text-lg mb-0.5"
           numberOfLines={1}
         >
           {course.title}
         </Text>
-        <Text className="text-slate-500 dark:text-slate-400 font-bold text-xs mb-2">
+        <Text className="text-ink-soft dark:text-night-soft font-bold text-xs mb-2">
           By: {course.teacherName || "Testkart Expert"}
         </Text>
         {/* Progress Bar */}
         <View className="flex-row items-center">
-          <View className="flex-1 h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full mr-3 overflow-hidden">
+          <View className="flex-1 h-1.5 bg-sand dark:bg-night-raised rounded-full mr-3 overflow-hidden">
             <View
-              className={`h-full ${course.completionPercentage >= 100 ? "bg-emerald-500" : "bg-primary"}`}
+              className={`h-full ${course.completionPercentage >= 100 ? "bg-emerald-500" : "bg-primary-deep"}`}
               style={{
                 width: `${Math.min(course.completionPercentage, 100)}%`,
               }}
             />
           </View>
-          <Text className="text-slate-500 dark:text-slate-400 font-black text-[10px]">
+          <Text className="text-ink-soft dark:text-night-soft font-extrabold text-[10px]">
             {Math.round(course.completionPercentage)}%
           </Text>
         </View>
         {course.totalLessons > 0 && (
-          <Text className="text-slate-400 dark:text-slate-500 font-bold text-[10px] mt-1">
+          <Text className="text-ink-soft dark:text-night-soft font-bold text-[10px] mt-1">
             {course.completedLessons} of {course.totalLessons} Lessons completed
           </Text>
         )}
@@ -67,7 +67,7 @@ const EnrolledCourseCard = ({ course }: EnrolledCourseCardProps) => {
       <Feather
         name="chevron-right"
         size={20}
-        color="#CBD5E1"
+        color="#B5AEA3"
         className="ml-2"
       />
     </TouchableOpacity>

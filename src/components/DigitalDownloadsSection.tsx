@@ -13,12 +13,12 @@ const DigitalDownloadsSection = ({
   if (!products || products.length === 0) return null;
 
   return (
-    <View className="bg-white dark:bg-slate-900">
-      <View className="px-6 pt-10 pb-5 items-center bg-white dark:bg-slate-900">
-        <Text className="text-4xl font-black text-slate-800 dark:text-white mb-3 text-center">
+    <View className="bg-white dark:bg-night">
+      <View className="px-6 pt-10 pb-5 items-center bg-white dark:bg-night">
+        <Text className="text-4xl font-extrabold text-ink dark:text-white mb-3 text-center">
           Study Notes
         </Text>
-        <Text className="text-base text-slate-500 dark:text-slate-400 leading-6 text-center">
+        <Text className="text-base text-ink-soft dark:text-night-soft leading-6 text-center">
           Premium notes, eBooks, and practice resources curated for faster exam prep.
         </Text>
       </View>
@@ -30,11 +30,11 @@ const DigitalDownloadsSection = ({
       </View>
 
       <TouchableOpacity
-        className="mx-12 mb-10 bg-orange-100/50 dark:bg-orange-900/20 py-3 rounded-2xl items-center border border-orange-200 dark:border-orange-800/30 shadow-sm"
+        className="mx-12 mb-10 bg-clay-tint dark:bg-night-raised py-3 rounded-2xl items-center border border-line dark:border-night-line shadow-sm"
         onPress={() => router.push("/shop")}
       >
         <View className="flex-row items-center">
-          <Text className="text-primary font-black text-lg mr-2">
+          <Text className="text-primary-deep dark:text-primary font-extrabold text-lg mr-2">
             Explore Digital Store
           </Text>
           <Feather name="arrow-right" size={20} color="#FF8A50" />

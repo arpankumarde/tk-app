@@ -1,7 +1,7 @@
 import { isPaymentAppUrl, openPaymentApp } from "@/utils/upiIntent";
 import { HIDE_WEBVIEW_UA_JS } from "@/utils/paymentWebView";
 import BlinkingDot from "@/components/BlinkingDot";
-import Header from "@/components/Header";
+import DetailHeader from "@/components/DetailHeader";
 import RichText from "@/components/RichText";
 import Placeholder from "@/constants/placeholder";
 import { useAuth } from "@/context/AuthContext";
@@ -158,8 +158,8 @@ const RuleSection = ({
   title: string;
   children: React.ReactNode;
 }) => (
-  <View className="mb-5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/50">
-    <Text className="text-base font-black text-slate-800 dark:text-white mb-3">
+  <View className="mb-5 bg-sand dark:bg-night-raised/40 rounded-2xl p-4 border border-line dark:border-night-line/50">
+    <Text className="text-base font-extrabold text-ink dark:text-white mb-3">
       {title}
     </Text>
     {children}
@@ -176,11 +176,11 @@ const InfoRow = ({
   value: string;
 }) => (
   <View className="flex-row items-center mb-2 last:mb-0">
-    <Feather name={icon} size={14} color="#64748b" />
-    <Text className="text-slate-500 dark:text-slate-400 text-sm ml-2 w-28">
+    <Feather name={icon} size={14} color="#6A6358" />
+    <Text className="text-ink-soft dark:text-night-soft text-sm ml-2 w-28">
       {label}
     </Text>
-    <Text className="text-slate-700 dark:text-slate-200 font-bold text-sm flex-1">
+    <Text className="text-ink-soft dark:text-night-soft font-bold text-sm flex-1">
       {value}
     </Text>
   </View>
@@ -194,8 +194,8 @@ const BulletItem = ({
   children?: React.ReactNode;
 }) => (
   <View className="flex-row mb-2 last:mb-0">
-    <Text className="text-orange-400 mr-2 mt-0.5 font-black">•</Text>
-    <Text className="text-slate-600 dark:text-slate-300 text-sm leading-5 flex-1">
+    <Text className="text-orange-400 mr-2 mt-0.5 font-extrabold">•</Text>
+    <Text className="text-ink-soft dark:text-night-soft text-sm leading-5 flex-1">
       {text || children}
     </Text>
   </View>
@@ -478,7 +478,7 @@ const LiveTestDetails = () => {
 
   if (loading || !liveTest) {
     return (
-      <View className="flex-1 bg-white dark:bg-slate-900">
+      <View className="flex-1 bg-paper dark:bg-night">
         <StatusBar
           barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
         />
@@ -486,18 +486,18 @@ const LiveTestDetails = () => {
           edges={["top", "left", "right", "bottom"]}
           className="flex-1"
         >
-          <Header />
+          <DetailHeader title="Live test" />
           <View className="flex-1 items-center justify-center px-10">
             {loading ? (
               <ActivityIndicator size="large" color="#FF8A50" />
             ) : (
               <>
-                <Text className="text-xl font-bold text-slate-800 dark:text-white mb-4">
+                <Text className="text-xl font-bold text-ink dark:text-white mb-4">
                   Live Test not found
                 </Text>
                 <TouchableOpacity
                   onPress={() => router.back()}
-                  className="bg-primary px-8 py-3 rounded-xl"
+                  className="bg-primary-deep px-8 py-3 rounded-xl"
                 >
                   <Text className="text-white font-bold">Go Back</Text>
                 </TouchableOpacity>
@@ -530,7 +530,7 @@ const LiveTestDetails = () => {
       : liveTest.mockTestExamName) || "General";
 
   return (
-    <View className="flex-1 bg-white dark:bg-slate-900">
+    <View className="flex-1 bg-paper dark:bg-night">
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
@@ -538,14 +538,14 @@ const LiveTestDetails = () => {
         edges={["top", "left", "right", "bottom"]}
         className="flex-1"
       >
-        <Header />
+        <DetailHeader title="Live test" onShare={handleShare} />
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 40 }}
         >
           {/* Image Hero Section */}
           <View className="px-6 pt-5 mb-5">
-            <View className="relative w-full aspect-video rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-800">
+            <View className="relative w-full aspect-video rounded-3xl overflow-hidden bg-sand dark:bg-night-raised shadow-sm border border-line dark:border-night-line">
               <Image
                 source={{
                   uri: liveTest.thumbnailUrl || Placeholder.LIVE,
@@ -557,19 +557,19 @@ const LiveTestDetails = () => {
                 {isLive ? (
                   <View className="bg-red-500 px-3 py-1.5 rounded-full flex-row items-center border border-red-400 shadow-lg">
                     <BlinkingDot />
-                    <Text className="text-white font-black text-[10px] uppercase tracking-wider">
+                    <Text className="text-white font-extrabold text-[10px] uppercase tracking-wider">
                       LIVE
                     </Text>
                   </View>
                 ) : (
-                  <View className="bg-blue-500 px-3 py-1.5 rounded-full flex-row items-center border border-blue-400 shadow-lg">
+                  <View className="bg-sky px-3 py-1.5 rounded-full flex-row items-center border border-sky shadow-lg">
                     <Feather
                       name="clock"
                       size={10}
                       color="white"
                       style={{ marginRight: 4 }}
                     />
-                    <Text className="text-white font-black text-[10px] uppercase tracking-wider">
+                    <Text className="text-white font-extrabold text-[10px] uppercase tracking-wider">
                       UPCOMING
                     </Text>
                   </View>
@@ -581,14 +581,14 @@ const LiveTestDetails = () => {
           {/* Ends In Highlighter (Timer) */}
           {timeLeft && (
             <View className="px-6 mb-6">
-              <View className="bg-orange-50 dark:bg-orange-950/30 px-5 py-4 rounded-2xl border border-orange-100 dark:border-orange-900/30 flex-row items-center justify-between">
+              <View className="bg-clay-tint dark:bg-night-raised px-5 py-4 rounded-2xl border border-line dark:border-night-line flex-row items-center justify-between">
                 <View className="flex-row items-center">
                   <View className="w-2 h-2 rounded-full bg-orange-500 mr-2.5 animate-pulse" />
-                  <Text className="text-orange-600 dark:text-orange-400 font-black text-sm uppercase tracking-wider">
+                  <Text className="text-orange-600 dark:text-orange-400 font-extrabold text-sm uppercase tracking-wider">
                     {countdownLabel}:
                   </Text>
                 </View>
-                <Text className="text-orange-500 dark:text-orange-300 font-black text-lg tabular-nums">
+                <Text className="text-orange-500 dark:text-orange-300 font-extrabold text-lg tabular-nums">
                   {timeLeft}
                 </Text>
               </View>
@@ -598,30 +598,30 @@ const LiveTestDetails = () => {
           {/* Heading (same style language as tests screen) */}
           <View className="px-6">
             <View className="flex-row items-center mb-4">
-              <View className="bg-orange-50 dark:bg-orange-900/30 border border-orange-100 dark:border-orange-800/30 px-4 py-1.5 rounded-full">
-                <Text className="text-primary text-[11px] font-black uppercase tracking-wider">
+              <View className="bg-clay-tint dark:bg-night-raised border border-line dark:border-night-line px-4 py-1.5 rounded-full">
+                <Text className="text-primary-deep dark:text-primary text-[11px] font-extrabold uppercase tracking-wider">
                   {liveTest.examSlug?.replace(/-/g, " ").toUpperCase() ||
                     "MOCK TEST"}
                 </Text>
               </View>
-              <View className="ml-3 bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-100 dark:border-cyan-800/30 px-4 py-1.5 rounded-full">
-                <Text className="text-cyan-600 dark:text-cyan-400 font-black text-[11px] uppercase tracking-wider">
+              <View className="ml-3 bg-sky-tint dark:bg-night-raised border border-line dark:border-night-line px-4 py-1.5 rounded-full">
+                <Text className="text-sky dark:text-sky-light font-extrabold text-[11px] uppercase tracking-wider">
                   {liveTest.language?.toUpperCase() || "ENGLISH"}
                 </Text>
               </View>
             </View>
 
-            <Text className="text-slate-800 dark:text-white text-3xl font-black leading-tight mb-4">
+            <Text className="text-ink dark:text-white text-3xl font-extrabold leading-tight mb-4">
               {liveTest.title}
             </Text>
 
-            {/* <Text className="text-slate-500 dark:text-slate-400 text-base leading-7 mb-4">
+            {/* <Text className="text-ink-soft dark:text-night-soft text-base leading-7 mb-4">
               {(liveTest.description ||
                 "Join this live mock test to improve speed, accuracy, and confidence.").trim()}
             </Text> */}
 
             <View className="flex-row items-center mb-5">
-              <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold">
+              <Text className="text-ink-soft dark:text-night-soft text-sm font-bold">
                 Created by{" "}
               </Text>
               <TouchableOpacity
@@ -645,7 +645,7 @@ const LiveTestDetails = () => {
                   }}
                   className="w-5 h-5 rounded-full mx-1.5"
                 />
-                <Text className="text-primary font-bold text-sm">
+                <Text className="text-primary-deep dark:text-primary font-bold text-sm">
                   {liveTest.teacherName}
                 </Text>
                 {liveTest.teacherIsVerified && (
@@ -657,48 +657,42 @@ const LiveTestDetails = () => {
                   />
                 )}
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleShare}
-                className="ml-auto bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 w-9 h-9 rounded-full items-center justify-center"
-              >
-                <Feather name="share-2" size={16} color="#FF8A50" />
-              </TouchableOpacity>
             </View>
 
             {/* Time Info */}
-            <View className="bg-slate-50 dark:bg-slate-800 rounded-2xl px-4 py-4 mb-6">
+            <View className="bg-sand dark:bg-night-raised rounded-2xl px-4 py-4 mb-6">
               {!!liveTest.startTime && (
                 <View className="flex-row items-center mb-3">
-                  <View className="w-7 h-7 bg-orange-50 dark:bg-orange-900/20 rounded-lg items-center justify-center">
+                  <View className="w-7 h-7 bg-clay-tint dark:bg-night-raised rounded-lg items-center justify-center">
                     <Feather name="calendar" size={13} color="#FF8A50" />
                   </View>
-                  <Text className="text-slate-500 dark:text-slate-400 text-xs ml-2.5 w-12">
+                  <Text className="text-ink-soft dark:text-night-soft text-xs ml-2.5 w-12">
                     Starts
                   </Text>
-                  <Text className="text-slate-700 dark:text-slate-200 font-bold text-xs flex-1">
+                  <Text className="text-ink-soft dark:text-night-soft font-bold text-xs flex-1">
                     {formatDateTime(liveTest.startTime)}
                   </Text>
                 </View>
               )}
               <View className="flex-row items-center mb-3">
-                <View className="w-7 h-7 bg-orange-50 dark:bg-orange-900/20 rounded-lg items-center justify-center">
+                <View className="w-7 h-7 bg-clay-tint dark:bg-night-raised rounded-lg items-center justify-center">
                   <Feather name="calendar" size={13} color="#FF8A50" />
                 </View>
-                <Text className="text-slate-500 dark:text-slate-400 text-xs ml-2.5 w-12">
+                <Text className="text-ink-soft dark:text-night-soft text-xs ml-2.5 w-12">
                   Ends
                 </Text>
-                <Text className="text-slate-700 dark:text-slate-200 font-bold text-xs flex-1">
+                <Text className="text-ink-soft dark:text-night-soft font-bold text-xs flex-1">
                   {formatDateTime(liveTest.endTime)}
                 </Text>
               </View>
               <View className="flex-row items-center">
-                <View className="w-7 h-7 bg-orange-50 dark:bg-orange-900/20 rounded-lg items-center justify-center">
+                <View className="w-7 h-7 bg-clay-tint dark:bg-night-raised rounded-lg items-center justify-center">
                   <Feather name="clock" size={13} color="#FF8A50" />
                 </View>
-                <Text className="text-slate-500 dark:text-slate-400 text-xs ml-2.5 w-12">
+                <Text className="text-ink-soft dark:text-night-soft text-xs ml-2.5 w-12">
                   Duration
                 </Text>
-                <Text className="text-slate-700 dark:text-slate-200 font-bold text-xs flex-1">
+                <Text className="text-ink-soft dark:text-night-soft font-bold text-xs flex-1">
                   {duration} mins
                 </Text>
               </View>
@@ -709,16 +703,16 @@ const LiveTestDetails = () => {
           {liveTest.hasPrizes && (
             <View className="mx-5 mb-5 rounded-[24px] overflow-hidden">
               <View className="px-5 pt-5 pb-6 bg-[#FF6B35]">
-                <Text className="text-white/80 text-xs font-black uppercase tracking-widest mb-1 text-center">
+                <Text className="text-white/80 text-xs font-extrabold uppercase tracking-widest mb-1 text-center">
                   WIN UP TO
                 </Text>
-                <Text className="font-black text-white text-4xl text-center mb-2">
+                <Text className="font-extrabold text-white text-4xl text-center mb-2">
                   ₹{liveTest.firstPrize}
                 </Text>
                 <View className="self-center bg-black/20 px-4 py-1.5 rounded-full mb-5">
                   <Text className="text-white/90 text-xs font-bold text-center">
                     Total Prize Pool:{" "}
-                    <Text className="font-black text-white">
+                    <Text className="font-extrabold text-white">
                       ₹{liveTest.totalPrizePool}
                     </Text>
                   </Text>
@@ -729,10 +723,10 @@ const LiveTestDetails = () => {
                   <View className="flex-1 items-center">
                     <View className="bg-white/30 rounded-2xl px-2 py-3 items-center w-full border border-white/30">
                       <Text className="text-3xl mb-1">🏆</Text>
-                      <Text className="text-white/80 text-[9px] font-black uppercase tracking-wide">
+                      <Text className="text-white/80 text-[9px] font-extrabold uppercase tracking-wide">
                         1st Place
                       </Text>
-                      <Text className="text-white font-black text-xl mt-0.5">
+                      <Text className="text-white font-extrabold text-xl mt-0.5">
                         ₹{liveTest.firstPrize}
                       </Text>
                     </View>
@@ -742,10 +736,10 @@ const LiveTestDetails = () => {
                   <View className="flex-1 items-center">
                     <View className="bg-white/20 rounded-2xl px-2 py-2.5 items-center w-full">
                       <Text className="text-2xl mb-1">🥈</Text>
-                      <Text className="text-white/70 text-[9px] font-black uppercase tracking-wide">
+                      <Text className="text-white/70 text-[9px] font-extrabold uppercase tracking-wide">
                         2nd Place
                       </Text>
-                      <Text className="text-white font-black text-lg mt-0.5">
+                      <Text className="text-white font-extrabold text-lg mt-0.5">
                         ₹{liveTest.secondPrize}
                       </Text>
                     </View>
@@ -755,10 +749,10 @@ const LiveTestDetails = () => {
                   <View className="flex-1 items-center">
                     <View className="bg-white/15 rounded-2xl px-2 py-2.5 items-center w-full">
                       <Text className="text-2xl mb-1">🥉</Text>
-                      <Text className="text-white/70 text-[9px] font-black uppercase tracking-wide">
+                      <Text className="text-white/70 text-[9px] font-extrabold uppercase tracking-wide">
                         3rd Place
                       </Text>
-                      <Text className="text-white font-black text-lg mt-0.5">
+                      <Text className="text-white font-extrabold text-lg mt-0.5">
                         ₹{liveTest.thirdPrize}
                       </Text>
                     </View>
@@ -772,16 +766,16 @@ const LiveTestDetails = () => {
           <View className="px-5 mb-5">
             <View className="flex-row justify-between mb-2">
               <View className="flex-row items-center">
-                <Feather name="users" size={14} color="#64748b" />
-                <Text className="text-slate-600 dark:text-slate-400 text-sm font-bold ml-1.5">
+                <Feather name="users" size={14} color="#6A6358" />
+                <Text className="text-ink-soft dark:text-night-soft text-sm font-bold ml-1.5">
                   {liveTest.enrolledCount} / {liveTest.maxSeats} seats filled
                 </Text>
               </View>
-              <Text className="text-orange-500 font-black text-sm">
+              <Text className="text-primary-deep dark:text-primary font-extrabold text-sm">
                 {liveTest.maxSeats - liveTest.enrolledCount} left
               </Text>
             </View>
-            <View className="h-2.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+            <View className="h-2.5 bg-sand dark:bg-night-line rounded-full overflow-hidden">
               <View
                 className="h-full bg-orange-400 rounded-full"
                 style={{ width: `${seatsPercentage}%` }}
@@ -791,7 +785,7 @@ const LiveTestDetails = () => {
 
           {/* ── Tabs ── */}
           <View className="px-5 mb-6">
-            <View className="flex-row bg-slate-100 dark:bg-slate-800 rounded-2xl p-1">
+            <View className="flex-row bg-sand dark:bg-night-raised rounded-2xl p-1">
               <TouchableOpacity
                 onPress={() => setActiveTab("about")}
                 className="flex-1 py-3 rounded-xl items-center"
@@ -799,7 +793,7 @@ const LiveTestDetails = () => {
                   activeTab === "about"
                     ? {
                         backgroundColor:
-                          colorScheme === "dark" ? "#334155" : "#ffffff",
+                          colorScheme === "dark" ? "#3A3731" : "#ffffff",
                         shadowColor: "#000",
                         shadowOffset: { width: 0, height: 1 },
                         shadowOpacity: 0.05,
@@ -809,14 +803,14 @@ const LiveTestDetails = () => {
                 }
               >
                 <Text
-                  className="font-black text-sm"
+                  className="font-extrabold text-sm"
                   style={{
                     color:
                       activeTab === "about"
                         ? "#f97316"
                         : colorScheme === "dark"
-                          ? "#94a3b8"
-                          : "#64748b",
+                          ? "#968E82"
+                          : "#6A6358",
                   }}
                 >
                   About
@@ -829,7 +823,7 @@ const LiveTestDetails = () => {
                   activeTab === "leaderboard"
                     ? {
                         backgroundColor:
-                          colorScheme === "dark" ? "#334155" : "#ffffff",
+                          colorScheme === "dark" ? "#3A3731" : "#ffffff",
                         shadowColor: "#000",
                         shadowOffset: { width: 0, height: 1 },
                         shadowOpacity: 0.05,
@@ -839,14 +833,14 @@ const LiveTestDetails = () => {
                 }
               >
                 <Text
-                  className="font-black text-sm"
+                  className="font-extrabold text-sm"
                   style={{
                     color:
                       activeTab === "leaderboard"
                         ? "#f97316"
                         : colorScheme === "dark"
-                          ? "#94a3b8"
-                          : "#64748b",
+                          ? "#968E82"
+                          : "#6A6358",
                   }}
                 >
                   Leaderboard
@@ -859,7 +853,7 @@ const LiveTestDetails = () => {
           {activeTab === "about" ? (
             <View className="px-5">
               {/* About This Test */}
-              <Text className="text-2xl font-black text-slate-800 dark:text-white mb-3">
+              <Text className="text-2xl font-extrabold text-ink dark:text-white mb-3">
                 About This Test
               </Text>
               <View className="mb-5">
@@ -871,7 +865,7 @@ const LiveTestDetails = () => {
                 />
               </View>
 
-              <Text className="text-xl font-black text-slate-800 dark:text-white mb-4">
+              <Text className="text-xl font-extrabold text-ink dark:text-white mb-4">
                 Comprehensive Rules & Information
               </Text>
 
@@ -939,7 +933,7 @@ const LiveTestDetails = () => {
                 <BulletItem>
                   By enrolling, you agree to the above rules and{" "}
                   <Text
-                    className="text-orange-500 font-bold"
+                    className="text-primary-deep dark:text-primary font-bold"
                     onPress={() => Linking.openURL("https://testkart.in/terms")}
                   >
                     Testkart&apos;s Terms of Service
@@ -949,10 +943,10 @@ const LiveTestDetails = () => {
               </RuleSection>
 
               <View className="mt-4">
-                <Text className="text-2xl font-black text-slate-800 dark:text-white mb-4">
+                <Text className="text-2xl font-extrabold text-ink dark:text-white mb-4">
                   About the Host
                 </Text>
-                <View className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl p-5">
+                <View className="bg-sand dark:bg-night-raised border border-line dark:border-night-line rounded-xl p-5">
                   <TouchableOpacity
                     onPress={() =>
                       router.push(
@@ -971,7 +965,7 @@ const LiveTestDetails = () => {
                     />
                     <View className="ml-4 flex-1">
                       <View className="flex-row items-center">
-                        <Text className="text-slate-800 dark:text-white font-black text-base">
+                        <Text className="text-ink dark:text-white font-extrabold text-base">
                           {liveTest.teacherName}
                         </Text>
                         {liveTest.teacherIsVerified && (
@@ -984,7 +978,7 @@ const LiveTestDetails = () => {
                         )}
                       </View>
                       {liveTest.teacherAcademyName ? (
-                        <Text className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">
+                        <Text className="text-ink-soft dark:text-night-soft text-xs mt-0.5">
                           {liveTest.teacherAcademyName}
                         </Text>
                       ) : null}
@@ -992,7 +986,7 @@ const LiveTestDetails = () => {
                     <Feather name="chevron-right" size={20} color="#FF8A50" />
                   </TouchableOpacity>
                   {liveTest.teacherBio ? (
-                    <Text className="text-slate-600 dark:text-slate-300 text-sm leading-6 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700/50">
+                    <Text className="text-ink-soft dark:text-night-soft text-sm leading-6 mt-4 pt-4 border-t border-line dark:border-night-line/50">
                       {liveTest.teacherBio}
                     </Text>
                   ) : null}
@@ -1008,13 +1002,13 @@ const LiveTestDetails = () => {
               ) : !leaderboardData ||
                 leaderboardData.leaderboard.length === 0 ? (
                 <View className="py-24 items-center justify-center">
-                  <View className="w-20 h-20 bg-slate-50 dark:bg-slate-800/50 rounded-[30px] items-center justify-center mb-6">
-                    <Feather name="bar-chart-2" size={32} color="#94a3b8" />
+                  <View className="w-20 h-20 bg-sand dark:bg-night-raised rounded-[30px] items-center justify-center mb-6">
+                    <Feather name="bar-chart-2" size={32} color="#968E82" />
                   </View>
-                  <Text className="text-slate-800 dark:text-white font-black text-2xl mb-3 text-center">
+                  <Text className="w-full text-ink dark:text-white font-extrabold text-2xl mb-3 text-center">
                     No Submissions Yet
                   </Text>
-                  <Text className="text-slate-400 dark:text-slate-500 text-base text-center leading-6 px-10">
+                  <Text className="text-ink-soft dark:text-night-soft text-base text-center leading-6 px-10">
                     The leaderboard will appear here once students start
                     completing the test.
                   </Text>
@@ -1026,16 +1020,16 @@ const LiveTestDetails = () => {
                     <View
                       className={`px-3 py-1.5 rounded-full ${
                         leaderboardData.testStatus === "completed"
-                          ? "bg-slate-100 dark:bg-slate-800"
+                          ? "bg-sand dark:bg-night-raised"
                           : leaderboardData.testStatus === "live"
                             ? "bg-green-100 dark:bg-green-900/30"
-                            : "bg-orange-100 dark:bg-orange-900/30"
+                            : "bg-clay-tint dark:bg-night-raised"
                       }`}
                     >
                       <Text
-                        className={`text-xs font-black uppercase tracking-wider ${
+                        className={`text-xs font-extrabold uppercase tracking-wider ${
                           leaderboardData.testStatus === "completed"
-                            ? "text-slate-500 dark:text-slate-400"
+                            ? "text-ink-soft dark:text-night-soft"
                             : leaderboardData.testStatus === "live"
                               ? "text-green-600 dark:text-green-400"
                               : "text-orange-600 dark:text-orange-400"
@@ -1050,8 +1044,8 @@ const LiveTestDetails = () => {
                     </View>
 
                     {leaderboardData.currentUserRank && (
-                      <View className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/30 px-3 py-1.5 rounded-full">
-                        <Text className="text-orange-500 font-black text-xs">
+                      <View className="bg-clay-tint dark:bg-night-raised border border-line dark:border-night-line px-3 py-1.5 rounded-full">
+                        <Text className="text-primary-deep dark:text-primary font-extrabold text-xs">
                           Your Rank: #{leaderboardData.currentUserRank}
                         </Text>
                       </View>
@@ -1060,64 +1054,64 @@ const LiveTestDetails = () => {
 
                   {/* Top 3 podium */}
                   {leaderboardData.leaderboard.length >= 3 && (
-                    <View className="bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-4 mb-5 border border-slate-100 dark:border-slate-700/50">
+                    <View className="bg-sand dark:bg-night-raised/40 rounded-2xl p-4 mb-5 border border-line dark:border-night-line/50">
                       <View className="flex-row items-end justify-center gap-3">
                         {/* 2nd */}
                         <View className="flex-1 items-center">
-                          <View className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 items-center justify-center mb-1">
+                          <View className="w-10 h-10 rounded-full bg-sand dark:bg-night-line items-center justify-center mb-1">
                             <Text className="text-base">🥈</Text>
                           </View>
                           <Text
-                            className="text-slate-700 dark:text-slate-200 font-black text-xs text-center"
+                            className="text-ink-soft dark:text-night-soft font-extrabold text-xs text-center"
                             numberOfLines={1}
                           >
                             {leaderboardData.leaderboard[1].studentName}
                           </Text>
-                          <Text className="text-slate-500 dark:text-slate-400 text-xs font-bold">
+                          <Text className="text-ink-soft dark:text-night-soft text-xs font-bold">
                             {leaderboardData.leaderboard[1].score} pts
                           </Text>
-                          <View className="h-12 w-full bg-slate-200 dark:bg-slate-700 rounded-t-xl mt-2 items-center justify-center">
-                            <Text className="text-slate-600 dark:text-slate-300 font-black text-sm">
+                          <View className="h-12 w-full bg-sand dark:bg-night-line rounded-t-xl mt-2 items-center justify-center">
+                            <Text className="text-ink-soft dark:text-night-soft font-extrabold text-sm">
                               #2
                             </Text>
                           </View>
                         </View>
                         {/* 1st */}
                         <View className="flex-1 items-center">
-                          <View className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 items-center justify-center mb-1">
+                          <View className="w-12 h-12 rounded-full bg-clay-tint dark:bg-night-raised items-center justify-center mb-1">
                             <Text className="text-xl">🏆</Text>
                           </View>
                           <Text
-                            className="text-slate-800 dark:text-white font-black text-xs text-center"
+                            className="text-ink dark:text-white font-extrabold text-xs text-center"
                             numberOfLines={1}
                           >
                             {leaderboardData.leaderboard[0].studentName}
                           </Text>
-                          <Text className="text-orange-500 font-black text-xs">
+                          <Text className="text-primary-deep dark:text-primary font-extrabold text-xs">
                             {leaderboardData.leaderboard[0].score} pts
                           </Text>
                           <View className="h-16 w-full bg-orange-400 rounded-t-xl mt-2 items-center justify-center">
-                            <Text className="text-white font-black text-sm">
+                            <Text className="text-white font-extrabold text-sm">
                               #1
                             </Text>
                           </View>
                         </View>
                         {/* 3rd */}
                         <View className="flex-1 items-center">
-                          <View className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 items-center justify-center mb-1">
+                          <View className="w-10 h-10 rounded-full bg-sand dark:bg-night-line items-center justify-center mb-1">
                             <Text className="text-base">🥉</Text>
                           </View>
                           <Text
-                            className="text-slate-700 dark:text-slate-200 font-black text-xs text-center"
+                            className="text-ink-soft dark:text-night-soft font-extrabold text-xs text-center"
                             numberOfLines={1}
                           >
                             {leaderboardData.leaderboard[2].studentName}
                           </Text>
-                          <Text className="text-slate-500 dark:text-slate-400 text-xs font-bold">
+                          <Text className="text-ink-soft dark:text-night-soft text-xs font-bold">
                             {leaderboardData.leaderboard[2].score} pts
                           </Text>
-                          <View className="h-8 w-full bg-slate-300 dark:bg-slate-600 rounded-t-xl mt-2 items-center justify-center">
-                            <Text className="text-slate-600 dark:text-slate-300 font-black text-sm">
+                          <View className="h-8 w-full bg-sand dark:bg-night-line rounded-t-xl mt-2 items-center justify-center">
+                            <Text className="text-ink-soft dark:text-night-soft font-extrabold text-sm">
                               #3
                             </Text>
                           </View>
@@ -1130,16 +1124,16 @@ const LiveTestDetails = () => {
                   <View className="mb-4">
                     {/* Header row */}
                     <View className="flex-row px-3 py-2 mb-1">
-                      <Text className="text-slate-400 dark:text-slate-500 text-xs font-black uppercase w-10">
+                      <Text className="text-ink-soft dark:text-night-soft text-xs font-extrabold uppercase w-10">
                         #
                       </Text>
-                      <Text className="text-slate-400 dark:text-slate-500 text-xs font-black uppercase flex-1">
+                      <Text className="text-ink-soft dark:text-night-soft text-xs font-extrabold uppercase flex-1">
                         Student
                       </Text>
-                      <Text className="text-slate-400 dark:text-slate-500 text-xs font-black uppercase w-14 text-right">
+                      <Text className="text-ink-soft dark:text-night-soft text-xs font-extrabold uppercase w-14 text-right">
                         Score
                       </Text>
-                      <Text className="text-slate-400 dark:text-slate-500 text-xs font-black uppercase w-16 text-right">
+                      <Text className="text-ink-soft dark:text-night-soft text-xs font-extrabold uppercase w-16 text-right">
                         Time
                       </Text>
                     </View>
@@ -1153,9 +1147,9 @@ const LiveTestDetails = () => {
                           key={entry.rank}
                           className={`flex-row items-center px-3 py-3 rounded-xl mb-1.5 ${
                             isCurrentUser
-                              ? "bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/30"
+                              ? "bg-clay-tint dark:bg-night-raised border border-line dark:border-night-line"
                               : isTop3
-                                ? "bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700/50"
+                                ? "bg-sand dark:bg-night-raised/40 border border-line dark:border-night-line/50"
                                 : ""
                           }`}
                         >
@@ -1167,7 +1161,7 @@ const LiveTestDetails = () => {
                             ) : entry.rank === 3 ? (
                               <Text className="text-base">🥉</Text>
                             ) : (
-                              <Text className="text-slate-500 dark:text-slate-400 font-black text-sm">
+                              <Text className="text-ink-soft dark:text-night-soft font-extrabold text-sm">
                                 {entry.rank}
                               </Text>
                             )}
@@ -1176,17 +1170,17 @@ const LiveTestDetails = () => {
                             className={`flex-1 text-sm font-bold ${
                               isCurrentUser
                                 ? "text-orange-600 dark:text-orange-400"
-                                : "text-slate-700 dark:text-slate-200"
+                                : "text-ink-soft dark:text-night-soft"
                             }`}
                             numberOfLines={1}
                           >
                             {entry.studentName}
                             {isCurrentUser ? " (You)" : ""}
                           </Text>
-                          <Text className="text-slate-800 dark:text-white font-black text-sm w-14 text-right">
+                          <Text className="text-ink dark:text-white font-extrabold text-sm w-14 text-right">
                             {entry.score}
                           </Text>
-                          <Text className="text-slate-400 dark:text-slate-500 text-xs font-bold w-16 text-right">
+                          <Text className="text-ink-soft dark:text-night-soft text-xs font-bold w-16 text-right">
                             {entry.timeTaken}m
                           </Text>
                         </View>
@@ -1201,10 +1195,10 @@ const LiveTestDetails = () => {
         </ScrollView>
 
         {/* Sticky Action Footer */}
-        <View className="bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 px-6 py-4">
+        <View className="bg-white dark:bg-night border-t border-line dark:border-night-line px-6 py-4">
           {isTestEnded && (
             <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-2xl px-4 py-3 mb-3">
-              <Text className="text-red-600 dark:text-red-400 font-black text-sm text-center">
+              <Text className="text-red-600 dark:text-red-400 font-extrabold text-sm text-center">
                 Test Ended
               </Text>
             </View>
@@ -1212,10 +1206,10 @@ const LiveTestDetails = () => {
           {liveTest.hasAttempted ? (
             <TouchableOpacity
               disabled
-              className="h-14 w-full rounded-2xl flex-row items-center justify-center shadow-md bg-slate-400 dark:bg-slate-600"
+              className="h-14 w-full rounded-2xl flex-row items-center justify-center shadow-md bg-ink-soft dark:bg-night-line"
             >
               <Feather name="check-circle" size={18} color="white" />
-              <Text className="text-white text-lg font-black ml-2.5">
+              <Text className="text-white text-lg font-extrabold ml-2.5">
                 Already Attempted
               </Text>
             </TouchableOpacity>
@@ -1230,7 +1224,7 @@ const LiveTestDetails = () => {
               className="h-14 w-full rounded-2xl flex-row items-center justify-center shadow-md bg-emerald-500 shadow-emerald-500/30"
             >
               <Feather name="play-circle" size={18} color="white" />
-              <Text className="text-white text-lg font-black ml-2.5">
+              <Text className="text-white text-lg font-extrabold ml-2.5">
                 Start Test
               </Text>
             </TouchableOpacity>
@@ -1254,12 +1248,12 @@ const LiveTestDetails = () => {
                 isTestEnded ||
                 (!liveTest.isEnrolled &&
                   liveTest.enrolledCount >= liveTest.maxSeats)
-                  ? "bg-slate-300 dark:bg-slate-700"
+                  ? "bg-sand dark:bg-night-line"
                   : liveTest.isEnrolled
                     ? "bg-emerald-500 shadow-emerald-500/30"
                     : liveTest.price === 0
                       ? "bg-emerald-500 shadow-emerald-500/20"
-                      : "bg-primary shadow-orange-500/20"
+                      : "bg-primary-deep shadow-orange-500/20"
               }`}
             >
               {purchaseLoading || enrolling ? (
@@ -1279,7 +1273,7 @@ const LiveTestDetails = () => {
                     size={18}
                     color="white"
                   />
-                  <Text className="text-white text-lg font-black ml-2.5">
+                  <Text className="text-white text-lg font-extrabold ml-2.5">
                     {isTestEnded
                       ? "Enrollment Closed"
                       : !liveTest.isEnrolled &&
@@ -1306,16 +1300,16 @@ const LiveTestDetails = () => {
           }
         >
           <View className="flex-1 bg-black/50 items-center justify-center px-6">
-            <View className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-sm items-center shadow-2xl">
+            <View className="bg-white dark:bg-night-raised rounded-3xl p-8 w-full max-w-sm items-center shadow-2xl">
               {enrollResult.success ? (
                 <>
                   <View className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 items-center justify-center mb-5">
                     <Feather name="check-circle" size={32} color="#10B981" />
                   </View>
-                  <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                  <Text className="text-2xl font-extrabold text-ink dark:text-white mb-2">
                     Enrolled Successfully!
                   </Text>
-                  <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                  <Text className="text-ink-soft dark:text-night-soft text-center text-sm leading-5 mb-6">
                     {enrollResult.message ||
                       "You have been successfully enrolled in this live test."}
                   </Text>
@@ -1337,7 +1331,7 @@ const LiveTestDetails = () => {
                         }}
                       >
                         <Feather name="play-circle" size={18} color="white" />
-                        <Text className="text-white font-black text-base ml-2">
+                        <Text className="text-white font-extrabold text-base ml-2">
                           Start Test
                         </Text>
                       </TouchableOpacity>
@@ -1350,7 +1344,7 @@ const LiveTestDetails = () => {
                           }))
                         }
                       >
-                        <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+                        <Text className="text-ink-soft dark:text-night-soft font-bold text-sm">
                           Close
                         </Text>
                       </TouchableOpacity>
@@ -1365,7 +1359,7 @@ const LiveTestDetails = () => {
                         }))
                       }
                     >
-                      <Text className="text-white font-black text-base">
+                      <Text className="text-white font-extrabold text-base">
                         Got it
                       </Text>
                     </TouchableOpacity>
@@ -1376,15 +1370,15 @@ const LiveTestDetails = () => {
                   <View className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 items-center justify-center mb-5">
                     <Feather name="alert-circle" size={32} color="#EF4444" />
                   </View>
-                  <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+                  <Text className="text-2xl font-extrabold text-ink dark:text-white mb-2">
                     Enrollment Failed
                   </Text>
-                  <Text className="text-slate-500 dark:text-slate-400 text-center text-sm leading-5 mb-6">
+                  <Text className="text-ink-soft dark:text-night-soft text-center text-sm leading-5 mb-6">
                     {enrollResult.message ||
                       "We couldn't process your enrollment right now."}
                   </Text>
                   <TouchableOpacity
-                    className="bg-primary w-full h-14 rounded-2xl items-center justify-center"
+                    className="bg-primary-deep w-full h-14 rounded-2xl items-center justify-center"
                     onPress={() =>
                       setEnrollResult((prev) => ({
                         ...prev,
@@ -1392,7 +1386,7 @@ const LiveTestDetails = () => {
                       }))
                     }
                   >
-                    <Text className="text-white font-black text-base">
+                    <Text className="text-white font-extrabold text-base">
                       Try Again
                     </Text>
                   </TouchableOpacity>
@@ -1409,8 +1403,8 @@ const LiveTestDetails = () => {
             animationType="slide"
             onRequestClose={handleWebViewClose}
           >
-            <SafeAreaView className="flex-1 bg-white dark:bg-slate-900">
-              <View className="flex-row items-center px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+            <SafeAreaView className="flex-1 bg-paper dark:bg-night">
+              <View className="flex-row items-center px-4 py-3 border-b border-line dark:border-night-line">
                 <TouchableOpacity
                   onPress={handleWebViewClose}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -1418,10 +1412,10 @@ const LiveTestDetails = () => {
                   <Feather
                     name="x"
                     size={24}
-                    color={colorScheme === "dark" ? "#fff" : "#1e293b"}
+                    color={colorScheme === "dark" ? "#fff" : "#25231F"}
                   />
                 </TouchableOpacity>
-                <Text className="ml-4 text-base font-black text-slate-800 dark:text-white">
+                <Text className="ml-4 text-base font-extrabold text-ink dark:text-white">
                   Complete Payment
                 </Text>
               </View>

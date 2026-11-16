@@ -207,24 +207,24 @@ const DocumentViewer = ({ source, endNote, onError }: DocumentViewerProps) => {
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-slate-100 px-8 dark:bg-slate-950">
+      <View className="flex-1 items-center justify-center bg-sand px-8 dark:bg-night">
         <Feather name="alert-circle" size={36} color="#DC2626" />
-        <Text className="mt-4 text-center text-base font-black text-slate-800 dark:text-white">
+        <Text className="mt-4 text-center text-base font-extrabold text-ink dark:text-white">
           {error}
         </Text>
         <TouchableOpacity
           onPress={retry}
-          className="mt-5 flex-row items-center rounded-2xl bg-primary px-6 py-3"
+          className="mt-5 flex-row items-center rounded-2xl bg-primary-deep px-6 py-3"
         >
           <Feather name="refresh-cw" size={14} color="#fff" />
-          <Text className="ml-2 text-sm font-black text-white">Try again</Text>
+          <Text className="ml-2 text-sm font-extrabold text-white">Try again</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-slate-100 dark:bg-slate-950">
+    <View className="flex-1 bg-sand dark:bg-night">
       <WebView
         key={attempt}
         ref={webViewRef}
@@ -244,21 +244,21 @@ const DocumentViewer = ({ source, endNote, onError }: DocumentViewerProps) => {
         setDisplayZoomControls={false}
         androidLayerType="hardware"
         overScrollMode="never"
-        style={{ flex: 1, backgroundColor: isDark ? "#0f172a" : "#f1f5f9" }}
+        style={{ flex: 1, backgroundColor: isDark ? "#1A1916" : "#EFE8DD" }}
       />
 
       {!loaded && (
-        <View className="absolute inset-0 items-center justify-center bg-slate-100 dark:bg-slate-950">
+        <View className="absolute inset-0 items-center justify-center bg-sand dark:bg-night">
           <ActivityIndicator size="large" color="#FF8A50" />
-          <Text className="mt-3 text-xs font-bold text-slate-500 dark:text-slate-400">
+          <Text className="mt-3 text-xs font-bold text-ink-soft dark:text-night-soft">
             Opening...
           </Text>
         </View>
       )}
 
       {loaded && totalPages > 0 && (
-        <View className="absolute bottom-5 self-center rounded-full bg-slate-900/85 px-4 py-1.5 dark:bg-slate-700">
-          <Text className="text-xs font-black text-white">
+        <View className="absolute bottom-5 self-center rounded-full bg-ink/85 px-4 py-1.5 dark:bg-night-line">
+          <Text className="text-xs font-extrabold text-white">
             {page} / {totalPages}
           </Text>
         </View>

@@ -61,25 +61,25 @@ const MockTestCard = ({ test }: MockTestCardProps) => {
     <TouchableOpacity
       onPress={handlePress}
       activeOpacity={0.9}
-      className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden mx-4 mb-8 shadow-xl shadow-slate-200/50 dark:shadow-none border border-gray-100 dark:border-slate-700/50"
+      className="bg-white dark:bg-night-raised rounded-3xl overflow-hidden mx-4 mb-8 shadow-xl dark:shadow-none border border-line dark:border-night-line"
     >
       {/* Post Header: teacher avatar + name */}
       <View className="flex-row items-center px-5 pt-4 pb-3">
-        <View className="w-9 h-9 rounded-full bg-orange-50 dark:bg-slate-700 items-center justify-center overflow-hidden mr-3">
+        <View className="w-9 h-9 rounded-full bg-clay-tint dark:bg-night-line items-center justify-center overflow-hidden mr-3">
           {test.teacherAvatarUrl ? (
             <Image
               source={{ uri: test.teacherAvatarUrl }}
               className="w-full h-full"
             />
           ) : (
-            <Text className="text-primary text-xs font-black">
+            <Text className="text-primary-deep dark:text-primary text-xs font-extrabold">
               {teacherInitials}
             </Text>
           )}
         </View>
         <View className="flex-row items-center flex-1">
           <Text
-            className="text-slate-800 dark:text-white font-bold text-sm"
+            className="text-ink dark:text-white font-bold text-sm"
             numberOfLines={1}
           >
             {displayAuthor}
@@ -97,14 +97,14 @@ const MockTestCard = ({ test }: MockTestCardProps) => {
 
       {/* Title */}
       <Text
-        className="text-lg font-black text-slate-800 dark:text-white px-5 mb-3 leading-6"
+        className="text-lg font-extrabold text-ink dark:text-white px-5 mb-3 leading-6"
         numberOfLines={2}
       >
         {test.title}
       </Text>
 
       {/* Thumbnail */}
-      <View className="aspect-video relative bg-gray-100 dark:bg-slate-900">
+      <View className="aspect-video relative bg-sand dark:bg-night">
         <Image
           source={{ uri: displayImage }}
           className="w-full h-full"
@@ -113,7 +113,7 @@ const MockTestCard = ({ test }: MockTestCardProps) => {
 
         {discountPercent !== null && (
           <View className="absolute top-3 right-3 px-3 py-1.5 bg-emerald-500 rounded-full shadow-sm">
-            <Text className="text-white text-[10px] font-black">
+            <Text className="text-white text-[10px] font-extrabold">
               {discountPercent}% OFF
             </Text>
           </View>
@@ -126,7 +126,7 @@ const MockTestCard = ({ test }: MockTestCardProps) => {
           {hasRatings && (
             <View className="flex-row items-center">
               <Feather name="star" size={13} color="#F59E0B" />
-              <Text className="ml-1 text-amber-600 dark:text-amber-500 text-xs font-black">
+              <Text className="ml-1 text-amber-600 dark:text-amber-500 text-xs font-extrabold">
                 {ratingDisplay} ({test.reviewsCount})
               </Text>
             </View>
@@ -134,7 +134,7 @@ const MockTestCard = ({ test }: MockTestCardProps) => {
         </View>
 
         <Text
-          className={`${isFree ? "text-emerald-500" : "text-primary"} text-lg font-black`}
+          className={`${isFree ? "text-emerald-700 dark:text-emerald-400" : "text-primary-deep dark:text-primary"} text-lg font-extrabold`}
         >
           {isFree ? "FREE" : `₹${formatInr(actualPrice)}`}
         </Text>

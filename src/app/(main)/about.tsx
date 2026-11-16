@@ -1,9 +1,8 @@
 import BottomTabs from "@/components/BottomTabs";
-import Header from "@/components/Header";
+import DetailHeader from "@/components/DetailHeader";
 import Feather from "@react-native-vector-icons/feather";
 import * as Application from "expo-application";
 import Constants from "expo-constants";
-import { router } from "expo-router";
 import { useColorScheme } from "nativewind";
 import {
   Image,
@@ -75,58 +74,42 @@ export default function AboutScreen() {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-950"
+      className="flex-1 bg-paper dark:bg-night"
     >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
-      <Header />
+      <DetailHeader title="About" />
 
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        {/* Back */}
-        <View className="px-6 pt-6 pb-2 flex-row items-center">
-          <TouchableOpacity
-            onPress={() =>
-              router.canGoBack() ? router.back() : router.push("/")
-            }
-            className="w-10 h-10 rounded-full bg-gray-50 dark:bg-slate-800 items-center justify-center"
-          >
-            <Feather
-              name="arrow-left"
-              size={20}
-              color={colorScheme === "dark" ? "#FFFFFF" : "#1A1A1A"}
-            />
-          </TouchableOpacity>
-        </View>
-
         {/* App identity */}
         <View className="items-center px-6 pt-6 pb-2">
-          <View className="w-24 h-24 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800">
+          <View className="w-24 h-24 rounded-3xl overflow-hidden border border-line dark:border-night-line">
             <Image
               source={require("@/assets/images/icon.png")}
               className="w-full h-full"
               resizeMode="cover"
             />
           </View>
-          <Text className="text-2xl font-black text-slate-800 dark:text-white mt-4">
+          <Text className="text-2xl font-extrabold text-ink dark:text-white mt-4">
             Testkart
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm mt-1">
+          <Text className="text-ink-soft dark:text-night-soft font-bold text-sm mt-1">
             Version {version} (Build {buildNumber})
           </Text>
         </View>
 
         {/* About description */}
         <View className="px-6 pt-6">
-          <View className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-5">
-            <Text className="text-lg font-black text-slate-800 dark:text-white mb-3">
+          <View className="bg-white dark:bg-night rounded-2xl border border-line dark:border-night-line p-5">
+            <Text className="text-lg font-extrabold text-ink dark:text-white mb-3">
               About Testkart
             </Text>
-            <Text className="text-slate-600 dark:text-slate-300 font-medium text-[15px] leading-6">
+            <Text className="text-ink-soft dark:text-night-soft font-medium text-[15px] leading-6">
               Testkart is your all-in-one learning companion - browse expert-led
               courses, attempt mock tests, join live classes, and shop curated
               study notes, all from a single app. Track your enrollments,
@@ -137,24 +120,24 @@ export default function AboutScreen() {
 
         {/* Links */}
         <View className="px-6 pt-6">
-          <View className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden shadow-sm">
+          <View className="bg-white dark:bg-night rounded-2xl border border-line dark:border-night-line overflow-hidden shadow-sm">
             {links.map((link, index) => (
               <TouchableOpacity
                 key={link.label}
                 onPress={link.onPress}
-                className={`flex-row items-center p-5 active:bg-slate-50 dark:active:bg-slate-800/50 ${
+                className={`flex-row items-center p-5 active:bg-sand dark:active:bg-night-line ${
                   index < links.length - 1
-                    ? "border-b border-gray-50 dark:border-slate-800"
+                    ? "border-b border-line dark:border-night-line"
                     : ""
                 }`}
               >
-                <View className="w-11 h-11 rounded-2xl bg-orange-50 dark:bg-orange-900/20 items-center justify-center mr-4">
+                <View className="w-11 h-11 rounded-2xl bg-clay-tint dark:bg-night-raised items-center justify-center mr-4">
                   <Feather name={link.icon as any} size={20} color="#FF8A50" />
                 </View>
-                <Text className="flex-1 text-slate-700 dark:text-slate-200 font-bold text-base">
+                <Text className="flex-1 text-ink dark:text-night-soft font-bold text-base">
                   {link.label}
                 </Text>
-                <Feather name="chevron-right" size={20} color="#CBD5E1" />
+                <Feather name="chevron-right" size={20} color="#B5AEA3" />
               </TouchableOpacity>
             ))}
           </View>
@@ -162,10 +145,10 @@ export default function AboutScreen() {
 
         {/* Footer */}
         <View className="items-center px-6 pt-8">
-          <Text className="text-slate-400 dark:text-slate-500 font-bold text-xs">
+          <Text className="text-ink-soft dark:text-night-soft font-bold text-xs">
             © {new Date().getFullYear()} Testkart. All rights reserved.
           </Text>
-          <Text className="text-slate-300 dark:text-slate-600 font-medium text-[11px] mt-1">
+          <Text className="text-ink-soft dark:text-night-soft font-medium text-[11px] mt-1">
             Made with care for learners across India.
           </Text>
         </View>

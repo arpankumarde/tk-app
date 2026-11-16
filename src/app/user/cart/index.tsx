@@ -19,7 +19,7 @@ import Feather from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
 import { useRouter } from "expo-router";
 import { WebView } from "react-native-webview";
-import Header from "@/components/Header";
+import DetailHeader from "@/components/DetailHeader";
 import BottomTabs from "@/components/BottomTabs";
 import { useAuth } from "@/context/AuthContext";
 import { useCartContext, CartItem } from "@/context/CartContext";
@@ -239,12 +239,12 @@ const Cart = () => {
 
   if (walletSuccess) {
     return (
-      <View className="flex-1 bg-white dark:bg-slate-900">
+      <View className="flex-1 bg-paper dark:bg-night">
         <StatusBar
           barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
         />
         <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
-          <Header />
+          <DetailHeader title="Cart" />
         </SafeAreaView>
         <Modal
           visible
@@ -253,7 +253,7 @@ const Cart = () => {
           onRequestClose={dismissWalletSuccess}
         >
           <View className="flex-1 bg-black/50 items-center justify-center px-6">
-            <View className="bg-white dark:bg-slate-800 rounded-3xl p-6 w-full max-w-sm shadow-2xl overflow-hidden">
+            <View className="bg-white dark:bg-night-raised rounded-3xl p-6 w-full max-w-sm shadow-2xl overflow-hidden">
               <View className="absolute top-0 right-0 w-24 h-24 bg-green-50 dark:bg-green-900/10 rounded-bl-full opacity-50" />
 
               <View className="items-center mt-2">
@@ -261,29 +261,29 @@ const Cart = () => {
                   <Feather name="check-circle" size={30} color="#16a34a" />
                 </View>
 
-                <Text className="text-xl font-black text-slate-800 dark:text-white mb-2 text-center">
+                <Text className="w-full text-xl font-extrabold text-ink dark:text-white mb-2 text-center">
                   Payment Successful
                 </Text>
 
-                <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold text-center mb-5 leading-5 px-2">
+                <Text className="text-ink-soft dark:text-night-soft text-sm font-bold text-center mb-5 leading-5 px-2">
                   Your order has been placed successfully.
                 </Text>
 
-                <View className="w-full bg-gray-50 dark:bg-slate-700/50 rounded-2xl p-4 mb-6">
+                <View className="w-full bg-sand dark:bg-night-line rounded-2xl p-4 mb-6">
                   <View className="flex-row items-center justify-between mb-2">
-                    <Text className="text-sm text-slate-500 dark:text-slate-400 font-bold">
+                    <Text className="text-sm text-ink-soft dark:text-night-soft font-bold">
                       Amount Deducted
                     </Text>
-                    <Text className="text-base text-slate-800 dark:text-white font-black">
+                    <Text className="text-base text-ink dark:text-white font-extrabold">
                       ₹{walletSuccess.amountDeducted.toFixed(2)}
                     </Text>
                   </View>
                   {walletSuccess.walletBalanceAfter != null && (
                     <View className="flex-row items-center justify-between">
-                      <Text className="text-sm text-slate-500 dark:text-slate-400 font-bold">
+                      <Text className="text-sm text-ink-soft dark:text-night-soft font-bold">
                         Wallet Balance
                       </Text>
-                      <Text className="text-base text-slate-800 dark:text-white font-black">
+                      <Text className="text-base text-ink dark:text-white font-extrabold">
                         ₹{walletSuccess.walletBalanceAfter.toFixed(2)}
                       </Text>
                     </View>
@@ -291,10 +291,10 @@ const Cart = () => {
                 </View>
 
                 <TouchableOpacity
-                  className="w-full h-12 rounded-xl items-center justify-center bg-primary shadow-lg shadow-orange-500/30"
+                  className="w-full h-12 rounded-xl items-center justify-center bg-primary-deep shadow-lg shadow-orange-500/30"
                   onPress={dismissWalletSuccess}
                 >
-                  <Text className="text-white font-black">
+                  <Text className="text-white font-extrabold">
                     {walletSuccess.orderId ? "View Order" : "Continue"}
                   </Text>
                 </TouchableOpacity>
@@ -308,12 +308,12 @@ const Cart = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-white dark:bg-slate-900">
+      <View className="flex-1 bg-paper dark:bg-night">
         <StatusBar
           barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
         />
         <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
-          <Header />
+          <DetailHeader title="Cart" />
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator size="large" color="#FF8A50" />
           </View>
@@ -325,27 +325,27 @@ const Cart = () => {
 
   if (cart.items.length === 0) {
     return (
-      <View className="flex-1 bg-white dark:bg-slate-900">
+      <View className="flex-1 bg-paper dark:bg-night">
         <StatusBar
           barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
         />
         <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
-          <Header />
+          <DetailHeader title="Cart" />
           <View className="flex-1 items-center justify-center px-8">
-            <View className="w-20 h-20 rounded-full bg-orange-50 dark:bg-orange-900/20 items-center justify-center mb-6">
+            <View className="w-20 h-20 rounded-full bg-clay-tint dark:bg-night-raised items-center justify-center mb-6">
               <Feather name="shopping-cart" size={36} color="#FF8A50" />
             </View>
-            <Text className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+            <Text className="w-full text-center text-2xl font-extrabold text-ink dark:text-white mb-2">
               Your cart is empty
             </Text>
-            <Text className="text-slate-500 dark:text-slate-400 text-center text-base mb-8">
+            <Text className="text-ink-soft dark:text-night-soft text-center text-base mb-8">
               Browse our courses, tests, and study materials to get started.
             </Text>
             <TouchableOpacity
               onPress={() => router.push("/(main)/shop" as any)}
-              className="bg-primary px-8 py-4 rounded-2xl"
+              className="bg-primary-deep px-8 py-4 rounded-2xl"
             >
-              <Text className="text-white font-black text-base">
+              <Text className="text-white font-extrabold text-base">
                 Browse Shop
               </Text>
             </TouchableOpacity>
@@ -357,12 +357,12 @@ const Cart = () => {
   }
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-slate-900">
+    <View className="flex-1 bg-sand dark:bg-night">
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
       <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
-        <Header />
+        <DetailHeader title="Cart" />
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 40 }}
@@ -370,10 +370,10 @@ const Cart = () => {
           <View className="px-5 pt-5">
             {/* Title */}
             <View className="flex-row items-baseline mb-5">
-              <Text className="text-2xl font-black text-slate-800 dark:text-white">
+              <Text className="text-2xl font-extrabold text-ink dark:text-white">
                 Shopping Cart
               </Text>
-              <Text className="text-base text-slate-500 dark:text-slate-400 ml-2 font-bold">
+              <Text className="text-base text-ink-soft dark:text-night-soft ml-2 font-bold">
                 ({cart.itemCount} {cart.itemCount === 1 ? "item" : "items"})
               </Text>
             </View>
@@ -393,17 +393,17 @@ const Cart = () => {
             </View>
 
             {/* Order Summary */}
-            <View className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-gray-100 dark:border-slate-700">
-              <Text className="text-xl font-black text-slate-800 dark:text-white mb-5">
+            <View className="bg-white dark:bg-night-raised rounded-2xl p-5 border border-line dark:border-night-line">
+              <Text className="text-xl font-extrabold text-ink dark:text-white mb-5">
                 Order Summary
               </Text>
 
               {/* Subtotal */}
               <View className="flex-row items-center justify-between mb-3">
-                <Text className="text-base text-slate-600 dark:text-slate-300 font-bold">
+                <Text className="text-base text-ink-soft dark:text-night-soft font-bold">
                   Subtotal
                 </Text>
-                <Text className="text-base text-slate-800 dark:text-white font-black">
+                <Text className="text-base text-ink dark:text-white font-extrabold">
                   ₹{cart.subtotal.toFixed(2)}
                 </Text>
               </View>
@@ -416,12 +416,12 @@ const Cart = () => {
                       Discount
                     </Text>
                     <View className="ml-2 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-md">
-                      <Text className="text-xs font-black text-green-700 dark:text-green-400">
+                      <Text className="text-xs font-extrabold text-green-700 dark:text-green-400">
                         {discountPercent}% OFF
                       </Text>
                     </View>
                   </View>
-                  <Text className="text-base text-green-600 dark:text-green-400 font-black">
+                  <Text className="text-base text-green-600 dark:text-green-400 font-extrabold">
                     -₹{itemDiscount.toFixed(2)}
                   </Text>
                 </View>
@@ -433,7 +433,7 @@ const Cart = () => {
                   <Text className="text-base text-green-600 dark:text-green-400 font-bold">
                     Promo Code ({appliedPromoCode})
                   </Text>
-                  <Text className="text-base text-green-600 dark:text-green-400 font-black">
+                  <Text className="text-base text-green-600 dark:text-green-400 font-extrabold">
                     -₹{cart.promoDiscount.toFixed(2)}
                   </Text>
                 </View>
@@ -444,25 +444,25 @@ const Cart = () => {
                   <Text className="text-base text-green-600 dark:text-green-400 font-bold">
                     Paid with Tcoins
                   </Text>
-                  <Text className="text-base text-green-600 dark:text-green-400 font-black">
+                  <Text className="text-base text-green-600 dark:text-green-400 font-extrabold">
                     -₹{tcoinsUsed.toFixed(2)}
                   </Text>
                 </View>
               )}
 
               {/* Divider */}
-              <View className="h-[1px] bg-gray-100 dark:bg-slate-700 my-4" />
+              <View className="h-[1px] bg-sand dark:bg-night-line my-4" />
 
               {/* Total */}
               <View className="flex-row items-center justify-between mb-1">
-                <Text className="text-lg font-black text-slate-800 dark:text-white">
+                <Text className="text-lg font-extrabold text-ink dark:text-white">
                   Total Amount
                 </Text>
-                <Text className="text-2xl font-black text-slate-800 dark:text-white">
+                <Text className="text-2xl font-extrabold text-ink dark:text-white">
                   ₹{payable.toFixed(2)}
                 </Text>
               </View>
-              <Text className="text-sm text-slate-400 dark:text-slate-500 text-right mb-5">
+              <Text className="text-sm text-ink-soft dark:text-night-soft text-right mb-5">
                 Inclusive of all taxes
               </Text>
 
@@ -471,7 +471,7 @@ const Cart = () => {
                 <View className="mb-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 px-4 py-3 flex-row items-center justify-between">
                   <View className="flex-row items-center">
                     <Feather name="check-circle" size={18} color="#16a34a" />
-                    <Text className="ml-2 text-base font-black text-slate-800 dark:text-white">
+                    <Text className="ml-2 text-base font-extrabold text-ink dark:text-white">
                       {appliedPromoCode}
                     </Text>
                     <Text className="ml-2 text-base text-green-600 dark:text-green-400 font-bold">
@@ -482,7 +482,7 @@ const Cart = () => {
                     onPress={handleClearPromo}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Feather name="x" size={20} color="#64748b" />
+                    <Feather name="x" size={20} color="#6A6358" />
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -493,7 +493,7 @@ const Cart = () => {
                   >
                     <View className="flex-row items-center">
                       <Feather name="tag" size={18} color="#FF8A50" />
-                      <Text className="ml-2 text-primary font-black text-base">
+                      <Text className="ml-2 text-primary-deep dark:text-primary font-extrabold text-base">
                         Have a Promo Code?
                       </Text>
                     </View>
@@ -508,24 +508,24 @@ const Cart = () => {
                     <View className="mb-4">
                       <View className="flex-row items-center">
                         <TextInput
-                          className="flex-1 h-12 border border-gray-200 dark:border-slate-600 rounded-xl px-4 text-slate-800 dark:text-white bg-gray-50 dark:bg-slate-700 font-bold"
+                          className="flex-1 h-12 border border-line dark:border-night-line rounded-xl px-4 text-ink dark:text-white bg-sand dark:bg-night-line font-bold"
                           placeholder="Enter Promo Code"
                           placeholderTextColor={
-                            colorScheme === "dark" ? "#64748b" : "#9ca3af"
+                            colorScheme === "dark" ? "#6A6358" : "#9ca3af"
                           }
                           value={promoCode}
                           onChangeText={setPromoCode}
                           autoCapitalize="characters"
                         />
                         <TouchableOpacity
-                          className="ml-3 bg-primary h-12 px-6 rounded-xl items-center justify-center"
+                          className="ml-3 bg-primary-deep h-12 px-6 rounded-xl items-center justify-center"
                           onPress={handleApplyPromo}
                           disabled={promoLoading}
                         >
                           {promoLoading ? (
                             <ActivityIndicator size="small" color="white" />
                           ) : (
-                            <Text className="text-white font-black text-base">
+                            <Text className="text-white font-extrabold text-base">
                               Apply
                             </Text>
                           )}
@@ -556,24 +556,24 @@ const Cart = () => {
 
               {/* Wallet Section — only render when balance > 0 */}
               {hasWallet && (
-                <View className="mb-3 rounded-2xl border border-primary/30 bg-orange-50/60 dark:bg-orange-900/10 p-4">
+                <View className="mb-3 rounded-2xl border border-primary/30 bg-clay-tint/60 dark:bg-night-raised p-4">
                   <View className="flex-row items-center justify-between mb-3">
                     <View className="flex-row items-center">
                       <View className="w-9 h-9 rounded-full bg-primary/10 items-center justify-center">
                         <Feather name="credit-card" size={18} color="#FF8A50" />
                       </View>
                       <View className="ml-3">
-                        <Text className="text-sm font-bold text-slate-500 dark:text-slate-400">
+                        <Text className="text-sm font-bold text-ink-soft dark:text-night-soft">
                           Wallet Balance
                         </Text>
-                        <Text className="text-lg font-black text-slate-800 dark:text-white">
+                        <Text className="text-lg font-extrabold text-ink dark:text-white">
                           ₹{availableWalletBalance.toFixed(2)}
                         </Text>
                       </View>
                     </View>
                     {canPayWithWallet && (
                       <View className="bg-green-100 dark:bg-green-900/30 px-2.5 py-1 rounded-md">
-                        <Text className="text-xs font-black text-green-700 dark:text-green-400">
+                        <Text className="text-xs font-extrabold text-green-700 dark:text-green-400">
                           Sufficient
                         </Text>
                       </View>
@@ -582,7 +582,7 @@ const Cart = () => {
 
                   {canPayWithWallet ? (
                     <TouchableOpacity
-                      className="bg-primary h-12 rounded-xl flex-row items-center justify-center shadow-md shadow-orange-500/20"
+                      className="bg-primary-deep h-12 rounded-xl flex-row items-center justify-center shadow-md shadow-orange-500/20"
                       onPress={handleWalletPurchase}
                       disabled={walletLoading}
                     >
@@ -591,7 +591,7 @@ const Cart = () => {
                       ) : (
                         <>
                           <Feather name="credit-card" size={16} color="white" />
-                          <Text className="text-white font-black text-base ml-2">
+                          <Text className="text-white font-extrabold text-base ml-2">
                             Pay ₹{payable.toFixed(2)} with Wallet
                           </Text>
                         </>
@@ -616,17 +616,17 @@ const Cart = () => {
               {/* OR divider — only when wallet is usable */}
               {canPayWithWallet && (
                 <View className="flex-row items-center my-2">
-                  <View className="flex-1 h-[1px] bg-gray-100 dark:bg-slate-700" />
-                  <Text className="mx-3 text-xs font-black text-slate-400 dark:text-slate-500">
+                  <View className="flex-1 h-[1px] bg-sand dark:bg-night-line" />
+                  <Text className="mx-3 text-xs font-extrabold text-ink-soft dark:text-night-soft">
                     OR
                   </Text>
-                  <View className="flex-1 h-[1px] bg-gray-100 dark:bg-slate-700" />
+                  <View className="flex-1 h-[1px] bg-sand dark:bg-night-line" />
                 </View>
               )}
 
               {/* Proceed to Payment */}
               <TouchableOpacity
-                className="bg-primary h-14 rounded-2xl flex-row items-center justify-center mt-2 shadow-md shadow-orange-500/20"
+                className="bg-primary-deep h-14 rounded-2xl flex-row items-center justify-center mt-2 shadow-md shadow-orange-500/20"
                 onPress={handleProceedToPayment}
                 disabled={orderLoading || walletLoading}
               >
@@ -635,7 +635,7 @@ const Cart = () => {
                 ) : (
                   <>
                     <Feather name="lock" size={18} color="white" />
-                    <Text className="text-white font-black text-lg ml-2">
+                    <Text className="text-white font-extrabold text-lg ml-2">
                       Proceed to Payment
                     </Text>
                   </>
@@ -644,8 +644,8 @@ const Cart = () => {
 
               {/* Secure Transaction */}
               <View className="flex-row items-center justify-center mt-4">
-                <Feather name="shield" size={14} color="#94a3b8" />
-                <Text className="ml-1.5 text-sm text-slate-400 dark:text-slate-500 font-bold">
+                <Feather name="shield" size={14} color="#968E82" />
+                <Text className="ml-1.5 text-sm text-ink-soft dark:text-night-soft font-bold">
                   Secure Transaction
                 </Text>
               </View>
@@ -662,8 +662,8 @@ const Cart = () => {
           animationType="slide"
           onRequestClose={() => handleWebViewClose((payuData as any).txnid)}
         >
-          <SafeAreaView className="flex-1 bg-white dark:bg-slate-900">
-            <View className="flex-row items-center px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+          <SafeAreaView className="flex-1 bg-paper dark:bg-night">
+            <View className="flex-row items-center px-4 py-3 border-b border-line dark:border-night-line">
               <TouchableOpacity
                 onPress={() => handleWebViewClose((payuData as any).txnid)}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -671,10 +671,10 @@ const Cart = () => {
                 <Feather
                   name="x"
                   size={24}
-                  color={colorScheme === "dark" ? "#fff" : "#1e293b"}
+                  color={colorScheme === "dark" ? "#fff" : "#25231F"}
                 />
               </TouchableOpacity>
-              <Text className="ml-4 text-base font-black text-slate-800 dark:text-white">
+              <Text className="ml-4 text-base font-extrabold text-ink dark:text-white">
                 Complete Payment
               </Text>
             </View>
@@ -725,22 +725,22 @@ const Cart = () => {
         onRequestClose={() => setItemToDelete(null)}
       >
         <View className="flex-1 bg-black/50 items-center justify-center px-6">
-          <View className="bg-white dark:bg-slate-800 rounded-3xl p-6 w-full max-w-sm shadow-2xl overflow-hidden">
+          <View className="bg-white dark:bg-night-raised rounded-3xl p-6 w-full max-w-sm shadow-2xl overflow-hidden">
             {/* Design Element */}
-            <View className="absolute top-0 right-0 w-24 h-24 bg-orange-50 dark:bg-orange-900/10 rounded-bl-full opacity-50" />
+            <View className="absolute top-0 right-0 w-24 h-24 bg-clay-tint dark:bg-night-raised rounded-bl-full opacity-50" />
 
             <View className="items-center mt-2">
               <View className="w-16 h-16 rounded-full bg-red-50 dark:bg-red-900/20 items-center justify-center mb-5">
                 <Feather name="trash-2" size={28} color="#EF4444" />
               </View>
 
-              <Text className="text-xl font-black text-slate-800 dark:text-white mb-2 text-center">
+              <Text className="w-full text-xl font-extrabold text-ink dark:text-white mb-2 text-center">
                 Remove from Cart?
               </Text>
 
-              <Text className="text-slate-500 dark:text-slate-400 text-sm font-bold text-center mb-8 leading-5 px-2">
+              <Text className="text-ink-soft dark:text-night-soft text-sm font-bold text-center mb-8 leading-5 px-2">
                 Are you sure you want to remove{"\n"}
-                <Text className="text-slate-800 dark:text-slate-200">
+                <Text className="text-ink dark:text-night-soft">
                   {itemToDelete?.title}
                 </Text>
                 {"\n"}from your shopping cart?
@@ -748,10 +748,10 @@ const Cart = () => {
 
               <View className="flex-row gap-x-3 w-full">
                 <TouchableOpacity
-                  className="flex-1 h-12 rounded-xl items-center justify-center bg-gray-100 dark:bg-slate-700"
+                  className="flex-1 h-12 rounded-xl items-center justify-center bg-sand dark:bg-night-line"
                   onPress={() => setItemToDelete(null)}
                 >
-                  <Text className="text-slate-500 dark:text-slate-400 font-bold">
+                  <Text className="text-ink-soft dark:text-night-soft font-bold">
                     Cancel
                   </Text>
                 </TouchableOpacity>
@@ -760,7 +760,7 @@ const Cart = () => {
                   className="flex-1 h-12 rounded-xl items-center justify-center bg-red-500 shadow-lg shadow-red-500/30"
                   onPress={confirmRemove}
                 >
-                  <Text className="text-white font-black">Remove</Text>
+                  <Text className="text-white font-extrabold">Remove</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -787,7 +787,7 @@ const CartItemCard = ({
   const hasDiscount = item.originalPrice > item.price;
 
   return (
-    <View className="bg-white dark:bg-slate-800 rounded-2xl p-4 mb-3 border border-gray-100 dark:border-slate-700 flex-row items-center">
+    <View className="bg-white dark:bg-night-raised rounded-2xl p-4 mb-3 border border-line dark:border-night-line flex-row items-center">
       {/* Thumbnail */}
       <Image
         source={{
@@ -800,26 +800,26 @@ const CartItemCard = ({
                   ? Placeholder.TEST
                   : Placeholder.NOTE,
         }}
-        className="w-[72px] h-[72px] rounded-xl"
+        className="w-28 aspect-video rounded-xl bg-sand dark:bg-night"
         resizeMode="cover"
       />
 
       {/* Info */}
       <View className="flex-1 ml-4 mr-2">
         <Text
-          className="text-base font-black text-slate-800 dark:text-white leading-tight"
+          className="text-base font-extrabold text-ink dark:text-white leading-tight"
           numberOfLines={2}
         >
           {item.title}
         </Text>
         {item.teacherName ? (
-          <Text className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-bold">
+          <Text className="text-sm text-ink-soft dark:text-night-soft mt-1 font-bold">
             by {item.teacherName}
           </Text>
         ) : null}
         {item.type === "digitalProduct" && (
-          <View className="mt-1.5 self-start rounded bg-gray-100 dark:bg-slate-700 px-2 py-0.5">
-            <Text className="text-xs font-bold text-slate-500 dark:text-slate-400">
+          <View className="mt-1.5 self-start rounded bg-sand dark:bg-night-line px-2 py-0.5">
+            <Text className="text-xs font-bold text-ink-soft dark:text-night-soft">
               Study Notes
             </Text>
           </View>
@@ -827,7 +827,7 @@ const CartItemCard = ({
         {promoEligible && (
           <View className="mt-1.5 flex-row items-center self-start rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-2 py-0.5">
             <Feather name="tag" size={12} color="#16a34a" />
-            <Text className="ml-1 text-xs font-black text-green-600 dark:text-green-400">
+            <Text className="ml-1 text-xs font-extrabold text-green-600 dark:text-green-400">
               Offer Applied
             </Text>
           </View>
@@ -839,7 +839,7 @@ const CartItemCard = ({
         {removing ? (
           <ActivityIndicator
             size="small"
-            color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
+            color={colorScheme === "dark" ? "#968E82" : "#6A6358"}
           />
         ) : (
           <TouchableOpacity
@@ -850,16 +850,16 @@ const CartItemCard = ({
             <Feather
               name="trash-2"
               size={18}
-              color={colorScheme === "dark" ? "#94a3b8" : "#64748b"}
+              color={colorScheme === "dark" ? "#968E82" : "#6A6358"}
             />
           </TouchableOpacity>
         )}
         {hasDiscount && (
-          <Text className="text-sm text-slate-400 dark:text-slate-500 line-through">
+          <Text className="text-sm text-ink-soft dark:text-night-soft line-through">
             ₹{item.originalPrice.toFixed(2)}
           </Text>
         )}
-        <Text className="text-lg font-black text-slate-800 dark:text-white">
+        <Text className="text-lg font-extrabold text-ink dark:text-white">
           ₹{item.price.toFixed(2)}
         </Text>
       </View>

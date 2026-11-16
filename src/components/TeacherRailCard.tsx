@@ -30,9 +30,9 @@ const TeacherRailCard = ({ teacher }: { teacher: TeacherItem }) => {
     <TouchableOpacity
       onPress={() => router.push(`/expert/${teacher.slug}` as any)}
       activeOpacity={0.9}
-      className="w-[144px] items-center bg-white dark:bg-slate-800 rounded-3xl border border-gray-100 dark:border-slate-700/50 shadow-sm shadow-slate-200/60 dark:shadow-none px-4 py-5"
+      className="w-[144px] items-center bg-white dark:bg-night-raised rounded-3xl border border-line dark:border-night-line px-4 py-5"
     >
-      <View className="w-16 h-16 rounded-full overflow-hidden border-2 border-orange-100 dark:border-slate-700 mb-3">
+      <View className="w-16 h-16 rounded-full overflow-hidden border-2 border-line dark:border-night-line mb-3">
         <Image
           source={{ uri: avatarUri }}
           className="w-full h-full"
@@ -42,7 +42,7 @@ const TeacherRailCard = ({ teacher }: { teacher: TeacherItem }) => {
 
       <View className="flex-row items-center mb-1 max-w-full">
         <Text
-          className="text-slate-800 dark:text-white font-black text-[13px]"
+          className="text-ink dark:text-white font-extrabold text-[13px]"
           numberOfLines={1}
         >
           {teacher.displayName}
@@ -58,15 +58,15 @@ const TeacherRailCard = ({ teacher }: { teacher: TeacherItem }) => {
       </View>
 
       <Text
-        className="text-slate-400 dark:text-slate-500 text-[10px] font-medium text-center mb-3 leading-[14px] h-[14px]"
+        className="text-ink-soft dark:text-night-soft text-[10px] font-medium text-center mb-3 leading-[14px] h-[14px]"
         numberOfLines={1}
       >
         {teacher.tagline || `${contentCount} resources`}
       </Text>
 
-      <View className="flex-row items-center border-t border-gray-50 dark:border-slate-700/50 pt-3 w-full justify-center">
-        <Feather name="users" size={11} color="#94a3b8" />
-        <Text className="ml-1.5 text-slate-500 dark:text-slate-400 text-[11px] font-bold">
+      <View className="flex-row items-center border-t border-line dark:border-night-line pt-3 w-full justify-center">
+        <Feather name="users" size={11} color="#9A8A93" />
+        <Text className="ml-1.5 text-ink-soft dark:text-night-soft text-[11px] font-bold">
           {teacher.studentCount ?? 0} students
         </Text>
       </View>

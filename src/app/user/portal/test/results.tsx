@@ -63,7 +63,7 @@ const shouldUseWebView = (html: string) => {
 };
 
 const getHtmlDocument = (html: string, isDark: boolean) => {
-  const textColor = isDark ? "#e2e8f0" : "#1e293b";
+  const textColor = isDark ? "#E3DACB" : "#25231F";
   const cleanedHtml = sanitizeHtml(html);
 
   return `<!DOCTYPE html>
@@ -356,7 +356,7 @@ const ResultsScreen = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-white dark:bg-slate-900 items-center justify-center">
+      <View className="flex-1 bg-paper dark:bg-night items-center justify-center">
         <ActivityIndicator size="large" color="#FF8A50" />
       </View>
     );
@@ -364,20 +364,20 @@ const ResultsScreen = () => {
 
   if (error || !resultData) {
     return (
-      <SafeAreaView className="flex-1 bg-white dark:bg-slate-900 px-6">
+      <SafeAreaView className="flex-1 bg-paper dark:bg-night px-6">
         <TouchableOpacity
           onPress={handleBackToEnrolledTest}
           className="mt-5 mb-8"
         >
           <Feather
-            name="arrow-left"
+            name="chevron-left"
             size={22}
-            color={colorScheme === "dark" ? "#e2e8f0" : "#1e293b"}
+            color={colorScheme === "dark" ? "#E3DACB" : "#25231F"}
           />
         </TouchableOpacity>
         <View className="flex-1 items-center justify-center">
           <Feather name="alert-circle" size={44} color="#FF6B6B" />
-          <Text className="text-slate-800 dark:text-white font-black text-xl mt-4 text-center">
+          <Text className="w-full text-ink dark:text-white font-extrabold text-xl mt-4 text-center">
             {error || "Unable to load results"}
           </Text>
         </View>
@@ -388,7 +388,7 @@ const ResultsScreen = () => {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-slate-50 dark:bg-slate-950"
+      className="flex-1 bg-sand dark:bg-night"
     >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
@@ -403,47 +403,47 @@ const ResultsScreen = () => {
           <View className="flex-row items-center justify-between mb-2">
             <TouchableOpacity
               onPress={handleBackToEnrolledTest}
-              className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 items-center justify-center"
+              className="w-10 h-10 rounded-full bg-white dark:bg-night-raised border border-line dark:border-night-line items-center justify-center"
             >
               <Feather
-                name="arrow-left"
-                size={20}
-                color={colorScheme === "dark" ? "#e2e8f0" : "#1e293b"}
+                name="chevron-left"
+                size={22}
+                color={colorScheme === "dark" ? "#E3DACB" : "#25231F"}
               />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={fetchLatestResults}
-              className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl"
+              className="bg-white dark:bg-night-raised border border-line dark:border-night-line px-4 py-2 rounded-xl"
             >
-              <Text className="text-slate-700 dark:text-slate-200 font-bold text-base">
+              <Text className="text-ink dark:text-night-soft font-bold text-base">
                 Refresh
               </Text>
             </TouchableOpacity>
           </View>
 
-          <Text className="text-slate-900 dark:text-white text-2xl font-black leading-tight">
+          <Text className="text-ink dark:text-white text-2xl font-extrabold leading-tight">
             Test Results
           </Text>
 
-          <View className="mt-3 bg-white dark:bg-slate-900 border border-orange-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm mb-3">
-            <Text className="text-slate-600 dark:text-slate-300 font-black text-base mb-1">
+          <View className="mt-3 bg-white dark:bg-night border border-line dark:border-night-line rounded-2xl p-4 shadow-sm mb-3">
+            <Text className="text-ink-soft dark:text-night-soft font-extrabold text-base mb-1">
               Your Score
             </Text>
-            <Text className="text-primary text-5xl font-black tracking-tight">
+            <Text className="text-primary-deep dark:text-primary text-5xl font-extrabold tracking-tight">
               {Number(resultData.score).toFixed(2)}%
             </Text>
-            <Text className="text-slate-800 dark:text-slate-100 text-2xl font-black mt-1">
+            <Text className="text-ink dark:text-white text-2xl font-extrabold mt-1">
               {Number(resultData.totalMarks).toFixed(2)} /{" "}
               {resultData.maxPossibleMarks} marks
             </Text>
-            <Text className="text-slate-500 dark:text-slate-400 font-semibold text-lg mt-1">
+            <Text className="text-ink-soft dark:text-night-soft font-semibold text-lg mt-1">
               {correctCount} / {attemptStats.total} correct ·{" "}
               {attemptStats.attempted} / {attemptStats.total} attempted
             </Text>
 
-            <View className="mt-3 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+            <View className="mt-3 h-2.5 rounded-full bg-line dark:bg-night-line overflow-hidden">
               <View
-                className="h-full bg-primary"
+                className="h-full bg-primary-deep"
                 style={{ width: `${scoreProgress}%` }}
               />
             </View>
@@ -451,66 +451,66 @@ const ResultsScreen = () => {
 
           <View className="mb-4" style={{ gap: 8 }}>
             <View className="flex-row" style={{ gap: 10 }}>
-              <View className="flex-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
+              <View className="flex-1 bg-paper dark:bg-night border border-line dark:border-night-line rounded-2xl p-3">
                 <View className="flex-row items-center mb-1">
                   <Feather name="check-circle" size={18} color="#22c55e" />
-                  <Text className="ml-2 text-slate-500 dark:text-slate-400 font-black text-xs uppercase">
+                  <Text className="ml-2 text-ink-soft dark:text-night-soft font-extrabold text-xs uppercase">
                     Correct
                   </Text>
                 </View>
-                <Text className="text-slate-900 dark:text-white text-3xl font-black">
+                <Text className="text-ink dark:text-white text-3xl font-extrabold">
                   {correctCount}
                 </Text>
               </View>
 
-              <View className="flex-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
+              <View className="flex-1 bg-paper dark:bg-night border border-line dark:border-night-line rounded-2xl p-3">
                 <View className="flex-row items-center mb-1">
                   <Feather name="x-circle" size={18} color="#ef4444" />
-                  <Text className="ml-2 text-slate-500 dark:text-slate-400 font-black text-xs uppercase">
+                  <Text className="ml-2 text-ink-soft dark:text-night-soft font-extrabold text-xs uppercase">
                     Incorrect
                   </Text>
                 </View>
-                <Text className="text-slate-900 dark:text-white text-3xl font-black">
+                <Text className="text-ink dark:text-white text-3xl font-extrabold">
                   {attemptStats.incorrect}
                 </Text>
               </View>
             </View>
 
             <View className="flex-row" style={{ gap: 10 }}>
-              <View className="flex-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
+              <View className="flex-1 bg-paper dark:bg-night border border-line dark:border-night-line rounded-2xl p-3">
                 <View className="flex-row items-center mb-1">
-                  <Feather name="minus-circle" size={18} color="#64748b" />
-                  <Text className="ml-2 text-slate-500 dark:text-slate-400 font-black text-xs uppercase">
+                  <Feather name="minus-circle" size={18} color="#6A6358" />
+                  <Text className="ml-2 text-ink-soft dark:text-night-soft font-extrabold text-xs uppercase">
                     Not Attempted
                   </Text>
                 </View>
-                <Text className="text-slate-900 dark:text-white text-3xl font-black">
+                <Text className="text-ink dark:text-white text-3xl font-extrabold">
                   {attemptStats.notAttempted}
                 </Text>
               </View>
 
-              <View className="flex-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
+              <View className="flex-1 bg-paper dark:bg-night border border-line dark:border-night-line rounded-2xl p-3">
                 <View className="flex-row items-center mb-1">
-                  <Feather name="clock" size={18} color="#0284c7" />
-                  <Text className="ml-2 text-slate-500 dark:text-slate-400 font-black text-xs uppercase">
+                  <Feather name="clock" size={18} color="#3F6577" />
+                  <Text className="ml-2 text-ink-soft dark:text-night-soft font-extrabold text-xs uppercase">
                     Time
                   </Text>
                 </View>
-                <Text className="text-slate-900 dark:text-white text-3xl font-black">
+                <Text className="text-ink dark:text-white text-3xl font-extrabold">
                   {formatDuration(resultData.timeTaken)}
                 </Text>
               </View>
             </View>
 
             <View className="flex-row" style={{ gap: 10 }}>
-              <View className="flex-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
+              <View className="flex-1 bg-paper dark:bg-night border border-line dark:border-night-line rounded-2xl p-3">
                 <View className="flex-row items-center mb-1">
                   <Feather name="award" size={18} color="#fb923c" />
-                  <Text className="ml-2 text-slate-500 dark:text-slate-400 font-black text-xs uppercase">
+                  <Text className="ml-2 text-ink-soft dark:text-night-soft font-extrabold text-xs uppercase">
                     Marks
                   </Text>
                 </View>
-                <Text className="text-slate-900 dark:text-white text-3xl font-black">
+                <Text className="text-ink dark:text-white text-3xl font-extrabold">
                   {resultData.totalMarks}/{resultData.maxPossibleMarks}
                 </Text>
               </View>
@@ -518,7 +518,7 @@ const ResultsScreen = () => {
           </View>
 
           <View>
-            <Text className="text-slate-900 dark:text-white font-black text-2xl mb-2">
+            <Text className="text-ink dark:text-white font-extrabold text-2xl mb-2">
               Question Review
             </Text>
 
@@ -566,16 +566,16 @@ const ResultsScreen = () => {
               return (
                 <View
                   key={`${item.questionId}-${index}`}
-                  className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-3 mb-3"
+                  className="bg-white dark:bg-night border border-line dark:border-night-line rounded-2xl p-3 mb-3"
                 >
                   <View className="flex-row items-center justify-between mb-2">
-                    <Text className="text-primary font-black text-2xl">
+                    <Text className="text-primary-deep dark:text-primary font-extrabold text-2xl">
                       {index + 1}.
                     </Text>
                     <Text
-                      className={`font-black text-sm ${
+                      className={`font-extrabold text-sm ${
                         !attempted
-                          ? "text-slate-500 dark:text-slate-400"
+                          ? "text-ink-soft dark:text-night-soft"
                           : isCorrect
                             ? "text-green-600"
                             : "text-red-500"
@@ -592,13 +592,13 @@ const ResultsScreen = () => {
                   {item.paragraphText
                     ? renderHtmlOrText(
                         item.paragraphText,
-                        "text-slate-700 dark:text-slate-200 text-sm font-semibold mb-2",
+                        "text-ink dark:text-night-soft text-sm font-semibold mb-2",
                       )
                     : null}
 
                   {renderHtmlOrText(
                     item.questionText,
-                    "text-slate-800 dark:text-white text-lg font-bold",
+                    "text-ink dark:text-white text-lg font-bold",
                   )}
 
                   {optionMap.length > 0 ? (
@@ -615,13 +615,13 @@ const ResultsScreen = () => {
                           ? "bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700"
                           : isSelectedOption
                             ? "bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700"
-                            : "bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700";
+                            : "bg-white dark:bg-night border-line dark:border-night-line";
 
                         const letterClass = isCorrectOption
                           ? "text-green-700 dark:text-green-300"
                           : isSelectedOption
                             ? "text-red-700 dark:text-red-300"
-                            : "text-slate-700 dark:text-slate-200";
+                            : "text-ink dark:text-night-soft";
 
                         return (
                           <View
@@ -630,7 +630,7 @@ const ResultsScreen = () => {
                           >
                             <View className="flex-row items-start">
                               <Text
-                                className={`font-black text-2xl mr-3 ${letterClass}`}
+                                className={`font-extrabold text-2xl mr-3 ${letterClass}`}
                               >
                                 {option.letter}:
                               </Text>
@@ -647,17 +647,17 @@ const ResultsScreen = () => {
                     </View>
                   ) : null}
 
-                  <View className="mt-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3">
-                    <Text className="text-slate-500 dark:text-slate-400 text-xs font-black uppercase mb-1">
+                  <View className="mt-2 rounded-xl bg-sand dark:bg-night-raised border border-line dark:border-night-line p-3">
+                    <Text className="text-ink-soft dark:text-night-soft text-xs font-extrabold uppercase mb-1">
                       Your Answer
                     </Text>
-                    <Text className="text-slate-900 dark:text-slate-100 text-lg font-black">
+                    <Text className="text-ink dark:text-white text-lg font-extrabold">
                       {answerText}
                     </Text>
-                    <Text className="text-slate-500 dark:text-slate-400 text-xs font-black uppercase mb-1 mt-2">
+                    <Text className="text-ink-soft dark:text-night-soft text-xs font-extrabold uppercase mb-1 mt-2">
                       Correct Answer
                     </Text>
-                    <Text className="text-green-700 dark:text-green-300 text-lg font-black">
+                    <Text className="text-green-700 dark:text-green-300 text-lg font-extrabold">
                       {correctText}
                     </Text>
                   </View>
@@ -666,9 +666,9 @@ const ResultsScreen = () => {
                     <View className="mt-3">
                       <TouchableOpacity
                         onPress={() => toggleExplanation(item.questionId)}
-                        className="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 bg-white dark:bg-slate-900 flex-row items-center justify-between"
+                        className="rounded-xl border border-line dark:border-night-line px-3 py-2 bg-white dark:bg-night flex-row items-center justify-between"
                       >
-                        <Text className="text-slate-700 dark:text-slate-200 font-black text-sm">
+                        <Text className="text-ink dark:text-night-soft font-extrabold text-sm">
                           {expandedExplanations[item.questionId]
                             ? "Hide Explanation"
                             : "Show Explanation"}
@@ -680,18 +680,18 @@ const ResultsScreen = () => {
                               : "chevron-down"
                           }
                           size={16}
-                          color={isDark ? "#e2e8f0" : "#334155"}
+                          color={isDark ? "#E3DACB" : "#3A3731"}
                         />
                       </TouchableOpacity>
 
                       {expandedExplanations[item.questionId] ? (
-                        <View className="mt-2 rounded-xl bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-700 px-3 py-3">
-                          <Text className="text-cyan-700 dark:text-cyan-300 text-xs font-black uppercase mb-1">
+                        <View className="mt-2 rounded-xl bg-sky-tint dark:bg-night-raised border border-line dark:border-night-line px-3 py-3">
+                          <Text className="text-sky dark:text-sky-light text-xs font-extrabold uppercase mb-1">
                             Explanation
                           </Text>
                           {renderHtmlOrText(
                             item.explanation,
-                            "text-slate-700 dark:text-slate-200 text-sm font-semibold",
+                            "text-ink dark:text-night-soft text-sm font-semibold",
                           )}
                         </View>
                       ) : null}

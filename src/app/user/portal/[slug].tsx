@@ -346,7 +346,7 @@ const Portal = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-white dark:bg-slate-900 items-center justify-center">
+      <View className="flex-1 bg-paper dark:bg-night items-center justify-center">
         <ActivityIndicator size="large" color="#FF8A50" />
       </View>
     );
@@ -354,17 +354,17 @@ const Portal = () => {
 
   if (error || !details) {
     return (
-      <SafeAreaView className="flex-1 bg-white dark:bg-slate-900 px-6">
+      <SafeAreaView className="flex-1 bg-paper dark:bg-night px-6">
         <TouchableOpacity onPress={() => router.back()} className="mt-5 mb-8">
           <Feather
-            name="arrow-left"
+            name="chevron-left"
             size={22}
-            color={colorScheme === "dark" ? "#e2e8f0" : "#1e293b"}
+            color={colorScheme === "dark" ? "#E3DACB" : "#25231F"}
           />
         </TouchableOpacity>
         <View className="flex-1 items-center justify-center">
           <Feather name="alert-circle" size={44} color="#FF6B6B" />
-          <Text className="text-slate-800 dark:text-white font-black text-xl mt-4 text-center">
+          <Text className="w-full text-ink dark:text-white font-extrabold text-xl mt-4 text-center">
             {error || "Unable to load instructions"}
           </Text>
         </View>
@@ -395,7 +395,7 @@ const Portal = () => {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-900"
+      className="flex-1 bg-paper dark:bg-night"
     >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
@@ -410,41 +410,41 @@ const Portal = () => {
           <View className="flex-row items-center justify-between mb-4">
             <TouchableOpacity
               onPress={() => router.back()}
-              className="w-10 h-10 rounded-full bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 items-center justify-center"
+              className="w-10 h-10 rounded-full bg-sand dark:bg-night-raised border border-line dark:border-night-line items-center justify-center"
             >
               <Feather
-                name="arrow-left"
-                size={20}
-                color={colorScheme === "dark" ? "#e2e8f0" : "#1e293b"}
+                name="chevron-left"
+                size={22}
+                color={colorScheme === "dark" ? "#E3DACB" : "#25231F"}
               />
             </TouchableOpacity>
-            <View className="bg-orange-50 dark:bg-orange-900/20 px-3 py-1 rounded-full border border-orange-100 dark:border-orange-800/40">
-              <Text className="text-primary text-[11px] font-black uppercase tracking-wider">
+            <View className="bg-clay-tint dark:bg-night-raised px-3 py-1 rounded-full border border-line dark:border-night-line">
+              <Text className="text-primary-deep dark:text-primary text-[11px] font-extrabold uppercase tracking-wider">
                 Test Instructions
               </Text>
             </View>
           </View>
 
           <Text
-            className="text-4xl font-black text-slate-800 dark:text-white leading-tight"
+            className="text-4xl font-extrabold text-ink dark:text-white leading-tight"
             numberOfLines={2}
           >
             {details.title}
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-base mt-2">
+          <Text className="text-ink-soft dark:text-night-soft text-base mt-2">
             Review the details carefully before starting your attempt.
           </Text>
 
           <View className="flex-row mt-6 mb-8" style={{ gap: 10 }}>
-            <View className="flex-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl px-4 py-3">
+            <View className="flex-1 bg-white dark:bg-night-raised border border-line dark:border-night-line rounded-2xl px-4 py-3">
               <View className="flex-row items-center mb-1">
                 <Feather name="clock" size={16} color="#FF8A50" />
-                <Text className="text-primary font-black text-xs uppercase tracking-wider ml-2">
+                <Text className="text-primary-deep dark:text-primary font-extrabold text-xs uppercase tracking-wider ml-2">
                   Duration
                 </Text>
               </View>
               <Text
-                className="text-slate-800 dark:text-white text-xl font-black"
+                className="text-ink dark:text-white text-xl font-extrabold"
                 numberOfLines={1}
               >
                 {details.questionWiseTiming
@@ -457,18 +457,18 @@ const Portal = () => {
               </Text>
             </View>
 
-            <View className="flex-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl px-4 py-3">
+            <View className="flex-1 bg-white dark:bg-night-raised border border-line dark:border-night-line rounded-2xl px-4 py-3">
               <View className="flex-row items-center mb-1">
                 <Ionicons
                   name="help-circle-outline"
                   size={17}
                   color="#FF8A50"
                 />
-                <Text className="text-primary font-black text-xs uppercase tracking-wider ml-2">
+                <Text className="text-primary-deep dark:text-primary font-extrabold text-xs uppercase tracking-wider ml-2">
                   Questions
                 </Text>
               </View>
-              <Text className="text-slate-800 dark:text-white text-xl font-black">
+              <Text className="text-ink dark:text-white text-xl font-extrabold">
                 {details.totalQuestions || 0} Questions
               </Text>
             </View>
@@ -478,7 +478,7 @@ const Portal = () => {
             <View className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-3xl p-5 mb-8">
               <View className="flex-row items-center mb-2">
                 <Feather name="alert-triangle" size={16} color="#f59e0b" />
-                <Text className="text-amber-800 dark:text-amber-200 font-black text-xs uppercase tracking-wider ml-2">
+                <Text className="text-amber-800 dark:text-amber-200 font-extrabold text-xs uppercase tracking-wider ml-2">
                   Attempt Limits
                 </Text>
               </View>
@@ -491,25 +491,25 @@ const Portal = () => {
               {attemptLimits.map((row, index) => (
                 <View
                   key={row.key}
-                  className={`flex-row items-center justify-between bg-white dark:bg-slate-800 border border-amber-100 dark:border-amber-900/40 rounded-2xl px-4 py-3 ${
+                  className={`flex-row items-center justify-between bg-white dark:bg-night-raised border border-amber-100 dark:border-amber-900/40 rounded-2xl px-4 py-3 ${
                     index < attemptLimits.length - 1 ? "mb-2" : ""
                   }`}
                 >
                   <View className="flex-1 pr-3">
                     <Text
-                      className="text-slate-800 dark:text-white text-base font-black"
+                      className="text-ink dark:text-white text-base font-extrabold"
                       numberOfLines={1}
                     >
                       {row.label}
                     </Text>
                     <Text
-                      className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-wider mt-0.5"
+                      className="text-ink-soft dark:text-night-soft text-[10px] font-extrabold uppercase tracking-wider mt-0.5"
                       numberOfLines={1}
                     >
                       {row.caption}
                     </Text>
                   </View>
-                  <Text className="text-amber-700 dark:text-amber-300 text-base font-black">
+                  <Text className="text-amber-700 dark:text-amber-300 text-base font-extrabold">
                     {row.limit} of {row.total}
                   </Text>
                 </View>
@@ -517,33 +517,33 @@ const Portal = () => {
             </View>
           )}
 
-          <View className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-3xl p-5 shadow-sm">
-            <Text className="text-slate-900 dark:text-white text-3xl font-black mb-4">
+          <View className="bg-white dark:bg-night-raised border border-line dark:border-night-line rounded-3xl p-5 shadow-sm">
+            <Text className="text-ink dark:text-white text-3xl font-extrabold mb-4">
               Instructions
             </Text>
             <View className="mb-2">
-              <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
+              <Text className="text-ink-soft dark:text-night-soft text-lg leading-8">
                 {hasAttemptLimits
                   ? "• Answer only as many questions as the attempt limits above allow."
                   : "• Answer all questions to the best of your ability."}
               </Text>
               {hasAttemptLimits ? (
                 <>
-                  <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
+                  <Text className="text-ink-soft dark:text-night-soft text-lg leading-8">
                     {`• Once a limit is reached, the remaining questions in that ${limitScopeWord} are locked.`}
                   </Text>
-                  <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
+                  <Text className="text-ink-soft dark:text-night-soft text-lg leading-8">
                     • Changed your mind? Clear an answer to free up an attempt
                     and use it on another question.
                   </Text>
                 </>
               ) : null}
-              <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
+              <Text className="text-ink-soft dark:text-night-soft text-lg leading-8">
                 {details.questionWiseTiming
                   ? "• Once you answer or skip a question, you cannot return to it."
                   : "• You can navigate between questions anytime."}
               </Text>
-              <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
+              <Text className="text-ink-soft dark:text-night-soft text-lg leading-8">
                 {hasAttemptLimits
                   ? "• Click Submit Test once you have spent the attempts you want."
                   : "• Click Submit Test after completing all answers."}
@@ -551,12 +551,12 @@ const Portal = () => {
               {!details.questionWiseTiming &&
               !details.subjectWiseTiming &&
               details.durationMinutes <= 0 ? (
-                <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
+                <Text className="text-ink-soft dark:text-night-soft text-lg leading-8">
                   • No time limit is set — the test will auto-submit after 3
                   hours.
                 </Text>
               ) : (
-                <Text className="text-slate-600 dark:text-slate-300 text-lg leading-8">
+                <Text className="text-ink-soft dark:text-night-soft text-lg leading-8">
                   • Test auto-submits when the timer reaches zero.
                 </Text>
               )}
@@ -565,14 +565,14 @@ const Portal = () => {
 
           <View className="items-center mt-12">
             {saved ? (
-              <View className="w-full bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/40 rounded-3xl p-5">
+              <View className="w-full bg-clay-tint dark:bg-night-raised border border-line dark:border-night-line rounded-3xl p-5">
                 <View className="flex-row items-center mb-2">
                   <Feather name="pause-circle" size={18} color="#FF8A50" />
-                  <Text className="text-slate-900 dark:text-white text-lg font-black ml-2">
+                  <Text className="text-ink dark:text-white text-lg font-extrabold ml-2">
                     You paused this test
                   </Text>
                 </View>
-                <Text className="text-slate-600 dark:text-slate-300 text-sm font-semibold leading-5 mb-4">
+                <Text className="text-ink-soft dark:text-night-soft text-sm font-semibold leading-5 mb-4">
                   {`${saved.answeredCount} of ${saved.totalQuestions} answered${
                     timeLeftLabel ? `, ${timeLeftLabel} left` : ""
                   }. Paused ${new Date(saved.savedAt).toLocaleString(
@@ -589,12 +589,12 @@ const Portal = () => {
                 <TouchableOpacity
                   onPress={handleResumeTest}
                   disabled={resuming || startingAttempt}
-                  className="bg-primary w-full h-14 rounded-2xl items-center justify-center shadow-sm"
+                  className="bg-primary-deep w-full h-14 rounded-2xl items-center justify-center shadow-sm"
                 >
                   {resuming ? (
                     <ActivityIndicator color="#FFFFFF" />
                   ) : (
-                    <Text className="text-white text-xl font-black">
+                    <Text className="text-white text-xl font-extrabold">
                       Resume Test
                     </Text>
                   )}
@@ -602,12 +602,12 @@ const Portal = () => {
                 <TouchableOpacity
                   onPress={handleStartNewTest}
                   disabled={resuming || startingAttempt}
-                  className="w-full h-12 mt-3 rounded-2xl items-center justify-center border border-slate-300 dark:border-slate-600"
+                  className="w-full h-12 mt-3 rounded-2xl items-center justify-center border border-line dark:border-night-line"
                 >
                   {startingAttempt ? (
                     <ActivityIndicator color="#FF8A50" />
                   ) : (
-                    <Text className="text-slate-700 dark:text-slate-200 text-base font-black">
+                    <Text className="text-ink dark:text-night-soft text-base font-extrabold">
                       Start a new test
                     </Text>
                   )}
@@ -617,12 +617,12 @@ const Portal = () => {
               <TouchableOpacity
                 onPress={handleStartTest}
                 disabled={startingAttempt}
-                className="bg-primary w-full h-14 rounded-2xl items-center justify-center shadow-sm"
+                className="bg-primary-deep w-full h-14 rounded-2xl items-center justify-center shadow-sm"
               >
                 {startingAttempt ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text className="text-white text-2xl font-black">
+                  <Text className="text-white text-2xl font-extrabold">
                     Start Test
                   </Text>
                 )}

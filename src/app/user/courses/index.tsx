@@ -10,7 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
 import Feather from "@react-native-vector-icons/feather";
 import { useColorScheme } from "nativewind";
-import Header from "@/components/Header";
+import DetailHeader from "@/components/DetailHeader";
 import BottomTabs from "@/components/BottomTabs";
 import { useEnrolledCourses } from "../_hooks/useEnrolledCourses";
 import EnrolledCourseCard from "../_components/EnrolledCourseCard";
@@ -25,12 +25,12 @@ export default function EnrolledCoursesScreen() {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-white dark:bg-slate-950"
+      className="flex-1 bg-paper dark:bg-night"
     >
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
-      <Header />
+      <DetailHeader title="My courses" />
 
       <ScrollView
         className="flex-1"
@@ -41,10 +41,7 @@ export default function EnrolledCoursesScreen() {
         }
       >
         <View className="px-6 pt-6">
-          <Text className="text-2xl font-black text-slate-800 dark:text-white mb-1">
-            My Courses
-          </Text>
-          <Text className="text-slate-500 dark:text-slate-400 font-bold text-sm mb-6">
+          <Text className="text-ink-soft dark:text-night-soft font-semibold text-sm mb-6">
             {total} enrolled course{total !== 1 ? "s" : ""}
           </Text>
 
@@ -57,9 +54,9 @@ export default function EnrolledCoursesScreen() {
               <EnrolledCourseCard key={course.id} course={course} />
             ))
           ) : (
-            <View className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-gray-100 dark:border-slate-800 border-dashed items-center">
-              <Feather name="book" size={32} color="#CBD5E1" />
-              <Text className="text-slate-400 font-bold mt-2">
+            <View className="bg-white dark:bg-night p-8 rounded-3xl border border-line dark:border-night-line border-dashed items-center">
+              <Feather name="book" size={32} color="#B5AEA3" />
+              <Text className="text-ink-soft font-bold mt-2">
                 No enrolled courses yet
               </Text>
             </View>

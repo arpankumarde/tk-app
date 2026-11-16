@@ -37,7 +37,7 @@ function TransactionItem({ item }: { item: WalletTransactionData }) {
   const meta = TYPE_META[item.transactionType];
 
   return (
-    <View className="flex-row items-center py-4 border-b border-gray-100 dark:border-slate-800">
+    <View className="flex-row items-center py-4 border-b border-line dark:border-night-line">
       <View
         className={`w-10 h-10 rounded-full items-center justify-center mr-3 ${
           isCredit
@@ -53,17 +53,17 @@ function TransactionItem({ item }: { item: WalletTransactionData }) {
       </View>
       <View className="flex-1 pr-2">
         <Text
-          className="text-slate-700 dark:text-slate-200 font-bold text-[15px]"
+          className="text-ink dark:text-night-soft font-bold text-[15px]"
           numberOfLines={1}
         >
           {item.description || meta.label}
         </Text>
-        <Text className="text-slate-400 text-xs mt-0.5">
+        <Text className="text-ink-soft text-xs mt-0.5">
           {formatDate(item.createdAt)}
         </Text>
       </View>
       <Text
-        className={`font-black text-base ${
+        className={`font-extrabold text-base ${
           isCredit
             ? "text-green-600 dark:text-green-400"
             : "text-red-500 dark:text-red-400"
@@ -87,9 +87,9 @@ export default function WalletTransaction({
 }) {
   if (transactions.length === 0) {
     return (
-      <View className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-gray-100 dark:border-slate-800 border-dashed items-center">
-        <Feather name="inbox" size={32} color="#CBD5E1" />
-        <Text className="text-slate-400 font-bold mt-2">
+      <View className="bg-white dark:bg-night p-8 rounded-3xl border border-line dark:border-night-line border-dashed items-center">
+        <Feather name="inbox" size={32} color="#B5AEA3" />
+        <Text className="text-ink-soft font-bold mt-2">
           No transactions yet
         </Text>
       </View>
@@ -98,7 +98,7 @@ export default function WalletTransaction({
 
   return (
     <>
-      <View className="bg-white dark:bg-slate-900 rounded-3xl px-5 border border-gray-100 dark:border-slate-800">
+      <View className="bg-white dark:bg-night rounded-3xl px-5 border border-line dark:border-night-line">
         {transactions.map((tx) => (
           <TransactionItem key={tx.id} item={tx} />
         ))}
@@ -109,7 +109,7 @@ export default function WalletTransaction({
         </View>
       )}
       {!hasMore && !loadingMore && (
-        <Text className="text-slate-400 font-bold text-xs text-center py-4">
+        <Text className="text-ink-soft font-bold text-xs text-center py-4">
           No more transactions
         </Text>
       )}
